@@ -1,6 +1,6 @@
 {
-    "name": "it-all/slim-postgres-admin",
-    "description": "A PHP web application platform with administrative interface built on Slim framework using PostgreSQL",
+    "name": "it-all/slim-postgres",
+    "description": "PHP web application platform with administrative interface built with Slim framework and PostgreSQL",
     "type": "project",
     "license": "MIT",
     "authors": [

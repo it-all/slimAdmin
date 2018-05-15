@@ -1,0 +1,21 @@
+{
+    "name": "it-all/slim-postgres-admin",
+    "description": "A PHP web application platform with administrative interface built on Slim framework using PostgreSQL",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "DBCL",
+            "email": "software@it-all.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^7.1",
+        "slim/slim": "^3.0",
+        "phpmailer/phpmailer": "^5.2",
+        "slim/csrf": "^0.8.1",
+        "it-all/form-former": "^2.0",
+        "vlucas/valitron": "^1.4"
+    }
+}

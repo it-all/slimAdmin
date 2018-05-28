@@ -16,6 +16,13 @@
         "phpmailer/phpmailer": "^5.2",
         "slim/csrf": "^0.8.1",
         "it-all/form-former": "^2.0",
-        "vlucas/valitron": "^1.4"
+        "vlucas/valitron": "^1.4",
+        "vlucas/phpdotenv": "^2.4",
+        "slim/php-view": "^2.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "It_All\\Slim_Postgres\\": ""
+        }
     }
 }

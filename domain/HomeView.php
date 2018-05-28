@@ -1,13 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace It_All\Slim_Postgres\Domain;
+namespace Domain;
 
-use It_All\Slim_Postgres\Infrastructure\Framework\View;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class HomeView extends View
+class HomeView extends \SlimPostgres\View
 {
     public function index(Request $request, Response $response)
     {

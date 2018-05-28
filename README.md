@@ -4,7 +4,7 @@ WORK IN PROGRESS
 slim-postrgres is a PHP 7, PostgreSQL RESTful web platform with built-in administration and other features, based on <a target="_blank" href="https://www.slimframework.com/">Slim Framework</a>.  
 
 FEATURES  
-<a target="_blank" href="https://postgresql.org">PostGreSQL Database</a> Integration  
+<a target="_blank" href="https://postgresql.org">PostgreSQL Database</a> Integration  
 MVC Structure  
 <a href="#eh">Custom Error Handling</a>  
 <a href="emailing">Emailing</a> with <a target="_blank" href="https://github.com/PHPMailer/PHPMailer">PHPMailer</a>    
@@ -35,7 +35,7 @@ If this is new admin functionality, you can add a link to it in the admin nav by
 Reporting Methods:
 
 1. Database Log
-    If the database and system events services have been set as properties in the ErrorHandler class, all errors are logged to the system_events table. The stack trace is not provided, instead, a reference is made to view the log file for complete details.
+    If the database and system events services have been set as properties in the ErrorHandler class, all errors are logged to the SystemEvents table. The stack trace is not provided, instead, a reference is made to view the log file for complete details.
     
 2. File Log
     All error details are logged to $config['storage']['logs']['pathPhpErrors'].
@@ -69,13 +69,13 @@ if ($this->mailer !== null) {
 }
                 
 <a name="se">System Event Database Logging</a>  
-Certain events such as logging in, logging out, inserting, updating, and deleting database records are automatically logged into the system_events table. You can choose other events to insert as you write your application. For usage examples and help, search "systemEvents->insert" and see SystemEventsModel.php. Note that PHP errors are also logged to the system_events table by default (this can be turned off in config.php).
+Certain events such as logging in, logging out, inserting, updating, and deleting database records are automatically logged into the SystemEvents table. You can choose other events to insert as you write your application. For usage examples and help, search "systemEvents->insert" and see SystemEventsModel.php. Note that PHP errors are also logged to the SystemEvents table by default (this can be turned off in config.php).
 
 <a name="errLog">PHP Error Log</a>  
 PHP Errors with stack trace are logged to the file set in config['storage']['logs']['pathPhpErrors']  
   
 <a name="csrf">CSRF</a>   
-The <a href="https://github.com/slimphp/Slim-Csrf" target="_blank">Slim Framework CSRF</a> protection middleware is used to check CSRF form fields. The CSRF key/value generators are added to the container for form field creation. They are also made available to Twig. A failure is logged to system_events as an error, the user's session is unset, and the user is redirected to the (frontend) homepage with an error message.
+The <a href="https://github.com/slimphp/Slim-Csrf" target="_blank">Slim Framework CSRF</a> protection middleware is used to check CSRF form fields. The CSRF key/value generators are added to the container for form field creation. They are also made available to Twig. A failure is logged to SystemEvents as an error, the user's session is unset, and the user is redirected to the (frontend) homepage with an error message.
 
 <a name="authe">Authentication</a>  
 Admin pages are protected through authenticated sessions.
@@ -84,7 +84,7 @@ Admin pages are protected through authenticated sessions.
 See NavAdmin.php.
 
 <a name="autho">Authorization</a>  
-Administrative resources and functionality can be protected against unauthorized use based on administrative roles. Resource and functionality access is defined in config.php in the 'administratorPermissions' array key based on the role and is set in routes.php on resources as necessary, in NavAdmin to determine whether or not to display navigation options, and in views and controllers as necessary to grant or limit functionality access. Authorization failures result in alerts being written to the system_events table and the user redirected to the admin homepage with a red alert message displayed. Authorization can be set as a minimum role level, where all roles with an equal or better level will be authorized, or as a set of authorized roles.
+Administrative resources and functionality can be protected against unauthorized use based on administrative roles. Resource and functionality access is defined in config.php in the 'administratorPermissions' array key based on the role and is set in routes.php on resources as necessary, in NavAdmin to determine whether or not to display navigation options, and in views and controllers as necessary to grant or limit functionality access. Authorization failures result in alerts being written to the SystemEvents table and the user redirected to the admin homepage with a red alert message displayed. Authorization can be set as a minimum role level, where all roles with an equal or better level will be authorized, or as a set of authorized roles.
 
 <a name="xss">XSS Prevention</a>  
 The appropriate <a target="_blank" href="https://twig.sensiolabs.org/doc/2.x/filters/escape.html" target="_blank">Twig escape filter</a> are used for any user-input data* that is output through Twig. Note that Twig defaults to autoescape 'html' in the autoescape environment variable: https://twig.sensiolabs.org/api/2.x/Twig_Environment.html

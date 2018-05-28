@@ -22,7 +22,8 @@
     },
     "autoload": {
         "psr-4": {
-            "It_All\\Slim_Postgres\\": ""
+            "SlimPostgres\\": "SlimPostgres",
+            "Domain\\": "domain"
         }
     }
 }

@@ -8,8 +8,7 @@ use Slim\Http\Response;
 define('ROUTE_HOME', 'home');
 
 // use as shortcuts for callables in routes
-define('NAMESPACE_DOMAIN', 'It_All\Slim_Postgres\Domain');
-define('NAMESPACE_INFRASTRUCTURE', 'It_All\Slim_Postgres\Infrastructure');
+define('NAMESPACE_DOMAIN', 'Domain');
 
 /////////////////////////////////////////
 // Routes that anyone can access
@@ -19,15 +18,3 @@ $slim->get('/', NAMESPACE_DOMAIN . '\HomeView:index')->setName(ROUTE_HOME);
 // remainder of front end pages to go here
 
 /////////////////////////////////////////
-
-//$slim->get('/', function (Request $request, Response $response, $args) {
-//    return $this->view->render($response, 'profile.html', [
-////        'name' => $args['name']
-//    ]);
-//});
-//
-//$slim->get('/test/{name}', function ($request, $response, $args) {
-//    return $this->view->render($response, 'profile.php', [
-//        'name' => $args['name']
-//    ]);
-//});

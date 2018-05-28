@@ -25,7 +25,7 @@ return [
 
     'session' => [
         'ttlHours' => 24,
-        'savePath' => __DIR__ . '/../infrastructure/storage/sessions' // note probably requires chmod 777
+        'savePath' => APPLICATION_ROOT_DIRECTORY . '/storage/sessions' // note probably requires chmod 777
     ],
 
     'emails' => [
@@ -42,13 +42,13 @@ return [
 
             'outputBuffering' => 'append',
 
-            'templatesPath' => APPLICATION_ROOT_DIRECTORY . '/user-interface/templates/', // note slim requires trailing slash
+            'templatesPath' => APPLICATION_ROOT_DIRECTORY . '/templates/', // note slim requires trailing slash
 
             'addContentLengthHeader' => false, // if this is not disabled, slim/App.php threw an exception related to error handling, when the php set_error_handler() function was triggered
 
             // routerCacheFile should only be set in production (when routes are stable)
             // https://akrabat.com/slims-route-cache-file/
-//            'routerCacheFile' => APPLICATION_ROOT_DIRECTORY . '/infrastructure/storage/cache/router.txt',
+//            'routerCacheFile' => APPLICATION_ROOT_DIRECTORY . '/storage/cache/router.txt',
 
             'authentication' => [
                 'maxFailedLogins' => 5, // If exceeded in a session, will insert a system event and disallow further login attempts

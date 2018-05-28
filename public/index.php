@@ -2,8 +2,5 @@
 declare(strict_types=1);
 
 define('APPLICATION_ROOT_DIRECTORY', realpath(__DIR__.'/..'));
-
 require APPLICATION_ROOT_DIRECTORY . '/vendor/autoload.php';
-
-$app = new \SlimPostgres\App();
-$app->run();
+(new \SlimPostgres\App())->run();

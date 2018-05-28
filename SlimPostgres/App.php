@@ -151,10 +151,15 @@ class App
 
         $this->setSlimMiddleware($slim, $slimContainer);
 
-        // Register routes
-        require APPLICATION_ROOT_DIRECTORY . '/config/routes.php';
+        $this->registerRoutes($slim, $slimContainer);
 
         $slim->run();
+    }
+
+    private function registerRoutes(\Slim\App $slim, $slimContainer)
+    {
+        $config = $this->config; // make available to routes file
+        require APPLICATION_ROOT_DIRECTORY . '/config/routes.php';
     }
 
     private function getSlimSettings(): array

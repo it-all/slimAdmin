@@ -18,7 +18,7 @@ return [
         'fatalMessage' => 'Apologies, there has been an error on our site. We have been alerted and will correct it as soon as possible.',
         'logToDatabase' => true,
         'echoDev' => true, // echo on dev servers (note, live server will never echo)
-        'emailDev' => true // email on dev servers (note, live server will always email)
+        'emailDev' => false // email on dev servers (note, live server will always email)
     ],
 
     'domainUseWww' => false,
@@ -27,6 +27,8 @@ return [
         'ttlHours' => 24,
         'savePath' => APPLICATION_ROOT_DIRECTORY . '/storage/sessions' // note probably requires chmod 777
     ],
+
+    'adminPath' => 'private',
 
     'emails' => [
         'owner' => "owner@".$domainName,
@@ -68,10 +70,6 @@ return [
             ],
 
             'adminDefaultRole' => 'user',
-
-            'dirs' => [
-                'admin' => 'private'
-            ],
 
             // if true removes leading and trailing blank space on all inputs
             'trimAllUserInput' => true,

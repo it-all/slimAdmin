@@ -1,0 +1,37 @@
+/* http://jsfiddle.net/doctorDestructo/gfbk73bp/ */
+/* http://stackoverflow.com/questions/673153/html-table-with-fixed-headers/25818428#25818428 */
+/* note, this script has been added to uiHelper.js
+
+<script>
+    document.getElementById("scrollingTableContainer").addEventListener("scroll",function(){
+    var translate = "translate(0,"+this.scrollTop+"px)";
+    this.querySelector("thead").style.transform = translate;
+});
+</script>
+
+*/
+
+#scrollingTableContainer {
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+  border: .1em solid black;
+}
+
+.scrollingTable {
+  width: 100%;
+  border-spacing: 0;
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+.scrollingTable > * > tr > * {
+  border-bottom: 1px solid black;
+  border-right: 1px solid black;
+  //border-left: 1px solid black;
+}
+.scrollingTable > tbody > :last-child > * {
+  //border-bottom: none;
+}
+.scrollingTable > thead > tr > th {
+  background-color: #1b0701;
+}

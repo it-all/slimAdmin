@@ -1,19 +1,6 @@
 <?php
 declare(strict_types=1);
 
-// GLOBAL ROUTE NAME CONSTANTS
-define('ROUTE_HOME', 'home');
-define('ROUTE_LOGIN', 'authentication.login');
-define('ROUTE_LOGIN_POST', 'authentication.post.login');
-// admin routes
-define('ROUTE_ADMIN_HOME_DEFAULT', 'admin.home');
-define('ROUTE_LOGOUT', 'authentication.logout');
-
-
-// use as shortcuts for callables in routes
-define('NAMESPACE_DOMAIN', 'Domain');
-define('NAMESPACE_SECURITY', '\SlimPostgres\Security');
-
 /////////////////////////////////////////
 // Routes that anyone can access
 

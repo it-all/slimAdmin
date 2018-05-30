@@ -10,4 +10,4 @@ $htmlBodyContent = <<< EOL
         $noticeDiv
     </main>
 EOL;
-require 'base.php';
+require APPLICATION_ROOT_DIRECTORY . '/templates/base.php';

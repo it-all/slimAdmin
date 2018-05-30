@@ -24,10 +24,14 @@ class AuthenticationView extends AdminView
         // render page
         return $this->view->render(
             $response,
-            'admin/authentication/login.twig',
+            'admin/login.php',
             [
+                'businessName' => $this->settings['businessName'],
+                'businessDba' => $this->settings['businessDba'],
+                'isLive' => $this->settings['isLive'],
                 'title' => '::Login',
-                'form' => $form
+                'form' => $form,
+                'authentication' => $this->authentication
             ]
         );
     }

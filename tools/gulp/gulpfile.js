@@ -1,5 +1,4 @@
 var gulp = require('gulp');
-var beep = require('beepbeep'); // not working
 var plumber = require('gulp-plumber');
 var sourcemaps = require('gulp-sourcemaps');
 var sass = require('gulp-sass');
@@ -12,14 +11,13 @@ var babel = require('gulp-babel');
 // error function for plumber. prevents having to start gulp watch on error
 var onError = function (err) {
     console.log(err);
-    beep(3); // not working
     this.emit('end');
 };
 
-var scssSrc = '../Src/prebuild/scss/';
-var jsSrc = '../Src/prebuild/js/';
-var cssDest = '../Src/public/css';
-var jsDest = '../Src/public/js';
+var scssSrc = '../../SlimPostgres/prebuild/scss/';
+var jsSrc = '../../SlimPostgres/prebuild/js/';
+var cssDest = '../../public/css';
+var jsDest = '../../public/js';
 var jsFile = 'scripts.min.js'; // use this only if concatenating all js with .pipe(concat(jsFile))
 
 gulp.task('sass', function() {

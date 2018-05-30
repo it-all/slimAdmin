@@ -1,0 +1,69 @@
+$formLabelColor: #A7D45B;
+
+form {
+  margin: 1em;
+}
+
+input, select, textarea, button, meter, progress, output {
+  display: block;
+  background-color: #dcd4c2;
+  border: .1em solid #000000;
+  color: black;
+  font-size: 1em;
+  padding: .2em;
+  margin: .1em .5em 1em .1em;
+}
+
+.inlineFormField {
+  //display: inline-block;
+  float: left;
+  clear: none;
+}
+
+input[type="checkbox"] {
+  /* Larger Checkboxes */
+  -ms-transform: scale(1.8); /* IE */
+  -moz-transform: scale(1.8); /* FF */
+  -webkit-transform: scale(1.8); /* Safari and Chrome */
+  -o-transform: scale(1.8); /* Opera */
+  margin: .4em 1em 1.1em .6em;
+  //padding: 10px;
+}
+
+input[type="submit"] {
+  font-size: 1.2em;
+  padding: .3em;
+  border: .2em solid #11213a;
+  border-radius: .4em;
+}
+
+label {
+  color: $formLabelColor;
+  font-size: 1em;
+  margin: 0 .3em 0 .2em;
+}
+
+.fieldRequired {
+  display: inline;
+  font-size: .8em;
+  color: #cccccc;
+}
+
+.generalFormError {
+  color: red;
+  font-size: 1.2em;
+  margin-bottom: 1em;
+}
+
+.ffErrorMsg {
+  color: red;
+}
+
+.formFieldError {
+  border: .1em solid red;
+}
+
+.afterLabel {
+  display: block;
+  margin: 0 0 1em 1.5em;
+}

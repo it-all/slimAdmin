@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres\Forms;
 
 use It_All\FormFormer\Fields\InputField;
+use SlimPostgres\App;
 use SlimPostgres\Database\SingleTable\DatabaseColumnModel;
 use SlimPostgres\Database\SingleTable\SingleTableModel;
 use SlimPostgres\Database\Postgres;
@@ -36,7 +37,7 @@ class FormHelper
 
     public static function getFieldValue(string $fieldName): string
     {
-        return (isset($_SESSION[SESSION_REQUEST_INPUT_KEY][$fieldName])) ? $_SESSION[SESSION_REQUEST_INPUT_KEY][$fieldName] : '';
+        return (isset($_SESSION[App::SESSION_KEYS['requestInput']][$fieldName])) ? $_SESSION[App::SESSION_KEYS['requestInput']][$fieldName] : '';
     }
 
     private static function getCommonFieldAttributes(string $fieldName = '', array $addAttributes = []): array
@@ -100,8 +101,8 @@ class FormHelper
 
     public static function unsetSessionInput()
     {
-        if (isset($_SESSION[SESSION_REQUEST_INPUT_KEY])) {
-            unset($_SESSION[SESSION_REQUEST_INPUT_KEY]);
+        if (isset($_SESSION[App::SESSION_KEYS['requestInput']])) {
+            unset($_SESSION[App::SESSION_KEYS['requestInput']]);
         }
     }
 

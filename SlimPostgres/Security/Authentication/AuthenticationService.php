@@ -4,8 +4,9 @@ declare(strict_types=1);
 namespace SlimPostgres\Security\Authentication;
 
 use It_All\FormFormer\Form;
-use It_All\Slim_Postgres\Domain\Admin\Administrators\AdministratorsModel;
-use It_All\Slim_Postgres\Domain\Admin\Administrators\Logins\LoginsModel;
+use Domain\Administrators\AdministratorsModel;
+use Domain\Administrators\Logins\LoginsModel;
+use SlimPostgres\App;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Forms\FormHelper;
 
@@ -20,47 +21,47 @@ class AuthenticationService
         $this->adminHomeRoutes = $adminHomeRoutes;
     }
 
-    public function user(): ?array
+    public function getUser(): ?array
     {
-        if (isset($_SESSION[SESSION_USER])) {
-            return $_SESSION[SESSION_USER];
+        if (isset($_SESSION[App::SESSION_KEYS['user']])) {
+            return $_SESSION[App::SESSION_KEYS['user']];
         }
         return null;
     }
 
     public function check(): bool
     {
-        return isset($_SESSION[SESSION_USER]);
+        return isset($_SESSION[App::SESSION_KEYS['user']]);
     }
 
     public function getUserId(): ?int
     {
-        if (isset($_SESSION[SESSION_USER][SESSION_USER_ID])) {
-            return (int) $_SESSION[SESSION_USER][SESSION_USER_ID];
+        if (isset($_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userId']])) {
+            return (int) $_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userId']];
         }
         return null;
     }
 
     public function getUserName(): ?string
     {
-        if (isset($_SESSION[SESSION_USER][SESSION_USER_NAME])) {
-            return $_SESSION[SESSION_USER][SESSION_USER_NAME];
+        if (isset($_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userName']])) {
+            return $_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userName']];
         }
         return null;
     }
 
     public function getUserUsername(): ?string
     {
-        if (isset($_SESSION[SESSION_USER][SESSION_USER_USERNAME])) {
-            return $_SESSION[SESSION_USER][SESSION_USER_USERNAME];
+        if (isset($_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userUsername']])) {
+            return $_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userUsername']];
         }
         return null;
     }
 
     public function getUserRole(): ?string
     {
-        if (isset($_SESSION[SESSION_USER][SESSION_USER_ROLE])) {
-            return $_SESSION[SESSION_USER][SESSION_USER_ROLE];
+        if (isset($_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userRole']])) {
+            return $_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userRole']];
         }
         return null;
     }
@@ -103,30 +104,15 @@ class AuthenticationService
 
     private function loginSucceeded(string $username, array $userRecord)
     {
-        $userFirstName = (strlen($userRecord['fname']) > 0) ? $userRecord['fname'] : $userRecord['name'];
         // set session for user
-        $_SESSION[SESSION_USER] = [
-            SESSION_USER_ID => $userRecord['id'],
-            SESSION_USER_NAME => $userFirstName,
-            SESSION_USER_USERNAME => $username,
-            SESSION_USER_ROLE => $userRecord['role'],
-            'employeeId' => $userRecord['employee_id'],
-            'employeeFirstName' => $userRecord['fname'],
-            'employeeLastName' => $userRecord['lname']
+        $_SESSION[App::SESSION_KEYS['user']] = [
+            App::SESSION_KEYS['userId'] => $userRecord['id'],
+            App::SESSION_KEYS['userName'] => $userRecord['name'],
+            App::SESSION_KEYS['userUsername'] => $username,
+            App::SESSION_KEYS['userRole'] => $userRecord['role']
         ];
-        
-        // for compatibility with old system
-        // to make new system role compatible with current system
-        $permissions = ($userRecord['role'] == 'user') ? 'admin' : $userRecord['role'];
-        $_SESSION['permissions'] = $permissions;
-        $_SESSION['level'] = $_SESSION['permissions']; // to be compatible with /admin
-        $_SESSION['adminId'] = $userRecord['id'];
-        $_SESSION['username'] = $username;
-        $_SESSION['employeeId'] = $userRecord['employee_id'];
-        $_SESSION['employeeFname'] = ($userRecord['fname']) ? $userRecord['fname'] : '';
-        $_SESSION['employeeLname'] = ($userRecord['lname']) ? $userRecord['lname'] : '';
-                
-        unset($_SESSION[SESSION_NUMBER_FAILED_LOGINS]);
+
+        unset($_SESSION[App::SESSION_KEYS['numFailedLogins']]);
 
         // insert login_attempts record
         (new LoginsModel())->insertSuccessfulLogin($username, (int) $userRecord['id']);
@@ -134,10 +120,10 @@ class AuthenticationService
 
     private function loginFailed(string $username, int $adminId = null)
     {
-        if (isset($_SESSION[SESSION_NUMBER_FAILED_LOGINS])) {
-            $_SESSION[SESSION_NUMBER_FAILED_LOGINS]++;
+        if (isset($_SESSION[App::SESSION_KEYS['numFailedLogins']])) {
+            $_SESSION[App::SESSION_KEYS['numFailedLogins']]++;
         } else {
-            $_SESSION[SESSION_NUMBER_FAILED_LOGINS] = 1;
+            $_SESSION[App::SESSION_KEYS['numFailedLogins']] = 1;
         }
 
         // insert login_attempts record
@@ -146,18 +132,18 @@ class AuthenticationService
 
     public function tooManyFailedLogins(): bool
     {
-        return isset($_SESSION[SESSION_NUMBER_FAILED_LOGINS]) &&
-            $_SESSION[SESSION_NUMBER_FAILED_LOGINS] > $this->maxFailedLogins;
+        return isset($_SESSION[App::SESSION_KEYS['numFailedLogins']]) &&
+            $_SESSION[App::SESSION_KEYS['numFailedLogins']] > $this->maxFailedLogins;
     }
 
     public function getNumFailedLogins(): int
     {
-        return (isset($_SESSION[SESSION_NUMBER_FAILED_LOGINS])) ? $_SESSION[SESSION_NUMBER_FAILED_LOGINS] : 0;
+        return (isset($_SESSION[App::SESSION_KEYS['numFailedLogins']])) ? $_SESSION[App::SESSION_KEYS['numFailedLogins']] : 0;
     }
 
     public function logout()
     {
-        unset($_SESSION[SESSION_USER]);
+        unset($_SESSION[App::SESSION_KEYS['user']]);
     }
 
     public function getLoginFields(): array

@@ -32,7 +32,9 @@ class App
         'userRole' => 'role',
         'adminNotice' => 'adminNotice',
         'notice' => 'notice',
-        'gotoAdminPath' => 'gotoAdminPath'
+        'gotoAdminPath' => 'gotoAdminPath',
+        'numFailedLogins' => 'numFailedLogins',
+        'requestInput' => 'requestInput',
     ];
 
     public function __construct()
@@ -165,8 +167,8 @@ class App
     private function getSlimSettings(): array
     {
         $slimSettings = $this->config['slim'];
-        // add common settings
 
+        // add common config settings
         foreach ($this->commonConfigSettingsKeys as $key) {
             if (isset($this->config[$key])) {
                 $slimSettings['settings'][$key] = $this->config[$key];
@@ -176,11 +178,12 @@ class App
         //Override the default Not Found Handler
         $slimSettings['notFoundHandler'] = function ($container) {
             return function ($request, $response) use ($container) {
-                // log error
-                // todo get adminId
-                $adminId = null; // (array_key_exists('user', $this->sessionKeys) && array_key_exists('userId', $this->sessionKeys) && isset($_SESSION[$this->sessionKeys['user']][$this->sessionKeys['userId']])) ? (int) $_SESSION[$this->sessionKeys['user']][$this->sessionKeys['userId']] : null;
 
-                $this->systemEventsModel->insertEvent('404 Page Not Found', 'notice', $adminId);
+                // log error
+                // todo get $administratorId
+                $administratorId = null; // (array_key_exists('user', $this->sessionKeys) && array_key_exists('userId', $this->sessionKeys) && isset($_SESSION[$this->sessionKeys['user']][$this->sessionKeys['userId']])) ? (int) $_SESSION[$this->sessionKeys['user']][$this->sessionKeys['userId']] : null;
+
+                $this->systemEventsModel->insertEvent('404 Page Not Found', 'notice', $administratorId);
 
                 $homeUrl = $container->router->pathFor(ROUTE_HOME);
                 $responseBodyHtml = $this->config['pageNotFoundText'].'<br><br><a href="'.$homeUrl.'">home</a>';
@@ -387,5 +390,44 @@ class App
         }
         return preg_match('/^[-,a-zA-Z0-9]{1,128}$/', $sessionId) > 0;
     }
+
+    static public function getIntOrNull(?string $input)
+    {
+        return ($input == null) ? null : (int) $input;
+    }
+
+    static public function getRouteName(bool $isAdmin = true, string $routePrefix = null, string $routeType = null, string $resourceType = null)
+    {
+        $routeName = '';
+
+        if ($isAdmin) {
+            $routeName .= ROUTEPREFIX_ADMIN;
+        }
+
+        if ($routePrefix !== null) {
+            $routeName .= '.' . $routePrefix;
+        }
+
+        if ($resourceType != null) {
+            $validActionTypes = ['put', 'post'];
+            if (!in_array($resourceType, $validActionTypes)) {
+                throw new \Exception("Invalid resource type $resourceType");
+            }
+
+            $routeName .= '.' . $resourceType;
+        }
+
+        if ($routeType !== null) {
+            $validRouteTypes = ['index', 'index.reset', 'insert', 'update', 'delete'];
+            if (!in_array($routeType, $validRouteTypes)) {
+                throw new \Exception("Invalid route type $routeType");
+            }
+
+            $routeName .= '.' . $routeType;
+        }
+
+        return $routeName;
+    }
+
 
 }

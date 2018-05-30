@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Security\Authorization;
 
-use It_All\Slim_Postgres\Domain\Admin\Administrators\Roles\RolesModel;
-use function SlimPostgres\Utilities\getRouteName;
+use Domain\Administrators\Roles\RolesModel;
+use SlimPostgres\App;
 
 /* There are two methods of Authorization: either by minimum permission, where the user role equal to or better than the minimum permission is authorized (in this case, the permission is a string). Or by a permission set, where the user role in the set of authorized permissions is authorized (permission is an array) */
 class AuthorizationService
@@ -30,8 +30,8 @@ class AuthorizationService
 
             // no exact match, so see if there are multiple terms and first term matches
             $fParts = explode('.', $functionality);
-            if (count($fParts) > 1 && isset($this->functionalityPermissions[getRouteName(true, $fParts[0])])) {
-                return $this->functionalityPermissions[getRouteName(true, $fParts[0])];
+            if (count($fParts) > 1 && isset($this->functionalityPermissions[App::getRouteName(true, $fParts[0])])) {
+                return $this->functionalityPermissions[App::getRouteName(true, $fParts[0])];
             }
 
             // no matches
@@ -43,10 +43,10 @@ class AuthorizationService
 
     public function getUserRole(): ?string
     {
-        $userRole = $_SESSION[SESSION_USER][SESSION_USER_ROLE];
+        $userRole = $_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userRole']];
 
         if (!in_array($userRole, $this->roles)) {
-            unset($_SESSION[SESSION_USER]); // force logout
+            unset($_SESSION[App::SESSION_KEYS['user']]); // force logout
             return null;
         }
 
@@ -58,7 +58,7 @@ class AuthorizationService
         if (!in_array($minimumRole, $this->roles)) {
             throw new \Exception("Invalid role: $minimumRole");
         }
-        if (!isset($_SESSION[SESSION_USER][SESSION_USER_ROLE])) {
+        if (!isset($_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userRole']])) {
             return false;
         }
 

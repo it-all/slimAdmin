@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Database\SingleTable;
 
+use SlimPostgres\App;
 use SlimPostgres\Controller;
 use SlimPostgres\Database\SingleTable\SingleTableModel;
 use SlimPostgres\Forms\FormHelper;
@@ -44,7 +45,7 @@ class SingleTableController extends Controller
         $this->setRequestInput($request);
         $this->addBooleanFieldsToInput();
 
-        $this->validator = $this->validator->withData($_SESSION[SESSION_REQUEST_INPUT_KEY], FormHelper::getDatabaseTableValidationFields($this->model));
+        $this->validator = $this->validator->withData($_SESSION[App::SESSION_KEYS['requestInput']], FormHelper::getDatabaseTableValidationFields($this->model));
 
         $this->validator->mapFieldsRules(FormHelper::getDatabaseTableValidation($this->model));
 
@@ -80,8 +81,8 @@ class SingleTableController extends Controller
     private function addBooleanFieldsToInput()
     {
         foreach ($this->model->getColumns() as $databaseColumnModel) {
-            if ($databaseColumnModel->isBoolean() && !isset($_SESSION[SESSION_REQUEST_INPUT_KEY][$databaseColumnModel->getName()])) {
-                $_SESSION[SESSION_REQUEST_INPUT_KEY][$databaseColumnModel->getName()] = 'f';
+            if ($databaseColumnModel->isBoolean() && !isset($_SESSION[App::SESSION_KEYS['requestInput']][$databaseColumnModel->getName()])) {
+                $_SESSION[App::SESSION_KEYS['requestInput']][$databaseColumnModel->getName()] = 'f';
             }
         }
     }
@@ -104,13 +105,13 @@ class SingleTableController extends Controller
 
         // if no changes made, redirect
         // debatable whether this should be part of validation and stay on page with error
-        if (!$this->haveAnyFieldsChanged($_SESSION[SESSION_REQUEST_INPUT_KEY], $record)) {
-            $_SESSION[SESSION_ADMIN_NOTICE] = ["No changes made (Record ".$args['primaryKey'].")", 'adminNoticeFailure'];
+        if (!$this->haveAnyFieldsChanged($_SESSION[App::SESSION_KEYS['requestInput']], $record)) {
+            $_SESSION[App::SESSION_KEYS['adminNotice']] = ["No changes made (Record ".$args['primaryKey'].")", 'adminNoticeFailure'];
             FormHelper::unsetSessionVars();
             return $response->withRedirect($this->router->pathFor($redirectRoute));
         }
 
-        $this->validator = $this->validator->withData($_SESSION[SESSION_REQUEST_INPUT_KEY], FormHelper::getDatabaseTableValidationFields($this->model));
+        $this->validator = $this->validator->withData($_SESSION[App::SESSION_KEYS['requestInput']], FormHelper::getDatabaseTableValidationFields($this->model));
 
         $this->validator->mapFieldsRules(FormHelper::getDatabaseTableValidation($this->model));
 
@@ -124,7 +125,7 @@ class SingleTableController extends Controller
 
             foreach ($this->model->getUniqueColumns() as $databaseColumnModel) {
                 // only set rule for changed columns
-                if ($_SESSION[SESSION_REQUEST_INPUT_KEY][$databaseColumnModel->getName()] != $record[$databaseColumnModel->getName()]) {
+                if ($_SESSION[App::SESSION_KEYS['requestInput']][$databaseColumnModel->getName()] != $record[$databaseColumnModel->getName()]) {
                     $this->validator->rule('unique', $databaseColumnModel->getName(), $databaseColumnModel, $this->validator);
                 }
             }
@@ -188,7 +189,7 @@ class SingleTableController extends Controller
     {
         // attempt insert
         try {
-            $res = $this->model->insertRecord($_SESSION[SESSION_REQUEST_INPUT_KEY]);
+            $res = $this->model->insertRecord($_SESSION[App::SESSION_KEYS['requestInput']]);
             $returned = pg_fetch_all($res);
             $primaryKeyColumnName = $this->model->getPrimaryKeyColumnName();
             $insertedRecordId = $returned[0][$primaryKeyColumnName];
@@ -218,7 +219,7 @@ class SingleTableController extends Controller
     {
         // attempt to update the model
         try {
-            $this->model->updateRecordByPrimaryKey($_SESSION[SESSION_REQUEST_INPUT_KEY], $args['primaryKey']);
+            $this->model->updateRecordByPrimaryKey($_SESSION[App::SESSION_KEYS['requestInput']], $args['primaryKey']);
 
             $primaryKeyColumnName = $this->model->getPrimaryKeyColumnName();
             $updatedRecordId = $args['primaryKey'];

@@ -138,8 +138,8 @@ class ListView extends AdminView
     // new input takes precedence over session value
     protected function getFilterFieldValue(): string
     {
-        if (isset($_SESSION[App::SESSION_KEYS['requestInput']][$this->sessionFilterFieldKey])) {
-            return $_SESSION[App::SESSION_KEYS['requestInput']][$this->sessionFilterFieldKey];
+        if (isset($_SESSION[App::SESSION_KEY_REQUEST_INPUT][$this->sessionFilterFieldKey])) {
+            return $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$this->sessionFilterFieldKey];
         } elseif (isset($_SESSION[$this->sessionFilterValueKey])) {
             return $_SESSION[$this->sessionFilterValueKey];
         } else {

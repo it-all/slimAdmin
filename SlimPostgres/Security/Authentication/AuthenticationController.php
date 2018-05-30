@@ -14,10 +14,10 @@ class AuthenticationController extends Controller
     function postLogin(Request $request, Response $response, $args)
     {
         $this->setRequestInput($request);
-        $username = $_SESSION[App::SESSION_KEYS['requestInput']]['username'];
-        $password = $_SESSION[App::SESSION_KEYS['requestInput']]['password_hash'];
+        $username = $_SESSION[App::SESSION_KEY_REQUEST_INPUT]['username'];
+        $password = $_SESSION[App::SESSION_KEY_REQUEST_INPUT]['password_hash'];
 
-        $this->validator = $this->validator->withData($_SESSION[App::SESSION_KEYS['requestInput']], $this->authentication->getLoginFields());
+        $this->validator = $this->validator->withData($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $this->authentication->getLoginFields());
 
         $this->validator->rules($this->authentication->getLoginFieldValidationRules());
 
@@ -41,7 +41,7 @@ class AuthenticationController extends Controller
             FormHelper::setGeneralError('Login Unsuccessful');
 
             // redisplay the form with input values and error(s). reset password.
-            $_SESSION[App::SESSION_KEYS['requestInput']]['password_hash'] = '';
+            $_SESSION[App::SESSION_KEY_REQUEST_INPUT]['password_hash'] = '';
             return $response->withRedirect($this->router->pathFor(ROUTE_LOGIN));
         }
 
@@ -50,9 +50,9 @@ class AuthenticationController extends Controller
         $this->systemEvents->insertInfo('Login', (int) $this->authentication->getUserId());
 
         // redirect to proper resource
-        if (isset($_SESSION[App::SESSION_KEYS['gotoAdminPath']])) {
-            $redirect = $_SESSION[App::SESSION_KEYS['gotoAdminPath']];
-            unset($_SESSION[App::SESSION_KEYS['gotoAdminPath']]);
+        if (isset($_SESSION[App::SESSION_KEY_GOTO_ADMIN_PATH])) {
+            $redirect = $_SESSION[App::SESSION_KEY_GOTO_ADMIN_PATH];
+            unset($_SESSION[App::SESSION_KEY_GOTO_ADMIN_PATH]);
         } else {
             $redirect = $this->router->pathFor($this->authentication->getAdminHomeRouteForUser());
         }

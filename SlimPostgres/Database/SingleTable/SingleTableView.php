@@ -43,7 +43,7 @@ class SingleTableView extends ListView
     /** this can be called for both the initial get and the posted form if errors exist (from controller) */
     public function insertView(Request $request, Response $response, $args)
     {
-        $formFieldData = ($request->isGet()) ? null : $_SESSION[App::SESSION_KEYS['requestInput']];
+        $formFieldData = ($request->isGet()) ? null : $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
         $form = new DatabaseTableForm($this->model, $this->router->pathFor(getRouteName(true, $this->routePrefix, 'insert', 'post')), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'insert', $formFieldData);
         FormHelper::unsetSessionVars();
@@ -72,7 +72,7 @@ class SingleTableView extends ListView
             return SingleTableHelper::updateRecordNotFound($this->container, $response, $args['primaryKey'], $this->model, $this->routePrefix);
         }
 
-        $formFieldData = ($request->isGet()) ? $record : $_SESSION[App::SESSION_KEYS['requestInput']];
+        $formFieldData = ($request->isGet()) ? $record : $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
         $form = new DatabaseTableForm($this->model, $this->router->pathFor(getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'update', $formFieldData);
         FormHelper::unsetSessionVars();

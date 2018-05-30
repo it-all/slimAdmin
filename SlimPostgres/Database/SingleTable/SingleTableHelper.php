@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Database\SingleTable;
 
+use SlimPostgres\App;
 use SlimPostgres\Database\SingleTable\SingleTableModel;
 use function SlimPostgres\Utilities\getRouteName;
 use Slim\Container;
@@ -14,7 +15,7 @@ class SingleTableHelper
     {
         $eventNote = $model->getPrimaryKeyColumnName().":$primaryKey|Table: ".$model->getTableName();
         $container->systemEvents->insertWarning('Record not found for update', (int) $container->authentication->getUserId(), $eventNote);
-        $_SESSION[SESSION_ADMIN_NOTICE] = ["Record $primaryKey Not Found", 'adminNoticeFailure'];
+        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Record $primaryKey Not Found", 'adminNoticeFailure'];
         return $response->withRedirect($container->router->pathFor(getRouteName(true, $routePrefix, 'index')));
     }
 

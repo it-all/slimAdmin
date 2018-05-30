@@ -37,7 +37,7 @@ class FormHelper
 
     public static function getFieldValue(string $fieldName): string
     {
-        return (isset($_SESSION[App::SESSION_KEYS['requestInput']][$fieldName])) ? $_SESSION[App::SESSION_KEYS['requestInput']][$fieldName] : '';
+        return (isset($_SESSION[App::SESSION_KEY_REQUEST_INPUT][$fieldName])) ? $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$fieldName] : '';
     }
 
     private static function getCommonFieldAttributes(string $fieldName = '', array $addAttributes = []): array
@@ -101,8 +101,8 @@ class FormHelper
 
     public static function unsetSessionInput()
     {
-        if (isset($_SESSION[App::SESSION_KEYS['requestInput']])) {
-            unset($_SESSION[App::SESSION_KEYS['requestInput']]);
+        if (isset($_SESSION[App::SESSION_KEY_REQUEST_INPUT])) {
+            unset($_SESSION[App::SESSION_KEY_REQUEST_INPUT]);
         }
     }
 

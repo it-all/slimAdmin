@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Domain\Administrators\Roles;
 
+use SlimPostgres\App;
 use SlimPostgres\Database\SingleTable\SingleTableController;
 use Slim\Container;
 
@@ -18,7 +19,7 @@ class RolesController extends SingleTableController
     {
         // make sure role is not being used
         if ($this->model::hasAdmin((int) $primaryKey)) {
-            $_SESSION[SESSION_ADMIN_NOTICE] = ["Role in use", 'adminNoticeFailure'];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Role in use", 'adminNoticeFailure'];
             return false;
         }
 

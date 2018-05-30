@@ -43,10 +43,10 @@ class AuthorizationService
 
     public function getUserRole(): ?string
     {
-        $userRole = $_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userRole']];
+        $userRole = $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLE];
 
         if (!in_array($userRole, $this->roles)) {
-            unset($_SESSION[App::SESSION_KEYS['user']]); // force logout
+            unset($_SESSION[App::SESSION_KEY_ADMINISTRATOR]); // force logout
             return null;
         }
 
@@ -58,7 +58,7 @@ class AuthorizationService
         if (!in_array($minimumRole, $this->roles)) {
             throw new \Exception("Invalid role: $minimumRole");
         }
-        if (!isset($_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userRole']])) {
+        if (!isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLE])) {
             return false;
         }
 

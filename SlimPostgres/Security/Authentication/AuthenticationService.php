@@ -23,45 +23,45 @@ class AuthenticationService
 
     public function getUser(): ?array
     {
-        if (isset($_SESSION[App::SESSION_KEYS['user']])) {
-            return $_SESSION[App::SESSION_KEYS['user']];
+        if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR])) {
+            return $_SESSION[App::SESSION_KEY_ADMINISTRATOR];
         }
         return null;
     }
 
     public function check(): bool
     {
-        return isset($_SESSION[App::SESSION_KEYS['user']]);
+        return isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR]);
     }
 
     public function getUserId(): ?int
     {
-        if (isset($_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userId']])) {
-            return (int) $_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userId']];
+        if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID])) {
+            return (int) $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID];
         }
         return null;
     }
 
     public function getUserName(): ?string
     {
-        if (isset($_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userName']])) {
-            return $_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userName']];
+        if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_NAME])) {
+            return $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_NAME];
         }
         return null;
     }
 
     public function getUserUsername(): ?string
     {
-        if (isset($_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userUsername']])) {
-            return $_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userUsername']];
+        if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_USERNAME])) {
+            return $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_USERNAME];
         }
         return null;
     }
 
     public function getUserRole(): ?string
     {
-        if (isset($_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userRole']])) {
-            return $_SESSION[App::SESSION_KEYS['user']][App::SESSION_KEYS['userRole']];
+        if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLE])) {
+            return $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLE];
         }
         return null;
     }
@@ -104,15 +104,15 @@ class AuthenticationService
 
     private function loginSucceeded(string $username, array $userRecord)
     {
-        // set session for user
-        $_SESSION[App::SESSION_KEYS['user']] = [
-            App::SESSION_KEYS['userId'] => $userRecord['id'],
-            App::SESSION_KEYS['userName'] => $userRecord['name'],
-            App::SESSION_KEYS['userUsername'] => $username,
-            App::SESSION_KEYS['userRole'] => $userRecord['role']
+        // set session for administrator
+        $_SESSION[App::SESSION_KEY_ADMINISTRATOR] = [
+            App::SESSION_ADMINISTRATOR_KEY_ID => $userRecord['id'],
+            App::SESSION_ADMINISTRATOR_KEY_NAME => $userRecord['name'],
+            App::SESSION_ADMINISTRATOR_KEY_USERNAME => $username,
+            App::SESSION_ADMINISTRATOR_KEY_ROLE => $userRecord['role']
         ];
 
-        unset($_SESSION[App::SESSION_KEYS['numFailedLogins']]);
+        unset($_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS]);
 
         // insert login_attempts record
         (new LoginsModel())->insertSuccessfulLogin($username, (int) $userRecord['id']);
@@ -120,10 +120,10 @@ class AuthenticationService
 
     private function loginFailed(string $username, int $adminId = null)
     {
-        if (isset($_SESSION[App::SESSION_KEYS['numFailedLogins']])) {
-            $_SESSION[App::SESSION_KEYS['numFailedLogins']]++;
+        if (isset($_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS])) {
+            $_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS]++;
         } else {
-            $_SESSION[App::SESSION_KEYS['numFailedLogins']] = 1;
+            $_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS] = 1;
         }
 
         // insert login_attempts record
@@ -132,18 +132,18 @@ class AuthenticationService
 
     public function tooManyFailedLogins(): bool
     {
-        return isset($_SESSION[App::SESSION_KEYS['numFailedLogins']]) &&
-            $_SESSION[App::SESSION_KEYS['numFailedLogins']] > $this->maxFailedLogins;
+        return isset($_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS]) &&
+            $_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS] > $this->maxFailedLogins;
     }
 
     public function getNumFailedLogins(): int
     {
-        return (isset($_SESSION[App::SESSION_KEYS['numFailedLogins']])) ? $_SESSION[App::SESSION_KEYS['numFailedLogins']] : 0;
+        return (isset($_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS])) ? $_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS] : 0;
     }
 
     public function logout()
     {
-        unset($_SESSION[App::SESSION_KEYS['user']]);
+        unset($_SESSION[App::SESSION_KEY_ADMINISTRATOR]);
     }
 
     public function getLoginFields(): array

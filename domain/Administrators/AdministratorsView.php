@@ -51,12 +51,12 @@ class AdministratorsView extends ListView
 
         // pw fields are not required on edit forms (leave blank to keep existing)
         if ($action == 'insert') {
-            $fieldValues = ($request->isGet()) ? [] : $_SESSION[App::SESSION_KEYS['requestInput']];
+            $fieldValues = ($request->isGet()) ? [] : $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
             $formAction = $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'insert', 'post'));
             $passwordLabel = 'Password';
             $passwordFieldsRequired = true;
         } else {
-            $fieldValues = ($request->isGet()) ? $record : $_SESSION[App::SESSION_KEYS['requestInput']];
+            $fieldValues = ($request->isGet()) ? $record : $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
             $formAction = $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $primaryKey]);
             $passwordLabel = 'Password [leave blank to keep existing]';
             $passwordFieldsRequired = false;

@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+// todo test cli scripts
 /** note: this file can also be called for cli scripts.*/
 
 namespace SlimPostgres;
@@ -23,6 +24,19 @@ class App
     private $mailer;
 
     const PATH_PHP_ERRORS_LOG = APPLICATION_ROOT_DIRECTORY . '/storage/logs/phpErrors.log';
+    const SESSION_KEY_LAST_ACTIVITY = 'lastActivity';
+    const SESSION_KEY_NOTICE = 'notice';
+    const SESSION_KEY_ADMIN_NOTICE = 'adminNotice';
+    const SESSION_KEY_GOTO_ADMIN_PATH = 'gotoAdminPath';
+    const SESSION_KEY_NUM_FAILED_LOGINS = 'numFailedLogins';
+    const SESSION_KEY_REQUEST_INPUT = 'requestInput';
+    const SESSION_KEY_ADMINISTRATOR = 'administrator';
+    // administrator sub-keys
+    const SESSION_ADMINISTRATOR_KEY_ID = 'id';
+    const SESSION_ADMINISTRATOR_KEY_NAME = 'name';
+    const SESSION_ADMINISTRATOR_KEY_USERNAME = 'username';
+    const SESSION_ADMINISTRATOR_KEY_ROLE = 'role';
+
     const SESSION_KEYS = [
         'lastActivity' => 'lastActivity',
         'user' => 'user',
@@ -137,7 +151,7 @@ class App
                 session_save_path($this->config['session']['savePath']);
             }
             session_start();
-            $_SESSION[self::SESSION_KEYS['lastActivity']] = time(); // update last activity time stamp
+            $_SESSION[self::SESSION_KEY_LAST_ACTIVITY] = time(); // update last activity time stamp
         }
 
     }

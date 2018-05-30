@@ -26,9 +26,9 @@ abstract class Controller
     /** may want a config var bool trimAllInputs */
     protected function setRequestInput(Request $request)
     {
-        $_SESSION[App::SESSION_KEYS['requestInput']] = [];
+        $_SESSION[App::SESSION_KEY_REQUEST_INPUT] = [];
         foreach ($request->getParsedBody() as $key => $value) {
-            $_SESSION[App::SESSION_KEYS['requestInput']][$key] = ($this->settings['trimAllUserInput']) ? trim($value) : $value;
+            $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$key] = ($this->settings['trimAllUserInput']) ? trim($value) : $value;
         }
     }
 
@@ -36,7 +36,7 @@ abstract class Controller
     {
         $this->setRequestInput($request);
 
-        if (!isset($_SESSION[App::SESSION_KEYS['requestInput']][$view->getSessionFilterFieldKey()])) {
+        if (!isset($_SESSION[App::SESSION_KEY_REQUEST_INPUT][$view->getSessionFilterFieldKey()])) {
             throw new \Exception("session filter input must be set");
         }
 
@@ -45,7 +45,7 @@ abstract class Controller
             return $view->indexView($response);
         } else {
             $_SESSION[$view->getSessionFilterColumnsKey()] = $filterColumnsInfo;
-            $_SESSION[$view->getSessionFilterValueKey()] = $_SESSION[App::SESSION_KEYS['requestInput']][$view->getSessionFilterFieldKey()];
+            $_SESSION[$view->getSessionFilterValueKey()] = $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$view->getSessionFilterFieldKey()];
             FormHelper::unsetSessionVars();
             return $response->withRedirect($this->router->pathFor($redirectRoute));
         }
@@ -55,7 +55,7 @@ abstract class Controller
     protected function getFilterColumns(string $filterFieldName, array $listViewColumns): ?array
     {
         $filterColumnsInfo = [];
-        $filterParts = explode(",", $_SESSION[App::SESSION_KEYS['requestInput']][$filterFieldName]);
+        $filterParts = explode(",", $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$filterFieldName]);
         if (strlen($filterParts[0]) == 0) {
             FormHelper::setFieldErrors([$filterFieldName => 'Not Entered']);
             return null;

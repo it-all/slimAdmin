@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Security\Authorization;
 
+use SlimPostgres\App;
 use SlimPostgres\Middleware;
 use Slim\Container;
 use Slim\Http\Request;
@@ -24,7 +25,7 @@ class AuthorizationMiddleware extends Middleware
         if (!$this->container->authorization->check($this->permissions)) {
             $this->container->systemEvents->insertAlert('No authorization for resource', $this->container->authentication->getUserId());
 
-            $_SESSION[SESSION_ADMIN_NOTICE] = ['No permission', 'adminNoticeFailure'];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['No permission', 'adminNoticeFailure'];
 
             return $response->withRedirect($this->container->router->pathFor(ROUTE_ADMIN_HOME_DEFAULT));
         }

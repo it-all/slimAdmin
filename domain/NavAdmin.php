@@ -14,46 +14,49 @@ class NavAdmin
 
     function __construct(Container $container)
     {
-        $this->setNav();
         $this->container = $container;
+        $this->setNav();
     }
 
+    // todo set nav in config or somewhere else
     private function setNav()
     {
+        $router = $this->container->router;
+
         $this->nav = [
 
             'System' => [
                 'subSections' => [
                     'Events' => [
-                        'link' => ROUTE_SYSTEM_EVENTS_RESET,
+                        'link' => $router->pathFor(ROUTE_SYSTEM_EVENTS_RESET),
                     ],
 
                     'Administrators' => [
-                        'link' => ROUTE_ADMIN_ADMINISTRATORS_RESET,
+                        'link' => $router->pathFor(ROUTE_ADMIN_ADMINISTRATORS_RESET),
                         'subSections' => [
 
                             'Insert' => [
-                                'link' => ROUTE_ADMIN_ADMINISTRATORS_INSERT,
+                                'link' => $router->pathFor(ROUTE_ADMIN_ADMINISTRATORS_INSERT),
                             ],
 
                             'Roles' => [
-                                'link' => ROUTE_ADMIN_ROLES,
+                                'link' => $router->pathFor(ROUTE_ADMIN_ROLES),
                                 'subSections' => [
                                     'Insert' => [
-                                        'link' => ROUTE_ADMIN_ROLES_INSERT,
+                                        'link' => $router->pathFor(ROUTE_ADMIN_ROLES_INSERT),
                                     ]
                                 ],
                             ],
 
                             'Login Attempts' => [
-                                'link' => ROUTE_LOGIN_ATTEMPTS,
+                                'link' => $router->pathFor(ROUTE_LOGIN_ATTEMPTS),
                             ],
                         ]
                     ]
                 ]
             ],
             'Logout' => [
-                'link' => ROUTE_LOGOUT
+                'link' => $router->pathFor(ROUTE_LOGOUT)
             ]
         ];
     }

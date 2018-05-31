@@ -37,19 +37,19 @@ class App
     const SESSION_ADMINISTRATOR_KEY_USERNAME = 'username';
     const SESSION_ADMINISTRATOR_KEY_ROLE = 'role';
 
-    const SESSION_KEYS = [
-        'lastActivity' => 'lastActivity',
-        'user' => 'user',
-        'userId' => 'id',
-        'userName' => 'name',
-        'userUsername' => 'username',
-        'userRole' => 'role',
-        'adminNotice' => 'adminNotice',
-        'notice' => 'notice',
-        'gotoAdminPath' => 'gotoAdminPath',
-        'numFailedLogins' => 'numFailedLogins',
-        'requestInput' => 'requestInput',
-    ];
+//    const SESSION_KEYS = [
+//        'lastActivity' => 'lastActivity',
+//        'user' => 'user',
+//        'userId' => 'id',
+//        'userName' => 'name',
+//        'userUsername' => 'username',
+//        'userRole' => 'role',
+//        'adminNotice' => 'adminNotice',
+//        'notice' => 'notice',
+//        'gotoAdminPath' => 'gotoAdminPath',
+//        'numFailedLogins' => 'numFailedLogins',
+//        'requestInput' => 'requestInput',
+//    ];
 
     public function __construct()
     {
@@ -96,7 +96,6 @@ class App
 
         $errorHandler = new Utilities\ErrorHandler(
             self::PATH_PHP_ERRORS_LOG,
-            self::SESSION_KEYS,
             $this->getRedirect(),
             $echoErrors,
             $emailErrors,

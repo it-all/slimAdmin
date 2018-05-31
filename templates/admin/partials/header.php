@@ -28,9 +28,8 @@ $header .= '</div>';
 
 if ($authentication->check()) {
     $header .= '<div id="adminPageHeaderNotice">';
-    $adminNotice = $_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE];
-    if (isset($adminNotice)) {
-        $header .= '<span class="'.$adminNotice[1].'">&raquo; '.$adminNotice[0].' &laquo;</span>';
+    if (isset($_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE])) {
+        $header .= '<span class="'.$_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE][1].'">&raquo; '.$_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE][0].' &laquo;</span>';
     }
     $header .= '</div>';
     $header .= '<div id="adminPageHeaderGreeting">

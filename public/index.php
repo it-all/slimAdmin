@@ -51,7 +51,11 @@ define('NAV_ADMIN_STAFFING', '.'.'staffing');
 
 // use as shortcuts for callables in routes
 define('NAMESPACE_DOMAIN', 'Domain');
-define('NAMESPACE_SECURITY', '\SlimPostgres\Security');
+define('NAMESPACE_SECURITY', 'SlimPostgres\Security');
+define('NAMESPACE_SYSTEM_EVENTS', 'SlimPostgres\SystemEvents');
+define('NAMESPACE_ADMINISTRATORS', 'Domain\Administrators');
+define('NAMESPACE_LOGINS', 'Domain\Administrators\Logins');
+define('NAMESPACE_ROLES', 'Domain\Administrators\Roles');
 
 
 (new \SlimPostgres\App())->run();

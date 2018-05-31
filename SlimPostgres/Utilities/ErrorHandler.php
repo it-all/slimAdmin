@@ -10,7 +10,6 @@ use SlimPostgres\SystemEvents\SystemEventsModel;
 class ErrorHandler
 {
     private $logPath;
-    private $sessionKeys;
     private $redirectPage;
     private $emailErrors;
     private $echoErrors;
@@ -22,7 +21,6 @@ class ErrorHandler
 
     public function __construct(
         string $logPath,
-        array $sessionKeys = [],
         ?string $redirectPage,
         bool $echoErrors = false,
         bool $emailErrors = true,
@@ -32,7 +30,6 @@ class ErrorHandler
     )
     {
         $this->logPath = $logPath;
-        $this->sessionKeys = $sessionKeys;
         $this->redirectPage = $redirectPage;
         $this->emailErrors = $emailErrors;
         $this->echoErrors = $echoErrors;
@@ -96,9 +93,9 @@ class ErrorHandler
 
             $databaseErrorMessage = explode('Stack Trace:', $errorMessage)[0].'.See phpErrors.log for further details.';
 
-            $adminId = (array_key_exists('user', $this->sessionKeys) && array_key_exists('userId', $this->sessionKeys) && isset($_SESSION[$this->sessionKeys['user']][$this->sessionKeys['userId']])) ? (int) $_SESSION[$this->sessionKeys['user']][$this->sessionKeys['userId']] : null;
+            $administratorId = (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID])) ? (int) $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID] : null;
 
-            @$this->systemEventsModel->insertEvent('PHP Error', $systemEventType, $adminId, $databaseErrorMessage);
+            @$this->systemEventsModel->insertEvent('PHP Error', $systemEventType, $administratorId, $databaseErrorMessage);
         }
 
         // log

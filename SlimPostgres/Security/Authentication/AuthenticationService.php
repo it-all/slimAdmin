@@ -114,6 +114,8 @@ class AuthenticationService
 
         unset($_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS]);
 
+        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Logged in", App::STATUS_ADMIN_NOTICE_SUCCESS];
+
         // insert login_attempts record
         (new LoginsModel())->insertSuccessfulLogin($username, (int) $userRecord['id']);
     }

@@ -30,11 +30,12 @@ if ($authentication->check()) {
     $header .= '<div id="adminPageHeaderNotice">';
     if (isset($_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE])) {
         $header .= '<span class="'.$_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE][1].'">&raquo; '.$_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE][0].' &laquo;</span>';
+        unset($_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE]);
     }
     $header .= '</div>';
     $header .= '<div id="adminPageHeaderGreeting">
         Hello '.$authentication->getUserName().'
-            [<a href="authentication.logout">logout</a>]
+            [<a href="'.$router->pathFor(ROUTE_LOGOUT).'">logout</a>]
         </div>';
 }
 

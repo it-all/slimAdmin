@@ -21,42 +21,40 @@ class NavAdmin
     // todo set nav in config or somewhere else
     private function setNav()
     {
-        $router = $this->container->router;
-
         $this->nav = [
 
             'System' => [
                 'subSections' => [
                     'Events' => [
-                        'link' => $router->pathFor(ROUTE_SYSTEM_EVENTS_RESET),
+                        'route' => ROUTE_SYSTEM_EVENTS_RESET,
                     ],
 
                     'Administrators' => [
-                        'link' => $router->pathFor(ROUTE_ADMIN_ADMINISTRATORS_RESET),
+                        'route' => ROUTE_SYSTEM_EVENTS_RESET,
                         'subSections' => [
 
                             'Insert' => [
-                                'link' => $router->pathFor(ROUTE_ADMIN_ADMINISTRATORS_INSERT),
+                                'route' => ROUTE_ADMIN_ADMINISTRATORS_INSERT,
                             ],
 
                             'Roles' => [
-                                'link' => $router->pathFor(ROUTE_ADMIN_ROLES),
+                                'route' => ROUTE_ADMIN_ROLES,
                                 'subSections' => [
                                     'Insert' => [
-                                        'link' => $router->pathFor(ROUTE_ADMIN_ROLES_INSERT),
+                                        'route' => ROUTE_ADMIN_ROLES_INSERT,
                                     ]
                                 ],
                             ],
 
                             'Login Attempts' => [
-                                'link' => $router->pathFor(ROUTE_LOGIN_ATTEMPTS),
+                                'route' => ROUTE_LOGIN_ATTEMPTS,
                             ],
                         ]
                     ]
                 ]
             ],
             'Logout' => [
-                'link' => $router->pathFor(ROUTE_LOGOUT)
+                'route' => ROUTE_LOGOUT,
             ]
         ];
     }
@@ -71,17 +69,13 @@ class NavAdmin
             return $section['permissions'];
         }
 
-        if (isset($section['link'])) {
-            return $this->container->authorization->getPermissions($section['link']);
+        if (isset($section['route'])) {
+            return $this->container->authorization->getPermissions($section['route']);
         }
 
         // by nav section - ie NAV_ADMIN_SYSTEM
-        if (!$sectionNameConstant = constant('NAV_ADMIN_'.strtoupper(str_replace(" ", "_", $sectionName)))) {
-           throw new \Exception("Undefined admin nav constant for ".'NAV_ADMIN_'.strtoupper(str_replace(" ", "_", $sectionName)));
-        }
-
-        return $this->container->authorization->getPermissions($sectionNameConstant);
-
+        // note if nav section not defined null argument is sent which results in base role permission (the default)
+        return $this->container->authorization->getPermissions(constant('NAV_ADMIN_'.strtoupper(str_replace(" ", "_", $sectionName))));
     }
 
     private function getSectionForUserRecurs(array $section, string $sectionName)

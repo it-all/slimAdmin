@@ -206,7 +206,7 @@ class SingleTableController extends Controller
                 );
             }
 
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted record $insertedRecordId", 'adminNoticeSuccess'];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted record $insertedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
 
             return true;
 
@@ -236,7 +236,7 @@ class SingleTableController extends Controller
                 );
             }
 
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated record $updatedRecordId", 'adminNoticeSuccess'];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated record $updatedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
 
             return true;
 
@@ -280,7 +280,7 @@ class SingleTableController extends Controller
             );
         }
 
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$adminMessage, 'adminNoticeSuccess'];
+        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$adminMessage, App::STATUS_ADMIN_NOTICE_SUCCESS];
         return true;
     }
 }

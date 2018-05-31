@@ -37,19 +37,11 @@ class App
     const SESSION_ADMINISTRATOR_KEY_USERNAME = 'username';
     const SESSION_ADMINISTRATOR_KEY_ROLE = 'role';
 
-//    const SESSION_KEYS = [
-//        'lastActivity' => 'lastActivity',
-//        'user' => 'user',
-//        'userId' => 'id',
-//        'userName' => 'name',
-//        'userUsername' => 'username',
-//        'userRole' => 'role',
-//        'adminNotice' => 'adminNotice',
-//        'notice' => 'notice',
-//        'gotoAdminPath' => 'gotoAdminPath',
-//        'numFailedLogins' => 'numFailedLogins',
-//        'requestInput' => 'requestInput',
-//    ];
+    // admin notice statuses (convert to css classes)
+    const STATUS_ADMIN_NOTICE_SUCCESS = 'adminNoticeSuccess';
+    const STATUS_ADMIN_NOTICE_FAILURE = 'adminNoticeFailure';
+    const STATUS_ADMIN_NOTICE_CAUTION = 'adminNoticeCaution';
+    const STATUS_ADMIN_NOTICE_MUTED = 'adminNoticeMuted';
 
     public function __construct()
     {
@@ -232,7 +224,10 @@ class App
         // Template
         $container['view'] = function ($container) {
             $settings = $container->get('settings');
-            return new \Slim\Views\PhpRenderer($settings['templatesPath']);
+            $templateVariables = [
+                'router' => $container->router
+            ];
+            return new \Slim\Views\PhpRenderer($settings['templatesPath'], $templateVariables);
         };
 
         // Database

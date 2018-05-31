@@ -97,7 +97,7 @@ class AdministratorsController extends Controller
 
         FormHelper::unsetSessionVars();
 
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted record $insertedRecordId", 'adminNoticeSuccess'];
+        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted record $insertedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMIN_ADMINISTRATORS));
     }
 
@@ -134,7 +134,7 @@ class AdministratorsController extends Controller
             $checkChangedFields['password_hash'] = password_hash($input['password'], PASSWORD_DEFAULT);
         }
         if (!$this->administratorsSingleTableController->haveAnyFieldsChanged($checkChangedFields, $record)) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made (Record $primaryKey)", 'adminNoticeFailure'];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made (Record $primaryKey)", App::STATUS_ADMIN_NOTICE_FAILURE];
             FormHelper::unsetSessionVars();
             return $response->withRedirect($this->router->pathFor($redirectRoute));
         }
@@ -155,7 +155,7 @@ class AdministratorsController extends Controller
 
         FormHelper::unsetSessionVars();
 
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated record $primaryKey", 'adminNoticeSuccess'];
+        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated record $primaryKey", App::STATUS_ADMIN_NOTICE_SUCCESS];
         return $response->withRedirect($this->router->pathFor(getRouteName(true, $this->routePrefix,'index')));
     }
 
@@ -169,7 +169,7 @@ class AdministratorsController extends Controller
 
         // make sure there are no system events for admin being deleted
         if ($this->container->systemEvents->hasForAdmin((int) $args['primaryKey'])) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["System Events exist for admin id ".$args['primaryKey'], 'adminNoticeFailure'];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["System Events exist for admin id ".$args['primaryKey'], App::STATUS_ADMIN_NOTICE_FAILURE];
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
         }
 

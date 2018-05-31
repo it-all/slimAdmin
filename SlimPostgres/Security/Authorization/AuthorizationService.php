@@ -24,8 +24,12 @@ class AuthorizationService
     // $functionality like 'marketing' or 'marketing.index'
     // the return value can either be a string or an array, based on configuration. See comment at the top of class for info.
     // if not found as an exact match or category match, the base (least permission) role is returned
-    public function getPermissions(string $functionality)
+    public function getPermissions(?string $functionality)
     {
+        if ($functionality === null) {
+            return $this->baseRole;
+        }
+
         if (!isset($this->functionalityPermissions[$functionality])) {
 
             // no exact match, so see if there are multiple terms and first term matches

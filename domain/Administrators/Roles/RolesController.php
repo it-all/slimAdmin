@@ -19,7 +19,7 @@ class RolesController extends SingleTableController
     {
         // make sure role is not being used
         if ($this->model::hasAdmin((int) $primaryKey)) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Role in use", 'adminNoticeFailure'];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Role in use", App::STATUS_ADMIN_NOTICE_FAILURE];
             return false;
         }
 

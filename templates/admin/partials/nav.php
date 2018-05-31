@@ -1,15 +1,15 @@
 <?php
 
-function navSection($key, $navItem)
+function navSection($key, $navItem, $router)
 {
     $navSection = '<li>';
 
-    $navSection .= (isset($navItem['link'])) ? '<a href="'.$navItem['link'].'">'.$key.'</a>' : $key;
+    $navSection .= (isset($navItem['route'])) ? '<a href="'.$router->pathFor($navItem['route']).'">'.$key.'</a>' : $key;
     if (isset($navItem['subSections']))     {
         $navSection .= '<a href="#" onclick="toggleDisplay(getElementById(\''.$key.'\'));togglePlusMinus(this);">+</a>';
         $navSection .= '<ul class="adminNavSubSection" id="'.$key.'">';
         foreach ($navItem['subSections'] as $subKey => $subNavItem) {
-            $navSection .= navSection($subKey, $subNavItem);
+            $navSection .= navSection($subKey, $subNavItem, $router);
         }
         $navSection .= '</ul>';
     }
@@ -21,9 +21,11 @@ function navSection($key, $navItem)
 $nav = '';
 
 if (isset($navigationItems)) {
+    $nav .= '<ul>';
     foreach ($navigationItems as $navKey => $navItem) {
-        $nav .= navSection($navKey, $navItem);
+        $nav .= navSection($navKey, $navItem, $router);
     }
+    $nav .= '</ul>';
 }
 
 //

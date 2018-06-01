@@ -1,0 +1,40 @@
+
+
+
+{% import 'admin/partials/list/macros.twig' as listMacros %}
+
+{% extends 'base.twig' %}
+
+{% block htmlHeadCss %}
+    <link href="/css/adminFlexList.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block htmlBodyContent %}
+
+{% include 'admin/partials/header.twig' %}
+
+{% include 'admin/partials/list/startMain.twig' %}
+
+    {% set rowId = 0 %}
+    {% for row in results %}
+        {% set rowId = rowId + 1 %}
+
+        {# default is rows can be deleted #}
+        {% set deletePermitted = true %}
+        {% if row.metaDisableDelete %}
+            {% set deletePermitted = false %}
+        {% endif %}
+
+        {{ listMacros.bodyRow(row, rowId, updateColumn, updatePermitted, updateRoute, addDeleteColumn, deletePermitted, deleteRoute) }}
+
+    {% endfor %}
+
+{% include 'admin/partials/list/endMain.twig' %}
+
+{% include 'admin/partials/footer.twig' %}
+
+{% endblock %}
+{% block htmlBodyJs %}
+    <script type="text/javascript" src="/js/uiHelper.js"></script>
+    <script type="text/javascript" src="/js/sortTable.js"></script>
+{% endblock %}

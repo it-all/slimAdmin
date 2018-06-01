@@ -1,0 +1,72 @@
+{% import 'admin/partials/list/macros.twig' as listMacros %}
+
+{% extends 'base.twig' %}
+
+{% block htmlHeadCss %}
+    <link href="/css/adminFlexList.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block htmlBodyContent %}
+
+{% include 'admin/partials/header.twig' %}
+
+{% include 'admin/partials/list/startMain.twig' %}
+
+    {% set rowId = 0 %}
+    {% for row in results %}
+        {% set rowId = rowId + 1 %}
+
+        {# do not allow non-owners to edit owners #}
+        {% if authentication.user.role != 'owner' and attribute(row, 'role') == 'owner' %}
+            {% set updatePermitted = false %}
+        {% endif %}
+
+        {# do not allow admin to delete themself or non-owners to delete owners #}
+        {% if attribute(row, 'username') != authentication.user.username and (authentication.user.role == 'owner' or attribute(row, 'role') != 'owner') %}
+            {% set deletePermitted = true %}
+        {% else %}
+            {% set deletePermitted = false %}
+        {% endif %}
+
+        <tr id="row{{ rowId }}">
+            {% for key, value in row %}
+                {% if key == updateColumn and updatePermitted %}
+
+                    <td><a href="{{ path_for(updateRoute, {"primaryKey": attribute(row, updateColumn)}) }}" title="update">{{ value }}</a></td>
+
+                {% elseif key == 'employee_id' %}
+
+                    <td><a href="{{ path_for(constant('ROUTE_ADMIN_EMPLOYEES_UPDATE'), {"primaryKey": value}) }}" title="update">{{ value }}</a></td>
+
+                {%  else %}
+
+                    <td>{{ value }}</td>
+
+                {% endif %}
+            {% endfor %}
+
+            {% if addDeleteColumn %}
+                {%  if deletePermitted %}
+
+                    <td><a href="{{ path_for(deleteRoute, {"primaryKey": attribute(row, updateColumn)}) }}" title="delete" onclick="return confirm('Are you sure you want to delete record  {{ attribute(row, updateColumn) }}?');">X</a></td>
+
+                {% else %}
+
+                    <td>&nbsp;</td>
+
+                {% endif %}
+            {% endif %}
+
+        </tr>
+
+    {% endfor %}
+
+{% include 'admin/partials/list/endMain.twig' %}
+
+{% include 'admin/partials/footer.twig' %}
+
+{% endblock %}
+{% block htmlBodyJs %}
+    <script type="text/javascript" src="/js/uiHelper.js"></script>
+    <script type="text/javascript" src="/js/sortTable.js"></script>
+{% endblock %}

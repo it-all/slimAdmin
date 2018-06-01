@@ -225,7 +225,17 @@ class App
         $container['view'] = function ($container) {
             $settings = $container->get('settings');
             $templateVariables = [
-                'router' => $container->router
+                'businessName' => $settings['businessName'],
+                'domainName' => $settings['domainName'],
+                'businessDba' => $settings['businessDba'],
+                'isLive' => $settings['isLive'],
+                'authentication' => $container->authentication,
+                'authorization' => $container->authorization,
+                'router' => $container->router,
+                'csrfNameKey' => $container->csrf->getTokenNameKey(),
+                'csrfName' => $container->csrf->getTokenName(),
+                'csrfValueKey' => $container->csrf->getTokenValueKey(),
+                'csrfValue' => $container->csrf->getTokenValue(),
             ];
             return new \Slim\Views\PhpRenderer($settings['templatesPath'], $templateVariables);
         };

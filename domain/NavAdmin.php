@@ -26,7 +26,7 @@ class NavAdmin
             'System' => [
                 'subSections' => [
                     'Events' => [
-                        'route' => ROUTE_SYSTEM_EVENTS_RESET,
+                        'route' => ROUTE_SYSTEM_EVENTS,
                     ],
 
                     'Administrators' => [
@@ -34,14 +34,14 @@ class NavAdmin
                         'subSections' => [
 
                             'Insert' => [
-                                'route' => ROUTE_ADMIN_ADMINISTRATORS_INSERT,
+                                'route' => ROUTE_ADMINISTRATORS_INSERT,
                             ],
 
                             'Roles' => [
-                                'route' => ROUTE_ADMIN_ROLES,
+                                'route' => ROUTE_ADMINISTRATORS_ROLES,
                                 'subSections' => [
                                     'Insert' => [
-                                        'route' => ROUTE_ADMIN_ROLES_INSERT,
+                                        'route' => ROUTE_ADMINISTRATORS_ROLES_INSERT,
                                     ]
                                 ],
                             ],

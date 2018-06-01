@@ -14,11 +14,11 @@ var onError = function (err) {
     this.emit('end');
 };
 
-var scssSrc = '../../SlimPostgres/prebuild/scss/';
-var jsSrc = '../../SlimPostgres/prebuild/js/';
-var cssDest = '../../public/css';
-var jsDest = '../../public/js';
-var jsFile = 'scripts.min.js'; // use this only if concatenating all js with .pipe(concat(jsFile))
+var scssSrc = 'SlimPostgres/prebuild/scss/';
+var jsSrc = 'SlimPostgres/prebuild/js/';
+var cssDest = 'public/css';
+var jsDest = 'public/js';
+// var jsFile = 'scripts.min.js'; // use this only if concatenating all js with .pipe(concat(jsFile))
 
 gulp.task('sass', function() {
     return gulp.src(scssSrc+'*.scss')

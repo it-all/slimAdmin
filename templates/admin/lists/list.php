@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 $partialsPath = APPLICATION_ROOT_DIRECTORY . '/templates/admin/partials/';
-$listPartialsPath = $partialsPath . 'list/';
+$listPartialsPath = 'partials/';
 require $partialsPath . 'header.php';
 require $listPartialsPath . 'startMain.php';
 require $listPartialsPath . 'resultsRows.php';

@@ -9,7 +9,7 @@ $filterForm = <<< EOT
 <form name="filter" method="post" style="display: inline" action="$ffAction">
     SELECT WHERE
     $ffError
-    <input type="text" name="$filterFieldName" value="$filterValue" size="70" maxlength="500" placeholder="field1:{op}:value 1[,field2...] op in [$filterOpsList ]" required>
+    <input type="text" name="$filterFieldName" value="$filterValue" size="55" maxlength="500" placeholder="field1:{op}:value 1[,field2...] op in [$filterOpsList ]" required>
     <input type="submit" value="Filter">
     $ffReset
     <input type="hidden" name="$csrfNameKey" value="$csrfName">

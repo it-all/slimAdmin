@@ -147,7 +147,7 @@ class AdministratorsController extends Controller
             return $this->view->updateView($request, $response, $args);
         }
 
-        if (!$this->administratorsModel->updateByPrimaryKey((int) $primaryKey, $input['name'], $input['username'], (int) $input['role_id'], App::getIntOrNull($input['employee_id']), $input['password'], $record)) {
+        if (!$this->administratorsModel->updateByPrimaryKey((int) $primaryKey, $input['name'], $input['username'], (int) $input['role_id'], $input['password'], $record)) {
             throw new \Exception("Update Failure");
         }
 
@@ -156,14 +156,14 @@ class AdministratorsController extends Controller
         FormHelper::unsetSessionVars();
 
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated record $primaryKey", App::STATUS_ADMIN_NOTICE_SUCCESS];
-        return $response->withRedirect($this->router->pathFor(getRouteName(true, $this->routePrefix,'index')));
+        return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
     }
 
     // override for custom validation and return column
     public function getDelete(Request $request, Response $response, $args)
     {
         // make sure the current admin is not deleting themself
-        if ((int) ($args['primaryKey']) == $this->container->authentication->user()['id']) {
+        if ((int) ($args['primaryKey']) == $this->container->authentication->getUserId()) {
             throw new \Exception('You cannot delete yourself from administrators');
         }
 

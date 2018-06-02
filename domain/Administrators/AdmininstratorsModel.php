@@ -32,11 +32,11 @@ class AdministratorsModel extends MultiTableModel
 
     public function insert(string $name, string $username, string $password, int $roleId)
     {
-        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash, role_id) VALUES($1, $2, $3, $4, $5) RETURNING id", $name, $username, password_hash($password, PASSWORD_DEFAULT), $roleId);
+        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash, role_id) VALUES($1, $2, $3, $4) RETURNING id", $name, $username, password_hash($password, PASSWORD_DEFAULT), $roleId);
         return $q->execute();
     }
 
-    private function getChangedColumns(array $record, ?string $name, string $username, int $roleId, ?int $employeeId, string $password = ''): array
+    private function getChangedColumns(array $record, ?string $name, string $username, int $roleId, string $password = ''): array
     {
         $changedColumns = [];
 
@@ -63,7 +63,7 @@ class AdministratorsModel extends MultiTableModel
     }
 
     // If a '' password is passed, the password field is not updated
-    public function updateByPrimaryKey(int $primaryKeyValue, ?string $name, string $username, int $roleId, int $employeeId = null, string $password = '', array $record = null)
+    public function updateByPrimaryKey(int $primaryKeyValue, ?string $name, string $username, int $roleId, string $password = '', array $record = null)
     {
         if ($record == null && !$record = $this->selectForPrimaryKey($primaryKeyValue)) {
             throw new \Exception("Invalid Primary Key $primaryKeyValue for ".self::TABLE_NAME);

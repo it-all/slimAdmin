@@ -7,7 +7,6 @@ use SlimPostgres\App;
 use SlimPostgres\Controller;
 use SlimPostgres\Database\SingleTable\SingleTableModel;
 use SlimPostgres\Forms\FormHelper;
-use function SlimPostgres\Utilities\getRouteName;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -33,12 +32,12 @@ class SingleTableController extends Controller
 
     public function postIndexFilter(Request $request, Response $response, $args)
     {
-        return $this->setIndexFilter($request, $response, $args, $this->model->getListViewColumns(), getRouteName(true, $this->routePrefix, 'index'), $this->view);
+        return $this->setIndexFilter($request, $response, $args, $this->model->getListViewColumns(), App::getRouteName(true, $this->routePrefix, 'index'), $this->view);
     }
 
     public function postInsert(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->checkFunctionality(getRouteName(true, $this->routePrefix, 'insert'))) {
+        if (!$this->authorization->checkFunctionality(App::getRouteName(true, $this->routePrefix, 'insert'))) {
             throw new \Exception('No permission.');
         }
 
@@ -75,7 +74,7 @@ class SingleTableController extends Controller
         }
 
         FormHelper::unsetSessionVars();
-        return $response->withRedirect($this->router->pathFor(getRouteName(true, $this->routePrefix, 'index')));
+        return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
 
     private function addBooleanFieldsToInput()
@@ -89,14 +88,14 @@ class SingleTableController extends Controller
 
     public function putUpdate(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->checkFunctionality(getRouteName(true, $this->routePrefix, 'update'))) {
+        if (!$this->authorization->checkFunctionality(App::getRouteName(true, $this->routePrefix, 'update'))) {
             throw new \Exception('No permission.');
         }
 
         $this->setRequestInput($request);
         $this->addBooleanFieldsToInput();
 
-        $redirectRoute = getRouteName(true, $this->routePrefix, 'index');
+        $redirectRoute = App::getRouteName(true, $this->routePrefix, 'index');
 
         // make sure there is a record for the primary key in the model
         if (!$record = $this->model->selectForPrimaryKey($args['primaryKey'])) {
@@ -154,7 +153,7 @@ class SingleTableController extends Controller
 
     public function getDeleteHelper(Response $response, $primaryKey, string $returnColumn = null, bool $sendEmail = false, $routeType = 'index')
     {
-        if (!$this->authorization->checkFunctionality(getRouteName(true, $this->routePrefix, 'delete'))) {
+        if (!$this->authorization->checkFunctionality(App::getRouteName(true, $this->routePrefix, 'delete'))) {
             throw new \Exception('No permission.');
         }
 
@@ -164,7 +163,7 @@ class SingleTableController extends Controller
             // no need to do anything, just redirect with error message already set
         }
 
-        $redirectRoute = getRouteName(true, $this->routePrefix, $routeType);
+        $redirectRoute = App::getRouteName(true, $this->routePrefix, $routeType);
         return $response->withRedirect($this->router->pathFor($redirectRoute));
     }
 

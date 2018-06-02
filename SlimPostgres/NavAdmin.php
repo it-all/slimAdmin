@@ -87,7 +87,7 @@ class NavAdmin
 
     private function getSectionForUserRecurs(array $section, string $sectionName)
     {
-        // if there are section permissions and they are not met
+        // if there are section permissions and they are not met, do not put section in user's nav
         if ($permissions = $this->getSectionPermissions($section, $sectionName)) {
             if (!$this->container->authorization->check($permissions)) {
                 return false;

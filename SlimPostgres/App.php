@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-// todo test cli scripts
+
 /** note: this file can also be called for cli scripts.*/
 
 namespace SlimPostgres;
@@ -42,6 +42,14 @@ class App
     const STATUS_ADMIN_NOTICE_FAILURE = 'adminNoticeFailure';
     const STATUS_ADMIN_NOTICE_CAUTION = 'adminNoticeCaution';
     const STATUS_ADMIN_NOTICE_MUTED = 'adminNoticeMuted';
+
+    // use as shortcuts for callables in routes
+    const NAMESPACE_DOMAIN = 'Domain';
+    const NAMESPACE_SECURITY = 'SlimPostgres\Security';
+    const NAMESPACE_SYSTEM_EVENTS = 'SlimPostgres\SystemEvents';
+    const NAMESPACE_ADMINISTRATORS = 'SlimPostgres\Administrators';
+    const NAMESPACE_LOGINS = 'SlimPostgres\Administrators\Logins';
+    const NAMESPACE_ROLES = 'SlimPostgres\Administrators\Roles';
 
     public function __construct()
     {

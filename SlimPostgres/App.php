@@ -185,13 +185,9 @@ class App
             return function ($request, $response) use ($container) {
 
                 // log error
-                // todo get $administratorId
-                $administratorId = null; // (array_key_exists('user', $this->sessionKeys) && array_key_exists('userId', $this->sessionKeys) && isset($_SESSION[$this->sessionKeys['user']][$this->sessionKeys['userId']])) ? (int) $_SESSION[$this->sessionKeys['user']][$this->sessionKeys['userId']] : null;
+                $this->systemEventsModel->insertEvent('404 Page Not Found', 'notice', $container->authentication->getUserId());
 
-                $this->systemEventsModel->insertEvent('404 Page Not Found', 'notice', $administratorId);
-
-                $homeUrl = $container->router->pathFor(ROUTE_HOME);
-                $responseBodyHtml = $this->config['pageNotFoundText'].'<br><br><a href="'.$homeUrl.'">home</a>';
+                $responseBodyHtml = $this->config['pageNotFoundText'].'<br><br><a href="'.$container->router->pathFor(ROUTE_HOME).'">home</a>';
 
                 return $container['response']
                     ->withStatus(404)

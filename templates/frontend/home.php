@@ -11,5 +11,3 @@ $htmlBodyContent = <<< EOL
     </main>
 EOL;
 require APPLICATION_ROOT_DIRECTORY . '/templates/base.php';
-
-session_destroy();

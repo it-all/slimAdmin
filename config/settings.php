@@ -82,6 +82,18 @@ return [
         // if true removes leading and trailing blank space on all inputs
         'trimAllUserInput' => true,
 
+        // how to add admin nav menu options
+//        'adminNav' => [
+//            'Test' => [
+//                'route' => ROUTE_SYSTEM_EVENTS,
+//                'subSections' => [
+//                    'Insert' => [
+//                        'route' => ROUTE_ADMINISTRATORS_ROLES_INSERT,
+//                    ]
+//                ],
+//            ]
+//        ],
+
     ] // end slim specific config
 
 ];

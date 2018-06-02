@@ -18,7 +18,6 @@ class NavAdmin
         $this->setNav();
     }
 
-    // todo set nav in config or somewhere else
     private function setNav()
     {
         $this->nav = [
@@ -57,6 +56,14 @@ class NavAdmin
                 'route' => ROUTE_LOGOUT,
             ]
         ];
+
+        if (isset($this->container['settings']['adminNav'])) {
+            if (!is_array($this->container['settings']['adminNav'])) {
+                throw new \Exception("adminNav config must be array");
+            }
+
+            $this->nav = array_merge($this->container['settings']['adminNav'], $this->nav);
+        }
     }
 
     // precedence:

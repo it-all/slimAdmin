@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace SlimPostgres;
 
-use Domain\NavAdmin;
 use Slim\Container;
 
 class AdminView extends View

@@ -1,9 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Domain;
-
-use SlimPostgres\AdminView;
+namespace SlimPostgres;
 
 class AdminHomeView extends AdminView
 {

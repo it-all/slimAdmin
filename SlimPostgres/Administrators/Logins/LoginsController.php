@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Domain\Administrators\Logins;
+namespace SlimPostgres\Administrators\Logins;
 
 use SlimPostgres\Database\SingleTable\SingleTableController;
 use Slim\Container;

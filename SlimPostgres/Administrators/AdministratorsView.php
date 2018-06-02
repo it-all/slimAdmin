@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Domain\Administrators;
+namespace SlimPostgres\Administrators;
 
-use Domain\Administrators\Roles\Roles;
-use Domain\Administrators\Roles\RolesModel;
+use SlimPostgres\Administrators\Roles\Roles;
+use SlimPostgres\Administrators\Roles\RolesModel;
 use It_All\FormFormer\Fields\InputField;
 use It_All\FormFormer\Form;
 use SlimPostgres\App;

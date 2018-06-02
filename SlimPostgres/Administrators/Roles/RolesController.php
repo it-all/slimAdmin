@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Domain\Administrators\Roles;
+namespace SlimPostgres\Administrators\Roles;
 
 use SlimPostgres\App;
 use SlimPostgres\Database\SingleTable\SingleTableController;

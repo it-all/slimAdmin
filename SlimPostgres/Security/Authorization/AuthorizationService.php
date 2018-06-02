@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Security\Authorization;
 
-use Domain\Administrators\Roles\RolesModel;
+use SlimPostgres\Administrators\Roles\RolesModel;
 use SlimPostgres\App;
 
 /* There are two methods of Authorization: either by minimum permission, where the user role equal to or better than the minimum permission is authorized (in this case, the permission is a string). Or by a permission set, where the user role in the set of authorized permissions is authorized (permission is an array) */

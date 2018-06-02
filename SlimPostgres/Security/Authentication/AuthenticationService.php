@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace SlimPostgres\Security\Authentication;
 
 use It_All\FormFormer\Form;
-use Domain\Administrators\AdministratorsModel;
-use Domain\Administrators\Logins\LoginsModel;
+use SlimPostgres\Administrators\AdministratorsModel;
+use SlimPostgres\Administrators\Logins\LoginsModel;
 use SlimPostgres\App;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Forms\FormHelper;

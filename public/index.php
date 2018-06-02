@@ -53,9 +53,9 @@ define('NAV_ADMIN_STAFFING', '.'.'staffing');
 define('NAMESPACE_DOMAIN', 'Domain');
 define('NAMESPACE_SECURITY', 'SlimPostgres\Security');
 define('NAMESPACE_SYSTEM_EVENTS', 'SlimPostgres\SystemEvents');
-define('NAMESPACE_ADMINISTRATORS', 'Domain\Administrators');
-define('NAMESPACE_LOGINS', 'Domain\Administrators\Logins');
-define('NAMESPACE_ROLES', 'Domain\Administrators\Roles');
+define('NAMESPACE_ADMINISTRATORS', 'SlimPostgres\Administrators');
+define('NAMESPACE_LOGINS', 'SlimPostgres\Administrators\Logins');
+define('NAMESPACE_ROLES', 'SlimPostgres\Administrators\Roles');
 
 
 (new \SlimPostgres\App())->run();

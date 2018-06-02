@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Domain\Administrators;
+namespace SlimPostgres\Administrators;
 
 use SlimPostgres\Database\SingleTable\SingleTableModel;
 use SlimPostgres\Database\Queries\QueryBuilder;

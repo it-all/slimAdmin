@@ -23,12 +23,12 @@ class AdministratorsView extends ListView
 
     public function __construct(Container $container)
     {
-        $this->routePrefix = ROUTEPREFIX_ADMIN_ADMINISTRATORS;
+        $this->routePrefix = ROUTEPREFIX_ADMINISTRATORS;
         $this->administratorsModel = new AdministratorsModel();
 
-        parent::__construct($container, 'administrators', ROUTE_ADMIN_ADMINISTRATORS, $this->administratorsModel, ROUTE_ADMIN_ADMINISTRATORS_RESET, 'admin/lists/administratorsList.twig');
+        parent::__construct($container, 'administrators', ROUTE_ADMINISTRATORS, $this->administratorsModel, ROUTE_ADMINISTRATORS_RESET, 'admin/lists/administratorsList.php');
 
-        $insertLink = ($this->authorization->check($this->container->settings['authorization'][App::getRouteName(true, $this->routePrefix, 'insert')])) ? ['text' => 'Insert '.$this->administratorsModel->getPrimaryTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
+        $insertLink = ($this->authorization->check($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->administratorsModel->getPrimaryTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
         $this->setInsert($insertLink);
 
         $this->setUpdate($this->authorization->check($this->getPermissions('update')), $this->administratorsModel->getUpdateColumnName(), App::getRouteName(true, $this->routePrefix, 'update', 'put'));

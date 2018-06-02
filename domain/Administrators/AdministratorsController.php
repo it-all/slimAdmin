@@ -23,7 +23,7 @@ class AdministratorsController extends Controller
     {
         $this->administratorsModel = new AdministratorsModel();
         $this->view = new AdministratorsView($container);
-        $this->routePrefix = ROUTEPREFIX_ADMIN_ADMINISTRATORS;
+        $this->routePrefix = ROUTEPREFIX_ADMINISTRATORS;
         $this->administratorsSingleTableController = new SingleTableController($container, $this->administratorsModel->getPrimaryTableModel(), $this->view, $this->routePrefix);
         parent::__construct($container);
     }
@@ -65,7 +65,7 @@ class AdministratorsController extends Controller
 
     public function postIndexFilter(Request $request, Response $response, $args)
     {
-        return $this->setIndexFilter($request, $response, $args, $this->administratorsModel::SELECT_COLUMNS, ROUTE_ADMIN_ADMINISTRATORS, $this->view);
+        return $this->setIndexFilter($request, $response, $args, $this->administratorsModel::SELECT_COLUMNS, ROUTE_ADMINISTRATORS, $this->view);
     }
 
     public function postInsert(Request $request, Response $response, $args)
@@ -98,7 +98,7 @@ class AdministratorsController extends Controller
         FormHelper::unsetSessionVars();
 
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted record $insertedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
-        return $response->withRedirect($this->router->pathFor(ROUTE_ADMIN_ADMINISTRATORS));
+        return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS));
     }
 
     public function putUpdate(Request $request, Response $response, $args)

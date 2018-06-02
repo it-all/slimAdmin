@@ -30,7 +30,7 @@ class NavAdmin
                     ],
 
                     'Administrators' => [
-                        'route' => ROUTE_SYSTEM_EVENTS_RESET,
+                        'route' => ROUTE_ADMINISTRATORS,
                         'subSections' => [
 
                             'Insert' => [

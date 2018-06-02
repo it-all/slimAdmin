@@ -34,11 +34,10 @@ foreach ($results[0] as $headerKey => $value) {
         $thClass = ($headerKey == $sortColumn) ? $sortClass : '';
         $startMain .= '<th class="'.$thClass.'">'.$headerKey.'</th>';
     }
+}
 
-    if ($addDeleteColumn) {
-        $startMain .= '<th class="sorttable_nosort">X</th>';
-    }
-
+if ($addDeleteColumn) {
+    $startMain .= '<th class="sorttable_nosort">X</th>';
 }
 
 $startMain .= <<< EOT

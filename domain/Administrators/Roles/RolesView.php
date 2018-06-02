@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Domain\Administrators\Roles;
 
 use SlimPostgres\Database\Queries\QueryBuilder;
-use Infrastructure\Database\SingleTable\SingleTableView;
+use SlimPostgres\Database\SingleTable\SingleTableView;
 use SlimPostgres\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Response;
@@ -13,7 +13,7 @@ class RolesView extends SingleTableView
 {
     public function __construct(Container $container)
     {
-        parent::__construct($container, new RolesModel($container->settings['adminDefaultRole']), ROUTEPREFIX_ADMIN_ROLES);
+        parent::__construct($container, new RolesModel($container->settings['adminDefaultRole']), ROUTEPREFIX_ROLES);
     }
 
     // override in order to not show delete link for roles in use
@@ -52,7 +52,7 @@ class RolesView extends SingleTableView
                 'filterOpsList' => QueryBuilder::getWhereOperatorsText(),
                 'filterValue' => $filterFieldValue,
                 'filterErrorMessage' => $filterErrorMessage,
-                'filterFormAction' => $this->indexRoute,
+                'filterFormActionRoute' => $this->indexRoute,
                 'filterFieldName' => $this->sessionFilterFieldKey,
                 'isFiltered' => $filterColumnsInfo,
                 'resetFilterRoute' => $this->filterResetRoute,

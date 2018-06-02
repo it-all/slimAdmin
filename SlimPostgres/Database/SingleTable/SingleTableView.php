@@ -1,13 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\Database\SingleTable;
+namespace SlimPostgres\Database\SingleTable;
 
 use SlimPostgres\App;
 use SlimPostgres\ListView;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Forms\FormHelper;
-use function SlimPostgres\Utilities\getRouteName;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -22,16 +21,16 @@ class SingleTableView extends ListView
         $this->model = $model;
         $this->routePrefix = $routePrefix;
 
-        parent::__construct($container, $routePrefix, getRouteName(true, $routePrefix, 'index'), $this->model, getRouteName(true, $routePrefix, 'index.reset'));
+        parent::__construct($container, $routePrefix, App::getRouteName(true, $routePrefix, 'index'), $this->model, App::getRouteName(true, $routePrefix, 'index.reset'));
 
-        $insertLink = ($this->authorization->check($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->model->getFormalTableName(false), 'route' => getRouteName(true, $this->routePrefix, 'insert')] : false;
+        $insertLink = ($this->authorization->check($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->model->getFormalTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
         $this->setInsert($insertLink);
 
         $allowUpdate = $this->authorization->check($this->getPermissions('update')) && $this->model->getPrimaryKeyColumnName() !== null;
 
-        $this->setUpdate($allowUpdate, $this->model->getPrimaryKeyColumnName(), getRouteName(true, $this->routePrefix, 'update', 'put'));
+        $this->setUpdate($allowUpdate, $this->model->getPrimaryKeyColumnName(), App::getRouteName(true, $this->routePrefix, 'update', 'put'));
 
-        $this->setDelete($this->container->authorization->check($this->getPermissions('delete')), getRouteName(true, $this->routePrefix, 'delete'));
+        $this->setDelete($this->container->authorization->check($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
 
     }
 
@@ -45,7 +44,7 @@ class SingleTableView extends ListView
     {
         $formFieldData = ($request->isGet()) ? null : $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
-        $form = new DatabaseTableForm($this->model, $this->router->pathFor(getRouteName(true, $this->routePrefix, 'insert', 'post')), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'insert', $formFieldData);
+        $form = new DatabaseTableForm($this->model, $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'insert', 'post')), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'insert', $formFieldData);
         FormHelper::unsetSessionVars();
 
         return $this->view->render(
@@ -74,7 +73,7 @@ class SingleTableView extends ListView
 
         $formFieldData = ($request->isGet()) ? $record : $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
-        $form = new DatabaseTableForm($this->model, $this->router->pathFor(getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'update', $formFieldData);
+        $form = new DatabaseTableForm($this->model, $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'update', $formFieldData);
         FormHelper::unsetSessionVars();
 
         return $this->view->render(

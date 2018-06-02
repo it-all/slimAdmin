@@ -1,17 +1,28 @@
 <?php
 declare(strict_types=1);
 
-use SlimPostgres\App;
+use Domain\HomeView;
+use SlimPostgres\Security\Authentication\AuthenticationView;
+use SlimPostgres\Security\Authentication\AuthenticationController;
 use SlimPostgres\Security\Authentication\GuestMiddleware;
 use SlimPostgres\Security\Authorization\AuthorizationMiddleware;
 use SlimPostgres\Security\Authentication\AuthenticationMiddleware;
+use Domain\AdminHomeView;
+use SlimPostgres\SystemEvents\SystemEventsView;
+use SlimPostgres\SystemEvents\SystemEventsController;
+use SlimPostgres\Administrators\Logins\LoginsView;
+use SlimPostgres\Administrators\Logins\LoginsController;
+use SlimPostgres\Administrators\AdministratorsView;
+use SlimPostgres\Administrators\AdministratorsController;
+use SlimPostgres\Administrators\Roles\RolesView;
+use SlimPostgres\Administrators\Roles\RolesController;
 
 $administratorPermissions = $config['slim']['authorization']['administratorPermissions'];
 
 /////////////////////////////////////////
 // Routes that anyone can access
 
-$slim->get('/', App::NAMESPACE_DOMAIN . '\HomeView:index')->setName(ROUTE_HOME);
+$slim->get('/', HomeView::class . ':index')->setName(ROUTE_HOME);
 
 // remainder of front end pages to go here
 
@@ -20,13 +31,11 @@ $slim->get('/', App::NAMESPACE_DOMAIN . '\HomeView:index')->setName(ROUTE_HOME);
 /////////////////////////////////////////
 // Routes that only non-authenticated users (Guests) can access
 
-$slim->get('/' . $config['adminPath'],
-    App::NAMESPACE_SECURITY.'\Authentication\AuthenticationView:getLogin')
+$slim->get('/' . $config['adminPath'], AuthenticationView::class . ':getLogin')
     ->add(new GuestMiddleware($slimContainer))
     ->setName(ROUTE_LOGIN);
 
-$slim->post('/' . $config['adminPath'],
-    App::NAMESPACE_SECURITY.'\Authentication\AuthenticationController:postLogin')
+$slim->post('/' . $config['adminPath'], AuthenticationController::class . ':postLogin')
     ->add(new GuestMiddleware($slimContainer))
     ->setName(ROUTE_LOGIN_POST);
 /////////////////////////////////////////
@@ -36,149 +45,126 @@ $slim->post('/' . $config['adminPath'],
 
 // admin home
 $slim->get('/' . $config['adminPath'] . '/home',
-    App::NAMESPACE_DOMAIN.'\AdminHomeView:index')
+    AdminHomeView::class . ':index')
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMIN_HOME_DEFAULT);
 
 // logout
-$slim->get('/' . $config['adminPath'] . '/logout',
-    App::NAMESPACE_SECURITY.'\Authentication\AuthenticationController:getLogout')
+$slim->get('/' . $config['adminPath'] . '/logout', AuthenticationController::class . ':getLogout')
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_LOGOUT);
 
 // system events
-$slim->get('/' . $config['adminPath'] . '/systemEvents',
-    App::NAMESPACE_SYSTEM_EVENTS . '\SystemEventsView:index')
+$slim->get('/' . $config['adminPath'] . '/systemEvents', SystemEventsView::class . ':index')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_SYSTEM_EVENTS]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_SYSTEM_EVENTS);
 
-$slim->post('/' . $config['adminPath'] . '/systemEvents',
-    App::NAMESPACE_SYSTEM_EVENTS . '\SystemEventsController:postIndexFilter')
+$slim->post('/' . $config['adminPath'] . '/systemEvents', SystemEventsController::class . ':postIndexFilter')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_SYSTEM_EVENTS]))
     ->add(new AuthenticationMiddleware($slimContainer));
 
 $slim->get('/' . $config['adminPath'] . '/systemEvents/reset',
-    App::NAMESPACE_SYSTEM_EVENTS . '\SystemEventsView:indexResetFilter')
+    SystemEventsView::class . ':indexResetFilter')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_SYSTEM_EVENTS]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_SYSTEM_EVENTS_RESET);
 // end system events
 
 // logins
-$slim->get('/' . $config['adminPath'] . '/logins',
-    App::NAMESPACE_LOGINS . '\LoginsView:index')
+$slim->get('/' . $config['adminPath'] . '/logins', LoginsView::class . ':index')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_LOGIN_ATTEMPTS]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_LOGIN_ATTEMPTS);
 
-$slim->post('/' . $config['adminPath'] . '/logins',
-    App::NAMESPACE_LOGINS . '\LoginsController:postIndexFilter')
+$slim->post('/' . $config['adminPath'] . '/logins', LoginsController::class . ':postIndexFilter')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_LOGIN_ATTEMPTS]))
     ->add(new AuthenticationMiddleware($slimContainer));
 
 $slim->get('/' . $config['adminPath'] . '/logins/reset',
-    App::NAMESPACE_LOGINS . '\LoginsView:indexResetFilter')
+    LoginsView::class . ':indexResetFilter')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_LOGIN_ATTEMPTS]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_LOGIN_ATTEMPTS_RESET);
 
 // administrators
-$slim->get('/' . $config['adminPath'] . '/administrators',
-    App::NAMESPACE_ADMINISTRATORS . '\AdministratorsView:index')
+$slim->get('/' . $config['adminPath'] . '/administrators', AdministratorsView::class . ':index')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS);
 
-$slim->post('/' . $config['adminPath'] . '/administrators',
-    App::NAMESPACE_ADMINISTRATORS . '\AdministratorsController:postIndexFilter')
+$slim->post('/' . $config['adminPath'] . '/administrators', AdministratorsController::class . ':postIndexFilter')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS]))
     ->add(new AuthenticationMiddleware($slimContainer));
 
-$slim->get('/' . $config['adminPath'] . '/administrators/reset',
-    App::NAMESPACE_ADMINISTRATORS . '\AdministratorsView:indexResetFilter')
+$slim->get('/' . $config['adminPath'] . '/administrators/reset', AdministratorsView::class . ':indexResetFilter')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS_RESET]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_RESET);
 
-$slim->get('/' . $config['adminPath'] . '/administrators/insert',
-    App::NAMESPACE_ADMINISTRATORS . '\AdministratorsView:getInsert')
+$slim->get('/' . $config['adminPath'] . '/administrators/insert', AdministratorsView::class . ':getInsert')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS_INSERT]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_INSERT);
 
-$slim->post('/' . $config['adminPath'] . '/administrators/insert',
-    App::NAMESPACE_ADMINISTRATORS . '\AdministratorsController:postInsert')
+$slim->post('/' . $config['adminPath'] . '/administrators/insert', AdministratorsController::class . ':postInsert')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS_INSERT]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_INSERT_POST);
 
-$slim->get('/' . $config['adminPath'] . '/administrators/{primaryKey}',
-    App::NAMESPACE_ADMINISTRATORS . '\AdministratorsView:getUpdate')
+$slim->get('/' . $config['adminPath'] . '/administrators/{primaryKey}', AdministratorsView::class . ':getUpdate')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS_UPDATE]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_UPDATE);
 
-$slim->put('/' . $config['adminPath'] . '/administrators/{primaryKey}',
-    App::NAMESPACE_ADMINISTRATORS . '\AdministratorsController:putUpdate')
+$slim->put('/' . $config['adminPath'] . '/administrators/{primaryKey}', AdministratorsController::class . ':putUpdate')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS_UPDATE]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_UPDATE_PUT);
 
-$slim->get('/' . $config['adminPath'] . '/administrators/delete/{primaryKey}',
-    App::NAMESPACE_ADMINISTRATORS . '\AdministratorsController:getDelete')
+$slim->get('/' . $config['adminPath'] . '/administrators/delete/{primaryKey}', AdministratorsController::class . ':getDelete')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS_DELETE]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_DELETE);
 // end administrators
 
 // roles
-$slim->get('/' . $config['adminPath'] . '/roles',
-    App::NAMESPACE_ROLES . '\RolesView:index')
+$slim->get('/' . $config['adminPath'] . '/roles', RolesView::class . ':index')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS_ROLES]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_ROLES);
 
-$slim->post('/' . $config['adminPath'] . '/roles',
-    App::NAMESPACE_ROLES . '\RolesController:postIndexFilter')
+$slim->post('/' . $config['adminPath'] . '/roles', RolesController::class . ':postIndexFilter')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS_ROLES]))
     ->add(new AuthenticationMiddleware($slimContainer));
 
-$slim->get('/' . $config['adminPath'] . '/roles/reset',
-    App::NAMESPACE_ROLES . '\RolesView:indexResetFilter')
+$slim->get('/' . $config['adminPath'] . '/roles/reset', RolesView::class . ':indexResetFilter')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS_ROLES]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_ROLES_RESET);
 
-$slim->get('/' . $config['adminPath'] . '/roles/insert',
-    App::NAMESPACE_ROLES . '\RolesView:getInsert')
+$slim->get('/' . $config['adminPath'] . '/roles/insert', RolesView::class . ':getInsert')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS_ROLES]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_ROLES_INSERT);
 
-$slim->post('/' . $config['adminPath'] . '/roles/insert',
-    App::NAMESPACE_ROLES . '\RolesController:postInsert')
+$slim->post('/' . $config['adminPath'] . '/roles/insert', RolesController::class . ':postInsert')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS_ROLES]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_ROLES_INSERT_POST);
 
-$slim->get('/' . $config['adminPath'] . '/roles/{primaryKey}',
-    App::NAMESPACE_ROLES . '\RolesView:getUpdate')
+$slim->get('/' . $config['adminPath'] . '/roles/{primaryKey}', RolesView::class . ':getUpdate')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS_ROLES]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_ROLES_UPDATE);
 
-$slim->put('/' . $config['adminPath'] . '/roles/{primaryKey}',
-    App::NAMESPACE_ROLES . '\RolesController:putUpdate')
+$slim->put('/' . $config['adminPath'] . '/roles/{primaryKey}', RolesController::class . ':putUpdate')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS_ROLES]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_ROLES_UPDATE_PUT);
 
-$slim->get('/' . $config['adminPath'] . '/roles/delete/{primaryKey}',
-    App::NAMESPACE_ROLES . '\RolesController:getDelete')
+$slim->get('/' . $config['adminPath'] . '/roles/delete/{primaryKey}', RolesController::class . ':getDelete')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_ADMINISTRATORS_ROLES]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_ROLES_DELETE);
 // end roles
-
-

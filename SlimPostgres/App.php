@@ -43,14 +43,6 @@ class App
     const STATUS_ADMIN_NOTICE_CAUTION = 'adminNoticeCaution';
     const STATUS_ADMIN_NOTICE_MUTED = 'adminNoticeMuted';
 
-    // use as shortcuts for callables in routes
-    const NAMESPACE_DOMAIN = 'Domain';
-    const NAMESPACE_SECURITY = 'SlimPostgres\Security';
-    const NAMESPACE_SYSTEM_EVENTS = 'SlimPostgres\SystemEvents';
-    const NAMESPACE_ADMINISTRATORS = 'SlimPostgres\Administrators';
-    const NAMESPACE_LOGINS = 'SlimPostgres\Administrators\Logins';
-    const NAMESPACE_ROLES = 'SlimPostgres\Administrators\Roles';
-
     public function __construct()
     {
         $this->commonConfigSettingsKeys = ['isLive', 'businessName', 'businessDba'];

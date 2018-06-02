@@ -40,51 +40,47 @@ return [
 
     'slim' => [
 
-        'settings' => [
+        'outputBuffering' => 'append',
 
-            'outputBuffering' => 'append',
+        'templatesPath' => APPLICATION_ROOT_DIRECTORY . '/templates/', // note slim requires trailing slash
 
-            'templatesPath' => APPLICATION_ROOT_DIRECTORY . '/templates/', // note slim requires trailing slash
+        'addContentLengthHeader' => false, // if this is not disabled, slim/App.php threw an exception related to error handling, when the php set_error_handler() function was triggered
 
-            'addContentLengthHeader' => false, // if this is not disabled, slim/App.php threw an exception related to error handling, when the php set_error_handler() function was triggered
-
-            // routerCacheFile should only be set in production (when routes are stable)
-            // https://akrabat.com/slims-route-cache-file/
+        // routerCacheFile should only be set in production (when routes are stable)
+        // https://akrabat.com/slims-route-cache-file/
 //            'routerCacheFile' => APPLICATION_ROOT_DIRECTORY . '/storage/cache/router.txt',
 
-            'authentication' => [
-                'maxFailedLogins' => 5, // If exceeded in a session, will insert a system event and disallow further login attempts
-                'adminHomeRoutes' => []
-            ],
+        'authentication' => [
+            'maxFailedLogins' => 5, // If exceeded in a session, will insert a system event and disallow further login attempts
+            'adminHomeRoutes' => []
+        ],
 
-            'authorization' => [
-                /* Either functionalityCategory => permissions or functionalityCategory.functionality => permissions where permissions is either a string equal to the minimum authorized role or an array of authorized roles */
-                // Important to properly match the indexes to routes authorization
-                // The role values must be in the database: roles.role
-                // If the index is not defined for a route or nav section, no authorization check is performed (all administrators (logged in users) will be able to access resource or view nav section). therefore, indexes only need to be defined for routes and nav sections that require authorization greater than the base (least permission) role.
-                // Note also that it's possible to give a role access to a resource, but then hide the navigation to to that resource to that role, which would usually be undesirable. For example, below the bookkeeper is authorized to view System Events, but will not see the System nav section because of the NAV_ADMIN_SYSTEM entry permissions being set to 'owner'
-                'administratorPermissions' => [
-                    ROUTE_LOGIN_ATTEMPTS => 'director',
-                    ROUTE_SYSTEM_EVENTS => 'owner',
-                    ROUTE_ADMINISTRATORS => 'director',
-                    ROUTE_ADMINISTRATORS_RESET => 'director',
-                    ROUTE_ADMINISTRATORS_INSERT => 'owner',
-                    ROUTE_ADMINISTRATORS_UPDATE => 'owner',
-                    ROUTE_ADMINISTRATORS_DELETE => 'owner',
-                    ROUTE_ADMINISTRATORS_ROLES => 'owner',
-                    ROUTE_ADMINISTRATORS_ROLES_INSERT => 'owner',
-                    ROUTE_ADMINISTRATORS_ROLES_UPDATE => 'owner',
-                    ROUTE_ADMINISTRATORS_ROLES_DELETE => 'owner',
-                    NAV_ADMIN_SYSTEM => 'owner',                ],
-
-            ],
-
-            'adminDefaultRole' => 'user',
-
-            // if true removes leading and trailing blank space on all inputs
-            'trimAllUserInput' => true,
+        'authorization' => [
+            /* Either functionalityCategory => permissions or functionalityCategory.functionality => permissions where permissions is either a string equal to the minimum authorized role or an array of authorized roles */
+            // Important to properly match the indexes to routes authorization
+            // The role values must be in the database: roles.role
+            // If the index is not defined for a route or nav section, no authorization check is performed (all administrators (logged in users) will be able to access resource or view nav section). therefore, indexes only need to be defined for routes and nav sections that require authorization greater than the base (least permission) role.
+            // Note also that it's possible to give a role access to a resource, but then hide the navigation to to that resource to that role, which would usually be undesirable. For example, below the bookkeeper is authorized to view System Events, but will not see the System nav section because of the NAV_ADMIN_SYSTEM entry permissions being set to 'owner'
+            'administratorPermissions' => [
+                ROUTE_LOGIN_ATTEMPTS => 'director',
+                ROUTE_SYSTEM_EVENTS => 'owner',
+                ROUTE_ADMINISTRATORS => 'director',
+                ROUTE_ADMINISTRATORS_RESET => 'director',
+                ROUTE_ADMINISTRATORS_INSERT => 'owner',
+                ROUTE_ADMINISTRATORS_UPDATE => 'owner',
+                ROUTE_ADMINISTRATORS_DELETE => 'owner',
+                ROUTE_ADMINISTRATORS_ROLES => 'owner',
+                ROUTE_ADMINISTRATORS_ROLES_INSERT => 'owner',
+                ROUTE_ADMINISTRATORS_ROLES_UPDATE => 'owner',
+                ROUTE_ADMINISTRATORS_ROLES_DELETE => 'owner',
+                NAV_ADMIN_SYSTEM => 'owner',                ],
 
         ],
+
+        'adminDefaultRole' => 'user',
+
+        // if true removes leading and trailing blank space on all inputs
+        'trimAllUserInput' => true,
 
     ] // end slim specific config
 

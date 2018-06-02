@@ -171,7 +171,7 @@ class App
 
     private function getSlimSettings(): array
     {
-        $slimSettings = $this->config['slim'];
+        $slimSettings['settings'] = $this->config['slim'];
 
         // add common config settings
         foreach ($this->commonConfigSettingsKeys as $key) {

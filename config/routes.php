@@ -5,7 +5,7 @@ use SlimPostgres\Security\Authentication\GuestMiddleware;
 use SlimPostgres\Security\Authorization\AuthorizationMiddleware;
 use SlimPostgres\Security\Authentication\AuthenticationMiddleware;
 
-$administratorPermissions = $config['slim']['settings']['authorization']['administratorPermissions'];
+$administratorPermissions = $config['slim']['authorization']['administratorPermissions'];
 
 /////////////////////////////////////////
 // Routes that anyone can access

@@ -104,7 +104,7 @@ class ListView extends AdminView
                 'filterOpsList' => QueryBuilder::getWhereOperatorsText(),
                 'filterValue' => $filterFieldValue,
                 'filterErrorMessage' => $filterErrorMessage,
-                'filterFormAction' => $this->indexRoute,
+                'filterFormActionRoute' => $this->indexRoute,
                 'filterFieldName' => $this->sessionFilterFieldKey,
                 'isFiltered' => $filterColumnsInfo,
                 'resetFilterRoute' => $this->filterResetRoute,

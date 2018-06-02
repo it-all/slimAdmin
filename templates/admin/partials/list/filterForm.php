@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-$ffAction = $router->pathFor($filterFormAction);
+$ffAction = $router->pathFor($filterFormActionRoute);
 $ffError = ($filterErrorMessage) ? '<span class="ffErrorMsg">'.$filterErrorMessage.'</span>' : '';
 $ffReset = ($isFiltered) ? '<a href="'.$router->pathFor($resetFilterRoute).'">reset</a>' : '';
 

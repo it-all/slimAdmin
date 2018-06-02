@@ -22,6 +22,6 @@ class SystemEventsController extends Controller
 
     public function postIndexFilter(Request $request, Response $response, $args)
     {
-        return $this->setIndexFilter($request, $response, $args, $this->model::SELECT_COLUMNS, ROUTE_SystemEvents, $this->view);
+        return $this->setIndexFilter($request, $response, $args, $this->model::SELECT_COLUMNS, ROUTE_SYSTEM_EVENTS, $this->view);
     }
 }

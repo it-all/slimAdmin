@@ -13,7 +13,7 @@ class HomeView extends \SlimPostgres\View
         return $this->view->render(
             $response,
             'frontend/home.php',
-            ['businessName' => $this->settings['businessName'], 'pageType' => 'public']
+            ['pageType' => 'public']
         );
     }
 }

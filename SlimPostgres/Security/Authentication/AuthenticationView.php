@@ -26,12 +26,8 @@ class AuthenticationView extends AdminView
             $response,
             'admin/login.php',
             [
-                'businessName' => $this->settings['businessName'],
-                'businessDba' => $this->settings['businessDba'],
-                'isLive' => $this->settings['isLive'],
                 'title' => '::Login',
                 'form' => $form,
-                'authentication' => $this->authentication
             ]
         );
     }

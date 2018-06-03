@@ -15,10 +15,6 @@ class AdminHomeView extends AdminView
             [
                 'title' => 'Admin',
                 'navigationItems' => $this->navigationItems,
-                'authentication' => $this->authentication,
-                'businessDba' => $this->settings['businessDba'],
-                'businessName' => $this->settings['businessName'],
-                'isLive' => $this->settings['isLive'],
             ]
         );
     }

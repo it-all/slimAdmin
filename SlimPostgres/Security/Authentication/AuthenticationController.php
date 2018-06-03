@@ -48,9 +48,8 @@ class AuthenticationController extends Controller
             $_SESSION[App::SESSION_KEY_REQUEST_INPUT]['password_hash'] = '';
 
             // redisplay the form with input values and error(s), and with 401 unauthenticated status
-            $av = new AuthenticationView($this->container);
             $args = array_merge($args, ['status' => 401]);
-            return $av->getLogin($request, $response, $args);
+            return (new AuthenticationView($this->container))->getLogin($request, $response, $args);
         }
 
         // successful login

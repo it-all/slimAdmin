@@ -35,17 +35,18 @@ class AuthenticationController extends Controller
                 $eventTitle = 'Maximum unsuccessful login attempts exceeded';
                 $eventNotes = 'Failed:'.$this->authentication->getNumFailedLogins();
                 $this->systemEvents->insertAlert($eventTitle, null, $eventNotes);
+
                 // redirect to home page with error message
                 $_SESSION[App::SESSION_KEY_NOTICE] = ['Login disabled. Too many failed logins.', 'error'];
                 return $response->withRedirect($this->router->pathFor(ROUTE_HOME));
-                // this will result in a blank page on production servers, assuming errors are not displayed, and an exception display on dev servers
-                throw new \Exception($eventTitle . ' '. $eventNotes, E_USER_ERROR);
             }
 
             FormHelper::setGeneralError('Login Unsuccessful');
 
-            // redisplay the form with input values and error(s). reset password.
+            // reset password.
             $_SESSION[App::SESSION_KEY_REQUEST_INPUT]['password_hash'] = '';
+
+            // redisplay the form with input values and error(s).
             return $response->withRedirect($this->router->pathFor(ROUTE_LOGIN));
         }
 

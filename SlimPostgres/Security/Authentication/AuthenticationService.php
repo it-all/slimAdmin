@@ -120,13 +120,18 @@ class AuthenticationService
         (new LoginsModel())->insertSuccessfulLogin($username, (int) $userRecord['id']);
     }
 
-    private function loginFailed(string $username, int $adminId = null)
+    private function incrementNumFailedLogins()
     {
         if (isset($_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS])) {
             $_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS]++;
         } else {
             $_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS] = 1;
         }
+    }
+
+    private function loginFailed(string $username, int $adminId = null)
+    {
+        $this->incrementNumFailedLogins();
 
         // insert login_attempts record
         (new LoginsModel())->insertFailedLogin($username, $adminId);
@@ -135,7 +140,7 @@ class AuthenticationService
     public function tooManyFailedLogins(): bool
     {
         return isset($_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS]) &&
-            $_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS] > $this->maxFailedLogins;
+            $_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS] >= $this->maxFailedLogins;
     }
 
     public function getNumFailedLogins(): int

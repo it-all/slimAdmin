@@ -35,7 +35,8 @@ class AuthenticationController extends Controller
                 $eventTitle = 'Maximum unsuccessful login attempts exceeded';
                 $eventNotes = 'Failed:'.$this->authentication->getNumFailedLogins();
                 $this->systemEvents->insertAlert($eventTitle, null, $eventNotes);
-                throw new \Exception($eventTitle . ' '. $eventNotes);
+                // this will result in a blank page on production servers, assuming errors are not displayed, and an exception display on dev servers
+                throw new \Exception($eventTitle . ' '. $eventNotes, E_USER_ERROR);
             }
 
             FormHelper::setGeneralError('Login Unsuccessful');

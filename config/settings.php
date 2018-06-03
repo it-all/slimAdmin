@@ -51,7 +51,7 @@ return [
 //            'routerCacheFile' => APPLICATION_ROOT_DIRECTORY . '/storage/cache/router.txt',
 
         'authentication' => [
-            'maxFailedLogins' => 5, // If exceeded in a session, will insert a system event and disallow further login attempts
+            'maxFailedLogins' => 5, // If met or exceeded in a session, will insert a system event and disallow further login attempts by redirecting to the homepage
             'adminHomeRoutes' => []
         ],
 

@@ -21,6 +21,8 @@ class AuthenticationView extends AdminView
 
         FormHelper::unsetSessionVars();
 
+        $renderStatus = (array_key_exists('status', $args)) ? $args['status'] : 200;
+
         // render page
         return $this->view->render(
             $response,
@@ -29,6 +31,6 @@ class AuthenticationView extends AdminView
                 'title' => '::Login',
                 'form' => $form,
             ]
-        );
+        )->withStatus($renderStatus);
     }
 }

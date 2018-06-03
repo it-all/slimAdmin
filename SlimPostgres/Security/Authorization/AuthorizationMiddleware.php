@@ -26,8 +26,11 @@ class AuthorizationMiddleware extends Middleware
             $this->container->systemEvents->insertAlert('No authorization for resource', $this->container->authentication->getUserId());
 
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['No permission', 'adminNoticeFailure'];
-
-            return $response->withRedirect($this->container->router->pathFor(ROUTE_ADMIN_HOME_DEFAULT));
+            return $this->container->view->render(
+                $response,
+                'admin/home.php',
+                [])->withStatus(403);
+//            return $response->withRedirect($this->container->router->pathFor(ROUTE_ADMIN_HOME_DEFAULT));
         }
 
 		$response = $next($request, $response);

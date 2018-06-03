@@ -37,7 +37,13 @@ class App
     const SESSION_ADMINISTRATOR_KEY_USERNAME = 'username';
     const SESSION_ADMINISTRATOR_KEY_ROLE = 'role';
 
-    // admin notice statuses (convert to css classes)
+    // frontend notice statuses (can be used as css classes)
+    const STATUS_NOTICE_SUCCESS = 'noticeSuccess';
+    const STATUS_NOTICE_FAILURE = 'noticeFailure';
+    const STATUS_NOTICE_CAUTION = 'noticeCaution';
+    const STATUS_NOTICE_MUTED = 'noticeMuted';
+
+    // admin notice statuses (can be used as css classes)
     const STATUS_ADMIN_NOTICE_SUCCESS = 'adminNoticeSuccess';
     const STATUS_ADMIN_NOTICE_FAILURE = 'adminNoticeFailure';
     const STATUS_ADMIN_NOTICE_CAUTION = 'adminNoticeCaution';
@@ -187,13 +193,11 @@ class App
                 // log error
                 $this->systemEventsModel->insertEvent('404 Page Not Found', 'notice', $container->authentication->getUserId());
 
-                $responseBodyHtml = $this->config['pageNotFoundText'].'<br><br><a href="'.$container->router->pathFor(ROUTE_HOME).'">home</a>';
-
-                return $container['response']
-                    ->withStatus(404)
-                    ->withHeader('Content-Type', 'text/html')
-                    ->write($responseBodyHtml);
-
+                $_SESSION[App::SESSION_KEY_NOTICE] = [$this->config['pageNotFoundText'], App::STATUS_NOTICE_FAILURE];
+                return $container->view->render(
+                    $response,
+                    'frontend/home.php',
+                    [])->withStatus(404);
             };
         };
 

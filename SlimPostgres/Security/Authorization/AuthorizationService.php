@@ -98,7 +98,11 @@ class AuthorizationService
         } elseif (is_array($permissions)) {
             return $this->checkSet($permissions);
         } else {
-            throw new \Exception('Invalid permissions');
+            return $container['response']
+                ->withStatus(404)
+                ->withHeader('Content-Type', 'text/html')
+                ->write($responseBodyHtml);
+//            throw new \Exception('Invalid permissions');
         }
     }
 

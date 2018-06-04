@@ -11,7 +11,7 @@ class RolesController extends SingleTableController
 {
     public function __construct(Container $container)
     {
-        parent::__construct($container, new RolesModel($container->settings['adminDefaultRole']), new RolesView($container), ROUTEPREFIX_ROLES);
+        parent::__construct($container, new RolesModel(), new RolesView($container), ROUTEPREFIX_ROLES);
     }
 
     // override to check condition and add custom return column

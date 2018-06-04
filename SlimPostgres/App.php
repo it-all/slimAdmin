@@ -51,7 +51,7 @@ class App
 
     public function __construct()
     {
-        $this->commonConfigSettingsKeys = ['isLive', 'businessName', 'businessDba'];
+        $this->commonConfigSettingsKeys = ['isLive', 'businessName', 'businessDba', 'administratorDefaultRole'];
         $dotenv = new Dotenv(APPLICATION_ROOT_DIRECTORY);
         $dotenv->load();
 
@@ -254,7 +254,7 @@ class App
         // Authorization
         $container['authorization'] = function($container) {
             $settings = $container->get('settings');
-            return new AuthorizationService($settings['authorization'], $settings['adminDefaultRole']);
+            return new AuthorizationService($settings['authorization']['administratorPermissions']);
         };
 
         // System Events (Database Log)

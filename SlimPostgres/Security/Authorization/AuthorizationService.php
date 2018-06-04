@@ -13,10 +13,10 @@ class AuthorizationService
     private $roles;
     private $baseRole;
 
-    public function __construct(array $functionalityPermissions, string $defaultAdminRole)
+    public function __construct(array $functionalityPermissions)
     {
         $this->functionalityPermissions = $functionalityPermissions;
-        $rolesModel = new RolesModel($defaultAdminRole);
+        $rolesModel = new RolesModel();
         $this->roles = $rolesModel->getRoles();
         $this->baseRole = $rolesModel->getBaseRole();
     }
@@ -31,7 +31,6 @@ class AuthorizationService
         }
 
         if (!isset($this->functionalityPermissions[$functionality])) {
-
             // no exact match, so see if there are multiple terms and first term matches
             $fParts = explode('.', $functionality);
             if (count($fParts) > 1 && isset($this->functionalityPermissions[App::getRouteName(true, $fParts[0])])) {

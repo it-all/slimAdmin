@@ -28,9 +28,8 @@ class AdministratorsController extends Controller
         parent::__construct($container);
     }
 
-    private function setValidation(array $record = null)
+    private function setValidation(array $input, array $record = null)
     {
-        $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
         $this->validator = $this->validator->withData($input);
 
         // bool - either inserting or !inserting (editing)
@@ -77,7 +76,9 @@ class AdministratorsController extends Controller
         $this->setRequestInput($request);
         // no boolean fields to add
 
-        $this->setValidation();
+        $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
+
+        $this->setValidation($input);
 
         if (!$this->validator->validate()) {
             // redisplay the form with input values and error(s)
@@ -85,7 +86,6 @@ class AdministratorsController extends Controller
             return $this->view->getInsert($request, $response, $args);
         }
 
-        $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
         if (!$res = $this->administratorsModel->insert($input['name'], $input['username'], $input['password'], (int) $input['role_id'])) {
             throw new \Exception("Insert Failure");
         }
@@ -139,7 +139,7 @@ class AdministratorsController extends Controller
             return $response->withRedirect($this->router->pathFor($redirectRoute));
         }
 
-        $this->setValidation($record);
+        $this->setValidation($input, $record);
 
         if (!$this->validator->validate()) {
             // redisplay the form with input values and error(s)

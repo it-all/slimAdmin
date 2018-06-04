@@ -18,6 +18,7 @@ class NavAdmin
         $this->setNav();
     }
 
+    /** entire nav without regard to permissions */
     private function setNav()
     {
         $this->nav = [
@@ -85,6 +86,7 @@ class NavAdmin
         return $this->container->authorization->getPermissions(constant('NAV_ADMIN_'.strtoupper(str_replace(" ", "_", $sectionName))));
     }
 
+    /** add nav components as necessary based on user role */
     private function getSectionForUserRecurs(array $section, string $sectionName)
     {
         // if there are section permissions and they are not met, do not put section in user's nav

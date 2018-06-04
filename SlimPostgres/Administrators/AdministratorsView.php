@@ -94,9 +94,9 @@ class AdministratorsView extends ListView
         $fields[] = new InputField('Confirm Password', $passwordConfirmationFieldAttributes, FormHelper::getFieldError('password_confirm'));
 
         // Role Field
-        $rolesModel = new RolesModel($this->container->settings['adminDefaultRole']);
-        $selectedOption = (isset($fieldValues['role_id'])) ? (int) $fieldValues['role_id'] : null;
-        $fields[] = $rolesModel->getIdSelectField(['name' => 'role_id', 'id' => 'role_id', 'required' => 'required'], 'Role', $selectedOption, true, FormHelper::getFieldError('role_id'));
+        $rolesModel = new RolesModel();
+        $selectedOption = (isset($fieldValues['role_id'])) ? (int) $fieldValues['role_id'] : $rolesModel->getRoleIdForRole($this->container->settings['administratorDefaultRole']); // null if not found
+        $fields[] = $rolesModel->getIdSelectField(['name' => 'role_id', 'id' => 'role_id', 'required' => 'required'], 'Role', $selectedOption, FormHelper::getFieldError('role_id'));
 
         // CSRF Fields
         $fields[] = FormHelper::getCsrfNameField($this->csrf->getTokenNameKey(), $this->csrf->getTokenName());

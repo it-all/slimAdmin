@@ -11,39 +11,42 @@ use It_All\FormFormer\Fields\SelectOption;
 // note that level 1 is the greatest permission
 class RolesModel extends SingleTableModel
 {
-    /* int */
-    private $defaultAdminRoleId;
-
-    /* array */
+    /** array */
     private $roles;
 
-    /* int */
+    /** int */
     private $baseRoleId;
 
-    public function __construct(string $defaultAdminRole)
+    public function __construct()
     {
         parent::__construct('roles', 'id, role, level','level');
         $this->addColumnNameConstraint('level', 'positive');
-        $this->setRoles($defaultAdminRole);
+        $this->setRoles();
     }
 
-    public function setRoles(string $defaultAdminRole)
+    private function setRoles()
     {
         $this->roles = [];
         $rs = $this->select();
         $lastRoleId = '';
         while ($row = pg_fetch_array($rs)) {
-            $this->roles[$row['id']] = $row['role'];
-
-            if ($row['role'] == $defaultAdminRole) {
-                $this->defaultAdminRoleId = (int) $row['id'];
-            }
-
+            $this->roles[(int) $row['id']] = $row['role'];
             $lastRoleId = (int) $row['id'];
         }
 
         // the last role returned is set to baseRole since order by level
         $this->baseRoleId = $lastRoleId;
+    }
+
+    public function getRoleIdForRole(string $roleSearch): ?int
+    {
+        foreach ($this->roles as $roleId => $role) {
+            if ($roleSearch == $role) {
+                return $roleId;
+            }
+        }
+
+        return null;
     }
 
     public function getRoles(): array
@@ -61,23 +64,13 @@ class RolesModel extends SingleTableModel
         return $this->roles[$this->baseRoleId];
     }
 
-    public function getDefaultAdminRoleId(): int
-    {
-        return $this->defaultAdminRoleId;
-    }
-
-    public function getDefaultAdminRole(): string
-    {
-        return $this->roles[$this->defaultAdminRoleId];
-    }
-
     public static function hasAdmin(int $roleId): bool
     {
         $q = new QueryBuilder("SELECT COUNT(id) FROM administrators WHERE role_id = $1", $roleId);
         return (bool) $q->getOne();
     }
 
-    public function getIdSelectField(array $fieldAttributes, string $fieldLabel = 'Role', ?int $selectedOption, bool $useDefaultAdminRoleIdAsSelectedIfNotProvided = true, ?string $fieldError)
+    public function getIdSelectField(array $fieldAttributes, string $fieldLabel = 'Role', ?int $selectedOption, ?string $fieldError)
     {
         // validate a provided selectedOption by verifying it is a valid role
         $selectedOptionValid = ($selectedOption === null) ? true : false;
@@ -95,10 +88,8 @@ class RolesModel extends SingleTableModel
             throw new \Exception("Invalid selected option $selectedOption does not exist in roles");
         }
 
-        // alter selectedOption and fieldError to send to SelectField constructor as empty string if null
-        if ($selectedOption === null) {
-            $selectedOption = ($useDefaultAdminRoleIdAsSelectedIfNotProvided) ? $this->defaultAdminRoleId : '';
-        }
+        // alter fieldError to send to SelectField constructor as empty string if null
+
         if ($fieldError === null) {
             $fieldError = '';
         }

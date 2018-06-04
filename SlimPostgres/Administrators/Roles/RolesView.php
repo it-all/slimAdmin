@@ -13,7 +13,7 @@ class RolesView extends SingleTableView
 {
     public function __construct(Container $container)
     {
-        parent::__construct($container, new RolesModel($container->settings['adminDefaultRole']), ROUTEPREFIX_ROLES);
+        parent::__construct($container, new RolesModel(), ROUTEPREFIX_ROLES);
     }
 
     // override in order to not show delete link for roles in use

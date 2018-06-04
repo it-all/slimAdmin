@@ -23,7 +23,6 @@ abstract class Controller
         return $this->container->{$name};
     }
 
-    /** may want a config var bool trimAllInputs */
     protected function setRequestInput(Request $request)
     {
         $_SESSION[App::SESSION_KEY_REQUEST_INPUT] = [];

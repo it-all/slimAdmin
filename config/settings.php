@@ -62,10 +62,10 @@ return [
             // If the index is not defined for a route or nav section, no authorization check is performed (all administrators (logged in users) will be able to access resource or view nav section). therefore, indexes only need to be defined for routes and nav sections that require authorization greater than the base (least permission) role.
             // Note also that it's possible to give a role access to a resource, but then hide the navigation to to that resource to that role, which would usually be undesirable. For example, below the bookkeeper is authorized to view System Events, but will not see the System nav section because of the NAV_ADMIN_SYSTEM entry permissions being set to 'owner'
             'administratorPermissions' => [
-                ROUTE_LOGIN_ATTEMPTS => 'director',
+                ROUTE_LOGIN_ATTEMPTS => 'owner',
                 ROUTE_SYSTEM_EVENTS => 'bookkeeper',
-                ROUTE_ADMINISTRATORS => 'director',
-                ROUTE_ADMINISTRATORS_RESET => 'director',
+                ROUTE_ADMINISTRATORS => 'owner',
+                ROUTE_ADMINISTRATORS_RESET => 'owner',
                 ROUTE_ADMINISTRATORS_INSERT => 'owner',
                 ROUTE_ADMINISTRATORS_UPDATE => 'owner',
                 ROUTE_ADMINISTRATORS_DELETE => 'owner',
@@ -78,7 +78,7 @@ return [
 
         ],
 
-        'adminDefaultRole' => 'user',
+        'administratorDefaultRole' => 'user',
 
         // if true removes leading and trailing blank space on all inputs
         'trimAllUserInput' => true,
@@ -86,10 +86,10 @@ return [
         // how to add admin nav menu options
 //        'adminNav' => [
 //            'Test' => [
-//                'route' => ROUTE_SYSTEM_EVENTS,
+//                'route' => ROUTE_TEST,
 //                'subSections' => [
 //                    'Insert' => [
-//                        'route' => ROUTE_ADMINISTRATORS_ROLES_INSERT,
+//                        'route' => ROUTE_TEST_INSERT,
 //                    ]
 //                ],
 //            ]

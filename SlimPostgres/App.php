@@ -49,6 +49,9 @@ class App
     const STATUS_ADMIN_NOTICE_CAUTION = 'adminNoticeCaution';
     const STATUS_ADMIN_NOTICE_MUTED = 'adminNoticeMuted';
 
+    const VALID_ROUTE_TYPES = ['index', 'index.reset', 'insert', 'update', 'delete'];
+
+
     public function __construct()
     {
         $this->commonConfigSettingsKeys = ['isLive', 'businessName', 'businessDba', 'administratorDefaultRole'];
@@ -414,7 +417,8 @@ class App
         return ($input == null) ? null : (int) $input;
     }
 
-    static public function getRouteName(bool $isAdmin = true, string $routePrefix = null, string $routeType = null, string $resourceType = null)
+    /** because of route naming conventions, only send resourceType of post, put, or patch */
+    static public function getRouteName(bool $isAdmin = true, string $routePrefix = null, string $routeType = null, string $requestMethod = null)
     {
         $routeName = '';
 
@@ -426,18 +430,17 @@ class App
             $routeName .= '.' . $routePrefix;
         }
 
-        if ($resourceType != null) {
-            $validActionTypes = ['put', 'post'];
-            if (!in_array($resourceType, $validActionTypes)) {
-                throw new \Exception("Invalid resource type $resourceType");
+        if ($requestMethod !== null) {
+            $validActionMethods = ['put', 'post'];
+            if (!in_array($requestMethod, $validActionMethods)) {
+                throw new \Exception("Invalid request method $requestMethod. Only post and put accepted in route names.");
             }
 
-            $routeName .= '.' . $resourceType;
+            $routeName .= '.' . $requestMethod;
         }
 
         if ($routeType !== null) {
-            $validRouteTypes = ['index', 'index.reset', 'insert', 'update', 'delete'];
-            if (!in_array($routeType, $validRouteTypes)) {
+            if (!in_array($routeType, self::VALID_ROUTE_TYPES)) {
                 throw new \Exception("Invalid route type $routeType");
             }
 
@@ -446,6 +449,7 @@ class App
 
         return $routeName;
     }
+
 
 
 }

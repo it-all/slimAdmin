@@ -18,16 +18,16 @@ class AdminView extends View
         $this->navigationItems = $navAdmin->getNavForUser();
     }
 
-    protected function getPermissions(string $type = 'index')
+    protected function getPermissions(string $routeType = 'index')
     {
         if (!isset($this->routePrefix)) {
             throw new \Exception("The routePrefix property must be set.");
         }
 
-        if ($type != 'index' && $type != 'insert' && $type != 'update' && $type != 'delete') {
-            throw new \Exception("Invalid type $type");
+        if (!in_array($routeType, App::VALID_ROUTE_TYPES)) {
+            throw new \Exception("Invalid route type $routeType");
         }
 
-        return $this->container->authorization->getPermissions(App::getRouteName(true, $this->routePrefix, $type));
+        return $this->container->authorization->getPermissions(App::getRouteName(true, $this->routePrefix, $routeType));
     }
 }

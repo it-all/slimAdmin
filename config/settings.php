@@ -80,7 +80,7 @@ return [
                 ROUTE_ADMINISTRATORS_ROLES_INSERT => 'owner',
                 ROUTE_ADMINISTRATORS_ROLES_UPDATE => 'owner',
                 ROUTE_ADMINISTRATORS_ROLES_DELETE => 'owner',
-                NAV_ADMIN_SYSTEM => 'owner',
+                NAV_ADMIN_SYSTEM => 'director',
             ],
 
         ],

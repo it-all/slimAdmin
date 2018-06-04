@@ -248,7 +248,7 @@ class App
         // Authentication
         $container['authentication'] = function($container) {
             $settings = $container->get('settings');
-            return new AuthenticationService($settings['authentication']['maxFailedLogins'], $settings['authentication']['adminHomeRoutes']);
+            return new AuthenticationService($settings['authentication']['maxFailedLogins'], $settings['authentication']['administratorHomeRoutes']);
         };
 
         // Authorization

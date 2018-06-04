@@ -13,12 +13,12 @@ use SlimPostgres\Forms\FormHelper;
 class AuthenticationService
 {
     private $maxFailedLogins;
-    private $adminHomeRoutes;
+    private $administratorHomeRoutes;
 
-    public function __construct(int $maxFailedLogins, array $adminHomeRoutes)
+    public function __construct(int $maxFailedLogins, array $administratorHomeRoutes)
     {
         $this->maxFailedLogins = $maxFailedLogins;
-        $this->adminHomeRoutes = $adminHomeRoutes;
+        $this->administratorHomeRoutes = $administratorHomeRoutes;
     }
 
     public function getUser(): ?array
@@ -69,10 +69,10 @@ class AuthenticationService
     public function getAdminHomeRouteForUser(): string
     {
         // determine home route: either by username, by role, or default
-        if (isset($this->adminHomeRoutes['usernames'][$this->getUserUsername()])) {
-            $homeRoute = $this->adminHomeRoutes['usernames'][$this->getUserUsername()];
-        } elseif (isset($this->adminHomeRoutes['roles'][$this->getUserRole()])) {
-            $homeRoute = $this->adminHomeRoutes['roles'][$this->getUserRole()];
+        if (isset($this->administratorHomeRoutes['usernames'][$this->getUserUsername()])) {
+            $homeRoute = $this->administratorHomeRoutes['usernames'][$this->getUserUsername()];
+        } elseif (isset($this->administratorHomeRoutes['roles'][$this->getUserRole()])) {
+            $homeRoute = $this->administratorHomeRoutes['roles'][$this->getUserRole()];
         } else {
             $homeRoute = ROUTE_ADMIN_HOME_DEFAULT;
         }

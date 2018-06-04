@@ -52,7 +52,14 @@ return [
 
         'authentication' => [
             'maxFailedLogins' => 5, // If met or exceeded in a session, will insert a system event and disallow further login attempts by redirecting to the homepage
-            'adminHomeRoutes' => []
+            'administratorHomeRoutes' => [
+                'usernames' => [
+                    'director' => ROUTE_ADMINISTRATORS
+                ],
+                'roles' => [
+                    'owner' => ROUTE_SYSTEM_EVENTS
+                ]
+            ],
         ],
 
         'authorization' => [
@@ -64,10 +71,10 @@ return [
             'administratorPermissions' => [
                 ROUTE_LOGIN_ATTEMPTS => 'owner',
                 ROUTE_SYSTEM_EVENTS => 'bookkeeper',
-                ROUTE_ADMINISTRATORS => 'owner',
-                ROUTE_ADMINISTRATORS_RESET => 'owner',
+                ROUTE_ADMINISTRATORS => 'director',
+                ROUTE_ADMINISTRATORS_RESET => 'director',
                 ROUTE_ADMINISTRATORS_INSERT => 'owner',
-                ROUTE_ADMINISTRATORS_UPDATE => 'owner',
+                ROUTE_ADMINISTRATORS_UPDATE => 'director',
                 ROUTE_ADMINISTRATORS_DELETE => 'owner',
                 ROUTE_ADMINISTRATORS_ROLES => 'owner',
                 ROUTE_ADMINISTRATORS_ROLES_INSERT => 'owner',

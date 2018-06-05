@@ -5,9 +5,9 @@ namespace SlimPostgres\Security;
 
 use Slim\Http\Request;
 use Slim\Http\Response;
-use SlimPostgres\Middleware;
+use SlimPostgres\BaseMiddleware;
 
-class CsrfMiddleware extends Middleware
+class CsrfMiddleware extends BaseMiddleware
 {
 	public function __invoke(Request $request, Response $response, $next)
 	{

@@ -3,10 +3,11 @@ declare(strict_types=1);
 
 namespace Domain;
 
+use SlimPostgres\UserInterface\BaseView;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class HomeView extends \SlimPostgres\View
+class HomeView extends BaseView
 {
     public function index(Request $request, Response $response)
     {

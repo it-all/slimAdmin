@@ -28,7 +28,7 @@ CODING NEW FUNCTIONALITY
 Create a new directory under domain and create a Model/View/Controller there as necessary. Model these files after existing functionality such as Domain/Admin/Marketing/Testimonials (single database table functionality so uses SingleTable files) or Domain/Admin/Administrators (joined database tables so mostly custom code).  
 Define a new global constant for the route name and add the route(s) in config/routes.php  
 If authorization is required at a resource or functionality level, add them to the 'administratorPermissions' key in config/settings.php, then add AuthorizationMiddleware to the route for resource authorization in config/routes.php.  
-If this is new admin functionality, you can add a link to it in the admin nav by editing Domain/Admin/NavAdmin.php. 
+If this is new admin functionality, you can add a link to it in the admin nav by editing Domain/Admin/AdminNav.php. 
 
 <a name="eh">Error Handling</a>  
   
@@ -81,10 +81,10 @@ The <a href="https://github.com/slimphp/Slim-Csrf" target="_blank">Slim Framewor
 Admin pages are protected through authenticated sessions.
 
 <a name="adminNav">Admin Nav</a>  
-See NavAdmin.php.
+See AdminNav.php.
 
 <a name="autho">Authorization</a>  
-Administrative resources and functionality can be protected against unauthorized use based on administrative roles. Resource and functionality access is defined in config.php in the 'administratorPermissions' array key based on the role and is set in routes.php on resources as necessary, in NavAdmin to determine whether or not to display navigation options, and in views and controllers as necessary to grant or limit functionality access. Authorization failures result in alerts being written to the SystemEvents table and the user redirected to the admin homepage with a red alert message displayed. Authorization can be set as a minimum role level, where all roles with an equal or better level will be authorized, or as a set of authorized roles.
+Administrative resources and functionality can be protected against unauthorized use based on administrative roles. Resource and functionality access is defined in config.php in the 'administratorPermissions' array key based on the role and is set in routes.php on resources as necessary, in AdminNav to determine whether or not to display navigation options, and in views and controllers as necessary to grant or limit functionality access. Authorization failures result in alerts being written to the SystemEvents table and the user redirected to the admin homepage with a red alert message displayed. Authorization can be set as a minimum role level, where all roles with an equal or better level will be authorized, or as a set of authorized roles.
 
 <a name="xss">XSS Prevention</a>  
 The appropriate <a target="_blank" href="https://twig.sensiolabs.org/doc/2.x/filters/escape.html" target="_blank">Twig escape filter</a> are used for any user-input data* that is output through Twig. Note that Twig defaults to autoescape 'html' in the autoescape environment variable: https://twig.sensiolabs.org/api/2.x/Twig_Environment.html

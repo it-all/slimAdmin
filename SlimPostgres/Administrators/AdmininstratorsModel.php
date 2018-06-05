@@ -6,7 +6,7 @@ namespace SlimPostgres\Administrators;
 use SlimPostgres\Database\SingleTable\SingleTableModel;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\Queries\SelectBuilder;
-use SlimPostgres\Database\Multi_Table\MultiTableModel;
+use SlimPostgres\Database\MultiTable\MultiTableModel;
 
 class AdministratorsModel extends MultiTableModel
 {

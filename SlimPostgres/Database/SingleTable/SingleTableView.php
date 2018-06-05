@@ -4,14 +4,14 @@ declare(strict_types=1);
 namespace SlimPostgres\Database\SingleTable;
 
 use SlimPostgres\App;
-use SlimPostgres\ListView;
+use SlimPostgres\UserInterface\AdminListView;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class SingleTableView extends ListView
+class SingleTableView extends AdminListView
 {
     protected $routePrefix;
     protected $model;

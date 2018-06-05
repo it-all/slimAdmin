@@ -4,14 +4,14 @@ declare(strict_types=1);
 namespace SlimPostgres\Database\SingleTable;
 
 use SlimPostgres\App;
-use SlimPostgres\Controller;
+use SlimPostgres\BaseController;
 use SlimPostgres\Database\SingleTable\SingleTableModel;
 use SlimPostgres\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class SingleTableController extends Controller
+class SingleTableController extends BaseController
 {
     protected $model;
     protected $view;

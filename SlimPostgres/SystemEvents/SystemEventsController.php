@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace SlimPostgres\SystemEvents;
 
-use SlimPostgres\Controller;
+use SlimPostgres\BaseController;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class SystemEventsController extends Controller
+class SystemEventsController extends BaseController
 {
     private $view;
     private $model;

@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres;
+namespace SlimPostgres\UserInterface;
 
 use Slim\Container;
 
 /** The base view class */
-class View
+class BaseView
 {
     protected $container; // dependency injection container
 

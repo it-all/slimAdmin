@@ -8,8 +8,9 @@ use SlimPostgres\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use SlimPostgres\UserInterface\AdminListView;
 
-abstract class Controller
+abstract class BaseController
 {
     protected $container; // dependency injection container
 
@@ -31,7 +32,7 @@ abstract class Controller
         }
     }
 
-    protected function setIndexFilter(Request $request, Response $response, $args, array $listViewColumns, string $redirectRoute, ListView $view)
+    protected function setIndexFilter(Request $request, Response $response, $args, array $listViewColumns, string $redirectRoute, AdminListView $view)
     {
         $this->setRequestInput($request);
 

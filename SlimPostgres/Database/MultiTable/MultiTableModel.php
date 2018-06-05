@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Database\Multi_Table;
+namespace SlimPostgres\Database\MultiTable;
 
 use SlimPostgres\Database\SingleTable\DatabaseColumnModel;
 use SlimPostgres\Database\SingleTable\SingleTableModel;

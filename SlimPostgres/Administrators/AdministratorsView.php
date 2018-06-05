@@ -9,14 +9,14 @@ use It_All\FormFormer\Fields\InputField;
 use It_All\FormFormer\Form;
 use SlimPostgres\App;
 use SlimPostgres\Database\SingleTable\SingleTableHelper;
-use SlimPostgres\ListView;
+use SlimPostgres\UserInterface\AdminListView;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class AdministratorsView extends ListView
+class AdministratorsView extends AdminListView
 {
     protected $routePrefix;
     protected $administratorsModel;

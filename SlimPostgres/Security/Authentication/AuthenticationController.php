@@ -3,14 +3,13 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Security\Authentication;
 
-use SlimPostgres\Administrators\AdministratorsView;
 use SlimPostgres\App;
-use SlimPostgres\Controller;
+use SlimPostgres\BaseController;
 use SlimPostgres\Forms\FormHelper;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class AuthenticationController extends Controller
+class AuthenticationController extends BaseController
 {
     function postLogin(Request $request, Response $response, $args)
     {

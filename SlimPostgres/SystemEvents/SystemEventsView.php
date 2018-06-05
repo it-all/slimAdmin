@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace SlimPostgres\SystemEvents;
 
-use SlimPostgres\ListView;
+use SlimPostgres\UserInterface\AdminListView;
 use Slim\Container;
 
-class SystemEventsView extends ListView
+class SystemEventsView extends AdminListView
 {
     public function __construct(Container $container)
     {

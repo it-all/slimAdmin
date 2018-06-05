@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres\Administrators;
 
 use SlimPostgres\App;
-use SlimPostgres\Controller;
+use SlimPostgres\BaseController;
 use SlimPostgres\Database\SingleTable\SingleTableController;
 use SlimPostgres\Database\SingleTable\SingleTableHelper;
 use SlimPostgres\Forms\FormHelper;
@@ -12,7 +12,7 @@ use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class AdministratorsController extends Controller
+class AdministratorsController extends BaseController
 {
     private $administratorsModel;
     private $view;

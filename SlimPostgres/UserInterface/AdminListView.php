@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres;
+namespace SlimPostgres\UserInterface;
 
+use SlimPostgres\App;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\TableModel;
 use SlimPostgres\Forms\FormHelper;
@@ -10,7 +11,7 @@ use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class ListView extends AdminView
+class AdminListView extends AdminView
 {
     protected $sessionFilterColumnsKey;
     protected $sessionFilterValueKey;

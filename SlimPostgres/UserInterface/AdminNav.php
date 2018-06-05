@@ -1,13 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres;
+namespace SlimPostgres\UserInterface;
+
 use Slim\Container;
 
 /**
  * navigation for admin pages
  */
-class NavAdmin
+class AdminNav
 {
     private $nav;
     private $container;

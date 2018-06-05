@@ -129,7 +129,7 @@ class App
             $errorHandler->setDatabaseAndSystemEventsModel($this->database, $this->systemEventsModel);
         }
 
-        if (!$this->isRunningFromCommandLine()) {
+        if (!$self::isRunningFromCommandLine()) {
             /**
              * verify/force all pages to be https. and verify/force www or not www based on Config::useWww
              * if not, REDIRECT TO PROPER SECURE PAGE
@@ -144,7 +144,7 @@ class App
             $sessionTTLseconds = $this->config['session']['ttlHours'] * 60 * 60;
             ini_set('session.gc_maxlifetime', (string) $sessionTTLseconds);
             ini_set('session.cookie_lifetime', (string) $sessionTTLseconds);
-            if (!$this->sessionValidId(session_id())) {
+            if (!$this->isSessionIdValid(session_id())) {
                 session_regenerate_id(true);
             }
             if (isset($this->config['session']['savePath']) && strlen($this->config['session']['savePath']) > 0) {
@@ -289,16 +289,16 @@ class App
     }
 
     // if called with no args, redirects to current URI with proper protocol, www or not based on config, and query string
-    public function redirect(string $toURI = null)
+    private function redirect(string $toURI = null)
     {
         header("Location: ".$this->getRedirect($toURI));
         exit();
     }
 
-    public function getRedirect(string $toURI = null): ?string
+    private function getRedirect(string $toURI = null): ?string
     {
         if (is_null($toURI)) {
-            if ($this->isRunningFromCommandLine()) {
+            if ($self::isRunningFromCommandLine()) {
                 return null;
             }
             $toURI = $this->getCurrentUri(true);
@@ -351,7 +351,7 @@ class App
         return $out;
     }
 
-    public function getCurrentUri(bool $includeQueryString = true): string
+    private function getCurrentUri(bool $includeQueryString = true): string
     {
         $uri = $_SERVER['REQUEST_URI'];
         if ($includeQueryString && isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
@@ -361,7 +361,7 @@ class App
         return $uri;
     }
 
-    public function getBaseUrl()
+    private function getBaseUrl()
     {
         global $config;
         $baseUrl = "https://";
@@ -372,7 +372,7 @@ class App
         return $baseUrl;
     }
 
-    public function getHostWithoutWww(): string
+    private function getHostWithoutWww(): string
     {
         if (substr($_SERVER['HTTP_HOST'], 0, 4) == 'www.') {
             return substr($_SERVER['HTTP_HOST'], 4);
@@ -384,7 +384,7 @@ class App
      * determines if current page is https
      * @return bool
      */
-    public function isHttps(): bool
+    private function isHttps(): bool
     {
         return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || intval($_SERVER['SERVER_PORT']) === 443;
     }
@@ -393,7 +393,7 @@ class App
      * determines if url host name begins with 'www'
      * @return bool
      */
-    public function isWww(): bool
+    private function isWww(): bool
     {
         return (strtolower(substr($_SERVER['SERVER_NAME'], 0, 3)) == 'www');
     }
@@ -404,7 +404,7 @@ class App
      * @param bool optional $isEmptyIdValid
      * @return bool
      */
-    public function sessionValidId(string $sessionId, $isEmptyIdValid = true): bool
+    private function isSessionIdValid(string $sessionId, $isEmptyIdValid = true): bool
     {
         if ($isEmptyIdValid && strlen($sessionId) == 0) { // if blank, there is no session id
             return true;
@@ -449,7 +449,4 @@ class App
 
         return $routeName;
     }
-
-
-
 }

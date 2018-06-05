@@ -129,7 +129,7 @@ class App
             $errorHandler->setDatabaseAndSystemEventsModel($this->database, $this->systemEventsModel);
         }
 
-        if (!$self::isRunningFromCommandLine()) {
+        if (!self::isRunningFromCommandLine()) {
             /**
              * verify/force all pages to be https. and verify/force www or not www based on Config::useWww
              * if not, REDIRECT TO PROPER SECURE PAGE
@@ -298,7 +298,7 @@ class App
     private function getRedirect(string $toURI = null): ?string
     {
         if (is_null($toURI)) {
-            if ($self::isRunningFromCommandLine()) {
+            if (self::isRunningFromCommandLine()) {
                 return null;
             }
             $toURI = $this->getCurrentUri(true);

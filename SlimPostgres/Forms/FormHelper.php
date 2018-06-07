@@ -99,6 +99,12 @@ class FormHelper
         return new InputField('', ['type' => 'submit', 'name' => 'submit', 'value' => $value]);
     }
 
+    // note: this is confusing.
+    public static function getCancelField(string $value = 'Cancel')
+    {
+        return new InputField('', ['type' => 'submit', 'name' => 'cancel', 'value' => $value, 'onclick' => 'if(confirm(\'Press OK to cancel\nPress Cancel to cancel canceling\')){return true;}']);
+    }
+
     public static function unsetSessionInput()
     {
         if (isset($_SESSION[App::SESSION_KEY_REQUEST_INPUT])) {

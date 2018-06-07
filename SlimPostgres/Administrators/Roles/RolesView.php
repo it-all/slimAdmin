@@ -41,7 +41,7 @@ class RolesView extends SingleTableView
         $filterErrorMessage = FormHelper::getFieldError($this->sessionFilterFieldKey);
 
         // make sure all session input necessary to send to template is produced above
-        FormHelper::unsetSessionVars();
+        FormHelper::unsetFormSessionVars();
 
         return $this->view->render(
             $response,

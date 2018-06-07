@@ -45,7 +45,7 @@ class SingleTableView extends AdminListView
         $formFieldData = ($request->isGet()) ? null : $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
         $form = new DatabaseTableForm($this->model, $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'insert', 'post')), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'insert', $formFieldData);
-        FormHelper::unsetSessionVars();
+        FormHelper::unsetFormSessionVars();
 
         return $this->view->render(
             $response,
@@ -74,7 +74,7 @@ class SingleTableView extends AdminListView
         $formFieldData = ($request->isGet()) ? $record : $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
         $form = new DatabaseTableForm($this->model, $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'update', $formFieldData);
-        FormHelper::unsetSessionVars();
+        FormHelper::unsetFormSessionVars();
 
         return $this->view->render(
             $response,

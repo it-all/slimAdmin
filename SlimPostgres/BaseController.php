@@ -46,7 +46,7 @@ abstract class BaseController
         } else {
             $_SESSION[$view->getSessionFilterColumnsKey()] = $filterColumnsInfo;
             $_SESSION[$view->getSessionFilterValueKey()] = $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$view->getSessionFilterFieldKey()];
-            FormHelper::unsetSessionVars();
+            FormHelper::unsetFormSessionVars();
             return $response->withRedirect($this->router->pathFor($redirectRoute));
         }
     }

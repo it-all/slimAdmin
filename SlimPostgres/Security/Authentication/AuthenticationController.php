@@ -52,7 +52,7 @@ class AuthenticationController extends BaseController
         }
 
         // successful login
-        FormHelper::unsetSessionVars();
+        FormHelper::unsetFormSessionVars();
         $this->systemEvents->insertInfo('Login', (int) $this->authentication->getUserId());
 
         // redirect to proper resource

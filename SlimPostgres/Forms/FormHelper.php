@@ -113,7 +113,7 @@ class FormHelper
         }
     }
 
-    public static function unsetSessionVars()
+    public static function unsetFormSessionVars()
     {
         self::unsetSessionInput();
         self::unsetSessionFormErrors();

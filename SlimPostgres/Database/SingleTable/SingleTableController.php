@@ -73,7 +73,7 @@ class SingleTableController extends BaseController
             throw new \Exception("Insert failure. ".$e->getMessage());
         }
 
-        FormHelper::unsetSessionVars();
+        FormHelper::unsetFormSessionVars();
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
 
@@ -106,7 +106,7 @@ class SingleTableController extends BaseController
         // debatable whether this should be part of validation and stay on page with error
         if (!$this->haveAnyFieldsChanged($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $record)) {
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made (Record ".$args['primaryKey'].")", 'adminNoticeFailure'];
-            FormHelper::unsetSessionVars();
+            FormHelper::unsetFormSessionVars();
             return $response->withRedirect($this->router->pathFor($redirectRoute));
         }
 
@@ -142,7 +142,7 @@ class SingleTableController extends BaseController
             throw new \Exception("Update failure. ".$e->getMessage());
         }
 
-        FormHelper::unsetSessionVars();
+        FormHelper::unsetFormSessionVars();
         return $response->withRedirect($this->router->pathFor($redirectRoute));
     }
 

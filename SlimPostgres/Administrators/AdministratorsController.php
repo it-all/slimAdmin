@@ -95,7 +95,7 @@ class AdministratorsController extends BaseController
 
         $this->systemEvents->insertInfo("Inserted admin", (int) $this->authentication->getUserId(), "id:$insertedRecordId");
 
-        FormHelper::unsetSessionVars();
+        FormHelper::unsetFormSessionVars();
 
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted record $insertedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS));
@@ -135,7 +135,7 @@ class AdministratorsController extends BaseController
         }
         if (!$this->administratorsSingleTableController->haveAnyFieldsChanged($checkChangedFields, $record)) {
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made (Record $primaryKey)", App::STATUS_ADMIN_NOTICE_FAILURE];
-            FormHelper::unsetSessionVars();
+            FormHelper::unsetFormSessionVars();
             return $response->withRedirect($this->router->pathFor($redirectRoute));
         }
 
@@ -153,7 +153,7 @@ class AdministratorsController extends BaseController
 
         $this->systemEvents->insertInfo("Updated ".$this->administratorsModel::TABLE_NAME, (int) $this->authentication->getUserId(), "id:$primaryKey");
 
-        FormHelper::unsetSessionVars();
+        FormHelper::unsetFormSessionVars();
 
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated record $primaryKey", App::STATUS_ADMIN_NOTICE_SUCCESS];
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));

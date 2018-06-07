@@ -106,7 +106,7 @@ class AdministratorsView extends AdminListView
         $fields[] = FormHelper::getSubmitField();
 
         $form = new Form($fields, ['method' => 'post', 'action' => $formAction, 'novalidate' => 'novalidate'], FormHelper::getGeneralError());
-        FormHelper::unsetSessionVars();
+        FormHelper::unsetFormSessionVars();
 
         return $form;
     }

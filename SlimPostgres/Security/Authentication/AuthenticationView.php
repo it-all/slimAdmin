@@ -19,7 +19,7 @@ class AuthenticationView extends AdminView
 
         $form = $this->authentication->getForm($this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), $this->router->pathFor(ROUTE_LOGIN_POST));
 
-        FormHelper::unsetSessionVars();
+        FormHelper::unsetFormSessionVars();
 
         $renderStatus = (array_key_exists('status', $args)) ? $args['status'] : 200;
 

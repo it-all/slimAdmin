@@ -36,42 +36,26 @@ class AdministratorsModel extends MultiTableModel
         return $q->execute();
     }
 
-    private function getChangedColumns(array $record, ?string $name, string $username, int $roleId, string $password = ''): array
+    public function getChangedColumnsValues(array $inputValues, array $record): array
     {
         $changedColumns = [];
-
-        if ($name != $record['name']) {
-            $changedColumns['name'] = $name;
-        }
-
-        if ($username != $record['username']) {
-            $changedColumns['username'] = $username;
-        }
-
-        if ($roleId != $record['role_id']) {
-            $changedColumns['role_id'] = $roleId;
-        }
-
-        if (strlen($password) > 0) {
-            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-            if ($passwordHash != $record['password_hash']) {
-                $changedColumns['password_hash'] = $passwordHash;
+        foreach ($inputValues as $columnName => $value) {
+            // throw out any new values that are not table columns
+            if ($this->getColumnByName($columnName) !== null && $value != $record[$columnName]) {
+                // do not add blank password to changed columns
+                if ($columnName == 'password') {
+                    if (mb_strlen($value) > 0) {
+                        $passwordHash = password_hash($value, PASSWORD_DEFAULT);
+                        if ($passwordHash != $record['password_hash']) {
+                            $changedColumns['password_hash'] = $passwordHash;
+                        }
+                    }
+                } else {
+                    $changedColumns[$columnName] = $value;
+                }
             }
         }
-
         return $changedColumns;
-    }
-
-    // If a '' password is passed, the password field is not updated
-    public function updateByPrimaryKey(int $primaryKeyValue, ?string $name, string $username, int $roleId, string $password = '', array $record = null)
-    {
-        if ($record == null && !$record = $this->selectForPrimaryKey($primaryKeyValue)) {
-            throw new \Exception("Invalid Primary Key $primaryKeyValue for ".self::TABLE_NAME);
-        }
-
-        $changedColumns = $this->getChangedColumns($record, $name, $username, $roleId, $password);
-
-        return $this->getPrimaryTableModel()->updateRecordByPrimaryKey($changedColumns, $primaryKeyValue);
     }
 
     public function checkRecordExistsForUsername(string $username): bool

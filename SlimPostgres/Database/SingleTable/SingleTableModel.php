@@ -195,17 +195,43 @@ class SingleTableModel implements TableModel
         }
     }
 
-    public function updateRecordByPrimaryKey(array $columnValues, $primaryKeyValue, bool $validatePrimaryKeyValue = false)
+    public function getChangedColumnsValues(array $inputValues, array $record): array
+    {
+        $changedColumns = [];
+        foreach ($inputValues as $columnName => $value) {
+            // throw out any new values that are not table columns
+            if ($this->getColumnByName($columnName) !== null && $value != $record[$columnName]) {
+                $changedColumns[$columnName] = $value;
+            }
+        }
+        return $changedColumns;
+    }
+
+    /**
+     * @param array $columnValues
+     * @param $primaryKeyValue
+     * @param bool $sendChangedColumnsOnly :: if false sends all received $columnValues. set false if calling with only changed columns as $columnValues in order to not duplicate checking for changes.
+     * @param array $record :: input if $sendChangedColumnsOnly false in order to not duplicate select query
+     * @return \SlimPostgres\Database\Queries\recordset
+     * @throws \Exception
+     */
+    public function updateRecordByPrimaryKey(array $columnValues, $primaryKeyValue, bool $sendChangedColumnsOnly = true, array $record = [])
     {
         $primaryKeyName = $this->getPrimaryKeyColumnName();
 
-        if ($validatePrimaryKeyValue && !$this->selectForPrimaryKey($primaryKeyValue)) {
-            throw new \Exception("Invalid $primaryKeyName $primaryKeyValue for $this->tableName");
+        $columnValues = $this->addBooleanColumnValues($columnValues);
+
+        if ($sendChangedColumnsOnly) {
+            if (count($record) == 0) {
+                $record = $this->selectForPrimaryKey($primaryKeyValue);
+            }
+            $updateColumnValues = $this->getChangedColumnsValues($columnValues, $record);
+        } else {
+            $updateColumnValues = $columnValues;
         }
 
-        $columnValues = $this->addBooleanColumnValues($columnValues);
         $ub = new UpdateBuilder($this->tableName, $primaryKeyName, $primaryKeyValue);
-        $this->addColumnsToBuilder($ub, $columnValues);
+        $this->addColumnsToBuilder($ub, $updateColumnValues);
         try {
             return $ub->execute();
         } catch(\Exception $exception) {

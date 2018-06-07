@@ -122,18 +122,12 @@ class AdministratorsController extends BaseController
         $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
         // if no changes made, redirect
-        // note, if pw and pwconf fields are blank, do not include them in changed fields check
+        // note, if password field is blank, it will not be included in changed fields check
         // debatable whether this should be part of validation and stay on page with error
-        $checkChangedFields = [
-            'username' => $input['username'],
-            'role_id' => $input['role_id'],
-            'name' => $input['name']
-        ];
-        if (strlen($input['password']) > 0 || strlen($input['password_confirm']) > 0) {
-            // password_hash to match db column name
-            $checkChangedFields['password_hash'] = password_hash($input['password'], PASSWORD_DEFAULT);
-        }
-        if (!$this->administratorsSingleTableController->haveAnyFieldsChanged($checkChangedFields, $record)) {
+
+        $changedFields = $this->administratorsModel->getChangedColumnsValues(['name' => $input['name'], 'username' => $input['username'], 'role_id' => (int) $input['role_id'], 'password' => $input['password']], $record);
+
+        if (count($changedFields) == 0) {
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made (Record $primaryKey)", App::STATUS_ADMIN_NOTICE_FAILURE];
             FormHelper::unsetFormSessionVars();
             return $response->withRedirect($this->router->pathFor($redirectRoute));
@@ -147,7 +141,7 @@ class AdministratorsController extends BaseController
             return $this->view->updateView($request, $response, $args);
         }
 
-        if (!$this->administratorsModel->updateByPrimaryKey((int) $primaryKey, $input['name'], $input['username'], (int) $input['role_id'], $input['password'], $record)) {
+        if (!$this->administratorsModel->getPrimaryTableModel()->updateRecordByPrimaryKey($changedFields, $primaryKey, false)) {
             throw new \Exception("Update Failure");
         }
 

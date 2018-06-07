@@ -104,7 +104,8 @@ class SingleTableController extends BaseController
 
         // if no changes made, redirect
         // debatable whether this should be part of validation and stay on page with error
-        if (!$this->haveAnyFieldsChanged($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $record)) {
+        $changedColumnsValues = $this->getModel()->getChangedColumnsValues($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $record);
+        if (count($changedColumnsValues) == 0) {
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made (Record ".$args['primaryKey'].")", 'adminNoticeFailure'];
             FormHelper::unsetFormSessionVars();
             return $response->withRedirect($this->router->pathFor($redirectRoute));
@@ -137,7 +138,7 @@ class SingleTableController extends BaseController
         }
 
         try {
-            $this->update($response, $args);
+            $this->update($response, $args, $changedColumnsValues, $record);
         } catch (\Exception $e) {
             throw new \Exception("Update failure. ".$e->getMessage());
         }
@@ -165,23 +166,6 @@ class SingleTableController extends BaseController
 
         $redirectRoute = App::getRouteName(true, $this->routePrefix, $routeType);
         return $response->withRedirect($this->router->pathFor($redirectRoute));
-    }
-
-    /**
-     * @param array $newValues
-     * @param array $record
-     * @return bool
-     */
-    public function haveAnyFieldsChanged(array $newValues, array $record): bool
-    {
-        foreach ($newValues as $columnName => $value) {
-            // throw out any new values that are not model table columns
-            if ($column = $this->model->getColumnByName($columnName) && $value != $record[$columnName]) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     protected function insert(bool $sendEmail = false)
@@ -214,11 +198,19 @@ class SingleTableController extends BaseController
         }
     }
 
-    protected function update(Response $response, $args, bool $sendEmail = false)
+    protected function update(Response $response, $args, array $changedColumnValues = [], array $record = [], bool $sendEmail = false)
     {
         // attempt to update the model
         try {
-            $this->model->updateRecordByPrimaryKey($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $args['primaryKey']);
+            if (count($changedColumnValues) > 0) {
+                $updateColumnValues = $changedColumnValues;
+                $sendChangedColumnsOnly = false;
+            } else {
+                $updateColumnValues = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
+                $sendChangedColumnsOnly = true;
+            }
+
+            $this->model->updateRecordByPrimaryKey($updateColumnValues, $args['primaryKey'], $sendChangedColumnsOnly, $record);
 
             $primaryKeyColumnName = $this->model->getPrimaryKeyColumnName();
             $updatedRecordId = $args['primaryKey'];

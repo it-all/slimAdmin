@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Administrators;
 
+use SlimPostgres\Administrators\Roles\RolesModel;
 use SlimPostgres\App;
 use SlimPostgres\BaseController;
 use SlimPostgres\Database\SingleTable\SingleTableController;
@@ -110,7 +111,7 @@ class AdministratorsController extends BaseController
         $primaryKey = $args['primaryKey'];
 
         $this->setRequestInput($request);
-        // no boolean fields
+        // no boolean fields to add
 
         $redirectRoute = App::getRouteName(true, $this->routePrefix,'index');
 
@@ -145,12 +146,35 @@ class AdministratorsController extends BaseController
             throw new \Exception("Update Failure");
         }
 
+        // if the administrator changed her/his own info, update the session
+        if ($primaryKey == $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID]) {
+            $this->updateAdministratorSession($changedFields);
+        }
+
         $this->systemEvents->insertInfo("Updated ".$this->administratorsModel::TABLE_NAME, (int) $this->authentication->getUserId(), "id:$primaryKey");
 
         FormHelper::unsetFormSessionVars();
 
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated record $primaryKey", App::STATUS_ADMIN_NOTICE_SUCCESS];
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
+    }
+
+    /** update whatever has changed of name, username, role */
+    private function updateAdministratorSession(array $changedFields)
+    {
+        foreach ($changedFields as $fieldName => $fieldValue) {
+            if ($fieldName == 'name') {
+                $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_NAME] = $fieldValue;
+            } elseif ($fieldName == 'username') {
+                $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_USERNAME] = $fieldValue;
+            } elseif ($fieldName == 'role_id') {
+                $rolesModel = new RolesModel();
+                if (!$newRole = $rolesModel->getRoleForRoleId((int) $fieldValue)) {
+                    throw new \Exception('Role not found for changed role id: '.$fieldValue);
+                }
+                $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLE] = $newRole;
+            }
+        }
     }
 
     // override for custom validation and return column

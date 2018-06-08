@@ -49,6 +49,17 @@ class RolesModel extends SingleTableModel
         return null;
     }
 
+    public function getRoleForRoleId(int $roleIdSearch): ?string
+    {
+        foreach ($this->roles as $roleId => $role) {
+            if ($roleIdSearch == $roleId) {
+                return $role;
+            }
+        }
+
+        return null;
+    }
+
     public function getRoles(): array
     {
         return $this->roles;

@@ -223,7 +223,7 @@ class DatabaseTableForm extends Form
                     }
                     $fieldInfo['tag'] = 'input';
                     $fieldInfo['attributes']['type'] = 'checkbox';
-                    if ($value == 't' || $value == 'on') {
+                    if ($value == 't') {
                         $fieldInfo['attributes']['checked'] = 'checked';
                     }
                     $formField = new CheckboxRadioInputField($fieldInfo['label'], FormHelper::getInputFieldAttributes($fieldInfo['attributes']['name'], $fieldInfo['attributes'], false), FormHelper::getFieldError($fieldInfo['attributes']['name']), true);

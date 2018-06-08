@@ -210,18 +210,18 @@ class SingleTableModel implements TableModel
     /**
      * @param array $columnValues
      * @param $primaryKeyValue
-     * @param bool $sendChangedColumnsOnly :: if false sends all received $columnValues. set false if calling with only changed columns as $columnValues in order to not duplicate checking for changes.
-     * @param array $record :: input if $sendChangedColumnsOnly false in order to not duplicate select query
+     * @param bool $getChangedColumnsOnly :: if false sends all received $columnValues. set false if calling with only changed columns as $columnValues in order to not duplicate checking for changes.
+     * @param array $record :: input if $getChangedColumnsOnly false in order to not duplicate select query
      * @return \SlimPostgres\Database\Queries\recordset
      * @throws \Exception
      */
-    public function updateRecordByPrimaryKey(array $columnValues, $primaryKeyValue, bool $sendChangedColumnsOnly = true, array $record = [])
+    public function updateRecordByPrimaryKey(array $columnValues, $primaryKeyValue, bool $getChangedColumnsOnly = true, array $record = [])
     {
         $primaryKeyName = $this->getPrimaryKeyColumnName();
 
         $columnValues = $this->addBooleanColumnValues($columnValues);
 
-        if ($sendChangedColumnsOnly) {
+        if ($getChangedColumnsOnly) {
             if (count($record) == 0) {
                 $record = $this->selectForPrimaryKey($primaryKeyValue);
             }
@@ -261,15 +261,9 @@ class SingleTableModel implements TableModel
     private function addColumnsToBuilder(InsertUpdateBuilder $builder, array $columnValues)
     {
         foreach ($columnValues as $name => $value) {
-
             // make sure this is truly a column
             if ($column = $this->getColumnByName($name)) {
-
-                if ($column->isBoolean()) {
-                    $value = ($value == 'on') ? 't' : 'f';
-                }
-
-                if (is_string($value) && strlen($value) == 0) {
+                if (is_string($value) && mb_strlen($value) == 0) {
                     $value = $this->handleBlankValue($column);
                 }
                 $builder->addColumn($name, $value);

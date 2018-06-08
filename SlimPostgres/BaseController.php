@@ -24,11 +24,35 @@ abstract class BaseController
         return $this->container->{$name};
     }
 
-    protected function setRequestInput(Request $request)
+    protected function setRequestInput(Request $request, array $booleanFieldNames = [])
     {
         $_SESSION[App::SESSION_KEY_REQUEST_INPUT] = [];
         foreach ($request->getParsedBody() as $key => $value) {
             $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$key] = ($this->settings['trimAllUserInput']) ? trim($value) : $value;
+        }
+
+        if (count($booleanFieldNames) > 0) {
+            $this->addBooleanFieldsToRequestInput($booleanFieldNames);
+        }
+    }
+
+    // since a boolean field (ie checkbox) with a false value (ie unchecked) does not appear in the post, they must be added to the input array
+    private function addBooleanFieldsToRequestInput(array $booleanFieldNames)
+    {
+        foreach ($booleanFieldNames as $fieldName) {
+            $this->addBooleanFieldToRequestInput($fieldName);
+        }
+    }
+
+    // give them the same value as stored in postgres
+    private function addBooleanFieldToRequestInput(string $booleanFieldName)
+    {
+        if (!isset($_SESSION[App::SESSION_KEY_REQUEST_INPUT][$booleanFieldName])) {
+            $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$booleanFieldName] = 'f';
+        } elseif ($_SESSION[App::SESSION_KEY_REQUEST_INPUT][$booleanFieldName] == 'on') {
+            $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$booleanFieldName] = 't';
+        } else {
+            throw new \Exception('Invalid value for boolean session var '.$booleanFieldName.': '.$_SESSION[App::SESSION_KEY_REQUEST_INPUT][$booleanFieldName]);
         }
     }
 

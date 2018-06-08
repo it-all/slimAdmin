@@ -65,8 +65,21 @@ class QueryBuilder
         $this->args = $args;
     }
 
-    public function execute()
+    private function alterBooleanArgs()
     {
+        foreach ($this->args as $argIndex => $arg) {
+            if (is_bool($arg)) {
+                $this->args[$argIndex] = ($arg) ? 't' : 'f';
+            }
+        }
+    }
+
+    public function execute(bool $alterBooleanArgs = false)
+    {
+        if ($alterBooleanArgs) {
+            $this->alterBooleanArgs();
+        }
+        
         if (!$res = pg_query_params($this->sql, $this->args)) {
             // note pg_last_error seems to often not return anything
             $msg = pg_last_error() . " " . $this->sql . " \nArgs: " . var_export($this->args, true);

@@ -74,8 +74,7 @@ class AdministratorsController extends BaseController
             throw new \Exception('No permission.');
         }
 
-        $this->setRequestInput($request);
-        // no boolean fields to add
+        $this->setRequestInput($request); // no boolean fields to add
 
         $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 

@@ -41,8 +41,7 @@ class SingleTableController extends BaseController
             throw new \Exception('No permission.');
         }
 
-        $this->setRequestInput($request);
-        $this->addBooleanFieldsToInput();
+        $this->setRequestInput($request, $this->getBooleanFieldNames());
 
         $this->validator = $this->validator->withData($_SESSION[App::SESSION_KEY_REQUEST_INPUT], FormHelper::getDatabaseTableValidationFields($this->model));
 
@@ -77,13 +76,15 @@ class SingleTableController extends BaseController
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
 
-    private function addBooleanFieldsToInput()
+    public function getBooleanFieldNames(): array
     {
+        $booleanFieldNames = [];
         foreach ($this->model->getColumns() as $databaseColumnModel) {
-            if ($databaseColumnModel->isBoolean() && !isset($_SESSION[App::SESSION_KEY_REQUEST_INPUT][$databaseColumnModel->getName()])) {
-                $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$databaseColumnModel->getName()] = 'f';
+            if ($databaseColumnModel->isBoolean()) {
+                $booleanFieldNames[] = $databaseColumnModel->getName();
             }
         }
+        return $booleanFieldNames;
     }
 
     public function putUpdate(Request $request, Response $response, $args)
@@ -92,8 +93,7 @@ class SingleTableController extends BaseController
             throw new \Exception('No permission.');
         }
 
-        $this->setRequestInput($request);
-        $this->addBooleanFieldsToInput();
+        $this->setRequestInput($request, $this->getBooleanFieldNames());
 
         $redirectRoute = App::getRouteName(true, $this->routePrefix, 'index');
 

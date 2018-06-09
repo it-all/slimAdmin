@@ -11,5 +11,5 @@ $q = new \SlimPostgres\Database\Queries\QueryBuilder("SELECT * FROM roles");
 $res = $q->execute();
 
 while ($row = pg_fetch_assoc($res)) {
-    echo $row['role'] . "\n";
+    echo $row['role'] . PHP_EOL;
 }

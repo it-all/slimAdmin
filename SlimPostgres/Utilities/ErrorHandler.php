@@ -139,7 +139,8 @@ class ErrorHandler
 
         $fatalErrorTypes = [E_USER_ERROR, E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING];
         if (in_array($error["type"], $fatalErrorTypes)) {
-            $this->handleError($this->generateMessageBodyCommon($error["type"], $error["message"], $error["file"], $error["line"]),$error["type"], true);
+            $message = $this->generateMessageBodyCommon($error["type"], $error["message"], $error["file"], $error["line"]);
+            $this->handleError($message, $error["type"], true);
         }
     }
 
@@ -150,7 +151,8 @@ class ErrorHandler
     public function throwableHandler(\Throwable $e)
     {
         $message = $this->generateMessageBodyCommon($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
-        $message .= "\nStack Trace:\n" . $e->getTraceAsString();
+        $message .= PHP_EOL . "Stack Trace:" . PHP_EOL . $e->getTraceAsString();
+
         $exitPage = ($e->getCode() == E_ERROR || $e->getCode() == E_USER_ERROR) ? true : false;
 
         $this->handleError($message, $e->getCode(), $exitPage);
@@ -166,7 +168,7 @@ class ErrorHandler
      */
     public function phpErrorHandler(int $errno, string $errstr, string $errfile = null, string $errline = null)
     {
-        $message = $this->generateMessageBodyCommon($errno, $errstr, $errfile, $errline) . "\nStack Trace:\n". $this->getDebugBacktraceString();
+        $message = $this->generateMessageBodyCommon($errno, $errstr, $errfile, $errline) . PHP_EOL . "Stack Trace:". PHP_EOL . $this->getDebugBacktraceString();
 
         $this->handleError($message, $errno, false);
     }
@@ -175,18 +177,16 @@ class ErrorHandler
     {
         $message = "[".date('Y-m-d H:i:s e')."] ";
 
-        $message .= App::isRunningFromCommandLine() ? gethostname() : $_SERVER['SERVER_NAME'];
-
         if (App::isRunningFromCommandLine()) {
             global $argv;
-            $message .= "Command line: " . $argv[0];
+            $message .= gethostname() . PHP_EOL . "Command line: " . $argv[0];
         } else {
-            $message .= "\nWeb Page: " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI'];
+            $message .= $_SERVER['SERVER_NAME'] . PHP_EOL . "Web Page: " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI'];
             if (mb_strlen($_SERVER['QUERY_STRING']) > 0) {
                 $message .= "?" . $_SERVER['QUERY_STRING'];
             }
         }
-        $message .= "\n$messageBody\n\n";
+        $message .= PHP_EOL . "$messageBody" . PHP_EOL . PHP_EOL;
         return $message;
     }
 
@@ -201,7 +201,7 @@ class ErrorHandler
     private function generateMessageBodyCommon(int $errno, string $errstr, string $errfile = null, $errline = null): string
     {
         $message = $this->getErrorType($errno).": ";
-        $message .= htmlspecialchars_decode($errstr)."\n";
+        $message .= htmlspecialchars_decode($errstr) . PHP_EOL;
 
         if (!is_null($errfile)) {
             $message .= "$errfile";
@@ -260,8 +260,9 @@ class ErrorHandler
         array_shift($dbt);
 
         // these could be in $config, but with the various format note above, that could lead to confusion.
+        // also, since the $e->getTraceAsString method shows the full file path, for consistency best to show it here
         $showVendorCalls = true;
-        $showFullFilePath = false;
+        $showFullFilePath = true;
         $startFilePath = '/Src'; // only applies if $showFullFilePath is false
         $showClassNamespace = false;
 
@@ -294,9 +295,9 @@ class ErrorHandler
                 $outLine .= $call['function']."()";
             }
             if (isset($call['args'])) {
-                $outLine .= " {".App::arrayWalkToStringRecursive($call['args'])."}";
+                $outLine .= " {".App::arrayWalkToStringRecursive($call['args'], 0, 1000, PHP_EOL)."}";
             }
-            $out .= "$outLine\n\n";
+            $out .= "$outLine" . PHP_EOL;
         }
 
         return $out;

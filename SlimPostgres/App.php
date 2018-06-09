@@ -328,7 +328,7 @@ class App
      * @param int $level
      * @return string
      */
-    static public function arrayWalkToStringRecursive(array $arr, int $level = 0, int $maxLevel = 1000): string
+    static public function arrayWalkToStringRecursive(array $arr, int $level = 0, int $maxLevel = 1000, $newLine = '<br>'): string
     {
         $out = "";
         $tabs = " ";
@@ -336,15 +336,15 @@ class App
             $tabs .= " ^"; // use ^ to denote another level
         }
         foreach ($arr as $k => $v) {
-            $out .= "<br>$tabs$k: ";
+            $out .= "$newLine$tabs$k: ";
             if (is_object($v)) {
                 $out .= 'object type: '.get_class($v);
             } elseif (is_array($v)) {
                 $newLevel = $level + 1;
                 if ($newLevel > $maxLevel) {
-                    $out .= ' array, too deep, quitting';
+                    $out .= ' array too deep, quitting';
                 } else {
-                    $out .= self::arrayWalkToStringRecursive($v, $newLevel);
+                    $out .= self::arrayWalkToStringRecursive($v, $newLevel, $maxLevel, $newLine);
                 }
             } else {
                 $out .= (string)$v;

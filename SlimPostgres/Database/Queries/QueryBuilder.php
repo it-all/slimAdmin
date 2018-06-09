@@ -82,7 +82,7 @@ class QueryBuilder
 
         if (!$res = pg_query_params($this->sql, $this->args)) {
             // note pg_last_error seems to often not return anything
-            $msg = pg_last_error() . " " . $this->sql . " \nArgs: " . var_export($this->args, true);
+            $msg = pg_last_error() . " " . $this->sql . PHP_EOL . " Args: " . var_export($this->args, true);
             throw new \Exception("Query Execution Failure: $msg");
         }
         return $res;
@@ -129,7 +129,7 @@ class QueryBuilder
     public function triggerError($msg = 'Query Failure')
     {
         $errorMsg = "$msg: $this->sql";
-        $errorMsg .= "\nArgs: ";
+        $errorMsg .= PHP_EOL . "Args: ";
         $errorMsg .= var_export($this->args, true);
         trigger_error($errorMsg);
     }

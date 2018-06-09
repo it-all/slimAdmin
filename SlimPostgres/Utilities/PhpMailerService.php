@@ -54,12 +54,12 @@ class PhpMailerService {
         $this->phpMailer->setFrom($fromEmail, $fromName);
         if (!$this->phpMailer->send()) {
             // note do not throw exception here because could get stuck in loop trying to email
-            $errorMessage = "[".date('Y-m-d H:i:s e')."]\n" .
-                "\nPhpMailer::send() failed: ".$this->phpMailer->ErrorInfo."\n".
-                "subject: $subject\n".
-                "body: $body\n".
-                "to: $toEmailsString\n".
-                "from: $fromEmail\n\n";
+            $errorMessage = "[".date('Y-m-d H:i:s e')."]" . PHP_EOL .
+                "PhpMailer::send() failed: ".$this->phpMailer->ErrorInfo . PHP_EOL .
+                "subject: $subject" . PHP_EOL .
+                "body: $body" . PHP_EOL .
+                "to: $toEmailsString" . PHP_EOL .
+                "from: $fromEmail" . PHP_EOL . PHP_EOL;
                 error_log($errorMessage, 3, $this->logPath);
         }
         $this->clear();

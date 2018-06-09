@@ -122,18 +122,6 @@ class QueryBuilder
         }
     }
 
-    /**
-     * @param string $msg
-     * sends pertinent query values to error handler
-     */
-    public function triggerError($msg = 'Query Failure')
-    {
-        $errorMsg = "$msg: $this->sql";
-        $errorMsg .= PHP_EOL . "Args: ";
-        $errorMsg .= var_export($this->args, true);
-        trigger_error($errorMsg);
-    }
-
     public static function validateWhereOperator(string $op): bool
     {
         return in_array($op, self::OPERATORS);

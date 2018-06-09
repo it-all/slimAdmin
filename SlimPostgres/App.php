@@ -70,6 +70,8 @@ class App
 
         $this->config = require APPLICATION_ROOT_DIRECTORY . '/config/settings.php';
 
+        mb_internal_encoding($this->config['mbInternalEncoding']); // so no need to set encoding for mb_strlen()
+
         // add some .env to config
         $this->config['isLive'] = !in_array(strtolower($this->environmentalVariables['IS_LIVE']), [false, 0, 'false', '0', 'off', 'no']); // bool
 
@@ -147,7 +149,7 @@ class App
             if (!$this->isSessionIdValid(session_id())) {
                 session_regenerate_id(true);
             }
-            if (isset($this->config['session']['savePath']) && strlen($this->config['session']['savePath']) > 0) {
+            if (isset($this->config['session']['savePath']) && mb_strlen($this->config['session']['savePath']) > 0) {
                 session_save_path($this->config['session']['savePath']);
             }
             session_start();
@@ -406,7 +408,7 @@ class App
      */
     private function isSessionIdValid(string $sessionId, $isEmptyIdValid = true): bool
     {
-        if ($isEmptyIdValid && strlen($sessionId) == 0) { // if blank, there is no session id
+        if ($isEmptyIdValid && mb_strlen($sessionId) == 0) { // if blank, there is no session id
             return true;
         }
         return preg_match('/^[-,a-zA-Z0-9]{1,128}$/', $sessionId) > 0;

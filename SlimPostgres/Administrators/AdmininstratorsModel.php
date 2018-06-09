@@ -17,8 +17,7 @@ class AdministratorsModel extends MultiTableModel
         'name' => 'administrators.name',
         'username' => 'administrators.username',
         'role' => 'roles.role',
-        'level' => 'roles.level',
-        'is_ok' => 'administrators.is_ok'
+        'level' => 'roles.level'
     ];
 
     public function __construct()

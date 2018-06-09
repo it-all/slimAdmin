@@ -80,7 +80,7 @@ abstract class BaseController
     {
         $filterColumnsInfo = [];
         $filterParts = explode(",", $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$filterFieldName]);
-        if (strlen($filterParts[0]) == 0) {
+        if (mb_strlen($filterParts[0]) == 0) {
             FormHelper::setFieldErrors([$filterFieldName => 'Not Entered']);
             return null;
         } else {

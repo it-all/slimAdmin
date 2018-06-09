@@ -83,11 +83,11 @@ class SystemEventsModel extends MultiTableModel
 
     private function insert(string $title, int $eventType = 2, string $notes = null, int $adminId = null)
     {
-        if (strlen(trim($title)) == 0) {
+        if (mb_strlen(trim($title)) == 0) {
             throw new \Exception("Title cannot be blank");
         }
 
-        if ($notes !== null && strlen(trim($notes)) == 0) {
+        if ($notes !== null && mb_strlen(trim($notes)) == 0) {
             $notes = null;
         }
 

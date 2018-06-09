@@ -182,7 +182,7 @@ class ErrorHandler
             $message .= "Command line: " . $argv[0];
         } else {
             $message .= "\nWeb Page: " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI'];
-            if (strlen($_SERVER['QUERY_STRING']) > 0) {
+            if (mb_strlen($_SERVER['QUERY_STRING']) > 0) {
                 $message .= "?" . $_SERVER['QUERY_STRING'];
             }
         }

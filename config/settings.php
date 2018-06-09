@@ -38,6 +38,8 @@ return [
 
     'pageNotFoundText' => 'Page not found. Please check the URL. If correct, please email service@'.$domainName.' for assistance.',
 
+    'mbInternalEncoding' => 'UTF-8',
+
     'slim' => [
 
         'outputBuffering' => 'append',

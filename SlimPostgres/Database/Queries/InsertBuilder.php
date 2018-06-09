@@ -19,11 +19,11 @@ class InsertBuilder extends InsertUpdateBuilder
     public function addColumn(string $name, $value)
     {
         $this->args[] = $value;
-        if (strlen($this->columns) > 0) {
+        if (mb_strlen($this->columns) > 0) {
             $this->columns .= ", ";
         }
         $this->columns .= $name;
-        if (strlen($this->values) > 0) {
+        if (mb_strlen($this->values) > 0) {
             $this->values .= ", ";
         }
         $argNum = count($this->args);

@@ -49,7 +49,7 @@ class AdministratorsController extends BaseController
         $this->validator->rule('regex', 'name', '%^[a-zA-Z\s]+$%')->message('must be letters and spaces only');
         $this->validator->rule('required', ['username', 'role_id']);
         $this->validator->rule('lengthMin', 'username', 4);
-        if ($inserting || strlen($input['password']) > 0) {
+        if ($inserting || mb_strlen($input['password']) > 0) {
             $this->validator->rule('required', ['password', 'password_confirm']);
             // https://stackoverflow.com/questions/8141125/regex-for-password-php
 //            $this->validator->rule('regex', 'password', '%^\S*(?=\S{4,})\S*$%')->message('Must be at least 12 characters long');

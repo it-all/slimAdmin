@@ -19,7 +19,7 @@ $htmlBodyContent .= $footer;
 
 $htmlBodyJs = '<script type="text/javascript" src="/js/uiHelper.js"></script>';
 $focusFieldId = $form->getFocusFieldId();
-if (strlen($focusFieldId) > 0) {
+if (mb_strlen($focusFieldId) > 0) {
     $htmlBodyJs = <<< EOT
 <script type="text/javascript">
     window.onload = document.getElementById('$focusFieldId').focus();

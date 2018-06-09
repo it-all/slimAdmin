@@ -38,7 +38,7 @@ class AdministratorsView extends AdminListView
 
     private function pwFieldsHaveError(): bool
     {
-        return strlen(FormHelper::getFieldError('password')) > 0 || strlen(FormHelper::getFieldError('password_confirm')) > 0;
+        return mb_strlen(FormHelper::getFieldError('password')) > 0 || mb_strlen(FormHelper::getFieldError('password_confirm')) > 0;
     }
 
     private function getForm(Request $request, string $action = 'insert', int $primaryKey = null,  array $record = null)

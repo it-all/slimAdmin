@@ -10,7 +10,7 @@ $htmlBodyContent .= '<main><div id="simpleContainer">'.$form->generate().'</div>
 $htmlBodyContent .= $footer;
 $htmlBodyJs = '<script type="text/javascript" src="/js/uiHelper.js"></script>';
 
-if (strlen($form->getFocusFieldId()) > 0) {
+if (mb_strlen($form->getFocusFieldId()) > 0) {
     $htmlBodyJs .= '<script type="text/javascript">window.onload = document.getElementById(\''.$form->getFocusFieldId().'\').focus();</script>';
 }
 

@@ -45,13 +45,13 @@ class FormHelper
         $attributes = [];
 
         // name: use field name if supplied, otherwise addAttributes['name'] will be used if supplied
-        if (strlen($fieldName) > 0) {
+        if (mb_strlen($fieldName) > 0) {
             $attributes['name'] = $fieldName;
             unset($addAttributes['name']);
         }
 
         // error class
-        if (strlen(self::getFieldError($fieldName)) > 0) {
+        if (mb_strlen(self::getFieldError($fieldName)) > 0) {
             if (array_key_exists('class', $addAttributes)) {
                 $attributes['class'] = $addAttributes['class'] . " " . self::FIELD_ERROR_CLASS;
                 unset($addAttributes['name']);

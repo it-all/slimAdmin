@@ -41,6 +41,6 @@ if ($authentication->check()) {
 
 $header .= '</header>';
 
-if (isset($debug) && strlen($debug) > 0) {
+if (isset($debug) && mb_strlen($debug) > 0) {
     $header .= '<div id="debug">$debug</div>';
 }

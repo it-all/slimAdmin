@@ -79,7 +79,7 @@ class QueryBuilder
         if ($alterBooleanArgs) {
             $this->alterBooleanArgs();
         }
-        
+
         if (!$res = pg_query_params($this->sql, $this->args)) {
             // note pg_last_error seems to often not return anything
             $msg = pg_last_error() . " " . $this->sql . " \nArgs: " . var_export($this->args, true);

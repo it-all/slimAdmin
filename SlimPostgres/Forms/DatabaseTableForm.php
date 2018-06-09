@@ -128,7 +128,7 @@ class DatabaseTableForm extends Form
         // set label
         if ($inputTypeOverride == 'hidden') {
             $label = '';
-        } elseif (strlen($labelOverride) > 0) {
+        } elseif (mb_strlen($labelOverride) > 0) {
             $label = $labelOverride;
         } else {
             $label = ucwords(str_replace('_', ' ', $columnName));
@@ -161,7 +161,7 @@ class DatabaseTableForm extends Form
             }
 
             // value
-            if (strlen($value) > 0) {
+            if (mb_strlen($value) > 0) {
                 $fieldInfo['attributes']['value'] = $value;
             }
             $formField = new InputField($fieldInfo['label'], FormHelper::getInputFieldAttributes($fieldInfo['attributes']['name'], $fieldInfo['attributes']), FormHelper::getFieldError($fieldInfo['attributes']['name']));
@@ -183,7 +183,7 @@ class DatabaseTableForm extends Form
                     $fieldInfo['tag'] = 'input';
                     $fieldInfo['attributes']['type'] = 'date';
                     // value
-                    if (strlen($value) > 0) {
+                    if (mb_strlen($value) > 0) {
                         $fieldInfo['attributes']['value'] = $value;
                     }
                     $formField = new InputField($fieldInfo['label'], FormHelper::getInputFieldAttributes($fieldInfo['attributes']['name'], $fieldInfo['attributes']), FormHelper::getFieldError($fieldInfo['attributes']['name']));
@@ -201,7 +201,7 @@ class DatabaseTableForm extends Form
                     // must have max defined
                     $fieldInfo['attributes']['maxlength'] = $column->getCharacterMaximumLength();
                     // value
-                    if (strlen($value) > 0) {
+                    if (mb_strlen($value) > 0) {
                         $fieldInfo['attributes']['value'] = $value;
                     }
 
@@ -240,6 +240,6 @@ class DatabaseTableForm extends Form
 
     public static function getInputType(string $inputTypeOverride = '')
     {
-        return (strlen($inputTypeOverride) > 0) ? $inputTypeOverride : 'text';
+        return (mb_strlen($inputTypeOverride) > 0) ? $inputTypeOverride : 'text';
     }
 }

@@ -112,6 +112,7 @@ class App
         set_exception_handler(array($errorHandler, 'throwableHandler'));
 
         error_reporting( -1 ); // all, including future types
+        // do not have php display errors, since this will be determined by config and done in error handler
         ini_set( 'display_errors', 'off' );
         ini_set( 'display_startup_errors', 'off' );
 

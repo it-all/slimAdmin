@@ -32,7 +32,7 @@ class AdministratorsModel extends MultiTableModel
 
     public function insert(string $name, string $username, string $password, int $roleId)
     {
-        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash, role_id) VALUES($1, $2, $3, $4) RETURNING id", $name, $username, password_hash($password, PASSWORD_DEFAULT));
+        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash, role_id) VALUES($1, $2, $3, $4) RETURNING id", $name, $username, password_hash($password, PASSWORD_DEFAULT), $roleId);
         return $q->execute();
     }
 

@@ -93,7 +93,7 @@ class AdministratorsController extends BaseController
         $returned = pg_fetch_all($res);
         $insertedRecordId = $returned[0]['id'];
 
-        $this->systemEvents->insertInfo("Inserted admin", (int) $this->authentication->getUserId(), "id:$insertedRecordId");
+        $this->systemEvents->insertInfo("Inserted admin", (int) $this->authentication->getAdministratorId(), "id:$insertedRecordId");
 
         FormHelper::unsetFormSessionVars();
 
@@ -150,7 +150,7 @@ class AdministratorsController extends BaseController
             $this->updateAdministratorSession($changedFields);
         }
 
-        $this->systemEvents->insertInfo("Updated ".$this->administratorsModel::TABLE_NAME, (int) $this->authentication->getUserId(), "id:$primaryKey");
+        $this->systemEvents->insertInfo("Updated ".$this->administratorsModel::TABLE_NAME, (int) $this->authentication->getAdministratorId(), "id:$primaryKey");
 
         FormHelper::unsetFormSessionVars();
 
@@ -171,7 +171,7 @@ class AdministratorsController extends BaseController
                 if (!$newRole = $rolesModel->getRoleForRoleId((int) $fieldValue)) {
                     throw new \Exception('Role not found for changed role id: '.$fieldValue);
                 }
-                $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLE] = $newRole;
+                $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES] = $newRole;
             }
         }
     }
@@ -180,7 +180,7 @@ class AdministratorsController extends BaseController
     public function getDelete(Request $request, Response $response, $args)
     {
         // make sure the current admin is not deleting themself
-        if ((int) ($args['primaryKey']) == $this->container->authentication->getUserId()) {
+        if ((int) ($args['primaryKey']) == $this->container->authentication->getAdministratorId()) {
             throw new \Exception('You cannot delete yourself from administrators');
         }
 

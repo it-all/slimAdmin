@@ -178,7 +178,7 @@ class SingleTableController extends BaseController
             $insertedRecordId = $returned[0][$primaryKeyColumnName];
             $tableName = $this->model->getTableName();
 
-            $this->systemEvents->insertInfo("Inserted $tableName", (int) $this->authentication->getUserId(), "$primaryKeyColumnName:$insertedRecordId");
+            $this->systemEvents->insertInfo("Inserted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName:$insertedRecordId");
 
             if ($sendEmail) {
                 $settings = $this->container->get('settings');
@@ -216,7 +216,7 @@ class SingleTableController extends BaseController
             $updatedRecordId = $args['primaryKey'];
             $tableName = $this->model->getTableName();
 
-            $this->systemEvents->insertInfo("Updated $tableName", (int) $this->authentication->getUserId(), "$primaryKeyColumnName:$updatedRecordId");
+            $this->systemEvents->insertInfo("Updated $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName:$updatedRecordId");
 
             if ($sendEmail) {
                 $settings = $this->container->get('settings');
@@ -244,7 +244,7 @@ class SingleTableController extends BaseController
 
         try {
             if (!$res = $this->model->deleteByPrimaryKey($primaryKey, $returnColumn)) {
-                $this->systemEvents->insertWarning('Primary key not found for delete', (int) $this->authentication->getUserId(), $eventNote);
+                $this->systemEvents->insertWarning('Primary key not found for delete', (int) $this->authentication->getAdministratorId(), $eventNote);
                 $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$primaryKey.' not found', 'adminNoticeFailure'];
                 return false;
             }
@@ -260,7 +260,7 @@ class SingleTableController extends BaseController
             $adminMessage .= " ($returnColumn ".$returned[0][$returnColumn].")";
         }
 
-        $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getUserId(), $eventNote);
+        $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), $eventNote);
 
         if ($sendEmail) {
             $settings = $this->container->get('settings');

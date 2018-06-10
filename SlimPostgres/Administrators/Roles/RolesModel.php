@@ -11,11 +11,8 @@ use It_All\FormFormer\Fields\SelectOption;
 // note that level 1 is the greatest permission
 class RolesModel extends SingleTableModel
 {
-    /** array */
+    /** array role_id => role */
     private $roles;
-
-    /** int */
-    private $baseRoleId;
 
     public function __construct()
     {
@@ -28,14 +25,10 @@ class RolesModel extends SingleTableModel
     {
         $this->roles = [];
         $rs = $this->select();
-        $lastRoleId = '';
         while ($row = pg_fetch_array($rs)) {
             $this->roles[(int) $row['id']] = $row['role'];
             $lastRoleId = (int) $row['id'];
         }
-
-        // the last role returned is set to baseRole since order by level
-        $this->baseRoleId = $lastRoleId;
     }
 
     public function getRoleIdForRole(string $roleSearch): ?int
@@ -65,19 +58,9 @@ class RolesModel extends SingleTableModel
         return $this->roles;
     }
 
-    public function getBaseRoleId(): int
-    {
-        return $this->baseRoleId;
-    }
-
-    public function getBaseRole()
-    {
-        return $this->roles[$this->baseRoleId];
-    }
-
     public static function hasAdmin(int $roleId): bool
     {
-        $q = new QueryBuilder("SELECT COUNT(id) FROM administrators WHERE role_id = $1", $roleId);
+        $q = new QueryBuilder("SELECT COUNT(id) FROM administrators_roles WHERE role_id = $1", $roleId);
         return (bool) $q->getOne();
     }
 

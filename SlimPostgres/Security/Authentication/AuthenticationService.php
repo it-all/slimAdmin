@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres\Security\Authentication;
 
 use It_All\FormFormer\Form;
+use SlimPostgres\Administrators\Administrator;
 use SlimPostgres\Administrators\AdministratorsModel;
 use SlimPostgres\Administrators\Logins\LoginsModel;
 use SlimPostgres\App;
@@ -21,7 +22,7 @@ class AuthenticationService
         $this->administratorHomeRoutes = $administratorHomeRoutes;
     }
 
-    public function getUser(): ?array
+    public function getAdministrator(): ?array
     {
         if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR])) {
             return $_SESSION[App::SESSION_KEY_ADMINISTRATOR];
@@ -29,12 +30,12 @@ class AuthenticationService
         return null;
     }
 
-    public function check(): bool
+    public function isAuthenticated(): bool
     {
         return isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR]);
     }
 
-    public function getUserId(): ?int
+    public function getAdministratorId(): ?int
     {
         if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID])) {
             return (int) $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID];
@@ -42,7 +43,7 @@ class AuthenticationService
         return null;
     }
 
-    public function getUserName(): ?string
+    public function getAdministratorName(): ?string
     {
         if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_NAME])) {
             return $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_NAME];
@@ -50,7 +51,7 @@ class AuthenticationService
         return null;
     }
 
-    public function getUserUsername(): ?string
+    public function getAdministratorUsername(): ?string
     {
         if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_USERNAME])) {
             return $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_USERNAME];
@@ -58,21 +59,21 @@ class AuthenticationService
         return null;
     }
 
-    public function getUserRole(): ?string
+    public function getAdministratorRoles(): ?string
     {
-        if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLE])) {
-            return $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLE];
+        if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES])) {
+            return $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES];
         }
         return null;
     }
 
-    public function getAdminHomeRouteForUser(): string
+    public function getAdminHomeRouteForAdministrator(): string
     {
         // determine home route: either by username, by role, or default
-        if (isset($this->administratorHomeRoutes['usernames'][$this->getUserUsername()])) {
-            $homeRoute = $this->administratorHomeRoutes['usernames'][$this->getUserUsername()];
-        } elseif (isset($this->administratorHomeRoutes['roles'][$this->getUserRole()])) {
-            $homeRoute = $this->administratorHomeRoutes['roles'][$this->getUserRole()];
+        if (isset($this->administratorHomeRoutes['usernames'][$this->getAdministratorUsername()])) {
+            $homeRoute = $this->administratorHomeRoutes['usernames'][$this->getAdministratorUsername()];
+        } elseif (isset($this->administratorHomeRoutes['roles'][$this->getAdministratorRoles()])) {
+            $homeRoute = $this->administratorHomeRoutes['roles'][$this->getAdministratorRoles()];
         } else {
             $homeRoute = ROUTE_ADMIN_HOME_DEFAULT;
         }
@@ -82,42 +83,39 @@ class AuthenticationService
 
     public function attemptLogin(string $username, string $password): bool
     {
-        $administrators = new AdministratorsModel();
-        $rs = $administrators->selectForUsername($username);
-        $userRecord = pg_fetch_assoc($rs);
-
-        // check if user exists
-        if (!$userRecord) {
-            $this->loginFailed($username);
+        $administratorsModel = new AdministratorsModel();
+        // check if administrator exists
+        if (!$administrator = $administratorsModel->getByUsername($username)) {
+            $this->loginFailed($username, null);
             return false;
         }
 
         // verify password for that user
-        if (password_verify($password, $userRecord['password_hash'])) {
-            $this->loginSucceeded($username, $userRecord);
+        if (password_verify($password, $administrator->getPasswordHash())) {
+            $this->loginSucceeded($username, $administrator);
             return true;
         } else {
-            $this->loginFailed($username, (int) $userRecord['id']);
+            $this->loginFailed($username, $administrator);
             return false;
         }
     }
 
-    private function loginSucceeded(string $username, array $userRecord)
+    private function setAdministratorSession(Administrator $administrator)
     {
-        // set session for administrator
         $_SESSION[App::SESSION_KEY_ADMINISTRATOR] = [
-            App::SESSION_ADMINISTRATOR_KEY_ID => $userRecord['id'],
-            App::SESSION_ADMINISTRATOR_KEY_NAME => $userRecord['name'],
-            App::SESSION_ADMINISTRATOR_KEY_USERNAME => $username,
-            App::SESSION_ADMINISTRATOR_KEY_ROLE => $userRecord['role']
+            App::SESSION_ADMINISTRATOR_KEY_ID => $administrator->getId(),
+            App::SESSION_ADMINISTRATOR_KEY_NAME => $administrator->getName(),
+            App::SESSION_ADMINISTRATOR_KEY_USERNAME => $administrator->getUsername(),
+            App::SESSION_ADMINISTRATOR_KEY_ROLES => $administrator->getRoles()
         ];
+    }
 
+    private function loginSucceeded(string $username, Administrator $administrator)
+    {
+        $this->setAdministratorSession($administrator);
         unset($_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS]);
-
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Logged in", App::STATUS_ADMIN_NOTICE_SUCCESS];
-
-        // insert login_attempts record
-        (new LoginsModel())->insertSuccessfulLogin($username, (int) $userRecord['id']);
+        (new LoginsModel())->insertSuccessfulLogin($administrator);
     }
 
     private function incrementNumFailedLogins()
@@ -129,12 +127,12 @@ class AuthenticationService
         }
     }
 
-    private function loginFailed(string $username, int $adminId = null)
+    private function loginFailed(string $username, ?Administrator $administrator)
     {
         $this->incrementNumFailedLogins();
 
         // insert login_attempts record
-        (new LoginsModel())->insertFailedLogin($username, $adminId);
+        (new LoginsModel())->insertFailedLogin($username, $administrator);
     }
 
     public function tooManyFailedLogins(): bool

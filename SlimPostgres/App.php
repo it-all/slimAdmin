@@ -35,7 +35,7 @@ class App
     const SESSION_ADMINISTRATOR_KEY_ID = 'id';
     const SESSION_ADMINISTRATOR_KEY_NAME = 'name';
     const SESSION_ADMINISTRATOR_KEY_USERNAME = 'username';
-    const SESSION_ADMINISTRATOR_KEY_ROLE = 'role';
+    const SESSION_ADMINISTRATOR_KEY_ROLES = 'roles';
 
     // frontend notice statuses (can be used as css classes)
     const STATUS_NOTICE_SUCCESS = 'noticeSuccess';
@@ -170,15 +170,9 @@ class App
 
         $this->setSlimMiddleware($slim, $slimContainer);
 
-        $this->registerRoutes($slim, $slimContainer);
+        $this->registerSlimRoutes($slim, $slimContainer);
 
         $slim->run();
-    }
-
-    private function registerRoutes(\Slim\App $slim, $slimContainer)
-    {
-        $config = $this->config; // make available to routes file
-        require APPLICATION_ROOT_DIRECTORY . '/config/routes.php';
     }
 
     private function getSlimSettings(): array
@@ -197,7 +191,7 @@ class App
             return function ($request, $response) use ($container) {
 
                 // log error
-                $this->systemEventsModel->insertEvent('404 Page Not Found', 'notice', $container->authentication->getUserId());
+                $this->systemEventsModel->insertEvent('404 Page Not Found', 'notice', $container->authentication->getAdministratorId());
 
                 $_SESSION[App::SESSION_KEY_NOTICE] = [$this->config['pageNotFoundText'], App::STATUS_NOTICE_FAILURE];
                 return $container->view->render(
@@ -208,21 +202,6 @@ class App
         };
 
         return $slimSettings;
-    }
-
-    private function removeSlimErrorHandler($slimContainer)
-    {
-        unset($slimContainer['errorHandler']);
-        unset($slimContainer['phpErrorHandler']);
-    }
-
-    /** Global middleware registration */
-    private function setSlimMiddleware(\Slim\App $slim, $slimContainer)
-    {
-        // handle CSRF check failures and allow template to access and insert CSRF fields to forms
-        $slim->add(new CsrfMiddleware($slimContainer));
-        // slim CSRF check middleware
-        $slim->add($slimContainer->csrf);
     }
 
     private function setSlimDependences($container, Postgres $database, SystemEventsModel $systemEventsModel, Utilities\PhpMailerService $mailer)
@@ -289,6 +268,28 @@ class App
             });
             return $guard;
         };
+    }
+
+    private function removeSlimErrorHandler($slimContainer)
+    {
+        unset($slimContainer['errorHandler']);
+        unset($slimContainer['phpErrorHandler']);
+    }
+
+    /** Global middleware registration */
+    private function setSlimMiddleware(\Slim\App $slim, $slimContainer)
+    {
+        // handle CSRF check failures and allow template to access and insert CSRF fields to forms
+        $slim->add(new CsrfMiddleware($slimContainer));
+        // slim CSRF check middleware
+        $slim->add($slimContainer->csrf);
+    }
+
+    /** note need the arguments for routes.php to access */
+    private function registerSlimRoutes(\Slim\App $slim, $slimContainer)
+    {
+        $config = $this->config; // make available to routes file
+        require APPLICATION_ROOT_DIRECTORY . '/config/routes.php';
     }
 
     // if called with no args, redirects to current URI with proper protocol, www or not based on config, and query string

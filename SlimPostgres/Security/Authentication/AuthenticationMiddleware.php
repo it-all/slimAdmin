@@ -12,8 +12,7 @@ class AuthenticationMiddleware extends BaseMiddleware
 {
 	public function __invoke(Request $request, Response $response, $next)
 	{
-		// check if the user is not signed in
-		if (!$this->container->authentication->check()) {
+		if (!$this->container->authentication->isAuthenticated()) {
 		    $this->container->systemEvents->insertWarning('Login required to access resource');
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Login required", 'adminNoticeFailure'];
             $_SESSION[App::SESSION_KEY_GOTO_ADMIN_PATH] = $request->getUri()->getPath();

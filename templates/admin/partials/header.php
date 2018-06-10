@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 $header = '<header id="adminPageHeader">'; 
-if ($authentication->check()) {
+if ($authentication->isAuthenticated()) {
     require 'nav.php';
     $header .= <<< EOT
 <nav id="adminNav">
@@ -26,7 +26,7 @@ if (!$isLive) {
 }
 $header .= '</div>';
 
-if ($authentication->check()) {
+if ($authentication->isAuthenticated()) {
     $header .= '<div id="adminPageHeaderNotice">';
     if (isset($_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE])) {
         $header .= '<span class="'.$_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE][1].'">&raquo; '.$_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE][0].' &laquo;</span>';
@@ -34,7 +34,7 @@ if ($authentication->check()) {
     }
     $header .= '</div>';
     $header .= '<div id="adminPageHeaderGreeting">
-        Hello '.$authentication->getUserName().'
+        Hello '.$authentication->getAdministratorName().'
             [<a href="'.$router->pathFor(ROUTE_LOGOUT).'">logout</a>]
         </div>';
 }

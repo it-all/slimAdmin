@@ -53,7 +53,7 @@ class AuthenticationController extends BaseController
 
         // successful login
         FormHelper::unsetFormSessionVars();
-        $this->systemEvents->insertInfo('Login', (int) $this->authentication->getUserId());
+        $this->systemEvents->insertInfo('Login', (int) $this->authentication->getAdministratorId());
 
         // redirect to proper resource
         if (isset($_SESSION[App::SESSION_KEY_GOTO_ADMIN_PATH])) {
@@ -68,10 +68,10 @@ class AuthenticationController extends BaseController
 
     public function getLogout(Request $request, Response $response)
     {
-        if (!$username = $this->authentication->getUserUsername()) {
+        if (!$username = $this->authentication->getAdministratorUsername()) {
             $this->systemEvents->insertWarning('Attempted logout for non-logged-in visitor');
         } else {
-            $this->systemEvents->insertInfo('Logout', (int) $this->authentication->getUserId());
+            $this->systemEvents->insertInfo('Logout', (int) $this->authentication->getAdministratorId());
             $this->authentication->logout();
         }
 

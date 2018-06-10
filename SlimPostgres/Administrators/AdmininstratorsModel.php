@@ -30,9 +30,9 @@ class AdministratorsModel extends MultiTableModel
         return 'level';
     }
 
-    public function insert(string $name, string $username, string $password, int $roleId)
+    public function insert(string $name, string $username, string $password)
     {
-        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash, role_id) VALUES($1, $2, $3, $4) RETURNING id", $name, $username, password_hash($password, PASSWORD_DEFAULT), $roleId);
+        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash) VALUES($1, $2, $3) RETURNING id", $name, $username, password_hash($password, PASSWORD_DEFAULT));
         return $q->execute();
     }
 
@@ -65,9 +65,29 @@ class AdministratorsModel extends MultiTableModel
         return pg_num_rows($res) > 0;
     }
 
+    public function getByUsername(string $username): ?Administrator
+    {
+        $q = new QueryBuilder("SELECT adm.*, r.role FROM ".self::TABLE_NAME." adm JOIN administrator_roles admr ON a.id = admr.administrator_id JOIN roles r ON admr.role_id = r.id WHERE a.username = $1", $username);
+        if ($result = $q->execute()) {
+            // there will be 1 record for each role
+            $roles = [];
+            while ($row = pg_fetch_row($result)) {
+                // repopulate id, name, passwordHash on each loop. it's either that or do a rowcount and populate them once but this is simpler and probably faster.
+                $id = $row['id'];
+                $name = $row['name'];
+                $passwordHash = $row['passwordHash'];
+                $roles[] = $row['role'];
+            }
+            return new Administrator((int) $id, $name, $username, $passwordHash, $roles);
+        }
+
+        return null;
+    }
+
+    // todo try to use select fn
     public function selectForUsername(string $username)
     {
-        $q = new QueryBuilder("SELECT a.*, r.role FROM ".self::TABLE_NAME." a JOIN roles r ON a.role_id = r.id WHERE a.username = $1", $username);
+        $q = new QueryBuilder("SELECT adm.*, r.role FROM ".self::TABLE_NAME." adm JOIN administrator_roles admr ON a.id = admr.administrator_id JOIN roles r ON admr.role_id = r.id WHERE a.username = $1", $username);
         return $q->execute();
     }
 
@@ -82,7 +102,7 @@ class AdministratorsModel extends MultiTableModel
             }
             $columnCount++;
         }
-        $fromClause = "FROM ".self::TABLE_NAME." JOIN roles ON ".self::TABLE_NAME.".role_id = roles.id";
+        $fromClause = "FROM ".self::TABLE_NAME." adm JOIN administrator_roles admr ON a.id = admr.administrator_id JOIN roles r ON admr.role_id = r.id";
         $orderByClause = "ORDER BY roles.level";
         if ($whereColumnsInfo != null) {
             $this->validateFilterColumns($whereColumnsInfo);

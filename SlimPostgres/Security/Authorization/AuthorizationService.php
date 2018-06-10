@@ -10,7 +10,11 @@ use SlimPostgres\App;
 class AuthorizationService
 {
     private $functionalityPermissions;
+
+    /** @var array all roles in the database */
     private $roles;
+
+    /** @var string the  */
     private $baseRole;
 
     public function __construct(array $functionalityPermissions)
@@ -18,7 +22,6 @@ class AuthorizationService
         $this->functionalityPermissions = $functionalityPermissions;
         $rolesModel = new RolesModel();
         $this->roles = $rolesModel->getRoles();
-        $this->baseRole = $rolesModel->getBaseRole();
     }
 
     // $functionality like 'marketing' or 'marketing.index'
@@ -44,16 +47,9 @@ class AuthorizationService
         return $this->functionalityPermissions[$functionality];
     }
 
-    public function getUserRole(): ?string
+    public function getAdministratorRoles(): array
     {
-        $userRole = $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLE];
-
-        if (!in_array($userRole, $this->roles)) {
-            unset($_SESSION[App::SESSION_KEY_ADMINISTRATOR]); // force logout
-            return null;
-        }
-
-        return $userRole;
+        return $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES];
     }
 
     private function checkMinimum(string $minimumRole): bool
@@ -61,14 +57,16 @@ class AuthorizationService
         if (!in_array($minimumRole, $this->roles)) {
             throw new \Exception("Invalid role: $minimumRole");
         }
-        if (!isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLE])) {
+        if (!isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES])) {
             return false;
         }
 
-        if (!$userRole = $this->getUserRole()) {
+        // todo fix
+        if (!$userRole = $this->getAdministratorRoles()) {
             return false;
         }
 
+        // todo fix
         return array_search($userRole, $this->roles) <= array_search($minimumRole, $this->roles);
     }
 
@@ -83,7 +81,7 @@ class AuthorizationService
             }
         }
 
-        if (!$userRole = $this->getUserRole()) {
+        if (!$userRole = $this->getAdministratorRoles()) {
             return false;
         }
 

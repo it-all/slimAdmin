@@ -13,7 +13,7 @@ class CsrfMiddleware extends BaseMiddleware
 	{
         if (false === $request->getAttribute('csrf_status')) {
             $eventTitle = 'CSRF Check Failure';
-            $this->container->systemEvents->insertError($eventTitle, (int) $this->container->authentication->getUserId());
+            $this->container->systemEvents->insertError($eventTitle, (int) $this->container->authentication->getAdministratorId());
             session_unset();
             $_SESSION[SESSION_NOTICE] = ['Error. Your session has been reset.', 'error'];
             return $response->withRedirect($this->container->router->pathFor(ROUTE_HOME));

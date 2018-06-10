@@ -71,7 +71,7 @@ return [
             // If the index is not defined for a route or nav section, no authorization check is performed (all administrators (logged in users) will be able to access resource or view nav section). therefore, indexes only need to be defined for routes and nav sections that require authorization greater than the base (least permission) role.
             // Note also that it's possible to give a role access to a resource, but then hide the navigation to to that resource to that role, which would usually be undesirable. For example, below the bookkeeper is authorized to view System Events, but will not see the System nav section because of the NAV_ADMIN_SYSTEM entry permissions being set to 'owner'
             'administratorPermissions' => [
-                ROUTE_LOGIN_ATTEMPTS => 'owner',
+                ROUTE_LOGIN_ATTEMPTS => ['owner', 'director'],
                 ROUTE_SYSTEM_EVENTS => 'bookkeeper',
                 ROUTE_ADMINISTRATORS => 'director',
                 ROUTE_ADMINISTRATORS_RESET => 'director',

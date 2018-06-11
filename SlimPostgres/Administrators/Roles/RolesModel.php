@@ -16,6 +16,7 @@ class RolesModel extends SingleTableModel
 
     public function __construct()
     {
+        // note that the roles select must be ordered by level (ascending) for getBaseLevel() to work
         parent::__construct('roles', 'id, role, level','level');
         $this->addColumnNameConstraint('level', 'positive');
         $this->setRoles();
@@ -26,36 +27,83 @@ class RolesModel extends SingleTableModel
         $this->roles = [];
         $rs = $this->select();
         while ($row = pg_fetch_array($rs)) {
-            $this->roles[(int) $row['id']] = $row['role'];
-            $lastRoleId = (int) $row['id'];
+            $this->roles[(int) $row['id']] = [
+                'role' => $row['role'],
+                'level' => $row['level']
+            ];
         }
     }
 
-    public function getRoleIdForRole(string $roleSearch): ?int
+    public function getRoleIdForRole(string $roleSearch): int
     {
-        foreach ($this->roles as $roleId => $role) {
-            if ($roleSearch == $role) {
+        foreach ($this->roles as $roleId => $roleData) {
+            if ($roleSearch == $roleData['role']) {
                 return $roleId;
             }
         }
 
-        return null;
+        throw new \Exception("Invalid role searched: $roleSearch");
     }
 
-    public function getRoleForRoleId(int $roleIdSearch): ?string
+    public function getRoleForRoleId(int $roleIdSearch): string
     {
-        foreach ($this->roles as $roleId => $role) {
+        foreach ($this->roles as $roleId => $roleData) {
             if ($roleIdSearch == $roleId) {
-                return $role;
+                return $roleData['role'];
             }
         }
 
-        return null;
+        throw new \Exception("Invalid role id searched: $roleIdSearch");
+
+    }
+
+    public function getLeveForRoleId(int $roleIdSearch): int
+    {
+        foreach ($this->roles as $roleId => $roleData) {
+            if ($roleIdSearch == $roleId) {
+                return (int) $roleData['level'];
+            }
+        }
+
+        throw new \Exception("Invalid role searched: $roleIdSearch");
+    }
+
+    public function getLeveForRole(string $roleSearch): int
+    {
+        foreach ($this->roles as $roleId => $roleData) {
+            if ($roleSearch == $roleData['role']) {
+                return (int) $roleData['level'];
+            }
+        }
+
+        throw new \Exception("Invalid role searched: $roleSearch");
     }
 
     public function getRoles(): array
     {
         return $this->roles;
+    }
+
+    public function getRoleNames(): array
+    {
+        $roleNames = [];
+        foreach ($this->roles as $roleId => $roleData) {
+            $roleNames[] = $roleData['role'];
+        }
+        return $roleNames;
+    }
+
+    // the last role is the base role since setRoles orders by level
+    // note that there can be multiple roles at the same level
+    public function getBaseRole(): int
+    {
+        return (int) end($this->roles)['role'];
+    }
+
+    // the last level is the base level since setRoles orders by level
+    public function getBaseLevel(): int
+    {
+        return (int) end($this->roles)['level'];
     }
 
     public static function hasAdmin(int $roleId): bool

@@ -28,12 +28,12 @@ class AdministratorsView extends AdminListView
 
         parent::__construct($container, 'administrators', ROUTE_ADMINISTRATORS, $this->administratorsModel, ROUTE_ADMINISTRATORS_RESET, 'admin/lists/administratorsList.php');
 
-        $insertLink = ($this->authorization->check($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->administratorsModel->getPrimaryTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
+        $insertLink = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->administratorsModel->getPrimaryTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
         $this->setInsert($insertLink);
 
-        $this->setUpdate($this->authorization->check($this->getPermissions('update')), $this->administratorsModel->getUpdateColumnName(), App::getRouteName(true, $this->routePrefix, 'update'));
+        $this->setUpdate($this->authorization->isAuthorized($this->getPermissions('update')), $this->administratorsModel->getUpdateColumnName(), App::getRouteName(true, $this->routePrefix, 'update'));
 
-        $this->setDelete($this->container->authorization->check($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
+        $this->setDelete($this->container->authorization->isAuthorized($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
     }
 
     private function pwFieldsHaveError(): bool

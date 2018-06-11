@@ -11,17 +11,12 @@ class AuthorizationService
 {
     private $functionalityPermissions;
 
-    /** @var array all roles in the database */
-    private $roles;
-
-    /** @var string the  */
-    private $baseRole;
+    private $rolesModel;
 
     public function __construct(array $functionalityPermissions)
     {
         $this->functionalityPermissions = $functionalityPermissions;
-        $rolesModel = new RolesModel();
-        $this->roles = $rolesModel->getRoles();
+        $this->rolesModel = new RolesModel();
     }
 
     // $functionality like 'marketing' or 'marketing.index'
@@ -30,7 +25,7 @@ class AuthorizationService
     public function getPermissions(?string $functionality)
     {
         if ($functionality === null) {
-            return $this->baseRole;
+            return $this->rolesModel->getBaseRole();
         }
 
         if (!isset($this->functionalityPermissions[$functionality])) {
@@ -41,7 +36,7 @@ class AuthorizationService
             }
 
             // no matches
-            return $this->baseRole;
+            return $this->rolesModel->getBaseRole();
         }
 
         return $this->functionalityPermissions[$functionality];
@@ -52,60 +47,59 @@ class AuthorizationService
         return $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES];
     }
 
-    private function checkMinimum(string $minimumRole): bool
+    // if any role of the session administrator meet or exceed the minimum role level, return true. otherwise, return false
+    // note that level 1 is the greatest role permission level
+    private function checkMinimum(int $minimumRoleLevel): bool
     {
-        if (!in_array($minimumRole, $this->roles)) {
-            throw new \Exception("Invalid role: $minimumRole");
-        }
+
         if (!isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES])) {
             return false;
         }
 
-        // todo fix
-        if (!$userRole = $this->getAdministratorRoles()) {
-            return false;
+        foreach ($this->getAdministratorRoles() as $administratorRole) {
+            if ($this->rolesModel->getLeveForRole($administratorRole) <= $minimumRoleLevel) {
+                return true;
+            }
         }
 
-        // todo fix
-        return array_search($userRole, $this->roles) <= array_search($minimumRole, $this->roles);
+        return false;
     }
 
-    private function checkSet(array $authorizedRoles): bool
+    // checks if logged in administrator has a role that is in the array of authorized roles
+    private function checkRoleSet(array $authorizedRoles): bool
     {
         foreach ($authorizedRoles as $authorizedRole) {
             if (!is_string($authorizedRole)) {
                 throw new \Exception("Invalid role type, must be strings");
             }
-            if (!in_array($authorizedRole, $this->roles)) {
+            if (!in_array($authorizedRole, $this->rolesModel->getRoleNames())) {
                 throw new \Exception("Invalid role $authorizedRole");
             }
         }
 
-        if (!$userRole = $this->getAdministratorRoles()) {
-            return false;
+        foreach ($this->getAdministratorRoles() as $administratorRole) {
+            if (in_array($administratorRole, $authorizedRoles)) {
+                return true;
+            }
         }
 
-        return in_array($userRole, $authorizedRoles);
+        return false;
     }
 
-    public function check($permissions): bool
+    public function isAuthorized($permissions): bool
     {
-        if (is_string($permissions)) {
-            return $this->checkMinimum($permissions);
-        } elseif (is_array($permissions)) {
-            return $this->checkSet($permissions);
+        if (is_string($permissions)) { // a role
+            return $this->checkMinimum($this->rolesModel->getLeveForRole($permissions));
+        } elseif (is_array($permissions)) { // an array of roles
+            return $this->checkRoleSet($permissions);
         } else {
             throw new \Exception("Invalid permissions: $permissions");
         }
     }
 
     // note, returns false if the minimum permission for $functionality is not defined
-    public function checkFunctionality(string $functionality): bool
+    public function isFunctionalityAuthorized(string $functionality): bool
     {
-        if (!$permissions = $this->getPermissions($functionality)) {
-            return false;
-        }
-
-        return $this->check($permissions);
+        return $this->isAuthorized($this->getPermissions($functionality));
     }
 }

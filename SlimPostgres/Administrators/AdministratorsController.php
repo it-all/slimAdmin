@@ -70,7 +70,7 @@ class AdministratorsController extends BaseController
 
     public function postInsert(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->checkFunctionality(App::getRouteName(true, $this->routePrefix, 'insert'))) {
+        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'insert'))) {
             throw new \Exception('No permission.');
         }
 
@@ -103,7 +103,7 @@ class AdministratorsController extends BaseController
 
     public function putUpdate(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->checkFunctionality(App::getRouteName(true, $this->routePrefix, 'update'))) {
+        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'update'))) {
             throw new \Exception('No permission.');
         }
 

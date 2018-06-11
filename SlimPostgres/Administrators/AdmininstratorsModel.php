@@ -67,21 +67,23 @@ class AdministratorsModel extends MultiTableModel
 
     public function getByUsername(string $username): ?Administrator
     {
-        $q = new QueryBuilder("SELECT adm.*, r.role FROM ".self::TABLE_NAME." adm JOIN administrator_roles admr ON a.id = admr.administrator_id JOIN roles r ON admr.role_id = r.id WHERE a.username = $1", $username);
-        if ($result = $q->execute()) {
+        // SELECT adm.*, r.role FROM administrators adm JOIN administrator_roles admr ON adm.id = admr.administrator_id JOIN roles r ON admr.role_id = r.id WHERE adm.username =
+        $q = new QueryBuilder("SELECT adm.*, r.role FROM ".self::TABLE_NAME." adm JOIN administrator_roles admr ON adm.id = admr.administrator_id JOIN roles r ON admr.role_id = r.id WHERE adm.username = $1", $username);
+        $results = $q->execute();
+        if (pg_numrows($results) > 0) {
             // there will be 1 record for each role
             $roles = [];
-            while ($row = pg_fetch_row($result)) {
+            while ($row = pg_fetch_assoc($results)) {
                 // repopulate id, name, passwordHash on each loop. it's either that or do a rowcount and populate them once but this is simpler and probably faster.
                 $id = $row['id'];
                 $name = $row['name'];
-                $passwordHash = $row['passwordHash'];
+                $passwordHash = $row['password_hash'];
                 $roles[] = $row['role'];
             }
             return new Administrator((int) $id, $name, $username, $passwordHash, $roles);
+        } else {
+            return null;
         }
-
-        return null;
     }
 
     // todo try to use select fn

@@ -23,7 +23,7 @@ class AuthorizationMiddleware extends BaseMiddleware
 
     public function __invoke(Request $request, Response $response, $next)
 	{
-        if (!$this->container->authorization->check($this->permissions)) {
+        if (!$this->container->authorization->isAuthorized($this->permissions)) {
             $this->container->systemEvents->insertAlert('No authorization for resource', $this->container->authentication->getAdministratorId());
 
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['No permission', 'adminNoticeFailure'];

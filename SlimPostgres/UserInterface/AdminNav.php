@@ -92,7 +92,7 @@ class AdminNav
     {
         // if there are section permissions and they are not met, do not put section in user's nav
         if ($permissions = $this->getSectionPermissions($section, $sectionName)) {
-            if (!$this->container->authorization->check($permissions)) {
+            if (!$this->container->authorization->isAuthorized($permissions)) {
                 return false;
             }
         }

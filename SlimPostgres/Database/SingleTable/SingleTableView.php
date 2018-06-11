@@ -23,14 +23,14 @@ class SingleTableView extends AdminListView
 
         parent::__construct($container, $routePrefix, App::getRouteName(true, $routePrefix, 'index'), $this->model, App::getRouteName(true, $routePrefix, 'index.reset'));
 
-        $insertLink = ($this->authorization->check($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->model->getFormalTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
+        $insertLink = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->model->getFormalTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
         $this->setInsert($insertLink);
 
-        $allowUpdate = $this->authorization->check($this->getPermissions('update')) && $this->model->getPrimaryKeyColumnName() !== null;
+        $allowUpdate = $this->authorization->isAuthorized($this->getPermissions('update')) && $this->model->getPrimaryKeyColumnName() !== null;
 
         $this->setUpdate($allowUpdate, $this->model->getPrimaryKeyColumnName(), App::getRouteName(true, $this->routePrefix, 'update', 'put'));
 
-        $this->setDelete($this->container->authorization->check($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
+        $this->setDelete($this->container->authorization->isAuthorized($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
 
     }
 

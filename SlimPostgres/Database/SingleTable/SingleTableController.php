@@ -37,7 +37,7 @@ class SingleTableController extends BaseController
 
     public function postInsert(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->checkFunctionality(App::getRouteName(true, $this->routePrefix, 'insert'))) {
+        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'insert'))) {
             throw new \Exception('No permission.');
         }
 
@@ -89,7 +89,7 @@ class SingleTableController extends BaseController
 
     public function putUpdate(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->checkFunctionality(App::getRouteName(true, $this->routePrefix, 'update'))) {
+        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'update'))) {
             throw new \Exception('No permission.');
         }
 
@@ -154,7 +154,7 @@ class SingleTableController extends BaseController
 
     public function getDeleteHelper(Response $response, $primaryKey, string $returnColumn = null, bool $sendEmail = false, $routeType = 'index')
     {
-        if (!$this->authorization->checkFunctionality(App::getRouteName(true, $this->routePrefix, 'delete'))) {
+        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'delete'))) {
             throw new \Exception('No permission.');
         }
 

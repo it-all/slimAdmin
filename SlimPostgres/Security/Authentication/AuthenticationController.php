@@ -60,7 +60,7 @@ class AuthenticationController extends BaseController
             $redirect = $_SESSION[App::SESSION_KEY_GOTO_ADMIN_PATH];
             unset($_SESSION[App::SESSION_KEY_GOTO_ADMIN_PATH]);
         } else {
-            $redirect = $this->router->pathFor($this->authentication->getAdminHomeRouteForUser());
+            $redirect = $this->router->pathFor($this->authentication->getAdminHomeRouteForAdministrator());
         }
 
         return $response->withRedirect($redirect);

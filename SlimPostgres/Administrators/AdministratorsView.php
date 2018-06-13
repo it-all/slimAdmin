@@ -8,6 +8,7 @@ use SlimPostgres\Administrators\Roles\RolesModel;
 use It_All\FormFormer\Fields\InputField;
 use It_All\FormFormer\Form;
 use SlimPostgres\App;
+use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\SingleTable\SingleTableHelper;
 use SlimPostgres\UserInterface\AdminListView;
 use SlimPostgres\Forms\DatabaseTableForm;
@@ -149,4 +150,59 @@ class AdministratorsView extends AdminListView
             ]
         );
     }
+
+    /**
+     * override in order to populate roles with multiple if necessary
+     * @param Response $response
+     * @param bool $resetFilter
+     * @return AdministratorsView|AdminListView
+     */
+    public function indexView(Response $response, bool $resetFilter = false)
+    {
+        if ($resetFilter) {
+            return $this->resetFilter($response, $this->indexRoute);
+        }
+
+        $filterColumnsInfo = (isset($_SESSION[$this->sessionFilterColumnsKey])) ? $_SESSION[$this->sessionFilterColumnsKey] : null;
+        if ($results = $this->model->selectArrayWithRolesString($filterColumnsInfo)) {
+            $numResults = count($results);
+        } else {
+            $numResults = 0;
+        }
+
+        $filterFieldValue = $this->getFilterFieldValue();
+        $filterErrorMessage = FormHelper::getFieldError($this->sessionFilterFieldKey);
+
+        // make sure all session input necessary to send to template is produced above
+        FormHelper::unsetFormSessionVars();
+
+        return $this->view->render(
+            $response,
+            $this->template,
+            [
+                'title' => $this->model->getFormalTableName(),
+                'insertLink' => $this->insertLink,
+                'filterOpsList' => QueryBuilder::getWhereOperatorsText(),
+                'filterValue' => $filterFieldValue,
+                'filterErrorMessage' => $filterErrorMessage,
+                'filterFormActionRoute' => $this->indexRoute,
+                'filterFieldName' => $this->sessionFilterFieldKey,
+                'isFiltered' => $filterColumnsInfo,
+                'resetFilterRoute' => $this->filterResetRoute,
+                'updateColumn' => $this->updateColumn,
+                'updatePermitted' => $this->updatePermitted,
+                'updateRoute' => $this->updateRoute,
+                'addDeleteColumn' => $this->addDeleteColumn,
+                'deleteRoute' => $this->deleteRoute,
+                'results' => $results,
+                'numResults' => $numResults,
+                'numColumns' => $this->model->getCountSelectColumns(),
+                'sortColumn' => $this->model->getOrderByColumnName(),
+                'sortByAsc' => $this->model->getOrderByAsc(),
+                'navigationItems' => $this->navigationItems
+            ]
+        );
+    }
+
+
 }

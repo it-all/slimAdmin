@@ -29,6 +29,6 @@ class AdminView extends BaseView
             throw new \Exception("Invalid route type $routeType");
         }
 
-        return $this->container->authorization->getPermissionsLevel(App::getRouteName(true, $this->routePrefix, $routeType));
+        return $this->container->authorization->getPermissions(App::getRouteName(true, $this->routePrefix, $routeType));
     }
 }

@@ -80,6 +80,7 @@ class QueryBuilder
             $this->alterBooleanArgs();
         }
 
+        // best to throw exception for failed call to stop further script execution or caller can use try/catch to handle
         if (!$res = pg_query_params($this->sql, $this->args)) {
             // note pg_last_error seems to often not return anything
             $msg = pg_last_error() . " " . $this->sql . PHP_EOL . " Args: " . var_export($this->args, true);

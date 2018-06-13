@@ -11,11 +11,13 @@ use SlimPostgres\Database\MultiTable\MultiTableModel;
 class AdministratorsModel extends MultiTableModel
 {
     const TABLE_NAME = 'administrators';
+    const ROLES_TABLE_NAME = 'roles';
+    const ADM_ROLES_TABLE_NAME = 'administrator_roles';
 
     const SELECT_COLUMNS = [
-        'id' => 'administrators.id',
-        'name' => 'administrators.name',
-        'username' => 'administrators.username',
+        'id' => self::TABLE_NAME . '.id',
+        'name' => self::TABLE_NAME . '.name',
+        'username' => self::TABLE_NAME . '.username',
         'role' => 'roles.role',
         'level' => 'roles.level'
     ];
@@ -67,8 +69,7 @@ class AdministratorsModel extends MultiTableModel
 
     public function getByUsername(string $username): ?Administrator
     {
-        // SELECT adm.*, r.role FROM administrators adm JOIN administrator_roles admr ON adm.id = admr.administrator_id JOIN roles r ON admr.role_id = r.id WHERE adm.username =
-        $q = new QueryBuilder("SELECT adm.*, r.role FROM ".self::TABLE_NAME." adm JOIN administrator_roles admr ON adm.id = admr.administrator_id JOIN roles r ON admr.role_id = r.id WHERE adm.username = $1", $username);
+        $q = new QueryBuilder("SELECT ".self::TABLE_NAME.".*, r.role FROM ".self::TABLE_NAME." adm JOIN administrator_roles admr ON ".self::TABLE_NAME.".id = admr.administrator_id JOIN roles r ON admr.role_id = r.id WHERE ".self::TABLE_NAME.".username = $1", $username);
         $results = $q->execute();
         if (pg_numrows($results) > 0) {
             // there will be 1 record for each role
@@ -86,11 +87,9 @@ class AdministratorsModel extends MultiTableModel
         }
     }
 
-    // todo try to use select fn
     public function selectForUsername(string $username)
     {
-        $q = new QueryBuilder("SELECT adm.*, r.role FROM ".self::TABLE_NAME." adm JOIN administrator_roles admr ON a.id = admr.administrator_id JOIN roles r ON admr.role_id = r.id WHERE a.username = $1", $username);
-        return $q->execute();
+        return $this->select(['username' => $username]);
     }
 
     public function select(array $whereColumnsInfo = null)
@@ -104,8 +103,8 @@ class AdministratorsModel extends MultiTableModel
             }
             $columnCount++;
         }
-        $fromClause = "FROM ".self::TABLE_NAME." adm JOIN administrator_roles admr ON a.id = admr.administrator_id JOIN roles r ON admr.role_id = r.id";
-        $orderByClause = "ORDER BY roles.level";
+        $fromClause = "FROM ".self::TABLE_NAME." JOIN ".self::ADM_ROLES_TABLE_NAME." ON ".self::TABLE_NAME.".id = ".self::ADM_ROLES_TABLE_NAME.".administrator_id JOIN ".self::ROLES_TABLE_NAME." ON ".self::ADM_ROLES_TABLE_NAME.".role_id = ".self::ROLES_TABLE_NAME.".id";
+        $orderByClause = "ORDER BY ".self::TABLE_NAME.".id, ".self::ROLES_TABLE_NAME.".level";
         if ($whereColumnsInfo != null) {
             $this->validateFilterColumns($whereColumnsInfo);
         }
@@ -113,4 +112,59 @@ class AdministratorsModel extends MultiTableModel
         return $q->execute();
     }
 
+    private function addAdministratorToArray(array &$results, int $id, string $name, string $username, array $roles)
+    {
+        $results[] = [
+            'id' => $id,
+            'name' => $name,
+            'username' => $username,
+            'roles' => $roles
+        ];
+    }
+
+    // returns array of results instead of recordset
+    public function selectArray(array $whereColumnsInfo = null): array
+    {
+        $results = []; // populate with 1 entry per administrator with an array of roles
+        if ($pgResults = $this->select($whereColumnsInfo)) {
+            $lastId = 0;
+            $roles = [];
+            while ($record = pg_fetch_assoc($pgResults)) {
+                $id = $record['id'];
+
+                if ($id != $lastId) {
+                    if ($lastId > 0) {
+                        // enter last administrator looped through
+                        $this->addAdministratorToArray($results, (int) $lastId, $name, $username, $roles);
+                        // reset roles
+                        $roles = [];
+                    }
+
+                    $name = $record['name'];
+                    $username = $record['username'];
+                    $roles[] = $record['role'];
+
+                    $lastId = $id;
+
+                } else {
+                    // continuation of same administrator with new role
+                    $roles[] = $record['role'];
+                }
+            }
+            // add last administrator
+            $this->addAdministratorToArray($results, (int) $lastId, $name, $username, $roles);
+        }
+        return $results;
+    }
+
+    public function selectArrayWithRolesString(array $whereColumnsInfo = null): array
+    {
+        $administrators = [];
+        $results = $this->selectArray($whereColumnsInfo);
+        foreach ($results as $index => $administrator) {
+            $administrators[$index] = $administrator;
+            $administrators[$index]['roles'] = implode(", ", $administrators[$index]['roles']);
+        }
+        return $administrators;
+    }
 }

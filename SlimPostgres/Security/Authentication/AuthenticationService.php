@@ -59,7 +59,7 @@ class AuthenticationService
         return null;
     }
 
-    public function getAdministratorRoles(): ?string
+    public function getAdministratorRoles(): array
     {
         if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES])) {
             return $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES];

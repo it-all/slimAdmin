@@ -11,7 +11,7 @@ use It_All\FormFormer\Fields\SelectOption;
 // note that level 1 is the greatest permission
 class RolesModel extends SingleTableModel
 {
-    /** array role_id => role */
+    /** array role_id => [role, level] */
     private $roles;
 
     public function __construct()
@@ -119,8 +119,8 @@ class RolesModel extends SingleTableModel
 
         // create the options
         $rolesOptions = [];
-        foreach ($this->getRoles() as $roleId => $role) {
-            $rolesOptions[] = new SelectOption($role, (string) $roleId);
+        foreach ($this->getRoles() as $roleId => $roleData) {
+            $rolesOptions[] = new SelectOption($roleData['role'], (string) $roleId);
             if (!$selectedOptionValid && $roleId == $selectedOption) {
                 $selectedOptionValid = true;
             }

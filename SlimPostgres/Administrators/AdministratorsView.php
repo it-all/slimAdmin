@@ -164,7 +164,7 @@ class AdministratorsView extends AdminListView
         }
 
         $filterColumnsInfo = (isset($_SESSION[$this->sessionFilterColumnsKey])) ? $_SESSION[$this->sessionFilterColumnsKey] : null;
-        if ($results = $this->model->selectArrayWithRolesString($filterColumnsInfo)) {
+        if ($results = $this->model->selectArray($filterColumnsInfo)) {
             $numResults = count($results);
         } else {
             $numResults = 0;

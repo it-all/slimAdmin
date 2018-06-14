@@ -69,7 +69,7 @@ class AdministratorsModel extends MultiTableModel
 
     public function getByUsername(string $username): ?Administrator
     {
-        $q = new QueryBuilder("SELECT ".self::TABLE_NAME.".*, r.role FROM ".self::TABLE_NAME." adm JOIN administrator_roles admr ON ".self::TABLE_NAME.".id = admr.administrator_id JOIN roles r ON admr.role_id = r.id WHERE ".self::TABLE_NAME.".username = $1", $username);
+        $q = new QueryBuilder("SELECT ".self::TABLE_NAME.".*, r.role FROM ".self::TABLE_NAME." JOIN administrator_roles admr ON ".self::TABLE_NAME.".id = admr.administrator_id JOIN roles r ON admr.role_id = r.id WHERE ".self::TABLE_NAME.".username = $1", $username);
         $results = $q->execute();
         if (pg_numrows($results) > 0) {
             // there will be 1 record for each role

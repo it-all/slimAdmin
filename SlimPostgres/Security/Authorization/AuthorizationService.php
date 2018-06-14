@@ -47,6 +47,15 @@ class AuthorizationService
         return $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES];
     }
 
+    // checks whether current administrator session has given role
+    public function hasRole(string $role): bool
+    {
+        if (!$this->validateRole($role)) {
+            throw new \Exception("Invalid role $role");
+        }
+        return in_array($role, $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES]);
+    }
+
     // if any role of the session administrator meet or exceed the minimum role level, return true. otherwise, return false
     // note that level 1 is the greatest role permission level
     private function checkMinimum(int $minimumRoleLevel): bool
@@ -65,6 +74,12 @@ class AuthorizationService
         return false;
     }
 
+    // validates role to be in database roles.role
+    public function validateRole(string $role): bool
+    {
+        return in_array($role, $this->rolesModel->getRoleNames());
+    }
+
     // checks if logged in administrator has a role that is in the array of authorized roles
     private function checkRoleSet(array $authorizedRoles): bool
     {
@@ -72,7 +87,7 @@ class AuthorizationService
             if (!is_string($authorizedRole)) {
                 throw new \Exception("Invalid role type, must be strings");
             }
-            if (!in_array($authorizedRole, $this->rolesModel->getRoleNames())) {
+            if (!$this->validateRole($authorizedRole)) {
                 throw new \Exception("Invalid role $authorizedRole");
             }
         }

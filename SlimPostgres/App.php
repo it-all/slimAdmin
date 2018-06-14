@@ -239,7 +239,7 @@ class App
         // Authorization
         $container['authorization'] = function($container) {
             $settings = $container->get('settings');
-            return new AuthorizationService($settings['authorization']['administratorPermissions']);
+            return new AuthorizationService($settings['authorization']['topRole'], $settings['authorization']['administratorPermissions']);
         };
 
         // System Events (Database Log)

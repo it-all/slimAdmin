@@ -65,6 +65,7 @@ return [
         ],
 
         'authorization' => [
+            'topRole' => 'owner', // must match database role with level 1
             /* Either functionalityCategory => permissions or functionalityCategory.functionality => permissions where permissions is either a string set to the minimum authorized role or an array of authorized roles */
             // Important to properly match the indexes to routes authorization
             // The role values must be in the database: roles.role

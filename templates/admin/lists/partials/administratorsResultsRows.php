@@ -10,10 +10,10 @@ foreach ($results as $row) {
     $rowCount++;
 
     // do not allow non-owners to edit owners
-    $rowUpdatePermitted = (!$authorization->hasRole('owner') && in_array('owner', $row['roles'])) ? false : true;
+    $rowUpdatePermitted = (!$authorization->hasTopRole() && in_array($authorization->getTopRole(), $row['roles'])) ? false : true;
 
     // do not allow admin to delete themself or non-owners to delete owners
-    $rowDeletePermitted = $row['username'] != $authentication->getAdministratorUsername() && ($authorization->hasRole('owner') || !in_array('owner', $row['roles']));
+    $rowDeletePermitted = $row['username'] != $authentication->getAdministratorUsername() && ($authorization->hasTopRole() || !in_array($authorization->getTopRole(), $row['roles']));
 
     // change roles field from array to string
     $row['roles'] = implode(", ", $row['roles']);

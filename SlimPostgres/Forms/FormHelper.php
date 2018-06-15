@@ -30,9 +30,19 @@ class FormHelper
         return (isset($_SESSION[self::SESSION_ERRORS_KEY][self::GENERAL_ERROR_KEY])) ? $_SESSION[self::SESSION_ERRORS_KEY][self::GENERAL_ERROR_KEY] : '';
     }
 
-    public static function getFieldError(string $fieldName): string
+    /**
+     * @param string $fieldName
+     * @param bool $returnNull
+     * @return null|string
+     * Either null or an empty string can be returned if the session field error is not set. defaults to empty string
+     */
+    public static function getFieldError(string $fieldName, bool $returnNull = false): ?string
     {
-        return (isset($_SESSION[self::SESSION_ERRORS_KEY][$fieldName])) ? $_SESSION[self::SESSION_ERRORS_KEY][$fieldName] : '';
+        if (isset($_SESSION[self::SESSION_ERRORS_KEY][$fieldName])) {
+            return $_SESSION[self::SESSION_ERRORS_KEY][$fieldName];
+        }
+
+        return ($returnNull) ? null : '';
     }
 
     public static function getFieldValue(string $fieldName): string

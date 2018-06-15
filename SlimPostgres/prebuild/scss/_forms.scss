@@ -4,6 +4,16 @@ form {
   margin: 1em;
 }
 
+fieldset {
+  padding-top: 1em;
+  margin-bottom: 1em;
+}
+
+legend {
+  //font-weight: bold;
+  color: $formLabelColor;
+}
+
 input, select, textarea, button, meter, progress, output {
   display: block;
   background-color: #dcd4c2;
@@ -15,18 +25,27 @@ input, select, textarea, button, meter, progress, output {
 }
 
 .inlineFormField {
-  //display: inline-block;
-  float: left;
-  clear: none;
+  display: inline-block;
+  //vertical-align: top;
+  //float: left;
+  //clear: none;
+}
+
+.afterLabel {
+  display: inline-block;
+  //margin: 0 0 1em 1.5em;
+  margin-right: 2em;
+  //vertical-align: middle;
 }
 
 input[type="checkbox"] {
   /* Larger Checkboxes */
-  -ms-transform: scale(1.8); /* IE */
-  -moz-transform: scale(1.8); /* FF */
-  -webkit-transform: scale(1.8); /* Safari and Chrome */
-  -o-transform: scale(1.8); /* Opera */
-  margin: .4em 1em 1.1em .6em;
+  -ms-transform: scale(1.6); /* IE */
+  -moz-transform: scale(1.6); /* FF */
+  -webkit-transform: scale(1.6); /* Safari and Chrome */
+  -o-transform: scale(1.6); /* Opera */
+  //vertical-align: top;
+  //margin: .4em 1em 1.1em .6em;
   //padding: 10px;
 }
 
@@ -61,9 +80,4 @@ label {
 
 .formFieldError {
   border: .1em solid red;
-}
-
-.afterLabel {
-  display: block;
-  margin: 0 0 1em 1.5em;
 }

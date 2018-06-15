@@ -28,7 +28,16 @@ abstract class BaseController
     {
         $_SESSION[App::SESSION_KEY_REQUEST_INPUT] = [];
         foreach ($request->getParsedBody() as $key => $value) {
-            $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$key] = ($this->settings['trimAllUserInput']) ? trim($value) : $value;
+            if (is_string($value) && $this->settings['trimAllUserInput']) {
+                $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$key] = trim($value);
+            } elseif (is_array($value)) {
+                // go 1 level deeper only
+                foreach ($value as $deeperKey => $deeperValue) {
+                    if (is_string($deeperValue) && $this->settings['trimAllUserInput']) {
+                        $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$key][$deeperKey] = trim($deeperValue);
+                    }
+                }
+            }
         }
 
         if (count($booleanFieldNames) > 0) {

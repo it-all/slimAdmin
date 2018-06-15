@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Administrators;
 
+use It_All\FormFormer\Fields\InputFields\CheckboxRadioInputField;
+use It_All\FormFormer\Fieldset;
 use SlimPostgres\Administrators\Roles\Roles;
 use SlimPostgres\Administrators\Roles\RolesModel;
 use It_All\FormFormer\Fields\InputField;
@@ -90,14 +92,33 @@ class AdministratorsView extends AdminListView
             $passwordConfirmationFieldAttributes = array_merge($passwordConfirmationFieldAttributes, ['required' => 'required']);
         }
 
-        $fields[] = new InputField($passwordLabel, $passwordFieldAttributes, FormHelper::getFieldError('password'));
+        $fields[] = new InputField($passwordLabel, $passwordFieldAttributes, FormHelper::getFieldError($passwordFieldAttributes['name']));
 
-        $fields[] = new InputField('Confirm Password', $passwordConfirmationFieldAttributes, FormHelper::getFieldError('password_confirm'));
+        $fields[] = new InputField('Confirm Password', $passwordConfirmationFieldAttributes, FormHelper::getFieldError($passwordConfirmationFieldAttributes['name']));
 
         // Role Field
+//        $selectedOption = (isset($fieldValues['role_id'])) ? (int) $fieldValues['role_id'] : $rolesModel->getRoleIdForRole($this->container->settings['administratorDefaultRole']); // null if not found
+//        $fields[] = $rolesModel->getIdSelectField(['name' => 'role_id', 'id' => 'role_id', 'required' => 'required'], 'Role', $selectedOption, FormHelper::getFieldError('role_id'));
+
+        // Roles Checkboxes
         $rolesModel = new RolesModel();
-        $selectedOption = (isset($fieldValues['role_id'])) ? (int) $fieldValues['role_id'] : $rolesModel->getRoleIdForRole($this->container->settings['administratorDefaultRole']); // null if not found
-        $fields[] = $rolesModel->getIdSelectField(['name' => 'role_id', 'id' => 'role_id', 'required' => 'required'], 'Role', $selectedOption, FormHelper::getFieldError('role_id'));
+        $rolesCheckboxes = [];
+        foreach ($rolesModel->getRoles() as $roleId => $roleData) {
+            $rolesCheckboxAttributes = [
+                'type' => 'checkbox',
+                'name' => 'roles[]',
+                'value' => $roleId,
+                'id' => 'roles' . $roleData['role'],
+                'class' => 'inlineFormField'
+            ];
+            // checked?
+//            if ()
+            $rolesCheckboxes[] = new CheckboxRadioInputField($roleData['role'], $rolesCheckboxAttributes);
+        }
+//        $rolesCheckbox1 = new CheckboxRadioInputField('owner', ['type' => 'checkbox', 'name' => 'rolesGroup', 'value' => '1', 'id' => 'rolesOwner', 'class' => 'inlineFormField']);
+//        $rolesCheckbox2 = new CheckboxRadioInputField('director', ['type' => 'checkbox', 'name' => 'rolesGroup', 'value' => '37', 'id' => 'rolesDirector', 'class' => 'inlineFormField']);
+        $fields[] = new Fieldset($rolesCheckboxes, [], true, 'Roles', null, FormHelper::getFieldError('roles', true));
+
 
         // CSRF Fields
         $fields[] = FormHelper::getCsrfNameField($this->csrf->getTokenNameKey(), $this->csrf->getTokenName());

@@ -96,10 +96,6 @@ class AdministratorsView extends AdminListView
 
         $fields[] = new InputField('Confirm Password', $passwordConfirmationFieldAttributes, FormHelper::getFieldError($passwordConfirmationFieldAttributes['name']));
 
-        // Role Field
-//        $selectedOption = (isset($fieldValues['role_id'])) ? (int) $fieldValues['role_id'] : $rolesModel->getRoleIdForRole($this->container->settings['administratorDefaultRole']); // null if not found
-//        $fields[] = $rolesModel->getIdSelectField(['name' => 'role_id', 'id' => 'role_id', 'required' => 'required'], 'Role', $selectedOption, FormHelper::getFieldError('role_id'));
-
         // Roles Checkboxes
         $rolesModel = new RolesModel();
         $rolesCheckboxes = [];
@@ -112,13 +108,12 @@ class AdministratorsView extends AdminListView
                 'class' => 'inlineFormField'
             ];
             // checked?
-//            if ()
+            if (in_array($roleId, $fieldValues['roles'])) {
+                $rolesCheckboxAttributes['checked'] = 'checked';
+            }
             $rolesCheckboxes[] = new CheckboxRadioInputField($roleData['role'], $rolesCheckboxAttributes);
         }
-//        $rolesCheckbox1 = new CheckboxRadioInputField('owner', ['type' => 'checkbox', 'name' => 'rolesGroup', 'value' => '1', 'id' => 'rolesOwner', 'class' => 'inlineFormField']);
-//        $rolesCheckbox2 = new CheckboxRadioInputField('director', ['type' => 'checkbox', 'name' => 'rolesGroup', 'value' => '37', 'id' => 'rolesDirector', 'class' => 'inlineFormField']);
         $fields[] = new Fieldset($rolesCheckboxes, [], true, 'Roles', null, FormHelper::getFieldError('roles', true));
-
 
         // CSRF Fields
         $fields[] = FormHelper::getCsrfNameField($this->csrf->getTokenNameKey(), $this->csrf->getTokenName());

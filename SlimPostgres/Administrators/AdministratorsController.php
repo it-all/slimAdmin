@@ -44,7 +44,6 @@ class AdministratorsController extends BaseController
             return true; // skip validation if there is already an error for the field
         }, 'Already exists.');
 
-        // name field is required (insert and edit)
         $this->validator->rule('required', ['name', 'username', 'roles']);
         $this->validator->rule('regex', 'name', '%^[a-zA-Z\s]+$%')->message('must be letters and spaces only');
         $this->validator->rule('lengthMin', 'username', 4);
@@ -60,6 +59,11 @@ class AdministratorsController extends BaseController
         if ($inserting || $record['username'] != $input['username']) {
             $this->validator->rule('unique', 'username', $this->administratorsModel->getPrimaryTableModel()->getColumnByName('username'), $this->validator);
         }
+
+        // all selected roles must be in roles table
+        $this->validator->rule('array', 'roles');
+        $rolesModel = new RolesModel();
+        $this->validator->rule('in', 'roles.*', array_keys($rolesModel->getRoles())); // role ids
     }
 
     public function postIndexFilter(Request $request, Response $response, $args)
@@ -77,19 +81,15 @@ class AdministratorsController extends BaseController
 
         $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
-//        var_dump($input);
-//        die();
-
         $this->setValidation($input);
 
         if (!$this->validator->validate()) {
-
             // redisplay the form with input values and error(s)
             FormHelper::setFieldErrors($this->validator->getFirstErrors());
             return $this->view->getInsert($request, $response, $args);
         }
 
-        if (!$res = $this->administratorsModel->insert($input['name'], $input['username'], $input['password'], (int) $input['role_id'])) {
+        if (!$res = $this->administratorsModel->create($input['name'], $input['username'], $input['password'], $input['roles'])) {
             throw new \Exception("Insert Failure");
         }
 

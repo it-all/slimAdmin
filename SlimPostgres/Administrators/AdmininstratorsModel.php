@@ -32,7 +32,13 @@ class AdministratorsModel extends MultiTableModel
         return 'level';
     }
 
-    public function insert(string $name, string $username, string $password)
+    // will be performing validation here. for now, assume validation has been performed
+    public function create(string $name, string $username, string $password, array $roles)
+    {
+        // insert
+    }
+
+    private function insert(string $name, string $username, string $password)
     {
         $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash) VALUES($1, $2, $3) RETURNING id", $name, $username, password_hash($password, PASSWORD_DEFAULT));
         return $q->execute();

@@ -7,6 +7,21 @@ use Valitron\Validator;
 
 class ValitronValidatorExtension extends Validator
 {
+    /**
+     * @param string $field
+     * @param string $msg
+     * @param array $params
+     * Override parent fn in order to fix field names that end in '.*'
+     */
+    public function error($field, $msg, array $params = array())
+    {
+        if (substr($field, mb_strlen($field) - 2, 2) == '.*') {
+            $field = substr($field, 0, mb_strlen($field) - 2);
+        }
+
+        parent::error($field, $msg, $params);
+    }
+
     public function getFirstErrors()
     {
         $firstErrors = [];

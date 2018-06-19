@@ -81,12 +81,23 @@ class QueryBuilder
         }
 
         // best to throw exception for failed call to stop further script execution or caller can use try/catch to handle
-        if (!$res = pg_query_params($this->sql, $this->args)) {
+        if (!$result = pg_query_params($this->sql, $this->args)) {
             // note pg_last_error seems to often not return anything
             $msg = pg_last_error() . " " . $this->sql . PHP_EOL . " Args: " . var_export($this->args, true);
             throw new \Exception("Query Execution Failure: $msg");
         }
-        return $res;
+
+        $this->resetQuery(); // prevent accidental multiple execution
+        return $result;
+    }
+
+    public function executeWithReturn(string $returnField)
+    {
+        if ($result = $this->execute()) {
+            $returned = pg_fetch_all($result);
+            return $returned[0][$returnField];
+        }
+        return false;
     }
 
     /**
@@ -95,11 +106,11 @@ class QueryBuilder
      */
     public function getOne()
     {
-        if ($res = $this->execute()) {
-            if (pg_num_rows($res) == 1) {
+        if ($result = $this->execute()) {
+            if (pg_num_rows($result) == 1) {
                 // make sure only 1 field in query
-                if (pg_num_fields($res) == 1) {
-                    return pg_fetch_array($res)[0];
+                if (pg_num_fields($result) == 1) {
+                    return pg_fetch_array($result)[0];
                 }
                 else {
                     throw new \Exception("Too many result fields");
@@ -108,7 +119,7 @@ class QueryBuilder
             else {
                 // either 0 or multiple records in result
                 // if 0
-                if (pg_num_rows($res) == 0) {
+                if (pg_num_rows($result) == 0) {
                     // no error here. client can error if appropriate
                     return false;
                 }
@@ -155,4 +166,11 @@ class QueryBuilder
     {
         return $this->args;
     }
+
+    public function resetQuery()
+    {
+        $this->sql = '';
+        $this->args = [];
+    }
+
 }

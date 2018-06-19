@@ -33,15 +33,48 @@ class AdministratorsModel extends MultiTableModel
     }
 
     // will be performing validation here. for now, assume validation has been performed
-    public function create(string $name, string $username, string $password, array $roles)
+    public function create(string $name, string $username, string $password, array $roleIds)
     {
-        // insert
+        // insert administrator then administrator_roles in a transaction
+        $q = new QueryBuilder("BEGIN");
+        $q->execute();
+
+        if ($administratorId = $this->insert($name, $username, $password)) {
+            if ($this->insertAdministratorRoles((int) $administratorId, $roleIds)) {
+                $q = new QueryBuilder("COMMIT");
+                $q->execute();
+                return $administratorId;
+            }
+        }
+
+        // a failure occurred
+        $q = new QueryBuilder("ROLLBACK");
+        $q->execute();
+        return false;
+    }
+
+    private function insertAdministratorRoles(int $administratorId, array $roleIds): bool
+    {
+        foreach ($roleIds as $roleId) {
+            if (!$administratorRoleId = $this->insertAdministratorRole($administratorId, (int) $roleId)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private function insertAdministratorRole(int $administratorId, int $roleId)
+    {
+        $returnField = 'id';
+        $q = new QueryBuilder("INSERT INTO ".self::ADM_ROLES_TABLE_NAME." (administrator_id, role_id) VALUES($1, $2) RETURNING $returnField", $administratorId, $roleId);
+        return $q->executeWithReturn($returnField);
     }
 
     private function insert(string $name, string $username, string $password)
     {
-        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash) VALUES($1, $2, $3) RETURNING id", $name, $username, password_hash($password, PASSWORD_DEFAULT));
-        return $q->execute();
+        $returnField = 'id';
+        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash) VALUES($1, $2, $3) RETURNING $returnField", $name, $username, password_hash($password, PASSWORD_DEFAULT));
+        return $q->executeWithReturn($returnField);
     }
 
     public function getChangedColumnsValues(array $inputValues, array $record): array

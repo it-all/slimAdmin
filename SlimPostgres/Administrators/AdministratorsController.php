@@ -89,18 +89,15 @@ class AdministratorsController extends BaseController
             return $this->view->getInsert($request, $response, $args);
         }
 
-        if (!$res = $this->administratorsModel->create($input['name'], $input['username'], $input['password'], $input['roles'])) {
+        if (!$administratorId = $this->administratorsModel->create($input['name'], $input['username'], $input['password'], $input['roles'])) {
             throw new \Exception("Insert Failure");
         }
 
-        $returned = pg_fetch_all($res);
-        $insertedRecordId = $returned[0]['id'];
-
-        $this->systemEvents->insertInfo("Inserted admin", (int) $this->authentication->getAdministratorId(), "id:$insertedRecordId");
+        $this->systemEvents->insertInfo("Inserted admin", (int) $this->authentication->getAdministratorId(), "id:$administratorId");
 
         FormHelper::unsetFormSessionVars();
 
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted record $insertedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
+        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted record $administratorId", App::STATUS_ADMIN_NOTICE_SUCCESS];
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS));
     }
 

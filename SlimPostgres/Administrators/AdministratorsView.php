@@ -108,7 +108,7 @@ class AdministratorsView extends AdminListView
                 'class' => 'inlineFormField'
             ];
             // checked?
-            if (in_array($roleId, $fieldValues['roles'])) {
+            if (isset($fieldValues['roles']) && in_array($roleId, $fieldValues['roles'])) {
                 $rolesCheckboxAttributes['checked'] = 'checked';
             }
             $rolesCheckboxes[] = new CheckboxRadioInputField($roleData['role'], $rolesCheckboxAttributes);

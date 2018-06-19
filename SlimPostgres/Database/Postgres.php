@@ -43,6 +43,7 @@ Class Postgres
         if (!$this->pgConn = pg_connect($connectionString)) {
             throw new \Exception('postgres connection failure');
         }
+        pg_set_error_verbosity($this->pgConn, PGSQL_ERRORS_VERBOSE);
     }
 
     public function getPgConn() {

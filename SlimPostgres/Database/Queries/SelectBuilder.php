@@ -20,24 +20,35 @@ class SelectBuilder extends QueryBuilder
         }
     }
 
+    //$whereColumnsInfo [column name sql => ['operators' => [], 'values' => []] ]
     private function addWhereClause(array $whereColumnsInfo)
     {
         foreach ($whereColumnsInfo as $columnNameSql => $columnWhereInfoArray) {
-            if (!isset($columnWhereInfoArray['operators'])) {
+
+            $operators = $columnWhereInfoArray['operators'];
+            $values = $columnWhereInfoArray['values'];
+
+            if (!isset($operators)) {
                 throw new \Exception('operators key not set');
             }
-            if (!isset($columnWhereInfoArray['values'])) {
+            if (!is_array($operators)) {
+                throw new \Exception('operators key must be array');
+            }
+            if (!isset($values)) {
                 throw new \Exception('values key not set');
             }
-            if (count($columnWhereInfoArray['operators']) != count($columnWhereInfoArray['values'])) {
+            if (!is_array($values)) {
+                throw new \Exception('values key must be array');
+            }
+            if (count($operators) != count($values)) {
                 throw new \Exception("number of operators must equal number of values");
             }
-            for ($i = 0; $i < count($columnWhereInfoArray['operators']); ++$i) {
-                if (!parent::validateWhereOperator($columnWhereInfoArray['operators'][$i])) {
-                    throw new \Exception("invalid whereOperator key ".$columnWhereInfoArray['operators'][$i]."  in whereColumnsInfo for $columnNameSql");
+            for ($i = 0; $i < count($operators); ++$i) {
+                if (!parent::validateWhereOperator($operators[$i])) {
+                    throw new \Exception("invalid whereOperator key ".$operators[$i]."  in whereColumnsInfo for $columnNameSql");
                 }
 
-                $this->addWhereColumn($columnNameSql, $columnWhereInfoArray['operators'][$i], $columnWhereInfoArray['values'][$i]);
+                $this->addWhereColumn($columnNameSql, $operators[$i], $values[$i]);
             }
         }
     }

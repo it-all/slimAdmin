@@ -5,8 +5,8 @@ namespace SlimPostgres\Forms;
 
 use It_All\FormFormer\Fields\InputField;
 use SlimPostgres\App;
-use SlimPostgres\Database\SingleTable\DatabaseColumnModel;
-use SlimPostgres\Database\SingleTable\SingleTableModel;
+use SlimPostgres\Database\DataMappers\ColumnMapper;
+use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Database\Postgres;
 
 class FormHelper
@@ -135,9 +135,9 @@ class FormHelper
         self::unsetSessionFormErrors();
     }
 
-    public static function getDatabaseColumnValidationValue(DatabaseColumnModel $databaseColumnModel, string $validationType)
+    public static function getDatabaseColumnValidationValue(ColumnMapper $databaseColumnMapper, string $validationType)
     {
-        foreach (self::getDatabaseColumnValidation($databaseColumnModel) as $validation) {
+        foreach (self::getDatabaseColumnValidation($databaseColumnMapper) as $validation) {
             if (!is_array($validation) && $validation == $validationType) {
                 return true;
             } elseif (is_array($validation) && $validation[0] == $validationType) {
@@ -148,23 +148,23 @@ class FormHelper
         return false;
     }
 
-    public static function getDatabaseColumnValidation(DatabaseColumnModel $databaseColumnModel): array
+    public static function getDatabaseColumnValidation(ColumnMapper $databaseColumnMapper): array
     {
         $columnValidation = [];
-        $columnConstraints = $databaseColumnModel->getConstraints();
+        $columnConstraints = $databaseColumnMapper->getConstraints();
 
-        if (!$databaseColumnModel->getIsNullable()) {
+        if (!$databaseColumnMapper->getIsNullable()) {
             $columnValidation[] = 'required';
         }
 
-        if ($databaseColumnModel->getCharacterMaximumLength() != null) {
-            $columnValidation[] = ['lengthMax', $databaseColumnModel->getCharacterMaximumLength()];
+        if ($databaseColumnMapper->getCharacterMaximumLength() != null) {
+            $columnValidation[] = ['lengthMax', $databaseColumnMapper->getCharacterMaximumLength()];
         }
 
-        if ($databaseColumnModel->isNumericType()) {
-            if ($databaseColumnModel->isIntegerType()) {
+        if ($databaseColumnMapper->isNumericType()) {
+            if ($databaseColumnMapper->isIntegerType()) {
                 $columnValidation[] = 'integer';
-                switch ($databaseColumnModel->getType()) {
+                switch ($databaseColumnMapper->getType()) {
                     case 'smallint':
                         $minValue = (in_array('positve', $columnConstraints)) ? 1 : Postgres::SMALLINT_MIN;
                         $columnValidation[] = ['min', $minValue];
@@ -212,10 +212,10 @@ class FormHelper
         return $columnValidation;
     }
 
-    public static function getDatabaseTableValidation(SingleTableModel $databaseTableModel): array
+    public static function getDatabaseTableValidation(TableMapper $databaseTableMapper): array
     {
         $validation = [];
-        foreach ($databaseTableModel->getColumns() as $column) {
+        foreach ($databaseTableMapper->getColumns() as $column) {
             // primary key does not have validation
             // do not impose required validation on boolean (checkbox) fields, even though the column may be not null, allowing 'f' (unchecked) is fine but doing required validation will cause an error for unchecked condition
             $columnValidation = ($column->isPrimaryKey() || $column->isBoolean()) ? [] : self::getDatabaseColumnValidation($column);
@@ -227,10 +227,10 @@ class FormHelper
         return $validation;
     }
 
-    public static function getDatabaseTableValidationFields(SingleTableModel $databaseTableModel): array
+    public static function getDatabaseTableValidationFields(TableMapper $databaseTableMapper): array
     {
         $fields = [];
-        foreach ($databaseTableModel->getColumns() as $column) {
+        foreach ($databaseTableMapper->getColumns() as $column) {
             // primary key does not have validation
             // do not impose required validation on boolean (checkbox) fields, even though the column may be not null, allowing 'f' (unchecked) is fine but doing required validation will cause an error for unchecked condition
             if (!$column->isPrimaryKey() && !$column->isBoolean()) {

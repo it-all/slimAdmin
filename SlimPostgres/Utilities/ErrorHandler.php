@@ -5,7 +5,8 @@ namespace SlimPostgres\Utilities;
 
 use SlimPostgres\Database\Postgres;
 use SlimPostgres\App;
-use SlimPostgres\SystemEvents\SystemEventsModel;
+use SlimPostgres\Utilities;
+use SlimPostgres\SystemEvents\SystemEventsMapper;
 
 class ErrorHandler
 {
@@ -16,7 +17,7 @@ class ErrorHandler
     private $mailer;
     private $emailTo;
     private $database;
-    private $systemEventsModel;
+    private $systemEventsMapper;
     private $fatalMessage;
 
     public function __construct(
@@ -38,10 +39,10 @@ class ErrorHandler
         $this->fatalMessage = $fatalMessage;
     }
 
-    public function setDatabaseAndSystemEventsModel(Postgres $database, SystemEventsModel $systemEventsModel)
+    public function setDatabaseAndSystemEventsMapper(Postgres $database, SystemEventsMapper $systemEventsMapper)
     {
         $this->setDatabase($database);
-        $this->setSystemEventsModel($systemEventsModel);
+        $this->setSystemEventsMapper($systemEventsMapper);
     }
 
     public function setDatabase(Postgres $database)
@@ -49,14 +50,14 @@ class ErrorHandler
         $this->database = $database;
     }
 
-    public function setSystemEventsModel(SystemEventsModel $systemEventsModel)
+    public function setSystemEventsMapper(SystemEventsMapper $systemEventsMapper)
     {
-        $this->systemEventsModel = $systemEventsModel;
+        $this->systemEventsMapper = $systemEventsMapper;
     }
 
     /*
      * 4 ways to handle:
-     * -database - always (as long as database and systemEventsModel properties have been set)
+     * -database - always (as long as database and systemEventsMapper properties have been set)
      * -log - always
      * -echo - depends on property
      * -email - depends on property. never email error deets.
@@ -72,7 +73,7 @@ class ErrorHandler
         $errorMessage = $this->generateMessage($messageBody);
 
         // database
-        if (isset($this->database) && isset($this->systemEventsModel)) {
+        if (isset($this->database) && isset($this->systemEventsMapper)) {
             switch ($this->getErrorType($errno)) {
                 case 'Core Error':
                 case 'Parse Error':
@@ -95,7 +96,7 @@ class ErrorHandler
 
             $administratorId = (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID])) ? (int) $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID] : null;
 
-            @$this->systemEventsModel->insertEvent('PHP Error', $systemEventType, $administratorId, $databaseErrorMessage);
+            @$this->systemEventsMapper->insertEvent('PHP Error', $systemEventType, $administratorId, $databaseErrorMessage);
         }
 
         // log
@@ -177,7 +178,7 @@ class ErrorHandler
     {
         $message = "[".date('Y-m-d H:i:s e')."] ";
 
-        if (App::isRunningFromCommandLine()) {
+        if (Utilities\Functions::isRunningFromCommandLine()) {
             global $argv;
             $message .= gethostname() . PHP_EOL . "Command line: " . $argv[0];
         } else {
@@ -295,7 +296,7 @@ class ErrorHandler
                 $outLine .= $call['function']."()";
             }
             if (isset($call['args'])) {
-                $outLine .= " {".App::arrayWalkToStringRecursive($call['args'], 0, 1000, PHP_EOL)."}";
+                $outLine .= " {".Utilities\Functions::arrayWalkToStringRecursive($call['args'], 0, 1000, PHP_EOL)."}";
             }
             $out .= "$outLine" . PHP_EOL;
         }

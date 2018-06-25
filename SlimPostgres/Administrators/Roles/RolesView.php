@@ -4,16 +4,16 @@ declare(strict_types=1);
 namespace SlimPostgres\Administrators\Roles;
 
 use SlimPostgres\Database\Queries\QueryBuilder;
-use SlimPostgres\Database\SingleTable\SingleTableView;
+use SlimPostgres\UserInterface\DatabaseTableListView;
 use SlimPostgres\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Response;
 
-class RolesView extends SingleTableView
+class RolesView extends DatabaseTableListView
 {
     public function __construct(Container $container)
     {
-        parent::__construct($container, new RolesModel(), ROUTEPREFIX_ROLES);
+        parent::__construct($container, new RolesMapper(), ROUTEPREFIX_ROLES);
     }
 
     // override in order to not show delete link for roles in use
@@ -24,7 +24,7 @@ class RolesView extends SingleTableView
         }
 
         $filterColumnsInfo = (isset($_SESSION[$this->sessionFilterColumnsKey])) ? $_SESSION[$this->sessionFilterColumnsKey] : null;
-        if ($results = pg_fetch_all($this->model->select($filterColumnsInfo))) {
+        if ($results = pg_fetch_all($this->mapper->select("*", $filterColumnsInfo))) {
             $numResults = count($results);
         } else {
             $numResults = 0;
@@ -32,7 +32,7 @@ class RolesView extends SingleTableView
 
         $allowDeleteRoles = [];
         foreach ($results as $row) {
-            if (!$this->model::hasAdmin((int) $row['id'])) {
+            if (!$this->mapper::hasAdministrator((int) $row['id'])) {
                 $allowDeleteRoles[] = $row['id'];
             }
         }
@@ -47,7 +47,7 @@ class RolesView extends SingleTableView
             $response,
             'admin/lists/rolesList.php',
             [
-                'title' => $this->model->getTableName(),
+                'title' => $this->mapper->getTableName(),
                 'insertLink' => $this->insertLink,
                 'filterOpsList' => QueryBuilder::getWhereOperatorsText(),
                 'filterValue' => $filterFieldValue,
@@ -64,9 +64,9 @@ class RolesView extends SingleTableView
                 'allowDeleteRoles' => $allowDeleteRoles,
                 'results' => $results,
                 'numResults' => $numResults,
-                'numColumns' => $this->model->getCountSelectColumns(),
-                'sortColumn' => $this->model->getOrderByColumnName(),
-                'sortByAsc' => $this->model->getOrderByAsc(),
+                'numColumns' => $this->mapper->getCountSelectColumns(),
+                'sortColumn' => $this->mapper->getOrderByColumnName(),
+                'sortByAsc' => $this->mapper->getOrderByAsc(),
                 'navigationItems' => $this->navigationItems
             ]
         );

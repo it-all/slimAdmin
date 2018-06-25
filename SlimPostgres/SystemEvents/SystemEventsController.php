@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\SystemEvents;
 
-use SlimPostgres\BaseController;
+use SlimPostgres\Controllers\BaseController;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -11,17 +11,17 @@ use Slim\Http\Response;
 class SystemEventsController extends BaseController
 {
     private $view;
-    private $model;
+    private $mapper;
 
     public function __construct(Container $container)
     {
         $this->view = new SystemEventsView($container);
         parent::__construct($container);
-        $this->model = $this->systemEvents; // already in container as a service
+        $this->mapper = $this->systemEvents; // already in container as a service
     }
 
     public function postIndexFilter(Request $request, Response $response, $args)
     {
-        return $this->setIndexFilter($request, $response, $args, $this->model::SELECT_COLUMNS, ROUTE_SYSTEM_EVENTS, $this->view);
+        return $this->setIndexFilter($request, $response, $args, $this->mapper::SELECT_COLUMNS, ROUTE_SYSTEM_EVENTS, $this->view);
     }
 }

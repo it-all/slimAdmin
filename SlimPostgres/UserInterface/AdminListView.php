@@ -5,19 +5,19 @@ namespace SlimPostgres\UserInterface;
 
 use SlimPostgres\App;
 use SlimPostgres\Database\Queries\QueryBuilder;
-use SlimPostgres\Database\TableModel;
+use SlimPostgres\Database\DataMappers\TableMappers;
 use SlimPostgres\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class AdminListView extends AdminView
+abstract class AdminListView extends AdminView
 {
     protected $sessionFilterColumnsKey;
     protected $sessionFilterValueKey;
     protected $sessionFilterFieldKey;
     protected $indexRoute;
-    protected $model;
+    protected $mapper;
     protected $template;
     protected $filterResetRoute;
     protected $insertLink; // false or ['text' => {link text}, 'route' => {route}]
@@ -27,13 +27,13 @@ class AdminListView extends AdminView
     protected $addDeleteColumn;
     protected $deleteRoute;
 
-    public function __construct(Container $container, string $filterFieldsPrefix, string $indexRoute, TableModel $model, string $filterResetRoute, string $template = 'admin/lists/list.php')
+    public function __construct(Container $container, string $filterFieldsPrefix, string $indexRoute, TableMappers $mapper, string $filterResetRoute, string $template = 'admin/lists/list.php')
     {
         $this->sessionFilterColumnsKey = $filterFieldsPrefix . 'FilterColumns';
         $this->sessionFilterValueKey = $filterFieldsPrefix . 'FilterValue';
         $this->sessionFilterFieldKey = $filterFieldsPrefix . 'Filter';
         $this->indexRoute = $indexRoute;
-        $this->model = $model;
+        $this->mapper = $mapper;
         $this->template = $template;
         $this->filterResetRoute = $filterResetRoute;
         $this->updatePermitted = false; // initialize
@@ -84,7 +84,7 @@ class AdminListView extends AdminView
         }
 
         $filterColumnsInfo = (isset($_SESSION[$this->sessionFilterColumnsKey])) ? $_SESSION[$this->sessionFilterColumnsKey] : null;
-        if ($results = pg_fetch_all($this->model->select($filterColumnsInfo))) {
+        if ($results = pg_fetch_all($this->mapper->select($this->mapper->getSelectColumnsString(), $filterColumnsInfo))) {
             $numResults = count($results);
         } else {
             $numResults = 0;
@@ -100,7 +100,7 @@ class AdminListView extends AdminView
             $response,
             $this->template,
             [
-                'title' => $this->model->getFormalTableName(),
+                'title' => $this->mapper->getFormalTableName(),
                 'insertLink' => $this->insertLink,
                 'filterOpsList' => QueryBuilder::getWhereOperatorsText(),
                 'filterValue' => $filterFieldValue,
@@ -116,9 +116,9 @@ class AdminListView extends AdminView
                 'deleteRoute' => $this->deleteRoute,
                 'results' => $results,
                 'numResults' => $numResults,
-                'numColumns' => $this->model->getCountSelectColumns(),
-                'sortColumn' => $this->model->getOrderByColumnName(),
-                'sortByAsc' => $this->model->getOrderByAsc(),
+                'numColumns' => $this->mapper->getCountSelectColumns(),
+                'sortColumn' => $this->mapper->getOrderByColumnName(),
+                'sortByAsc' => $this->mapper->getOrderByAsc(),
                 'navigationItems' => $this->navigationItems
             ]
         );

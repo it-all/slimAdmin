@@ -10,7 +10,7 @@ use SlimPostgres\Database\Postgres;
 use SlimPostgres\Security\Authentication\AuthenticationService;
 use SlimPostgres\Security\Authorization\AuthorizationService;
 use SlimPostgres\Security\CsrfMiddleware;
-use SlimPostgres\SystemEvents\SystemEventsModel;
+use SlimPostgres\SystemEvents\SystemEventsMapper;
 use SlimPostgres\Utilities;
 
 class App
@@ -20,7 +20,7 @@ class App
     private $commonConfigSettingsKeys;
     private $environmentalVariables;
     private $database;
-    private $systemEventsModel;
+    private $systemEventsMapper;
     private $mailer;
 
     const PATH_PHP_ERRORS_LOG = APPLICATION_ROOT_DIRECTORY . '/storage/logs/phpErrors.log';
@@ -126,13 +126,13 @@ class App
         $this->database = new Postgres($postgresConnectionString);
 
         // used in error handler and container
-        $this->systemEventsModel = new SystemEventsModel();
+        $this->systemEventsMapper = new SystemEventsMapper();
 
         if ($this->config['errors']['logToDatabase']) {
-            $errorHandler->setDatabaseAndSystemEventsModel($this->database, $this->systemEventsModel);
+            $errorHandler->setDatabaseAndSystemEventsMapper($this->database, $this->systemEventsMapper);
         }
 
-        if (!self::isRunningFromCommandLine()) {
+        if (!Utilities\Functions::isRunningFromCommandLine()) {
             /**
              * verify/force all pages to be https. and verify/force www or not www based on Config::useWww
              * if not, REDIRECT TO PROPER SECURE PAGE
@@ -164,7 +164,7 @@ class App
         $slim = new \Slim\App($this->getSlimSettings());
         $slimContainer = $slim->getContainer();
 
-        $this->setSlimDependences($slimContainer, $this->database, $this->systemEventsModel, $this->mailer);
+        $this->setSlimDependences($slimContainer, $this->database, $this->systemEventsMapper, $this->mailer);
 
         $this->removeSlimErrorHandler($slimContainer);
 
@@ -191,7 +191,7 @@ class App
             return function ($request, $response) use ($container) {
 
                 // log error
-                $this->systemEventsModel->insertEvent('404 Page Not Found', 'notice', $container->authentication->getAdministratorId());
+                $this->systemEventsMapper->insertEvent('404 Page Not Found', 'notice', $container->authentication->getAdministratorId());
 
                 $_SESSION[App::SESSION_KEY_NOTICE] = [$this->config['pageNotFoundText'], App::STATUS_NOTICE_FAILURE];
                 return $container->view->render(
@@ -204,7 +204,7 @@ class App
         return $slimSettings;
     }
 
-    private function setSlimDependences($container, Postgres $database, SystemEventsModel $systemEventsModel, Utilities\PhpMailerService $mailer)
+    private function setSlimDependences($container, Postgres $database, SystemEventsMapper $systemEventsMapper, Utilities\PhpMailerService $mailer)
     {
         // Template
         $container['view'] = function ($container) {
@@ -243,8 +243,8 @@ class App
         };
 
         // System Events (Database Log)
-        $container['systemEvents'] = function($container) use ($systemEventsModel) {
-            return $systemEventsModel;
+        $container['systemEvents'] = function($container) use ($systemEventsMapper) {
+            return $systemEventsMapper;
         };
 
         // Mailer
@@ -302,7 +302,7 @@ class App
     private function getRedirect(string $toURI = null): ?string
     {
         if (is_null($toURI)) {
-            if (self::isRunningFromCommandLine()) {
+            if (Utilities\Functions::isRunningFromCommandLine()) {
                 return null;
             }
             $toURI = $this->getCurrentUri(true);
@@ -314,45 +314,6 @@ class App
         }
 
         return $this->getBaseUrl() . $toURI;
-    }
-
-    /**
-     * Returns true if the current script is running from the command line (ie, CLI).
-     */
-    static public function isRunningFromCommandLine(): bool
-    {
-        return php_sapi_name() == 'cli';
-    }
-
-    /**
-     * converts array to string
-     * @param array $arr
-     * @param int $level
-     * @return string
-     */
-    static public function arrayWalkToStringRecursive(array $arr, int $level = 0, int $maxLevel = 1000, $newLine = '<br>'): string
-    {
-        $out = "";
-        $tabs = " ";
-        for ($i = 0; $i < $level; $i++) {
-            $tabs .= " ^"; // use ^ to denote another level
-        }
-        foreach ($arr as $k => $v) {
-            $out .= "$newLine$tabs$k: ";
-            if (is_object($v)) {
-                $out .= 'object type: '.get_class($v);
-            } elseif (is_array($v)) {
-                $newLevel = $level + 1;
-                if ($newLevel > $maxLevel) {
-                    $out .= ' array too deep, quitting';
-                } else {
-                    $out .= self::arrayWalkToStringRecursive($v, $newLevel, $maxLevel, $newLine);
-                }
-            } else {
-                $out .= (string)$v;
-            }
-        }
-        return $out;
     }
 
     private function getCurrentUri(bool $includeQueryString = true): string
@@ -414,11 +375,6 @@ class App
             return true;
         }
         return preg_match('/^[-,a-zA-Z0-9]{1,128}$/', $sessionId) > 0;
-    }
-
-    static public function getIntOrNull(?string $input)
-    {
-        return ($input == null) ? null : (int) $input;
     }
 
     /** because of route naming conventions, only send resourceType of post, put, or patch */

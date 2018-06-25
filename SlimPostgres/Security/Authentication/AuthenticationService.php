@@ -5,8 +5,8 @@ namespace SlimPostgres\Security\Authentication;
 
 use It_All\FormFormer\Form;
 use SlimPostgres\Administrators\Administrator;
-use SlimPostgres\Administrators\AdministratorsModel;
-use SlimPostgres\Administrators\Logins\LoginsModel;
+use SlimPostgres\Administrators\AdministratorsMapper;
+use SlimPostgres\Administrators\Logins\LoginsMapper;
 use SlimPostgres\App;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Forms\FormHelper;
@@ -83,9 +83,9 @@ class AuthenticationService
 
     public function attemptLogin(string $username, string $password): bool
     {
-        $administratorsModel = new AdministratorsModel();
+        $administratorsMapper = new AdministratorsMapper();
         // check if administrator exists
-        if (!$administrator = $administratorsModel->getByUsername($username)) {
+        if (!$administrator = $administratorsMapper->getObjectByUsername($username)) {
             $this->loginFailed($username, null);
             return false;
         }
@@ -115,7 +115,7 @@ class AuthenticationService
         $this->setAdministratorSession($administrator);
         unset($_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS]);
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Logged in", App::STATUS_ADMIN_NOTICE_SUCCESS];
-        (new LoginsModel())->insertSuccessfulLogin($administrator);
+        (new LoginsMapper())->insertSuccessfulLogin($administrator);
     }
 
     private function incrementNumFailedLogins()
@@ -132,7 +132,7 @@ class AuthenticationService
         $this->incrementNumFailedLogins();
 
         // insert login_attempts record
-        (new LoginsModel())->insertFailedLogin($username, $administrator);
+        (new LoginsMapper())->insertFailedLogin($username, $administrator);
     }
 
     public function tooManyFailedLogins(): bool
@@ -168,11 +168,11 @@ class AuthenticationService
 
     public function getForm(string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $action)
     {
-        $administratorsModel = new AdministratorsModel();
+        $administratorsMapper = new AdministratorsMapper();
 
         $fields = [];
-        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($administratorsModel->getColumnByName('username'));
-        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($administratorsModel->getColumnByName('password_hash'), null, null, 'Password', 'password');
+        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($administratorsMapper->getColumnByName('username'));
+        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($administratorsMapper->getColumnByName('password_hash'), null, null, 'Password', 'password');
         $fields[] = FormHelper::getCsrfNameField($csrfNameKey, $csrfNameValue);
         $fields[] = FormHelper::getCsrfValueField($csrfValueKey, $csrfValueValue);
         $fields[] = FormHelper::getSubmitField();

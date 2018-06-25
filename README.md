@@ -25,7 +25,7 @@ coming soon
   
 CODING NEW FUNCTIONALITY  
 *work in progress*  
-Create a new directory under domain and create a Model/View/Controller (or whatever code structure you desire) as necessary. You can model these files after existing functionality such as Domain/Admin/Marketing/Testimonials (coming soon) (single database table functionality so uses SingleTable files) or SlimPostgres/Administrators (joined database tables so mostly custom code).  
+Create a new directory under domain and create a Mapper/View/Controller (or whatever code structure you desire) as necessary. You can model these files after existing functionality such as Domain/Admin/Marketing/Testimonials (coming soon) (single database table functionality so uses SingleTable files) or SlimPostgres/Administrators (joined database tables so mostly custom code).  
 Add and configure your new route to the system by:  
 - Adding a new route name constant in config/constants.php  
 - Adding the new route in config/routes.php  
@@ -49,7 +49,7 @@ Upon browsing to the administrative directory set in $config['adminPath'] authen
 These options are found in the navigation menu at top left. Once other options are coded, they can be added to the menu by uncommenting/adding to $config['slim']['adminNav'].  
 
 <a name="se">System Event Database Logging</a>  
-Certain events such as logging in, logging out, inserting, updating, and deleting database records are automatically logged into the SystemEvents table. You can choose other events to insert as you write your application. For usage examples and help, search "systemEvents->insert" and see SystemEventsModel.php. Note that PHP errors are also logged to the SystemEvents table by default (this can be turned off in $config['errors']['logToDatabase']).  
+Certain events such as logging in, logging out, inserting, updating, and deleting database records are automatically logged into the SystemEvents table. You can choose other events to insert as you write your application. For usage examples and help, search "systemEvents->insert" and see SystemEventsMapper.php. Note that PHP errors are also logged to the SystemEvents table by default (this can be turned off in $config['errors']['logToDatabase']).  
 
 <a name="eh">Error Handling</a>  
   

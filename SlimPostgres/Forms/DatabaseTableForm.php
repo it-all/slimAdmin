@@ -9,21 +9,21 @@ use It_All\FormFormer\Fields\SelectField;
 use It_All\FormFormer\Fields\SelectOption;
 use It_All\FormFormer\Fields\TextareaField;
 use It_All\FormFormer\Form;
-use SlimPostgres\Database\SingleTable\DatabaseColumnModel;
-use SlimPostgres\Database\SingleTable\SingleTableModel;
+use SlimPostgres\Database\DataMappers\ColumnMapper;
+use SlimPostgres\Database\DataMappers\TableMapper;
 
 class DatabaseTableForm extends Form
 {
     const TEXTAREA_COLS = 50;
     const TEXTAREA_ROWS = 5;
 
-    public function __construct(SingleTableModel $databaseTableModel, string $formAction, string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $databaseAction = 'insert', array $fieldData = null)
+    public function __construct(TableMapper $databaseTableMapper, string $formAction, string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $databaseAction = 'insert', array $fieldData = null)
     {
         $this->validateDatabaseActionString($databaseAction);
 
         $fields = [];
 
-        foreach ($databaseTableModel->getColumns() as $column) {
+        foreach ($databaseTableMapper->getColumns() as $column) {
             if ($this->includeFieldForColumn($column, $databaseAction)) {
                 // value
                 if (isset($fieldData)) {
@@ -61,7 +61,7 @@ class DatabaseTableForm extends Form
      * conditions for returning false:
      * - primary column
      */
-    protected function includeFieldForColumn(DatabaseColumnModel $column): bool
+    protected function includeFieldForColumn(ColumnMapper $column): bool
     {
         if ($column->isPrimaryKey()) {
             return false;
@@ -70,7 +70,7 @@ class DatabaseTableForm extends Form
         return true;
     }
 
-    protected static function getMinMaxForIntegerTypes(DatabaseColumnModel $column): array
+    protected static function getMinMaxForIntegerTypes(ColumnMapper $column): array
     {
         switch ($column->getType()) {
             case 'smallint':
@@ -113,7 +113,7 @@ class DatabaseTableForm extends Form
     }
 
     public static function getFieldFromDatabaseColumn(
-        DatabaseColumnModel $column,
+        ColumnMapper $column,
         bool $isRequiredOverride = null,
         string $valueOverride = null,
         string $labelOverride = '',

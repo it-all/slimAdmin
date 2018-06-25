@@ -5,13 +5,14 @@ namespace SlimPostgres\Administrators;
 
 use It_All\FormFormer\Fields\InputFields\CheckboxRadioInputField;
 use It_All\FormFormer\Fieldset;
+use SlimPostgres\Administrators\Administrator;
 use SlimPostgres\Administrators\Roles\Roles;
-use SlimPostgres\Administrators\Roles\RolesModel;
+use SlimPostgres\Administrators\Roles\RolesMapper;
 use It_All\FormFormer\Fields\InputField;
 use It_All\FormFormer\Form;
 use SlimPostgres\App;
+use SlimPostgres\ResponseUtilities;
 use SlimPostgres\Database\Queries\QueryBuilder;
-use SlimPostgres\Database\SingleTable\SingleTableHelper;
 use SlimPostgres\UserInterface\AdminListView;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Forms\FormHelper;
@@ -21,20 +22,22 @@ use Slim\Http\Response;
 
 class AdministratorsView extends AdminListView
 {
+    use ResponseUtilities;
+
     protected $routePrefix;
-    protected $administratorsModel;
+    protected $administratorsMapper;
 
     public function __construct(Container $container)
     {
         $this->routePrefix = ROUTEPREFIX_ADMINISTRATORS;
-        $this->administratorsModel = new AdministratorsModel();
+        $this->administratorsMapper = new AdministratorsMapper();
 
-        parent::__construct($container, 'administrators', ROUTE_ADMINISTRATORS, $this->administratorsModel, ROUTE_ADMINISTRATORS_RESET, 'admin/lists/administratorsList.php');
+        parent::__construct($container, 'administrators', ROUTE_ADMINISTRATORS, $this->administratorsMapper, ROUTE_ADMINISTRATORS_RESET, 'admin/lists/administratorsList.php');
 
-        $insertLink = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->administratorsModel->getPrimaryTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
+        $insertLink = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->administratorsMapper->getPrimaryTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
         $this->setInsert($insertLink);
 
-        $this->setUpdate($this->authorization->isAuthorized($this->getPermissions('update')), $this->administratorsModel->getUpdateColumnName(), App::getRouteName(true, $this->routePrefix, 'update'));
+        $this->setUpdate($this->authorization->isAuthorized($this->getPermissions('update')), $this->administratorsMapper->getUpdateColumnName(), App::getRouteName(true, $this->routePrefix, 'update'));
 
         $this->setDelete($this->container->authorization->isAuthorized($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
     }
@@ -44,7 +47,7 @@ class AdministratorsView extends AdminListView
         return mb_strlen(FormHelper::getFieldError('password')) > 0 || mb_strlen(FormHelper::getFieldError('password_confirm')) > 0;
     }
 
-    private function getForm(Request $request, string $action = 'insert', int $primaryKey = null,  array $record = null)
+    private function getForm(Request $request, string $action = 'insert', int $primaryKey = null, Administrator $administrator = null)
     {
         if ($action != 'insert' && $action != 'update') {
             throw new \Exception("Invalid action $action");
@@ -58,8 +61,15 @@ class AdministratorsView extends AdminListView
             $formAction = $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'insert', 'post'));
             $passwordLabel = 'Password';
             $passwordFieldsRequired = true;
-        } else {
-            $fieldValues = ($request->isGet()) ? $record : $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
+        } else { // update
+            if ($request->isGet()) { // database values
+                $fieldValues['name'] = $administrator->getName();
+                $fieldValues['username'] = $administrator->getUsername();
+                $fieldValues['password'] = $administrator->getPasswordHash();
+                $fieldValues['roles'] = $administrator->getRoles();
+            } else {
+                $fieldValues = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
+            }
             $formAction = $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $primaryKey]);
             $passwordLabel = 'Password [leave blank to keep existing]';
             $passwordFieldsRequired = false;
@@ -68,11 +78,11 @@ class AdministratorsView extends AdminListView
 
         // Name Field
         $nameValue = (isset($fieldValues['name'])) ? $fieldValues['name'] : '';
-        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($this->administratorsModel->getPrimaryTableModel()->getColumnByName('name'), null, $nameValue);
+        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($this->administratorsMapper->getPrimaryTableMapper()->getColumnByName('name'), null, $nameValue);
 
         // Username Field
         $usernameValue = (isset($fieldValues['username'])) ? $fieldValues['username'] : '';
-        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($this->administratorsModel->getPrimaryTableModel()->getColumnByName('username'), null, $usernameValue);
+        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($this->administratorsMapper->getPrimaryTableMapper()->getColumnByName('username'), null, $usernameValue);
 
         // Password Fields
         // determine values of pw and pw conf fields
@@ -97,9 +107,9 @@ class AdministratorsView extends AdminListView
         $fields[] = new InputField('Confirm Password', $passwordConfirmationFieldAttributes, FormHelper::getFieldError($passwordConfirmationFieldAttributes['name']));
 
         // Roles Checkboxes
-        $rolesModel = new RolesModel();
+        $rolesMapper = new RolesMapper();
         $rolesCheckboxes = [];
-        foreach ($rolesModel->getRoles() as $roleId => $roleData) {
+        foreach ($rolesMapper->getRoles() as $roleId => $roleData) {
             $rolesCheckboxAttributes = [
                 'type' => 'checkbox',
                 'name' => 'roles[]',
@@ -108,7 +118,7 @@ class AdministratorsView extends AdminListView
                 'class' => 'inlineFormField'
             ];
             // checked?
-            if (isset($fieldValues['roles']) && in_array($roleId, $fieldValues['roles'])) {
+            if (isset($fieldValues['roles']) && array_key_exists($roleId, $fieldValues['roles'])) {
                 $rolesCheckboxAttributes['checked'] = 'checked';
             }
             $rolesCheckboxes[] = new CheckboxRadioInputField($roleData['role'], $rolesCheckboxAttributes);
@@ -135,7 +145,7 @@ class AdministratorsView extends AdminListView
             $response,
             'admin/form.php',
             [
-                'title' => 'Insert '. $this->administratorsModel->getPrimaryTableName(false),
+                'title' => 'Insert '. $this->administratorsMapper->getPrimaryTableName(false),
                 'form' => $this->getForm($request),
                 'navigationItems' => $this->navigationItems
             ]
@@ -150,17 +160,17 @@ class AdministratorsView extends AdminListView
     /** this can be called for both the initial get and the posted form if errors exist (from controller) */
     public function updateView(Request $request, Response $response, $args)
     {
-        // make sure there is a record for the model
-        if (!$record = $this->administratorsModel->getPrimaryTableModel()->selectForPrimaryKey($args['primaryKey'])) {
-            return SingleTableHelper::updateRecordNotFound($this->container, $response, $args['primaryKey'], $this->administratorsModel->getPrimaryTableModel(), $this->routePrefix);
+        // make sure there is an administrator for the primary key
+        if (!$administrator = $this->administratorsMapper->getObjectById((int) $args['primaryKey'])) {
+            return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->administratorsMapper->getPrimaryTableMapper(), 'update');
         }
 
         return $this->view->render(
             $response,
             'admin/form.php',
             [
-                'title' => 'Update ' . $this->administratorsModel->getPrimaryTableModel()->getFormalTableName(false),
-                'form' => $this->getForm($request, 'update', (int) $args['primaryKey'], $record),
+                'title' => 'Update ' . $this->administratorsMapper->getPrimaryTableMapper()->getFormalTableName(false),
+                'form' => $this->getForm($request, 'update', (int) $args['primaryKey'], $administrator),
                 'primaryKey' => $args['primaryKey'],
                 'navigationItems' => $this->navigationItems
             ]
@@ -180,7 +190,7 @@ class AdministratorsView extends AdminListView
         }
 
         $filterColumnsInfo = (isset($_SESSION[$this->sessionFilterColumnsKey])) ? $_SESSION[$this->sessionFilterColumnsKey] : null;
-        if ($results = $this->model->selectArray($filterColumnsInfo)) {
+        if ($results = $this->mapper->selectArray($this->mapper->getSelectColumnsString(), $filterColumnsInfo)) {
             $numResults = count($results);
         } else {
             $numResults = 0;
@@ -196,7 +206,7 @@ class AdministratorsView extends AdminListView
             $response,
             $this->template,
             [
-                'title' => $this->model->getFormalTableName(),
+                'title' => $this->mapper->getFormalTableName(),
                 'insertLink' => $this->insertLink,
                 'filterOpsList' => QueryBuilder::getWhereOperatorsText(),
                 'filterValue' => $filterFieldValue,
@@ -212,9 +222,9 @@ class AdministratorsView extends AdminListView
                 'deleteRoute' => $this->deleteRoute,
                 'results' => $results,
                 'numResults' => $numResults,
-                'numColumns' => $this->model->getCountSelectColumns(),
-                'sortColumn' => $this->model->getOrderByColumnName(),
-                'sortByAsc' => $this->model->getOrderByAsc(),
+                'numColumns' => $this->mapper->getCountSelectColumns(),
+                'sortColumn' => $this->mapper->getOrderByColumnName(),
+                'sortByAsc' => $this->mapper->getOrderByAsc(),
                 'navigationItems' => $this->navigationItems
             ]
         );

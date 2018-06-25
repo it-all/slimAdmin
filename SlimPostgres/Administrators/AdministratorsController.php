@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Administrators;
 
-use SlimPostgres\Administrators\Roles\RolesModel;
+use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\App;
-use SlimPostgres\BaseController;
-use SlimPostgres\Database\SingleTable\SingleTableController;
-use SlimPostgres\Database\SingleTable\SingleTableHelper;
+use SlimPostgres\ResponseUtilities;
+use SlimPostgres\Controllers\BaseController;
+use SlimPostgres\Controllers\DatabaseTableController;
 use SlimPostgres\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
@@ -15,26 +15,29 @@ use Slim\Http\Response;
 
 class AdministratorsController extends BaseController
 {
-    private $administratorsModel;
+    use ResponseUtilities;
+
+    private $administratorsMapper;
     private $view;
     private $routePrefix;
-    private $administratorsSingleTableController;
+    private $administratorsDatabaseTableController;
 
     public function __construct(Container $container)
     {
-        $this->administratorsModel = new AdministratorsModel();
+        $this->administratorsMapper = new AdministratorsMapper();
         $this->view = new AdministratorsView($container);
         $this->routePrefix = ROUTEPREFIX_ADMINISTRATORS;
-        $this->administratorsSingleTableController = new SingleTableController($container, $this->administratorsModel->getPrimaryTableModel(), $this->view, $this->routePrefix);
+        $this->administratorsDatabaseTableController = new DatabaseTableController($container, $this->administratorsMapper->getPrimaryTableMapper(), $this->view, $this->routePrefix);
         parent::__construct($container);
     }
 
-    private function setValidation(array $input, array $record = null)
+    // if this is for an update there must be changed fields
+    private function setValidation(array $input, array $changedFieldValues = [])
     {
         $this->validator = $this->validator->withData($input);
 
-        // bool - either inserting or !inserting (editing)
-        $inserting = $record == null;
+        // bool - either inserting or !inserting (updating)
+        $inserting = count($changedFieldValues) == 0;
 
         // define unique column rule to be used in certain situations below
         $this->validator::addRule('unique', function($field, $value, array $params = [], array $fields = []) {
@@ -56,19 +59,19 @@ class AdministratorsController extends BaseController
         }
 
         // unique column rule for username if it has changed
-        if ($inserting || $record['username'] != $input['username']) {
-            $this->validator->rule('unique', 'username', $this->administratorsModel->getPrimaryTableModel()->getColumnByName('username'), $this->validator);
+        if ($inserting || array_key_exists('username', $changedFieldValues)) {
+            $this->validator->rule('unique', 'username', $this->administratorsMapper->getPrimaryTableMapper()->getColumnByName('username'), $this->validator);
         }
 
         // all selected roles must be in roles table
         $this->validator->rule('array', 'roles');
-        $rolesModel = new RolesModel();
-        $this->validator->rule('in', 'roles.*', array_keys($rolesModel->getRoles())); // role ids
+        $rolesMapper = new RolesMapper();
+        $this->validator->rule('in', 'roles.*', array_keys($rolesMapper->getRoles())); // role ids
     }
 
     public function postIndexFilter(Request $request, Response $response, $args)
     {
-        return $this->setIndexFilter($request, $response, $args, $this->administratorsModel::SELECT_COLUMNS, ROUTE_ADMINISTRATORS, $this->view);
+        return $this->setIndexFilter($request, $response, $args, $this->administratorsMapper::SELECT_COLUMNS, ROUTE_ADMINISTRATORS, $this->view);
     }
 
     public function postInsert(Request $request, Response $response, $args)
@@ -89,7 +92,7 @@ class AdministratorsController extends BaseController
             return $this->view->getInsert($request, $response, $args);
         }
 
-        if (!$administratorId = $this->administratorsModel->create($input['name'], $input['username'], $input['password'], $input['roles'])) {
+        if (!$administratorId = $this->administratorsMapper->create($input['name'], $input['username'], $input['password'], $input['roles'])) {
             throw new \Exception("Insert Failure");
         }
 
@@ -99,6 +102,57 @@ class AdministratorsController extends BaseController
 
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted record $administratorId", App::STATUS_ADMIN_NOTICE_SUCCESS];
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS));
+    }
+
+    private function getChangedFieldValues(Administrator $administrator): ?array 
+    {
+        $changedFieldValues = [];
+
+        $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
+
+        if ($administrator->getName() != $input['name']) {
+            $changedFieldValues['name'] = $input['name'];
+        }
+        if ($administrator->getUsername() != $input['username']) {
+            $changedFieldValues['username'] = $input['username'];
+        }
+        if (mb_strlen($input['password']) > 0 && $administrator->getPasswordHash() != $this->$administratorsDatabaseTableController->getHashedPassword($input['password'])) {
+            $changedFieldValues['password'] = $input['password'];
+        }
+
+        // roles - only add to main array if changed
+        $addRoles = []; // populate with ids of new roles
+        $removeRoles = []; // populate with ids of former roles
+        
+        $currentRoles = $administrator->getRoles();
+
+        // search roles to add
+        foreach ($input['roles'] as $newRoleId) {
+            if (!array_key_exists($newRoleId, $currentRoles)) {
+                $addRoles[] = $newRoleId;
+            }
+        }
+
+        // search roles to remove
+        foreach ($currentRoles as $currentRoleId => $currentRoleInfo) {
+            if (!in_array($currentRoleId, $input['roles'])) {
+                $removeRoles[] = $currentRoleId;
+            }
+        }
+
+        if (count($addRoles) > 0) {
+            $changedFieldValues['roles']['add'] = $addRoles;
+        }
+
+        if (count($removeRoles) > 0) {
+            $changedFieldValues['roles']['remove'] = $removeRoles;
+        }
+
+        if (count($changedFieldValues) == 0) {
+            return null;
+        }
+
+        return $changedFieldValues;
     }
 
     public function putUpdate(Request $request, Response $response, $args)
@@ -114,9 +168,9 @@ class AdministratorsController extends BaseController
 
         $redirectRoute = App::getRouteName(true, $this->routePrefix,'index');
 
-        // make sure there is a record for the primary key in the model
-        if (!$record = $this->administratorsModel->getPrimaryTableModel()->selectForPrimaryKey($primaryKey)) {
-            return SingleTableHelper::updateRecordNotFound($this->container, $response, $primaryKey, $this->administratorsModel->getPrimaryTableModel(), $this->routePrefix);
+        // make sure there is an administrator for the primary key
+        if (!$administrator = $this->administratorsMapper->getObjectById((int) $primaryKey)) {
+            return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsMapper->getPrimaryTableMapper(), 'update');
         }
 
         $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
@@ -125,7 +179,7 @@ class AdministratorsController extends BaseController
         // note, if password field is blank, it will not be included in changed fields check
         // debatable whether this should be part of validation and stay on page with error
 
-        $changedFields = $this->administratorsModel->getChangedColumnsValues(['name' => $input['name'], 'username' => $input['username'], 'role_id' => (int) $input['role_id'], 'password' => $input['password']], $record);
+        $changedFields = $this->getChangedFieldValues($administrator);
 
         if (count($changedFields) == 0) {
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made (Record $primaryKey)", App::STATUS_ADMIN_NOTICE_FAILURE];
@@ -133,7 +187,7 @@ class AdministratorsController extends BaseController
             return $response->withRedirect($this->router->pathFor($redirectRoute));
         }
 
-        $this->setValidation($input, $record);
+        $this->setValidation($input, $changedFields);
 
         if (!$this->validator->validate()) {
             // redisplay the form with input values and error(s)
@@ -141,16 +195,14 @@ class AdministratorsController extends BaseController
             return $this->view->updateView($request, $response, $args);
         }
 
-        if (!$this->administratorsModel->getPrimaryTableModel()->updateRecordByPrimaryKey($changedFields, $primaryKey, false)) {
-            throw new \Exception("Update Failure");
-        }
+        $this->administratorsMapper->update((int) $primaryKey, $changedFields);
 
         // if the administrator changed her/his own info, update the session
         if ($primaryKey == $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID]) {
             $this->updateAdministratorSession($changedFields);
         }
 
-        $this->systemEvents->insertInfo("Updated ".$this->administratorsModel::TABLE_NAME, (int) $this->authentication->getAdministratorId(), "id:$primaryKey");
+        $this->systemEvents->insertInfo("Updated ".$this->administratorsMapper::TABLE_NAME, (int) $this->authentication->getAdministratorId(), "id:$primaryKey");
 
         FormHelper::unsetFormSessionVars();
 
@@ -158,7 +210,7 @@ class AdministratorsController extends BaseController
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
     }
 
-    /** update whatever has changed of name, username, role */
+    /** update whatever has changed of name, username, roles if the currently logged on administrator has changed own info */
     private function updateAdministratorSession(array $changedFields)
     {
         foreach ($changedFields as $fieldName => $fieldValue) {
@@ -167,8 +219,8 @@ class AdministratorsController extends BaseController
             } elseif ($fieldName == 'username') {
                 $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_USERNAME] = $fieldValue;
             } elseif ($fieldName == 'role_id') {
-                $rolesModel = new RolesModel();
-                if (!$newRole = $rolesModel->getRoleForRoleId((int) $fieldValue)) {
+                $rolesMapper = new RolesMapper();
+                if (!$newRole = $rolesMapper->getRoleForRoleId((int) $fieldValue)) {
                     throw new \Exception('Role not found for changed role id: '.$fieldValue);
                 }
                 $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES] = $newRole;
@@ -179,17 +231,33 @@ class AdministratorsController extends BaseController
     // override for custom validation and return column
     public function getDelete(Request $request, Response $response, $args)
     {
-        // make sure the current admin is not deleting themself
-        if ((int) ($args['primaryKey']) == $this->container->authentication->getAdministratorId()) {
+        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'delete'))) {
+            throw new \Exception('No permission.');
+        }
+
+        // make sure an administrator exists with that id
+
+        // make sure the current administrator is not deleting themself
+        if ((int) $args['primaryKey'] == $this->container->authentication->getAdministratorId()) {
             throw new \Exception('You cannot delete yourself from administrators');
         }
 
-        // make sure there are no system events for admin being deleted
+        // make sure there are no system events for administrator being deleted
         if ($this->container->systemEvents->hasForAdmin((int) $args['primaryKey'])) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["System Events exist for admin id ".$args['primaryKey'], App::STATUS_ADMIN_NOTICE_FAILURE];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["System events exist for administrator id ".$args['primaryKey'], App::STATUS_ADMIN_NOTICE_FAILURE];
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
         }
 
-        return $this->administratorsSingleTableController->getDeleteHelper($response, $args['primaryKey'],'username', true);
+        // make sure there are no login attempts for administrator being deleted
+        $loginsMapper = new \SlimPostgres\Administrators\Logins\LoginsMapper();
+        if ($loginsMapper->hasAdministrator((int) $args['primaryKey'])) {
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Login attempts exist for administrator id ".$args['primaryKey'], App::STATUS_ADMIN_NOTICE_FAILURE];
+            return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
+        }
+
+        $this->administratorsMapper->delete((int) $args['primaryKey']);
+
+        return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
+        // return $this->administratorsDatabaseTableController->getDeleteHelper($response, $args['primaryKey'],'username', true);
     }
 }

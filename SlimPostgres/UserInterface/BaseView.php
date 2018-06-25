@@ -5,7 +5,6 @@ namespace SlimPostgres\UserInterface;
 
 use Slim\Container;
 
-/** The base view class */
 class BaseView
 {
     protected $container; // dependency injection container

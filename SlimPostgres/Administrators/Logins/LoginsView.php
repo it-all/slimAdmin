@@ -10,6 +10,6 @@ class LoginsView extends AdminListView
 {
     public function __construct(Container $container)
     {
-        parent::__construct($container, 'logins', ROUTE_LOGIN_ATTEMPTS, new LoginsModel(), ROUTE_LOGIN_ATTEMPTS_RESET);
+        parent::__construct($container, 'logins', ROUTE_LOGIN_ATTEMPTS, new LoginsMapper(), ROUTE_LOGIN_ATTEMPTS_RESET);
     }
 }

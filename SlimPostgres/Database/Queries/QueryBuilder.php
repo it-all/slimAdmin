@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Database\Queries;
 
-class QueryBuilder
+use SlimPostgres\Database\Postgres;
+
+class QueryBuilder extends Postgres
 {
     protected $sql;
     protected $args = array();
@@ -69,7 +71,7 @@ class QueryBuilder
     {
         foreach ($this->args as $argIndex => $arg) {
             if (is_bool($arg)) {
-                $this->args[$argIndex] = ($arg) ? 't' : 'f';
+                $this->args[$argIndex] = ($arg) ? self::BOOLEAN_TRUE : self::BOOLEAN_FALSE;
             }
         }
     }

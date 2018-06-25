@@ -7,7 +7,6 @@ use SlimPostgres\Database\Queries\QueryBuilder;
 
 /**
  * Class Postgres
- * @package It_All\Spaghettify\ServicePg
  * A class for connecting to a postgresql database and a few useful meta-query methods
  */
 Class Postgres
@@ -35,13 +34,16 @@ Class Postgres
     const BIGSERIAL_MIN = self::SMALLSERIAL_MIN;
     const BIGSERIAL_MAX = self::BIGINT_MAX;
 
+    const BOOLEAN_FALSE = 'f';
+    const BOOLEAN_TRUE = 't';
+
     private $pgConn;
 
     /** host and password may not be necessary depending on hba.conf */
     public function __construct(string $connectionString = '')
     {
         if (!$this->pgConn = pg_connect($connectionString)) {
-            throw new \Exception('postgres connection failure');
+            throw new \Exception('Postgres connection failure');
         }
         pg_set_error_verbosity($this->pgConn, PGSQL_ERRORS_VERBOSE);
     }

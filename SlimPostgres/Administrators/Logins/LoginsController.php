@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Administrators\Logins;
 
-use SlimPostgres\Database\SingleTable\SingleTableController;
+use SlimPostgres\Controllers\DatabaseTableController;
 use Slim\Container;
 
-class LoginsController extends SingleTableController
+class LoginsController extends DatabaseTableController
 {
     public function __construct(Container $container)
     {
-        parent::__construct($container, new LoginsModel(), new LoginsView($container), 'logins');
+        parent::__construct($container, new LoginsMapper(), new LoginsView($container), 'logins');
     }
 }

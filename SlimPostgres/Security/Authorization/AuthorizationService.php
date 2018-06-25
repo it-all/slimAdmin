@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Security\Authorization;
 
-use SlimPostgres\Administrators\Roles\RolesModel;
+use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\App;
 
 /* There are two methods of Authorization: either by minimum permission, where the user role equal to or better than the minimum permission is authorized (in this case, the permission is a string). Or by a permission set, where the user role in the set of authorized permissions is authorized (permission is an array) */
@@ -11,13 +11,13 @@ class AuthorizationService
 {
     private $topRole;
     private $functionalityPermissions;
-    private $rolesModel;
+    private $rolesMapper;
 
     public function __construct(string $topRole, array $functionalityPermissions)
     {
         $this->topRole = $topRole;
         $this->functionalityPermissions = $functionalityPermissions;
-        $this->rolesModel = new RolesModel();
+        $this->rolesMapper = new RolesMapper();
         if (!$this->validateRole($topRole)) {
             throw new \Exception("Invalid top role: $topRole");
         }
@@ -39,7 +39,7 @@ class AuthorizationService
     public function getPermissions(?string $functionality)
     {
         if ($functionality === null) {
-            return $this->rolesModel->getBaseRole();
+            return $this->rolesMapper->getBaseRole();
         }
 
         if (!isset($this->functionalityPermissions[$functionality])) {
@@ -50,7 +50,7 @@ class AuthorizationService
             }
 
             // no matches
-            return $this->rolesModel->getBaseRole();
+            return $this->rolesMapper->getBaseRole();
         }
 
         return $this->functionalityPermissions[$functionality];
@@ -80,7 +80,7 @@ class AuthorizationService
         }
 
         foreach ($this->getAdministratorRoles() as $administratorRole) {
-            if ($this->rolesModel->getLeveForRole($administratorRole) <= $minimumRoleLevel) {
+            if ($this->rolesMapper->getLeveForRole($administratorRole) <= $minimumRoleLevel) {
                 return true;
             }
         }
@@ -91,7 +91,7 @@ class AuthorizationService
     // validates role to be in database roles.role
     public function validateRole(string $role): bool
     {
-        return in_array($role, $this->rolesModel->getRoleNames());
+        return in_array($role, $this->rolesMapper->getRoleNames());
     }
 
     // checks if logged in administrator has a role that is in the array of authorized roles
@@ -118,7 +118,7 @@ class AuthorizationService
     public function isAuthorized($permissions): bool
     {
         if (is_string($permissions)) { // a role
-            return $this->checkMinimum($this->rolesModel->getLeveForRole($permissions));
+            return $this->checkMinimum($this->rolesMapper->getLeveForRole($permissions));
         } elseif (is_array($permissions)) { // an array of roles
             return $this->checkRoleSet($permissions);
         } else {

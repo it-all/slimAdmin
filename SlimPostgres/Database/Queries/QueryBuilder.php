@@ -93,6 +93,7 @@ class QueryBuilder extends Postgres
         return $result;
     }
 
+    // this should only be used with INSERT, UPDATE, and DELETE queries 
     public function executeWithReturn(string $returnField)
     {
         if ($result = $this->execute()) {

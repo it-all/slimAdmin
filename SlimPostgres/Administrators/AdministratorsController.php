@@ -235,29 +235,42 @@ class AdministratorsController extends BaseController
             throw new \Exception('No permission.');
         }
 
-        // make sure an administrator exists with that id
+        $primaryKey = $args['primaryKey'];
+
+        // make sure there is an administrator for the primary key
+        if (!$administrator = $this->administratorsMapper->getObjectById((int) $primaryKey)) {
+            return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsMapper->getPrimaryTableMapper(), 'delete');
+        }
 
         // make sure the current administrator is not deleting themself
-        if ((int) $args['primaryKey'] == $this->container->authentication->getAdministratorId()) {
+        if ((int) $primaryKey == $this->container->authentication->getAdministratorId()) {
             throw new \Exception('You cannot delete yourself from administrators');
         }
 
         // make sure there are no system events for administrator being deleted
-        if ($this->container->systemEvents->hasForAdmin((int) $args['primaryKey'])) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["System events exist for administrator id ".$args['primaryKey'], App::STATUS_ADMIN_NOTICE_FAILURE];
+        if ($this->container->systemEvents->hasForAdmin((int) $primaryKey)) {
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["System events exist for administrator id $primaryKey", App::STATUS_ADMIN_NOTICE_FAILURE];
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
         }
 
         // make sure there are no login attempts for administrator being deleted
         $loginsMapper = new \SlimPostgres\Administrators\Logins\LoginsMapper();
-        if ($loginsMapper->hasAdministrator((int) $args['primaryKey'])) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Login attempts exist for administrator id ".$args['primaryKey'], App::STATUS_ADMIN_NOTICE_FAILURE];
+        if ($loginsMapper->hasAdministrator((int) $primaryKey)) {
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Login attempts exist for administrator id $primaryKey", App::STATUS_ADMIN_NOTICE_FAILURE];
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
         }
 
-        $this->administratorsMapper->delete((int) $args['primaryKey']);
+        $this->administratorsMapper->delete((int) $primaryKey);
 
+        // the event and notification code below is duplication from DatabaseTableController -> look to DRY
+        $eventNote = "$primaryKeyColumnName:$primaryKey|username:" . $administrator->getUsername();
+        $adminMessage = "Deleted record $primaryKey(username:" . $administrator->getUsername() . ")";
+
+        $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), $eventNote);
+        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$adminMessage, App::STATUS_ADMIN_NOTICE_SUCCESS];
+        
+        unset($administrator);
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
-        // return $this->administratorsDatabaseTableController->getDeleteHelper($response, $args['primaryKey'],'username', true);
+    
     }
 }

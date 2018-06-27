@@ -14,10 +14,7 @@ class AdminView extends BaseView
     public function __construct(Container $container)
     {
         parent::__construct($container);
-
-        // Instantiate navigation navbar contents
-        $navAdmin = new AdminNavigation($container);
-        $this->navigationItems = $navAdmin->getNavForUser();
+        $this->navigationItems = (new AdminNavigation($container))->getNavForUser();
     }
 
     protected function getPermissions(string $routeType = 'index')

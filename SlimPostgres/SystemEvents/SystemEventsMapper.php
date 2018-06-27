@@ -129,7 +129,6 @@ class SystemEventsMapper extends MultiTableMapper
         }
 
         $q = new SelectBuilder($selectClause, $fromClause, $filterColumnsInfo, $orderByClause);
-        echo $q->getSql();
         return $q->execute();
     }
 

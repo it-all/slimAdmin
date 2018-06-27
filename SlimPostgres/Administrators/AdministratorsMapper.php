@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Administrators;
 
+use SlimPostgres\App;
 use SlimPostgres\Utilities\Functions;
 use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Database\Queries\QueryBuilder;
@@ -98,8 +99,8 @@ class AdministratorsMapper extends MultiTableMapper
                 $username = $row['username'];
                 $passwordHash = $row['password_hash'];
                 $roles[$row['role_id']] = [
-                    'roleName' => $row['role'],
-                    'roleLevel' => $row['role_level']
+                    App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME => $row['role'],
+                    App::SESSION_ADMINISTRATOR_KEY_ROLES_LEVEL => $row['role_level']
                 ];
             }
 

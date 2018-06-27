@@ -79,8 +79,8 @@ class AuthorizationService
             return false;
         }
 
-        foreach ($this->getAdministratorRoles() as $administratorRole) {
-            if ($this->rolesMapper->getLeveForRole($administratorRole) <= $minimumRoleLevel) {
+        foreach ($this->getAdministratorRoles() as $roleId => $roleInfo) {
+            if ($roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_LEVEL] <= $minimumRoleLevel) {
                 return true;
             }
         }

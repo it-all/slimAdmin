@@ -36,6 +36,8 @@ class App
     const SESSION_ADMINISTRATOR_KEY_NAME = 'name';
     const SESSION_ADMINISTRATOR_KEY_USERNAME = 'username';
     const SESSION_ADMINISTRATOR_KEY_ROLES = 'roles';
+    const SESSION_ADMINISTRATOR_KEY_ROLES_NAME = 'roleName';
+    const SESSION_ADMINISTRATOR_KEY_ROLES_LEVEL = 'roleLevel';
 
     // frontend notice statuses (can be used as css classes)
     const STATUS_NOTICE_SUCCESS = 'noticeSuccess';

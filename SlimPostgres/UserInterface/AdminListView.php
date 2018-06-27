@@ -6,7 +6,7 @@ namespace SlimPostgres\UserInterface;
 use SlimPostgres\App;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\DataMappers\TableMappers;
-use SlimPostgres\Forms\FormHelper;
+use SlimPostgres\UserInterface\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;

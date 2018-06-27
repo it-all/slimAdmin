@@ -5,7 +5,7 @@ namespace SlimPostgres\Administrators\Roles;
 
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\UserInterface\DatabaseTableListView;
-use SlimPostgres\Forms\FormHelper;
+use SlimPostgres\UserInterface\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Response;
 

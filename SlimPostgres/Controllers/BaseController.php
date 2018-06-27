@@ -5,7 +5,7 @@ namespace SlimPostgres\Controllers;
 
 use SlimPostgres\App;
 use SlimPostgres\Database\Queries\QueryBuilder;
-use SlimPostgres\Forms\FormHelper;
+use SlimPostgres\UserInterface\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;

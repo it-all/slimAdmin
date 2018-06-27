@@ -8,7 +8,7 @@ use SlimPostgres\App;
 use SlimPostgres\ResponseUtilities;
 use SlimPostgres\Controllers\BaseController;
 use SlimPostgres\Controllers\DatabaseTableController;
-use SlimPostgres\Forms\FormHelper;
+use SlimPostgres\UserInterface\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;

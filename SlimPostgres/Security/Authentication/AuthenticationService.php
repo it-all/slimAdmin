@@ -8,8 +8,8 @@ use SlimPostgres\Administrators\Administrator;
 use SlimPostgres\Administrators\AdministratorsMapper;
 use SlimPostgres\Administrators\Logins\LoginsMapper;
 use SlimPostgres\App;
-use SlimPostgres\Forms\DatabaseTableForm;
-use SlimPostgres\Forms\FormHelper;
+use SlimPostgres\UserInterface\Forms\DatabaseTableForm;
+use SlimPostgres\UserInterface\Forms\FormHelper;
 
 class AuthenticationService
 {

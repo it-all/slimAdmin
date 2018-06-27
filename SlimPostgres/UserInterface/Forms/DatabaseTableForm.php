@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Forms;
+namespace SlimPostgres\UserInterface\Forms;
 
 use It_All\FormFormer\Fields\InputField;
 use It_All\FormFormer\Fields\InputFields\CheckboxRadioInputField;

@@ -5,7 +5,7 @@ namespace SlimPostgres\Security\Authentication;
 
 use SlimPostgres\UserInterface\AdminView;
 use SlimPostgres\Forms\Form;
-use SlimPostgres\Forms\FormHelper;
+use SlimPostgres\UserInterface\Forms\FormHelper;
 use Slim\Http\Request;
 use Slim\Http\Response;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres\Administrators\Roles;
 
 use SlimPostgres\Database\Queries\QueryBuilder;
-use SlimPostgres\UserInterface\DatabaseTableListView;
+use SlimPostgres\UserInterface\Views\DatabaseTableListView;
 use SlimPostgres\UserInterface\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Response;

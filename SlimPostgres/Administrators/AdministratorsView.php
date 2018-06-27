@@ -13,7 +13,7 @@ use It_All\FormFormer\Form;
 use SlimPostgres\App;
 use SlimPostgres\ResponseUtilities;
 use SlimPostgres\Database\Queries\QueryBuilder;
-use SlimPostgres\UserInterface\AdminListView;
+use SlimPostgres\UserInterface\Views\AdminListView;
 use SlimPostgres\UserInterface\Forms\DatabaseTableForm;
 use SlimPostgres\UserInterface\Forms\FormHelper;
 use Slim\Container;

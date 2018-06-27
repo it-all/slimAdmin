@@ -31,13 +31,13 @@ Add and configure your new route to the system by:
 - Adding the new route in config/routes.php  
 - For new administrative resources, add AuthenticationMiddleware to the route (see existing examples in the routes file)  
 - For new administrative resources, if authorization is required at a resource or functionality level, add them to the 'administratorPermissions' key in config/settings.php, then add AuthorizationMiddleware to the route (see existing examples in the routes file)   
-- For new administrative resources, you can add a link in the administrative navigation menu by editing SlimPostgres/UserInterface/AdminNav.php. 
+- For new administrative resources, you can add a link in the administrative navigation menu by editing SlimPostgres/UserInterface/Navigation/AdminNavigation.php. 
 
 <a name="authe">Authentication</a>  
 Admin pages are protected through authenticated sessions.
 
 <a name="autho">Authorization</a>  
-Administrative resources and functionality can be protected against unauthorized use based on administrative roles. Resource and functionality access is defined in config.php in the 'administratorPermissions' array key based on the role and is set in routes.php on resources as necessary, in AdminNav to determine whether or not to display navigation options, and in views and controllers as necessary to grant or limit functionality access. Authorization failures result in alerts being written to the SystemEvents table and the user redirected to the admin homepage with a red alert message displayed. Authorization can be set as a minimum role level, where all roles with an equal or better level will be authorized, or as a set of authorized roles.
+Administrative resources and functionality can be protected against unauthorized use based on administrative roles. Resource and functionality access is defined in config.php in the 'administratorPermissions' array key based on the role and is set in routes.php on resources as necessary, in AdminNavigation to determine whether or not to display navigation options, and in views and controllers as necessary to grant or limit functionality access. Authorization failures result in alerts being written to the SystemEvents table and the user redirected to the admin homepage with a red alert message displayed. Authorization can be set as a minimum role level, where all roles with an equal or better level will be authorized, or as a set of authorized roles.
 
 <a name="admin">Administrative Interface and Navigation</a>  
 Upon browsing to the administrative directory set in $config['adminPath'] authenticating, the appropriate resource is loaded based on $config['slim']['authentication']['administratorHomeRoutes']. The following administrative functionalities are already coded:  

@@ -1,9 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\UserInterface;
+namespace SlimPostgres\UserInterface\Views;
 
 use SlimPostgres\App;
+use SlimPostgres\UserInterface\Views\Navigation\AdminNavigation;
 use Slim\Container;
 
 class AdminView extends BaseView
@@ -15,7 +16,7 @@ class AdminView extends BaseView
         parent::__construct($container);
 
         // Instantiate navigation navbar contents
-        $navAdmin = new AdminNav($container);
+        $navAdmin = new AdminNavigation($container);
         $this->navigationItems = $navAdmin->getNavForUser();
     }
 

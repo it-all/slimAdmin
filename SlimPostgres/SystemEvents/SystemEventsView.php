@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\SystemEvents;
 
-use SlimPostgres\UserInterface\AdminListView;
+use SlimPostgres\UserInterface\Views\AdminListView;
 use Slim\Container;
 
 class SystemEventsView extends AdminListView

@@ -9,7 +9,7 @@ use SlimPostgres\UserInterface\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
-use SlimPostgres\UserInterface\AdminListView;
+use SlimPostgres\UserInterface\Views\AdminListView;
 
 abstract class BaseController
 {

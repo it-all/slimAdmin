@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres\Controllers;
 
 use SlimPostgres\App;
-use SlimPostgres\ResponseUtilities;
+use SlimPostgres\Utilities\ResponseUtilities;
 use SlimPostgres\Controllers\BaseController;
 use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\UserInterface\Forms\FormHelper;

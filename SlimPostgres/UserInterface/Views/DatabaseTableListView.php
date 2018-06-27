@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres\UserInterface\Views;
 
 use SlimPostgres\App;
-use SlimPostgres\ResponseUtilities;
+use SlimPostgres\Utilities\ResponseUtilities;
 use SlimPostgres\UserInterface\Forms\DatabaseTableForm;
 use SlimPostgres\Database\DataMappers\TableMappers;
 use SlimPostgres\UserInterface\Forms\FormHelper;

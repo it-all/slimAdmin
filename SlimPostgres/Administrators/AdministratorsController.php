@@ -5,7 +5,7 @@ namespace SlimPostgres\Administrators;
 
 use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\App;
-use SlimPostgres\ResponseUtilities;
+use SlimPostgres\Utilities\ResponseUtilities;
 use SlimPostgres\Controllers\BaseController;
 use SlimPostgres\Controllers\DatabaseTableController;
 use SlimPostgres\UserInterface\Forms\FormHelper;

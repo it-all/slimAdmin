@@ -110,6 +110,11 @@ class AdministratorsController extends BaseController
 
         $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
+        // if all roles have been unchecked it won't be included in user input
+        if (!isset($input['roles'])) {
+            $input['roles'] = [];
+        }
+
         if ($administrator->getName() != $input['name']) {
             $changedFieldValues['name'] = $input['name'];
         }

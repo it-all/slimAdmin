@@ -17,10 +17,10 @@ class SystemEventsMapper extends MultiTableMapper
     // event types: debug, info, notice, warning, error, critical, alert, emergency [props to monolog]
     const SELECT_COLUMNS = [
         'id' => self::PRIMARY_TABLE_NAME . '.id',
-        'time_stamp' => self::PRIMARY_TABLE_NAME . '.created',
+        'created' => self::PRIMARY_TABLE_NAME . '.created',
         'event_type' => self::TYPES_TABLE_NAME . '.event_type',
         'event' => self::PRIMARY_TABLE_NAME . '.title',
-        'admin' => self::ADMINISTRATORS_TABLE_NAME . '.name',
+        'name' => self::ADMINISTRATORS_TABLE_NAME . '.name',
         'notes' => self::PRIMARY_TABLE_NAME . '.notes',
         'ip_address' => self::PRIMARY_TABLE_NAME . '.ip_address',
         'request_method' => self::PRIMARY_TABLE_NAME . '.request_method',

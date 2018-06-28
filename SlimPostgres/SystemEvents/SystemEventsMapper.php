@@ -18,7 +18,7 @@ class SystemEventsMapper extends MultiTableMapper
     const SELECT_COLUMNS = [
         'id' => self::PRIMARY_TABLE_NAME . '.id',
         'time_stamp' => self::PRIMARY_TABLE_NAME . '.created',
-        'type' => self::TYPES_TABLE_NAME . '.event_type',
+        'event_type' => self::TYPES_TABLE_NAME . '.event_type',
         'event' => self::PRIMARY_TABLE_NAME . '.title',
         'admin' => self::ADMINISTRATORS_TABLE_NAME . '.name',
         'notes' => self::PRIMARY_TABLE_NAME . '.notes',

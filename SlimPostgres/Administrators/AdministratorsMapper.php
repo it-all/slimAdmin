@@ -176,32 +176,34 @@ class AdministratorsMapper extends MultiTableMapper
     {
         $results = []; // populate with 1 entry per administrator with an array of roles
         if ($pgResults = $this->select($columns, $whereColumnsInfo)) {
-            $lastId = 0;
-            $roles = [];
-            while ($record = pg_fetch_assoc($pgResults)) {
-                $id = $record['id'];
-
-                if ($id != $lastId) {
-                    if ($lastId > 0) {
-                        // enter last administrator looped through
-                        $this->addAdministratorToArray($results, (int) $lastId, $name, $username, $roles);
-                        // reset roles
-                        $roles = [];
+            if (pg_num_rows($pgResults) > 0) {
+                $lastId = 0;
+                $roles = [];
+                while ($record = pg_fetch_assoc($pgResults)) {
+                    $id = $record['id'];
+    
+                    if ($id != $lastId) {
+                        if ($lastId > 0) {
+                            // enter last administrator looped through before processing then start a new one
+                            $this->addAdministratorToArray($results, (int) $lastId, $name, $username, $roles);
+                            // reset roles
+                            $roles = [];
+                        }
+    
+                        $name = $record['name'];
+                        $username = $record['username'];
+                        $roles[] = $record['role'];
+    
+                        $lastId = $id;
+    
+                    } else {
+                        // continuation of same administrator with new role
+                        $roles[] = $record['role'];
                     }
-
-                    $name = $record['name'];
-                    $username = $record['username'];
-                    $roles[] = $record['role'];
-
-                    $lastId = $id;
-
-                } else {
-                    // continuation of same administrator with new role
-                    $roles[] = $record['role'];
                 }
+                // add last administrator
+                $this->addAdministratorToArray($results, (int) $lastId, $name, $username, $roles);    
             }
-            // add last administrator
-            // $this->addAdministratorToArray($results, (int) $lastId, $name, $username, $roles);
         }
         return $results;
     }

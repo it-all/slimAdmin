@@ -87,6 +87,7 @@ abstract class AdminListView extends AdminView
         if ($results = pg_fetch_all($this->mapper->select($this->mapper->getSelectColumnsString(), $filterColumnsInfo))) {
             $numResults = count($results);
         } else {
+            $results = [];
             $numResults = 0;
         }
 

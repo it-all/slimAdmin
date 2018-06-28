@@ -27,6 +27,7 @@ class RolesView extends DatabaseTableListView
         if ($results = pg_fetch_all($this->mapper->select("*", $filterColumnsInfo))) {
             $numResults = count($results);
         } else {
+            $results = [];
             $numResults = 0;
         }
 

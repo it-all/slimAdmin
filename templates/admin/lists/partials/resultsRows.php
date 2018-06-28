@@ -6,8 +6,12 @@ require 'bodyRow.php';
 $resultsRows = '';
 $rowCount = 0;
 
-foreach ($results as $row) {
-    $rowCount++;
-    $deletePermitted = !isset($row['metaDisableDelete']) || !$row['metaDisableDelete'];
-    $resultsRows .= bodyRow($row, $rowCount, $updateColumn, $updatePermitted, $updateRoute, $addDeleteColumn, $deletePermitted, $deleteRoute, $router);
+if ($numResults > 0) {
+    foreach ($results as $row) {
+        $rowCount++;
+        $deletePermitted = !isset($row['metaDisableDelete']) || !$row['metaDisableDelete'];
+        $resultsRows .= bodyRow($row, $rowCount, $updateColumn, $updatePermitted, $updateRoute, $addDeleteColumn, $deletePermitted, $deleteRoute, $router);
+    }    
+} else {
+    $resultsRows .= '<tr><td>No results</td></tr>';
 }

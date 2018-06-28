@@ -193,6 +193,7 @@ class AdministratorsView extends AdminListView
         if ($results = $this->mapper->selectArray($this->mapper->getSelectColumnsString(), $filterColumnsInfo)) {
             $numResults = count($results);
         } else {
+            $results = [];
             $numResults = 0;
         }
 

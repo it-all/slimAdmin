@@ -201,7 +201,7 @@ class AdministratorsMapper extends MultiTableMapper
                 }
             }
             // add last administrator
-            $this->addAdministratorToArray($results, (int) $lastId, $name, $username, $roles);
+            // $this->addAdministratorToArray($results, (int) $lastId, $name, $username, $roles);
         }
         return $results;
     }

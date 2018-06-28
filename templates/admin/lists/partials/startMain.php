@@ -25,23 +25,25 @@ $startMain .= <<< EOT
                         $filterForm
                     </th>
                 </tr>
-                <tr class="sortable-header-row">
 EOT;
 
-foreach ($results[0] as $headerKey => $value) {
-    if ($headerKey != 'metaDisableDelete') {
-        $sortClass = ($sortByAsc) ? 'sorttable_sorted' : 'sorttable_sorted_reverse';
-        $thClass = ($headerKey == $sortColumn) ? $sortClass : '';
-        $startMain .= '<th class="'.$thClass.'">'.$headerKey.'</th>';
+if ($numResults > 0) {
+    $startMain .= '<tr class="sortable-header-row">';
+    foreach ($results[0] as $headerKey => $value) {
+        if ($headerKey != 'metaDisableDelete') {
+            $sortClass = ($sortByAsc) ? 'sorttable_sorted' : 'sorttable_sorted_reverse';
+            $thClass = ($headerKey == $sortColumn) ? $sortClass : '';
+            $startMain .= '<th class="'.$thClass.'">'.$headerKey.'</th>';
+        }
     }
-}
-
-if ($addDeleteColumn) {
-    $startMain .= '<th class="sorttable_nosort">X</th>';
+    
+    if ($addDeleteColumn) {
+        $startMain .= '<th class="sorttable_nosort">X</th>';
+    }
+    $startMain .= '</tr>';
 }
 
 $startMain .= <<< EOT
-                </tr>
             </thead>
             <tbody id="tbody">
 EOT;

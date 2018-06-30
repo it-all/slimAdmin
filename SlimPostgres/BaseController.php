@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Controllers;
+namespace SlimPostgres;
 
 use SlimPostgres\App;
 use SlimPostgres\Database\Queries\QueryBuilder;
-use SlimPostgres\UserInterface\Forms\FormHelper;
+use SlimPostgres\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
-use SlimPostgres\UserInterface\Views\AdminListView;
+use SlimPostgres\AdminListView;
 
 abstract class BaseController
 {

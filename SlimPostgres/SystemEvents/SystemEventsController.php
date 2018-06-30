@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\SystemEvents;
 
-use SlimPostgres\Controllers\BaseController;
+use SlimPostgres\BaseController;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;

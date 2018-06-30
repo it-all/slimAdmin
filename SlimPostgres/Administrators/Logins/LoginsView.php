@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Administrators\Logins;
 
-use SlimPostgres\UserInterface\Views\AdminListView;
+use SlimPostgres\AdminListView;
 use Slim\Container;
 
 class LoginsView extends AdminListView

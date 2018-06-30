@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Security\Authentication;
 
-use SlimPostgres\UserInterface\Views\AdminView;
+use SlimPostgres\AdminView;
 use SlimPostgres\Forms\Form;
-use SlimPostgres\UserInterface\Forms\FormHelper;
+use SlimPostgres\Forms\FormHelper;
 use Slim\Http\Request;
 use Slim\Http\Response;
 

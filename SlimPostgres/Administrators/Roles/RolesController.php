@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres\Administrators\Roles;
 
 use SlimPostgres\App;
-use SlimPostgres\Controllers\DatabaseTableController;
+use SlimPostgres\DatabaseTableController;
 use Slim\Container;
 
 class RolesController extends DatabaseTableController

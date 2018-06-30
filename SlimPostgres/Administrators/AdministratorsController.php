@@ -5,10 +5,10 @@ namespace SlimPostgres\Administrators;
 
 use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\App;
-use SlimPostgres\Utilities\ResponseUtilities;
-use SlimPostgres\Controllers\BaseController;
-use SlimPostgres\Controllers\DatabaseTableController;
-use SlimPostgres\UserInterface\Forms\FormHelper;
+use SlimPostgres\ResponseUtilities;
+use SlimPostgres\BaseController;
+use SlimPostgres\DatabaseTableController;
+use SlimPostgres\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;

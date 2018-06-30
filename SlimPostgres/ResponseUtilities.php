@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Utilities;
+namespace SlimPostgres;
 
 use SlimPostgres\App;
 use SlimPostgres\Database\DataMappers\TableMapper;

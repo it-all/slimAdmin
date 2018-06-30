@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\UserInterface\Views\Navigation;
+namespace SlimPostgres;
 
 use Slim\Container;
 

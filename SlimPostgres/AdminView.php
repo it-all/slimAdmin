@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\UserInterface\Views;
+namespace SlimPostgres;
 
 use SlimPostgres\App;
-use SlimPostgres\UserInterface\Views\Navigation\AdminNavigation;
+use SlimPostgres\AdminNavigation;
 use Slim\Container;
 
 class AdminView extends BaseView

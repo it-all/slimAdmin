@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Administrators\Logins;
 
-use SlimPostgres\Controllers\DatabaseTableController;
+use SlimPostgres\DatabaseTableController;
 use Slim\Container;
 
 class LoginsController extends DatabaseTableController

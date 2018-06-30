@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\UserInterface\Forms;
+namespace SlimPostgres\Forms;
 
 use It_All\FormFormer\Fields\InputField;
 use SlimPostgres\App;

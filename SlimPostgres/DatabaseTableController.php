@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Controllers;
+namespace SlimPostgres;
 
 use SlimPostgres\App;
-use SlimPostgres\Utilities\ResponseUtilities;
-use SlimPostgres\Controllers\BaseController;
+use SlimPostgres\ResponseUtilities;
+use SlimPostgres\BaseController;
 use SlimPostgres\Database\DataMappers\TableMapper;
-use SlimPostgres\UserInterface\Forms\FormHelper;
+use SlimPostgres\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;

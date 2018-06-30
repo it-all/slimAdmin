@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Domain;
 
-use SlimPostgres\UserInterface\Views\AdminView;
+use SlimPostgres\AdminView;
 
 class AdminHomeView extends AdminView
 {

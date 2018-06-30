@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres\Administrators;
 
 use SlimPostgres\Administrators\Roles\RolesMapper;
+use SlimPostgres\Administrators\Logins\LoginAttemptsMapper;
 use SlimPostgres\App;
 use SlimPostgres\ResponseUtilities;
 use SlimPostgres\BaseController;
@@ -24,7 +25,7 @@ class AdministratorsController extends BaseController
 
     public function __construct(Container $container)
     {
-        $this->administratorsMapper = new AdministratorsMapper();
+        $this->administratorsMapper = AdministratorsMapper::getInstance();
         $this->view = new AdministratorsView($container);
         $this->routePrefix = ROUTEPREFIX_ADMINISTRATORS;
         $this->administratorsDatabaseTableController = new DatabaseTableController($container, $this->administratorsMapper->getPrimaryTableMapper(), $this->view, $this->routePrefix);
@@ -65,7 +66,7 @@ class AdministratorsController extends BaseController
 
         // all selected roles must be in roles table
         $this->validator->rule('array', 'roles');
-        $rolesMapper = new RolesMapper();
+        $rolesMapper = RolesMapper::getInstance();
         $this->validator->rule('in', 'roles.*', array_keys($rolesMapper->getRoles())); // role ids
     }
 
@@ -224,7 +225,7 @@ class AdministratorsController extends BaseController
             } elseif ($fieldName == 'username') {
                 $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_USERNAME] = $fieldValue;
             } elseif ($fieldName == 'role_id') {
-                $rolesMapper = new RolesMapper();
+                $rolesMapper = RolesMapper::getInstance();
                 if (!$newRole = $rolesMapper->getRoleForRoleId((int) $fieldValue)) {
                     throw new \Exception('Role not found for changed role id: '.$fieldValue);
                 }
@@ -259,7 +260,7 @@ class AdministratorsController extends BaseController
         }
 
         // make sure there are no login attempts for administrator being deleted
-        $loginsMapper = new \SlimPostgres\Administrators\Logins\LoginsMapper();
+        $loginsMapper = LoginAttemptsMapper::getInstance();
         if ($loginsMapper->hasAdministrator((int) $primaryKey)) {
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Login attempts exist for administrator id $primaryKey", App::STATUS_ADMIN_NOTICE_FAILURE];
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));

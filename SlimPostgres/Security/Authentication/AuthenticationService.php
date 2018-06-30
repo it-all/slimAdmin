@@ -6,7 +6,7 @@ namespace SlimPostgres\Security\Authentication;
 use It_All\FormFormer\Form;
 use SlimPostgres\Administrators\Administrator;
 use SlimPostgres\Administrators\AdministratorsMapper;
-use SlimPostgres\Administrators\Logins\LoginsMapper;
+use SlimPostgres\Administrators\Logins\LoginAttemptsMapper;
 use SlimPostgres\App;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Forms\FormHelper;
@@ -66,24 +66,28 @@ class AuthenticationService
         }
         return null;
     }
-
+ // determine home route: either by username, by role, or default
     public function getAdminHomeRouteForAdministrator(): string
     {
-        // determine home route: either by username, by role, or default
+        // by username
         if (isset($this->administratorHomeRoutes['usernames'][$this->getAdministratorUsername()])) {
-            $homeRoute = $this->administratorHomeRoutes['usernames'][$this->getAdministratorUsername()];
-        } elseif (isset($this->administratorHomeRoutes['roles'][$this->getAdministratorRoles()])) {
-            $homeRoute = $this->administratorHomeRoutes['roles'][$this->getAdministratorRoles()];
-        } else {
-            $homeRoute = ROUTE_ADMIN_HOME_DEFAULT;
+            return $this->administratorHomeRoutes['usernames'][$this->getAdministratorUsername()];
         }
 
-        return $homeRoute;
+        // by role
+        foreach ($this->getAdministratorRoles() as $roleId => $roleInfo) {
+            if (isset($this->administratorHomeRoutes['roles'][$roleInfo['roleName']])) {
+                $homeRoute = $this->administratorHomeRoutes['roles'][$roleInfo['roleName']];
+            }
+        }
+        
+        // default
+        return ROUTE_ADMIN_HOME_DEFAULT;
     }
 
     public function attemptLogin(string $username, string $password): bool
     {
-        $administratorsMapper = new AdministratorsMapper();
+        $administratorsMapper = AdministratorsMapper::getInstance();
         // check if administrator exists
         if (!$administrator = $administratorsMapper->getObjectByUsername($username)) {
             $this->loginFailed($username, null);
@@ -115,7 +119,7 @@ class AuthenticationService
         $this->setAdministratorSession($administrator);
         unset($_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS]);
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Logged in", App::STATUS_ADMIN_NOTICE_SUCCESS];
-        (new LoginsMapper())->insertSuccessfulLogin($administrator);
+        (LoginAttemptsMapper::getInstance())->insertSuccessfulLogin($administrator);
     }
 
     private function incrementNumFailedLogins()
@@ -132,7 +136,7 @@ class AuthenticationService
         $this->incrementNumFailedLogins();
 
         // insert login_attempts record
-        (new LoginsMapper())->insertFailedLogin($username, $administrator);
+        (LoginAttemptsMapper::getInstance())->insertFailedLogin($username, $administrator);
     }
 
     public function tooManyFailedLogins(): bool
@@ -168,7 +172,7 @@ class AuthenticationService
 
     public function getForm(string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $action)
     {
-        $administratorsMapper = new AdministratorsMapper();
+        $administratorsMapper = AdministratorsMapper::getInstance();
 
         $fields = [];
         $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($administratorsMapper->getColumnByName('username'));

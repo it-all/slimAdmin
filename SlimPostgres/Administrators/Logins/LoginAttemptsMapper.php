@@ -8,11 +8,21 @@ use SlimPostgres\Database\Postgres;
 use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Database\Queries\QueryBuilder;
 
-class LoginsMapper extends TableMapper
+// Singleton
+final class LoginAttemptsMapper extends TableMapper
 {
     const TABLE_NAME = 'login_attempts';
 
-    public function __construct()
+    public static function getInstance()
+    {
+        static $instance = null;
+        if ($instance === null) {
+            $instance = new LoginAttemptsMapper();
+        }
+        return $instance;
+    }
+
+    private function __construct()
     {
         parent::__construct(self::TABLE_NAME, '*', 'created', false);
     }

@@ -8,21 +8,34 @@ use SlimPostgres\Database\Queries\QueryBuilder;
 use It_All\FormFormer\Fields\SelectField;
 use It_All\FormFormer\Fields\SelectOption;
 
+// Singleton
 // note that level 1 is the greatest permission
-class RolesMapper extends TableMapper
+final class RolesMapper extends TableMapper
 {
     /** array role_id => [role, level] */
     private $roles;
 
-    public function __construct()
+    const TABLE_NAME = 'roles';
+
+    public static function getInstance()
+    {
+        static $instance = null;
+        if ($instance === null) {
+            $instance = new RolesMapper();
+        }
+        return $instance;
+    }
+
+    private function __construct()
     {
         // note that the roles select must be ordered by level (ascending) for getBaseLevel() to work
-        parent::__construct('roles', 'id, role, level', 'level');
+        parent::__construct(self::TABLE_NAME, 'id, role, level', 'level');
         $this->addColumnNameConstraint('level', 'positive');
         $this->setRoles();
     }
 
-    private function setRoles()
+    // this is called by constructor and also should be called after a change to roles from single page app to reset them.
+    public function setRoles()
     {
         $this->roles = [];
         $rs = $this->select();

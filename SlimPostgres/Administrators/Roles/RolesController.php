@@ -11,7 +11,7 @@ class RolesController extends DatabaseTableController
 {
     public function __construct(Container $container)
     {
-        parent::__construct($container, new RolesMapper(), new RolesView($container), ROUTEPREFIX_ROLES);
+        parent::__construct($container, RolesMapper::getInstance(), new RolesView($container), ROUTEPREFIX_ROLES);
     }
 
     // override to check condition and add custom return column

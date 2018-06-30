@@ -8,7 +8,8 @@ use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\Queries\SelectBuilder;
 use SlimPostgres\Database\DataMappers\MultiTableMapper;
 
-class SystemEventsMapper extends MultiTableMapper
+// Singleton
+final class SystemEventsMapper extends MultiTableMapper
 {
     const PRIMARY_TABLE_NAME = 'system_events';
     const TYPES_TABLE_NAME = 'system_event_types';
@@ -27,7 +28,16 @@ class SystemEventsMapper extends MultiTableMapper
         'resource' => self::PRIMARY_TABLE_NAME . '.resource'
     ];
 
-    public function __construct()
+    public static function getInstance()
+    {
+        static $instance = null;
+        if ($instance === null) {
+            $instance = new SystemEventsMapper();
+        }
+        return $instance;
+    }
+
+    private function __construct()
     {
         // note time_stamp is the alias for created used in view query
         parent::__construct(new TableMapper(self::PRIMARY_TABLE_NAME, '*', 'time_stamp', false), self::SELECT_COLUMNS);

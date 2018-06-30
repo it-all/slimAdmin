@@ -10,7 +10,8 @@ use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\Queries\SelectBuilder;
 use SlimPostgres\Database\DataMappers\MultiTableMapper;
 
-class AdministratorsMapper extends MultiTableMapper
+// Singleton
+final class AdministratorsMapper extends MultiTableMapper
 {
     const TABLE_NAME = 'administrators';
     const ROLES_TABLE_NAME = 'roles';
@@ -25,7 +26,16 @@ class AdministratorsMapper extends MultiTableMapper
         'level' => self::ROLES_TABLE_NAME . '.level'
     ];
 
-    public function __construct()
+    public static function getInstance()
+    {
+        static $instance = null;
+        if ($instance === null) {
+            $instance = new AdministratorsMapper();
+        }
+        return $instance;
+    }
+
+    private function __construct()
     {
         parent::__construct(new TableMapper(self::TABLE_NAME), self::SELECT_COLUMNS);
     }
@@ -121,6 +131,17 @@ class AdministratorsMapper extends MultiTableMapper
         return "FROM administrators JOIN administrator_roles ON administrators.id = administrator_roles.administrator_id JOIN roles ON administrator_roles.role_id = roles.id";
     }
 
+    private function getOrderByClause(): string 
+    {
+        return 'ORDER BY roles.level';
+    }
+
+    private function getObject(array $whereColumnsInfo): ?Administrator
+    {
+        $q = new SelectBuilder($this->getSelectClause(), $this->getFromClause(), $whereColumnsInfo, $this->getOrderByClause()); // order by level
+        return $this->getForResults($q->execute());
+    }
+
     public function getObjectById(int $id): ?Administrator 
     {
         $whereColumnsInfo = [
@@ -129,10 +150,7 @@ class AdministratorsMapper extends MultiTableMapper
                 'values' => [$id]
             ]
         ];
-
-        $q = new SelectBuilder($this->getSelectClause(), $this->getFromClause(), $whereColumnsInfo);
-
-        return $this->getForResults($q->execute());
+        return $this->getObject($whereColumnsInfo);
     }
 
     public function getObjectByUsername(string $username): ?Administrator
@@ -143,17 +161,14 @@ class AdministratorsMapper extends MultiTableMapper
                 'values' => [$username]
             ]
         ];
-
-        $q = new SelectBuilder($this->getSelectClause(), $this->getFromClause(), $whereColumnsInfo);
-
-        return $this->getForResults($q->execute());
+        return $this->getObject($whereColumnsInfo);
     }
 
-    public function select(string $columns = "*", array $whereColumnsInfo = null)
+    public function select(string $columns = "*", array $whereColumnsInfo = null, string $orderByClause = null)
     {
         $selectClause = "SELECT $columns";
         $fromClause = "FROM ".self::TABLE_NAME." JOIN ".self::ADM_ROLES_TABLE_NAME." ON ".self::TABLE_NAME.".id = ".self::ADM_ROLES_TABLE_NAME.".administrator_id JOIN ".self::ROLES_TABLE_NAME." ON ".self::ADM_ROLES_TABLE_NAME.".role_id = ".self::ROLES_TABLE_NAME.".id";
-        $orderByClause = "ORDER BY ".self::TABLE_NAME.".id, ".self::ROLES_TABLE_NAME.".level";
+        $orderByClause = ($orderByClause == null) ? $this->getOrderByClause() : $orderByClause;
         if ($whereColumnsInfo != null) {
             $this->validateFilterColumns($whereColumnsInfo);
         }

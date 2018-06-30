@@ -13,7 +13,7 @@ class RolesView extends DatabaseTableListView
 {
     public function __construct(Container $container)
     {
-        parent::__construct($container, new RolesMapper(), ROUTEPREFIX_ROLES);
+        parent::__construct($container, RolesMapper::getInstance(), ROUTEPREFIX_ROLES);
     }
 
     // override in order to not show delete link for roles in use

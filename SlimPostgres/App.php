@@ -128,7 +128,7 @@ class App
         $this->database = new Postgres($postgresConnectionString);
 
         // used in error handler and container
-        $this->systemEventsMapper = new SystemEventsMapper();
+        $this->systemEventsMapper = SystemEventsMapper::getInstance();
 
         if ($this->config['errors']['logToDatabase']) {
             $errorHandler->setDatabaseAndSystemEventsMapper($this->database, $this->systemEventsMapper);

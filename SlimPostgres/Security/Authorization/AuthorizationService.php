@@ -17,7 +17,7 @@ class AuthorizationService
     {
         $this->topRole = $topRole;
         $this->functionalityPermissions = $functionalityPermissions;
-        $this->rolesMapper = new RolesMapper();
+        $this->rolesMapper = RolesMapper::getInstance();
         if (!$this->validateRole($topRole)) {
             throw new \Exception("Invalid top role: $topRole");
         }

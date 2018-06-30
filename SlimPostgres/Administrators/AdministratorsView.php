@@ -30,7 +30,7 @@ class AdministratorsView extends AdminListView
     public function __construct(Container $container)
     {
         $this->routePrefix = ROUTEPREFIX_ADMINISTRATORS;
-        $this->administratorsMapper = new AdministratorsMapper();
+        $this->administratorsMapper = AdministratorsMapper::getInstance();
 
         parent::__construct($container, 'administrators', ROUTE_ADMINISTRATORS, $this->administratorsMapper, ROUTE_ADMINISTRATORS_RESET, 'admin/lists/administratorsList.php');
 
@@ -107,7 +107,7 @@ class AdministratorsView extends AdminListView
         $fields[] = new InputField('Confirm Password', $passwordConfirmationFieldAttributes, FormHelper::getFieldError($passwordConfirmationFieldAttributes['name']));
 
         // Roles Checkboxes
-        $rolesMapper = new RolesMapper();
+        $rolesMapper = RolesMapper::getInstance();
         $rolesCheckboxes = [];
         foreach ($rolesMapper->getRoles() as $roleId => $roleData) {
             $rolesCheckboxAttributes = [

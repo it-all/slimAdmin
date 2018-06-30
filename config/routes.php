@@ -10,8 +10,8 @@ use SlimPostgres\Security\Authentication\AuthenticationMiddleware;
 use Domain\AdminHomeView;
 use SlimPostgres\SystemEvents\SystemEventsView;
 use SlimPostgres\SystemEvents\SystemEventsController;
-use SlimPostgres\Administrators\Logins\LoginsView;
-use SlimPostgres\Administrators\Logins\LoginsController;
+use SlimPostgres\Administrators\Logins\LoginAttemptsView;
+use SlimPostgres\Administrators\Logins\LoginAttemptsController;
 use SlimPostgres\Administrators\AdministratorsView;
 use SlimPostgres\Administrators\AdministratorsController;
 use SlimPostgres\Administrators\Roles\RolesView;
@@ -71,18 +71,18 @@ $slim->get('/' . $config['adminPath'] . '/systemEvents/reset',
     ->setName(ROUTE_SYSTEM_EVENTS_RESET);
 // end system events
 
-// logins
-$slim->get('/' . $config['adminPath'] . '/logins', LoginsView::class . ':index')
+// login attempts
+$slim->get('/' . $config['adminPath'] . '/logins', LoginAttemptsView::class . ':index')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_LOGIN_ATTEMPTS]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_LOGIN_ATTEMPTS);
 
-$slim->post('/' . $config['adminPath'] . '/logins', LoginsController::class . ':postIndexFilter')
+$slim->post('/' . $config['adminPath'] . '/logins', LoginAttemptsController::class . ':postIndexFilter')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_LOGIN_ATTEMPTS]))
     ->add(new AuthenticationMiddleware($slimContainer));
 
 $slim->get('/' . $config['adminPath'] . '/logins/reset',
-    LoginsView::class . ':indexResetFilter')
+    LoginAttemptsView::class . ':indexResetFilter')
     ->add(new AuthorizationMiddleware($slimContainer, $administratorPermissions[ROUTE_LOGIN_ATTEMPTS]))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_LOGIN_ATTEMPTS_RESET);

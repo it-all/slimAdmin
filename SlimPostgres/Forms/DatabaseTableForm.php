@@ -19,6 +19,17 @@ class DatabaseTableForm extends Form
 
     public function __construct(TableMapper $databaseTableMapper, string $formAction, string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $databaseAction = 'insert', array $fieldData = null, bool $jsValidate = true)
     {
+        
+        $formTagAttributes = ['method' => 'post', 'action' => $formAction];
+        if (!$jsValidate) {
+            $formTagAttributes['novalidate'] = 'novalidate';
+        }
+        parent::__construct($this->getFields($databaseAction), $formTagAttributes, FormHelper::getGeneralError());
+
+    }
+
+    private function getFields(string $databaseAction)
+    {
         $this->validateDatabaseActionString($databaseAction);
 
         $fields = [];
@@ -43,17 +54,10 @@ class DatabaseTableForm extends Form
 
         $fields[] = FormHelper::getCsrfNameField($csrfNameKey, $csrfNameValue);
         $fields[] = FormHelper::getCsrfValueField($csrfValueKey, $csrfValueValue);
-
         $fields[] = FormHelper::getSubmitField();
 
-        $formTagAttributes = ['method' => 'post', 'action' => $formAction];
-        if (!$jsValidate) {
-            $formTagAttributes['novalidate'] = 'novalidate';
-        }
-        parent::__construct($fields, $formTagAttributes, FormHelper::getGeneralError());
-
+        return $fields;
     }
-
     protected function validateDatabaseActionString(string $databaseAction)
     {
         if ($databaseAction != 'insert' && $databaseAction != 'update') {

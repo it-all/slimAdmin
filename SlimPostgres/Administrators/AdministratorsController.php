@@ -105,7 +105,7 @@ class AdministratorsController extends BaseController
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS));
     }
 
-    private function getChangedFieldValues(Administrator $administrator): ?array 
+    private function getChangedFieldValues(Administrator $administrator): array 
     {
         $changedFieldValues = [];
 
@@ -154,10 +154,6 @@ class AdministratorsController extends BaseController
             $changedFieldValues['roles']['remove'] = $removeRoles;
         }
 
-        if (count($changedFieldValues) == 0) {
-            return null;
-        }
-
         return $changedFieldValues;
     }
 
@@ -188,9 +184,8 @@ class AdministratorsController extends BaseController
         $changedFields = $this->getChangedFieldValues($administrator);
 
         if (count($changedFields) == 0) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made (Record $primaryKey)", App::STATUS_ADMIN_NOTICE_FAILURE];
-            FormHelper::unsetFormSessionVars();
-            return $response->withRedirect($this->router->pathFor($redirectRoute));
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made", 'adminNoticeFailure'];
+            return $this->view->updateView($request, $response, $args);
         }
 
         $this->setValidation($input, $changedFields);

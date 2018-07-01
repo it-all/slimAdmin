@@ -17,7 +17,7 @@ class DatabaseTableForm extends Form
     const TEXTAREA_COLS = 50;
     const TEXTAREA_ROWS = 5;
 
-    public function __construct(TableMapper $databaseTableMapper, string $formAction, string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $databaseAction = 'insert', array $fieldData = null)
+    public function __construct(TableMapper $databaseTableMapper, string $formAction, string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $databaseAction = 'insert', array $fieldData = null, bool $jsValidate = true)
     {
         $this->validateDatabaseActionString($databaseAction);
 
@@ -46,7 +46,11 @@ class DatabaseTableForm extends Form
 
         $fields[] = FormHelper::getSubmitField();
 
-        parent::__construct($fields, ['method' => 'post', 'action' => $formAction], FormHelper::getGeneralError());
+        $formTagAttributes = ['method' => 'post', 'action' => $formAction];
+        if (!$jsValidate) {
+            $formTagAttributes['novalidate'] = 'novalidate';
+        }
+        parent::__construct($fields, $formTagAttributes, FormHelper::getGeneralError());
 
     }
 

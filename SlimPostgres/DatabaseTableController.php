@@ -8,6 +8,7 @@ use SlimPostgres\ResponseUtilities;
 use SlimPostgres\BaseController;
 use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Forms\FormHelper;
+use SlimPostgres\DatabaseTableValidator;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -56,26 +57,12 @@ class DatabaseTableController extends BaseController
 
         $this->setRequestInput($request, $this->getBooleanFieldNames());
 
-        $this->validator = $this->validator->withData($_SESSION[App::SESSION_KEY_REQUEST_INPUT], FormHelper::getDatabaseTableValidationFields($this->mapper));
+        $validator = new DatabaseTableValidator($this->mapper, $_SESSION[App::SESSION_KEY_REQUEST_INPUT]);
+        $validator->setInsertRules();
 
-        $this->validator->mapFieldsRules(FormHelper::getDatabaseTableValidation($this->mapper));
-
-        if (count($this->mapper->getUniqueColumns()) > 0) {
-            $this->validator::addRule('unique', function($field, $value, array $params = [], array $fields = []) {
-                if (!$params[1]->errors($field)) {
-                    return !$params[0]->recordExistsForValue($value);
-                }
-                return true; // skip validation if there is already an error for the field
-            }, 'Already exists.');
-
-            foreach ($this->mapper->getUniqueColumns() as $databaseColumnMapper) {
-                $this->validator->rule('unique', $databaseColumnMapper->getName(), $databaseColumnMapper, $this->validator);
-            }
-        }
-
-        if (!$this->validator->validate()) {
+        if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
-            FormHelper::setFieldErrors($this->validator->getFirstErrors());
+            FormHelper::setFieldErrors($validator->getFirstErrors());
             return $this->view->insertView($request, $response, $args);
         }
 
@@ -113,41 +100,21 @@ class DatabaseTableController extends BaseController
         // make sure there is a record for the primary key
         if (!$record = $this->mapper->selectForPrimaryKey($args['primaryKey'])) {
             return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->mapper, 'update');
-            // return SingleTableHelper::updateRecordNotFound($this->container, $response, $args['primaryKey'], $this->mapper, $this->routePrefix);
         }
 
-        // if no changes made, redirect
-        // debatable whether this should be part of validation and stay on page with error
+        // if no changes made stay on page with error
         $changedColumnsValues = $this->getMapper()->getChangedColumnsValues($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $record);
         if (count($changedColumnsValues) == 0) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made (Record ".$args['primaryKey'].")", 'adminNoticeFailure'];
-            FormHelper::unsetFormSessionVars();
-            return $response->withRedirect($this->router->pathFor($redirectRoute));
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made", 'adminNoticeFailure'];
+            return $this->view->updateView($request, $response, $args);
         }
 
-        $this->validator = $this->validator->withData($_SESSION[App::SESSION_KEY_REQUEST_INPUT], FormHelper::getDatabaseTableValidationFields($this->mapper));
+        $validator = new DatabaseTableValidator($this->mapper, $_SESSION[App::SESSION_KEY_REQUEST_INPUT]);
+        $validator->setUpdateRules($record);
 
-        $this->validator->mapFieldsRules(FormHelper::getDatabaseTableValidation($this->mapper));
-
-        if (count($this->mapper->getUniqueColumns()) > 0) {
-            $this->validator::addRule('unique', function($field, $value, array $params = [], array $fields = []) {
-                if (!$params[1]->errors($field)) {
-                    return !$params[0]->recordExistsForValue($value);
-                }
-                return true; // skip validation if there is already an error for the field
-            }, 'Already exists.');
-
-            foreach ($this->mapper->getUniqueColumns() as $databaseColumnMapper) {
-                // only set rule for changed columns
-                if ($_SESSION[App::SESSION_KEY_REQUEST_INPUT][$databaseColumnMapper->getName()] != $record[$databaseColumnMapper->getName()]) {
-                    $this->validator->rule('unique', $databaseColumnMapper->getName(), $databaseColumnMapper, $this->validator);
-                }
-            }
-        }
-
-        if (!$this->validator->validate()) {
+        if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
-            FormHelper::setFieldErrors($this->validator->getFirstErrors());
+            FormHelper::setFieldErrors($validator->getFirstErrors());
             return $this->view->updateView($request, $response, $args);
         }
 

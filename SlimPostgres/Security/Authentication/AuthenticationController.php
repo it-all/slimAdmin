@@ -17,13 +17,11 @@ class AuthenticationController extends BaseController
         $username = $_SESSION[App::SESSION_KEY_REQUEST_INPUT]['username'];
         $password = $_SESSION[App::SESSION_KEY_REQUEST_INPUT]['password_hash'];
 
-        $this->validator = $this->validator->withData($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $this->authentication->getLoginFields());
+        $validator = new AuthenticationValidator($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $this->authentication);
 
-        $this->validator->rules($this->authentication->getLoginFieldValidationRules());
-
-        if (!$this->validator->validate()) {
+        if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
-            FormHelper::setFieldErrors($this->validator->getFirstErrors());
+            FormHelper::setFieldErrors($validator->getFirstErrors());
             $av = new AuthenticationView($this->container);
             return $av->getLogin($request, $response, $args);
         }

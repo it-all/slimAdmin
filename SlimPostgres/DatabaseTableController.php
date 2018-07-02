@@ -8,7 +8,7 @@ use SlimPostgres\ResponseUtilities;
 use SlimPostgres\BaseController;
 use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Forms\FormHelper;
-use SlimPostgres\DatabaseTableValidator;
+use SlimPostgres\DatabaseTableInsertFormValidator;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -57,8 +57,7 @@ class DatabaseTableController extends BaseController
 
         $this->setRequestInput($request, $this->getBooleanFieldNames());
 
-        $validator = new DatabaseTableValidator($this->mapper, $_SESSION[App::SESSION_KEY_REQUEST_INPUT]);
-        $validator->setInsertRules();
+        $validator = new DatabaseTableInsertFormValidator($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $this->mapper);
 
         if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
@@ -109,8 +108,7 @@ class DatabaseTableController extends BaseController
             return $this->view->updateView($request, $response, $args);
         }
 
-        $validator = new DatabaseTableValidator($this->mapper, $_SESSION[App::SESSION_KEY_REQUEST_INPUT]);
-        $validator->setUpdateRules($record);
+        $validator = new DatabaseTableUpdateFormValidator($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $this->mapper, $record);
 
         if (!$validator->validate()) {
             // redisplay the form with input values and error(s)

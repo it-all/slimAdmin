@@ -48,7 +48,7 @@ abstract class DatabaseTableListView extends AdminListView
     {
         $formFieldData = ($request->isGet()) ? null : $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
-        $form = new DatabaseTableForm($this->mapper, $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'insert', 'post')), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'insert', $formFieldData);
+        $form = new DatabaseTableForm($this->mapper, $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'insert', 'post')), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'insert', $formFieldData, false);
         FormHelper::unsetFormSessionVars();
 
         return $this->view->render(
@@ -73,12 +73,11 @@ abstract class DatabaseTableListView extends AdminListView
         // make sure there is a record for the mapper
         if (!$record = $this->mapper->selectForPrimaryKey($args['primaryKey'])) {
             return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->mapper, 'update');
-            // return SingleTableHelper::updateRecordNotFound($this->container, $response, $args['primaryKey'], $this->mapper, $this->routePrefix);
         }
 
         $formFieldData = ($request->isGet()) ? $record : $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
-        $form = new DatabaseTableForm($this->mapper, $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'update', $formFieldData);
+        $form = new DatabaseTableForm($this->mapper, $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'update', $formFieldData, false);
         FormHelper::unsetFormSessionVars();
 
         return $this->view->render(

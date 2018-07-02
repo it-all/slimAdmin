@@ -8,20 +8,20 @@ use SlimPostgres\Utilities\ValitronValidatorExtension;
 use SlimPostgres\Forms\FormHelper;
 
 // sets validation rules for database table based on table's columns
-class DatabaseTableValidator extends ValitronValidatorExtension
+abstract class DatabaseTableFormValidator extends ValitronValidatorExtension
 {
     private $mapper;
     private $inputData;
 
-    public function __construct(TableMapper $mapper, array $inputData)
+    public function __construct(array $inputData, TableMapper $mapper)
     {
         parent::__construct($inputData, FormHelper::getDatabaseTableValidationFields($mapper));
         $this->mapper = $mapper;
         $this->inputData = $inputData;
     }
 
-    // common to both insert and update
-    private function setRules(bool $skipUniqueForUnchanged = false, array $record = null)
+    // called by both insert and update children. update will call with skip true and record data so that only columns that have been changed have the unique rule applied, otherwise validation would fail for unchanged unique fields
+    protected function setRules(bool $skipUniqueForUnchanged = false, array $record = null)
     {
         $this->mapFieldsRules(FormHelper::getDatabaseTableValidation($this->mapper));
 
@@ -41,30 +41,4 @@ class DatabaseTableValidator extends ValitronValidatorExtension
             }
         }
     }
-
-    public function setInsertRules()
-    {
-        $this->setRules();
-
-        // if (count($this->mapper->getUniqueColumns()) > 0) {
-
-        //     foreach ($this->mapper->getUniqueColumns() as $databaseColumnMapper) {
-        //         $this->rule('unique', $databaseColumnMapper->getName(), $databaseColumnMapper, $this);
-        //     }
-        // }
-    }
-
-    public function setUpdateRules(array $record)
-    {
-        $this->setRules(true, $record);
-
-        // if (count($this->mapper->getUniqueColumns()) > 0) {
-        //     foreach ($this->mapper->getUniqueColumns() as $databaseColumnMapper) {
-        //         // only set rule for changed columns
-        //         if ($_SESSION[App::SESSION_KEY_REQUEST_INPUT][$databaseColumnMapper->getName()] != $record[$databaseColumnMapper->getName()]) {
-        //             $this->validator->rule('unique', $databaseColumnMapper->getName(), $databaseColumnMapper, $this->validator);
-        //         }
-        //     }
-        // }
-    }
-}
+ }

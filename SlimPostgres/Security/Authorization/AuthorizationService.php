@@ -106,8 +106,8 @@ class AuthorizationService
             }
         }
 
-        foreach ($this->getAdministratorRoles() as $administratorRole) {
-            if (in_array($administratorRole, $authorizedRoles)) {
+        foreach ($this->getAdministratorRoles() as $roleId => $roleInfo) {
+            if (in_array($roleInfo['roleName'], $authorizedRoles)) {
                 return true;
             }
         }

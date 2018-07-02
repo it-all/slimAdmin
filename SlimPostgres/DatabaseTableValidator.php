@@ -13,7 +13,6 @@ class DatabaseTableValidator extends ValitronValidatorExtension
     private $mapper;
     private $inputData;
 
-    // sets validation rules
     public function __construct(TableMapper $mapper, array $inputData)
     {
         parent::__construct($inputData, FormHelper::getDatabaseTableValidationFields($mapper));

@@ -31,7 +31,7 @@ Add and configure your new route to the system by:
 - Adding the new route in config/routes.php  
 - For new administrative resources, add AuthenticationMiddleware to the route (see existing examples in the routes file)  
 - For new administrative resources, if authorization is required at a resource or functionality level, add them to the 'administratorPermissions' key in config/settings.php, then add AuthorizationMiddleware to the route (see existing examples in the routes file)   
-- For new administrative resources, you can add a link in the administrative navigation menu by editing SlimPostgres/UserInterface/Navigation/AdminNavigation.php. 
+- For new administrative resources, you can add a link in the administrative navigation menu by editing SlimPostgres/AdminNavigation.php. 
 
 <a name="authe">Authentication</a>  
 Admin pages are protected through authenticated sessions.

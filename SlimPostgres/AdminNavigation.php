@@ -26,10 +26,6 @@ class AdminNavigation
 
             'System' => [
                 'subSections' => [
-                    'Events' => [
-                        'route' => ROUTE_SYSTEM_EVENTS,
-                    ],
-
                     'Administrators' => [
                         'route' => ROUTE_ADMINISTRATORS,
                         'subSections' => [
@@ -51,7 +47,16 @@ class AdminNavigation
                                 'route' => ROUTE_LOGIN_ATTEMPTS,
                             ],
                         ]
+                    ],
+
+                    'Events' => [
+                        'route' => ROUTE_SYSTEM_EVENTS,
+                    ],
+
+                    'Login Attempts' => [
+                        'route' => ROUTE_LOGIN_ATTEMPTS
                     ]
+
                 ]
             ],
             'Logout' => [
@@ -83,7 +88,7 @@ class AdminNavigation
         }
 
         // by nav section - ie NAV_ADMIN_SYSTEM
-        // note if nav section not defined null argument is sent which results in base role permission (the default)
+        // note if nav section not defined constant evaluates to null, which results in base role permission (the default)
         return $this->container->authorization->getPermissions(constant('NAV_ADMIN_'.strtoupper(str_replace(" ", "_", $sectionName))));
     }
 

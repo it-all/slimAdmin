@@ -19,16 +19,17 @@ class DatabaseTableForm extends Form
 
     public function __construct(TableMapper $databaseTableMapper, string $formAction, string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $databaseAction = 'insert', array $fieldData = null, bool $jsValidate = true)
     {
-        
         $formTagAttributes = ['method' => 'post', 'action' => $formAction];
         if (!$jsValidate) {
             $formTagAttributes['novalidate'] = 'novalidate';
         }
-        parent::__construct($this->getFields($databaseAction), $formTagAttributes, FormHelper::getGeneralError());
+        $fields = $this->getFields($databaseTableMapper, $csrfNameKey, $csrfNameValue, $csrfValueKey, $csrfValueValue, $databaseAction, $fieldData);
+
+        parent::__construct($fields, $formTagAttributes, FormHelper::getGeneralError());
 
     }
 
-    private function getFields(string $databaseAction)
+    private function getFields(TableMapper $databaseTableMapper, string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $databaseAction = 'insert', array $fieldData = null)
     {
         $this->validateDatabaseActionString($databaseAction);
 

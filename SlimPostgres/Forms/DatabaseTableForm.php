@@ -11,31 +11,35 @@ use It_All\FormFormer\Fields\TextareaField;
 use It_All\FormFormer\Form;
 use SlimPostgres\Database\DataMappers\ColumnMapper;
 use SlimPostgres\Database\DataMappers\TableMapper;
+use SlimPostgres\Database\DatabaseTableValidation;
 
 class DatabaseTableForm extends Form
 {
     const TEXTAREA_COLS = 50;
     const TEXTAREA_ROWS = 5;
+    private static $tableMapper;
 
     public function __construct(TableMapper $databaseTableMapper, string $formAction, string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $databaseAction = 'insert', array $fieldData = null, bool $jsValidate = true)
     {
+        self::$tableMapper = $databaseTableMapper;
+
         $formTagAttributes = ['method' => 'post', 'action' => $formAction];
         if (!$jsValidate) {
             $formTagAttributes['novalidate'] = 'novalidate';
         }
-        $fields = $this->getFields($databaseTableMapper, $csrfNameKey, $csrfNameValue, $csrfValueKey, $csrfValueValue, $databaseAction, $fieldData);
+        $fields = $this->getFields($csrfNameKey, $csrfNameValue, $csrfValueKey, $csrfValueValue, $databaseAction, $fieldData);
 
         parent::__construct($fields, $formTagAttributes, FormHelper::getGeneralError());
 
     }
 
-    private function getFields(TableMapper $databaseTableMapper, string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $databaseAction = 'insert', array $fieldData = null)
+    private function getFields(string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $databaseAction = 'insert', array $fieldData = null)
     {
         $this->validateDatabaseActionString($databaseAction);
 
         $fields = [];
 
-        foreach ($databaseTableMapper->getColumns() as $column) {
+        foreach (self::$tableMapper->getColumns() as $column) {
             if ($this->includeFieldForColumn($column, $databaseAction)) {
                 // value
                 if (isset($fieldData)) {
@@ -83,33 +87,33 @@ class DatabaseTableForm extends Form
     {
         switch ($column->getType()) {
             case 'smallint':
-                $min = FormHelper::getDatabaseColumnValidationValue($column,'min');
-                $max = FormHelper::getDatabaseColumnValidationValue($column,'max');
+                $min = DatabaseTableValidation::getDatabaseColumnValidationValue($column,'min');
+                $max = DatabaseTableValidation::getDatabaseColumnValidationValue($column,'max');
                 break;
 
             case 'integer':
-                $min = FormHelper::getDatabaseColumnValidationValue($column,'min');
-                $max = FormHelper::getDatabaseColumnValidationValue($column,'max');
+                $min = DatabaseTableValidation::getDatabaseColumnValidationValue($column,'min');
+                $max = DatabaseTableValidation::getDatabaseColumnValidationValue($column,'max');
                 break;
 
             case 'bigint':
-                $min = FormHelper::getDatabaseColumnValidationValue($column,'min');
-                $max = FormHelper::getDatabaseColumnValidationValue($column,'max');
+                $min = DatabaseTableValidation::getDatabaseColumnValidationValue($column,'min');
+                $max = DatabaseTableValidation::getDatabaseColumnValidationValue($column,'max');
                 break;
 
             case 'smallserial':
-                $min = FormHelper::getDatabaseColumnValidationValue($column,'min');
-                $max = FormHelper::getDatabaseColumnValidationValue($column,'max');
+                $min = DatabaseTableValidation::getDatabaseColumnValidationValue($column,'min');
+                $max = DatabaseTableValidation::getDatabaseColumnValidationValue($column,'max');
                 break;
 
             case 'serial':
-                $min = FormHelper::getDatabaseColumnValidationValue($column,'min');
-                $max = FormHelper::getDatabaseColumnValidationValue($column,'max');
+                $min = DatabaseTableValidation::getDatabaseColumnValidationValue($column,'min');
+                $max = DatabaseTableValidation::getDatabaseColumnValidationValue($column,'max');
                 break;
 
             case 'bigserial':
-                $min = FormHelper::getDatabaseColumnValidationValue($column,'min');
-                $max = FormHelper::getDatabaseColumnValidationValue($column,'max');
+                $min = DatabaseTableValidation::getDatabaseColumnValidationValue($column,'min');
+                $max = DatabaseTableValidation::getDatabaseColumnValidationValue($column,'max');
                 break;
 
             default:
@@ -121,6 +125,7 @@ class DatabaseTableForm extends Form
 
     }
 
+    // static for access to column field only
     public static function getFieldFromDatabaseColumn(
         ColumnMapper $column,
         bool $isRequiredOverride = null,
@@ -151,7 +156,7 @@ class DatabaseTableForm extends Form
             ]
         ];
 
-        if ( ($isRequiredOverride !== null && $isRequiredOverride) || FormHelper::getDatabaseColumnValidationValue($column, 'required')) {
+        if ( ($isRequiredOverride !== null && $isRequiredOverride) || DatabaseTableValidation::getDatabaseColumnValidationValue($column, 'required') ) {
             $fieldInfo['attributes']['required'] = 'required';
         }
 

@@ -85,11 +85,10 @@ class AdministratorsController extends BaseController
 
         $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
-        $this->setValidation($input);
-
-        if (!$this->validator->validate()) {
+        $validator = new AdministratorsValidator($input);
+        if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
-            FormHelper::setFieldErrors($this->validator->getFirstErrors());
+            FormHelper::setFieldErrors($validator->getFirstErrors());
             return $this->view->getInsert($request, $response, $args);
         }
 
@@ -188,13 +187,20 @@ class AdministratorsController extends BaseController
             return $this->view->updateView($request, $response, $args);
         }
 
-        $this->setValidation($input, $changedFields);
-
-        if (!$this->validator->validate()) {
+        $validator = new AdministratorsValidator($input, $changedFields);
+        if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
-            FormHelper::setFieldErrors($this->validator->getFirstErrors());
+            FormHelper::setFieldErrors($validator->getFirstErrors());
             return $this->view->updateView($request, $response, $args);
         }
+        
+        // $this->setValidation($input, $changedFields);
+
+        // if (!$this->validator->validate()) {
+        //     // redisplay the form with input values and error(s)
+        //     FormHelper::setFieldErrors($this->validator->getFirstErrors());
+        //     return $this->view->updateView($request, $response, $args);
+        // }
 
         $this->administratorsMapper->update((int) $primaryKey, $changedFields);
 

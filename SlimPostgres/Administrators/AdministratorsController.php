@@ -32,44 +32,6 @@ class AdministratorsController extends BaseController
         parent::__construct($container);
     }
 
-    // if this is for an update there must be changed fields
-    private function setValidation(array $input, array $changedFieldValues = [])
-    {
-        $this->validator = $this->validator->withData($input);
-
-        // bool - either inserting or !inserting (updating)
-        $inserting = count($changedFieldValues) == 0;
-
-        // define unique column rule to be used in certain situations below
-        $this->validator::addRule('unique', function($field, $value, array $params = [], array $fields = []) {
-            if (!$params[1]->errors($field)) {
-                return !$params[0]->recordExistsForValue($value);
-            }
-            return true; // skip validation if there is already an error for the field
-        }, 'Already exists.');
-
-        $this->validator->rule('required', ['name', 'username', 'roles']);
-        $this->validator->rule('regex', 'name', '%^[a-zA-Z\s]+$%')->message('must be letters and spaces only');
-        $this->validator->rule('lengthMin', 'username', 4);
-        if ($inserting || mb_strlen($input['password']) > 0) {
-            $this->validator->rule('required', ['password', 'password_confirm']);
-            // https://stackoverflow.com/questions/8141125/regex-for-password-php
-//            $this->validator->rule('regex', 'password', '%^\S*(?=\S{4,})\S*$%')->message('Must be at least 12 characters long');
-            $this->validator->rule('lengthMin', 'password', 4);
-            $this->validator->rule('equals', 'password', 'password_confirm')->message('must be the same as Confirm Password');
-        }
-
-        // unique column rule for username if it has changed
-        if ($inserting || array_key_exists('username', $changedFieldValues)) {
-            $this->validator->rule('unique', 'username', $this->administratorsMapper->getPrimaryTableMapper()->getColumnByName('username'), $this->validator);
-        }
-
-        // all selected roles must be in roles table
-        $this->validator->rule('array', 'roles');
-        $rolesMapper = RolesMapper::getInstance();
-        $this->validator->rule('in', 'roles.*', array_keys($rolesMapper->getRoles())); // role ids
-    }
-
     public function postIndexFilter(Request $request, Response $response, $args)
     {
         return $this->setIndexFilter($request, $response, $args, $this->administratorsMapper::SELECT_COLUMNS, ROUTE_ADMINISTRATORS, $this->view);
@@ -194,14 +156,6 @@ class AdministratorsController extends BaseController
             return $this->view->updateView($request, $response, $args);
         }
         
-        // $this->setValidation($input, $changedFields);
-
-        // if (!$this->validator->validate()) {
-        //     // redisplay the form with input values and error(s)
-        //     FormHelper::setFieldErrors($this->validator->getFirstErrors());
-        //     return $this->view->updateView($request, $response, $args);
-        // }
-
         $this->administratorsMapper->update((int) $primaryKey, $changedFields);
 
         // if the administrator changed her/his own info, update the session

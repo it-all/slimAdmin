@@ -254,11 +254,6 @@ class App
             return $mailer;
         };
 
-        // Form Validation
-        $container['validator'] = function ($container) {
-            return new Utilities\ValitronValidatorExtension();
-        };
-
         // CSRF
         $container['csrf'] = function ($container) {
             $storage = null; // cannot directly pass null because received by reference.

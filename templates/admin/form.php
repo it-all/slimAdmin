@@ -6,7 +6,7 @@ require 'partials/footer.php';
 
 $htmlHeadCss = '<link href="/css/adminFlexSimple.css" rel="stylesheet" type="text/css">';
 $htmlBodyContent = $header;
-$htmlBodyContent .= '<main><div id="simpleContainer">'.$form->generate().'</div></main>';
+$htmlBodyContent .= '<main><div id="simpleContainer"><h1>'.$title.'</h1>'.$form->generate().'</div></main>';
 $htmlBodyContent .= $footer;
 $htmlBodyJs = '<script type="text/javascript" src="/js/uiHelper.js"></script>';
 

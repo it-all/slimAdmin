@@ -1,14 +1,14 @@
 # slim-postgres  
 WORK IN PROGRESS  
   
-slim-postrgres is a PHP 7, PostgreSQL RESTful web platform with built-in administration and other features, based on <a target="_blank" href="https://www.slimframework.com/">Slim Framework</a>.  
+slim-postgres is a PHP 7, PostgreSQL RESTful web platform with built-in administration and other features, based on <a target="_blank" href="https://www.slimframework.com/">Slim Framework</a>.  
 
 FEATURES  
-<a target="_blank" href="https://slimframework.com">Slim Micro-framework</a> Integration  
+Built on <a target="_blank" href="https://slimframework.com">Slim framework</a>, a front-controller micro-framework for PHP 
 <a target="_blank" href="https://postgresql.org">PostgreSQL Database</a> Integration  
 <a href="#authe">Authentication</a> (Log In/Out)  
 <a href="#autho">Authorization</a> (Permissions for Resource and Functionality Access)   
-<a target="_blank" href="#admin">Administrative Interface and Navigation</a>  
+<a target="_blank" href="#admin">Administrative User Interface and Navigation</a>  
 <a href="#se">Database Logging of system events, login attempts, and errors</a>  
 <a href="#eh">Error Handling</a>  
 <a href="emailing">Emailing</a> with <a target="_blank" href="https://github.com/PHPMailer/PHPMailer">PHPMailer</a>    
@@ -25,16 +25,16 @@ coming soon
   
 CODING NEW FUNCTIONALITY  
 *work in progress*  
-Create a new directory under domain and create a Mapper/View/Controller (or whatever code structure you desire) as necessary. You can model these files after existing functionality such as Domain/Admin/Marketing/Testimonials (coming soon) (single database table functionality so uses SingleTable files) or SlimPostgres/Administrators (joined database tables so mostly custom code).  
+Create a new directory under domain and create a Model/View/Controller (or whatever code structure you desire) as necessary. You can model these files after existing functionality such as SlimPostgres/Administrators/Roles (single database table model) or SlimPostgres/Administrators (joined database tables).  
 Add and configure your new route to the system by:  
 - Adding a new route name constant in config/constants.php  
 - Adding the new route in config/routes.php  
 - For new administrative resources, add AuthenticationMiddleware to the route (see existing examples in the routes file)  
 - For new administrative resources, if authorization is required at a resource or functionality level, add them to the 'administratorPermissions' key in config/settings.php, then add AuthorizationMiddleware to the route (see existing examples in the routes file)   
-- For new administrative resources, you can add a link in the administrative navigation menu by editing SlimPostgres/AdminNavigation.php. 
+- For new administrative resources, you can add a link in the administrative navigation menu by editing SlimPostgres/AdminNavigation.php, or config/settings.php ['adminNav']. 
 
 <a name="authe">Authentication</a>  
-Admin pages are protected through authenticated sessions.
+Administrative resources can require authentication (login) to access. See config/routes.php admin home for adding Authentication Middleware to a route.  
 
 <a name="autho">Authorization</a>  
 Administrative resources and functionality can be protected against unauthorized use based on administrative roles. Resource and functionality access is defined in config.php in the 'administratorPermissions' array key based on the role and is set in routes.php on resources as necessary, in AdminNavigation to determine whether or not to display navigation options, and in views and controllers as necessary to grant or limit functionality access. Authorization failures result in alerts being written to the SystemEvents table and the user redirected to the admin homepage with a red alert message displayed. Authorization can be set as a minimum role level, where all roles with an equal or better level will be authorized, or as a set of authorized roles.
@@ -52,7 +52,9 @@ These options are found in the navigation menu at top left. Once other options a
 Certain events such as logging in, logging out, inserting, updating, and deleting database records are automatically logged into the SystemEvents table. You can choose other events to insert as you write your application. For usage examples and help, search "systemEvents->insert" and see SystemEventsMapper.php. Note that PHP errors are also logged to the SystemEvents table by default (this can be turned off in $config['errors']['logToDatabase']).  
 
 <a name="eh">Error Handling</a>  
-  
+
+Slim's built in error handling has been disabled, and custom error handling implemented, in order to handle any errors encountered prior to running the Slim application, as well as to be able to email an administrator that an error occured, and to log the error to the system_events database table, viewable in list form in the administrative interface.  
+
 Reporting Methods:
 
 1. Database Log
@@ -92,6 +94,8 @@ if ($this->mailer !== null) {
 The <a href="https://github.com/slimphp/Slim-Csrf" target="_blank">Slim Framework CSRF</a> protection middleware is used to check CSRF form fields. The CSRF key/value generators are added to the container for form field creation. They are also made available to Twig. A failure is logged to SystemEvents as an error, the user's session is unset, and the user is redirected to the (frontend) homepage with an error message.  
   
 <a name="xss">XSS Prevention</a>  
+THIS SECTION NEEDS UPDATING. TWIG IS NO LONGER BEING USED, THEREFORE ANY DISPLAYED USER DATA MUST BE ESCAPED USING htmlspecialchars().  
+  
 The appropriate <a target="_blank" href="https://twig.sensiolabs.org/doc/2.x/filters/escape.html" target="_blank">Twig escape filter</a> are used for any user-input data* that is output through Twig. Note that Twig defaults to autoescape 'html' in the autoescape environment variable: https://twig.sensiolabs.org/api/2.x/Twig_Environment.html  
   
 protectXSS() or arrayProtectRecursive() should be called for any user-input data* that is output into HTML independent of Twig (currently there is none).

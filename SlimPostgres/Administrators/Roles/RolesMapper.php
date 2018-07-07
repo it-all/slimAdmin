@@ -7,6 +7,7 @@ use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use It_All\FormFormer\Fields\SelectField;
 use It_All\FormFormer\Fields\SelectOption;
+use SlimPostgres\Exceptions;
 
 // Singleton
 // note that level 1 is the greatest permission
@@ -92,6 +93,15 @@ final class RolesMapper extends TableMapper
         throw new \Exception("Invalid role searched: $roleSearch");
     }
 
+    public function getObject(int $primaryKey): ?Role 
+    {
+        if ($record = $this->selectForPrimaryKey($primaryKey)) {
+            return new Role((int) $record['id'], $record['role'], $record['level']);
+        }
+
+        return null;
+    }
+
     public function getRoles(): array
     {
         return $this->roles;
@@ -119,7 +129,7 @@ final class RolesMapper extends TableMapper
         return (int) end($this->roles)['level'];
     }
 
-    public static function hasAdministrator(int $roleId): bool
+    public function hasAdministrator(int $roleId): bool
     {
         $q = new QueryBuilder("SELECT COUNT(id) FROM administrator_roles WHERE role_id = $1", $roleId);
         return (bool) $q->getOne();
@@ -150,5 +160,32 @@ final class RolesMapper extends TableMapper
         }
 
         return new SelectField($rolesOptions, (string) $selectedOption, $fieldLabel, $fieldAttributes, $fieldError);
+    }
+
+    // override for validation
+    // return query result
+    public function deleteByPrimaryKey($primaryKeyValue, string $returning = null) 
+    {
+        // make sure returning column exists
+        if ($returning !== null) {
+            if (!$returnColumn = $this->getColumnByName($returning)) {
+                throw new \InvalidArgumentException("Invalid return column $returning");
+            }
+        }
+
+        // make sure role is not being used
+        if ($this->hasAdministrator((int) $primaryKeyValue)) {
+            throw new Exceptions\UnallowedQueryException("Role in use: id $primaryKeyValue");
+        }
+
+        try {
+            $dbResult = parent::deleteByPrimaryKey($primaryKeyValue, $returning);
+        } catch (Exceptions\QueryResultsNotFoundException $e) {
+            throw new Exceptions\QueryResultsNotFoundException("Role not found");
+        } catch (\Exception $e) {
+            throw $e;
+        }
+
+        return $dbResult;
     }
 }

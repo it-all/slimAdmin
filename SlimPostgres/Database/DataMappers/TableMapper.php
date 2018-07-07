@@ -9,6 +9,7 @@ use SlimPostgres\Database\Queries\InsertUpdateBuilder;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\Queries\SelectBuilder;
 use SlimPostgres\Database\Queries\UpdateBuilder;
+use SlimPostgres\Exceptions;
 
 class TableMapper implements TableMappers
 {
@@ -159,7 +160,7 @@ class TableMapper implements TableMappers
             // this is for a query error not a not found condition
             throw new \Exception("Invalid $primaryKeyName for $this->table: $primaryKeyValue");
         }
-        return pg_fetch_assoc($res); // returns false if not records are found
+        return pg_fetch_assoc($res); // returns false if no records are found
     }
 
     protected function addBooleanColumnValues(array $columnValues): array
@@ -232,6 +233,7 @@ class TableMapper implements TableMappers
         }
     }
 
+    // returns query result
     public function deleteByPrimaryKey($primaryKeyValue, string $returning = null)
     {
         $query = "DELETE FROM $this->tableName WHERE ".$this->getPrimaryKeyColumnName()." = $1";
@@ -240,15 +242,13 @@ class TableMapper implements TableMappers
         }
         $q = new QueryBuilder($query, $primaryKeyValue);
 
-        try {
-            $res = $q->execute();
-            if (pg_num_rows($res) == 0) {
-                return false;
-            }
-            return $res;
-        } catch(\Exception $exception) {
-            throw $exception;
+        $dbResult = $q->execute();
+
+        if (pg_affected_rows($dbResult) == 0) {
+            throw new Exceptions\QueryResultsNotFoundException();
         }
+
+        return $dbResult;
     }
 
     private function addColumnsToBuilder(InsertUpdateBuilder $builder, array $columnValues)

@@ -128,20 +128,17 @@ class DatabaseTableController extends BaseController
 
     public function getDelete(Request $request, Response $response, $args)
     {
-        return $this->getDeleteHelper($response, $args['primaryKey']);
+        return $this->deleteHelper($response, $args['primaryKey']);
     }
 
-    public function getDeleteHelper(Response $response, $primaryKey, string $returnColumn = null, bool $sendEmail = false, $routeType = 'index')
+    // this can be called by child classes
+    public function deleteHelper(Response $response, $primaryKey, ?string $returnColumn = null, ?string $emailTo = null, $routeType = 'index')
     {
         if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'delete'))) {
             throw new \Exception('No permission.');
         }
 
-        try {
-            $this->delete($primaryKey, $returnColumn, $sendEmail);
-        } catch (\Exception $e) {
-            // no need to do anything, just redirect with error message already set
-        }
+        $this->delete($primaryKey, $returnColumn, $emailTo); // sets success or failure notices
 
         $redirectRoute = App::getRouteName(true, $this->routePrefix, $routeType);
         return $response->withRedirect($this->router->pathFor($redirectRoute));
@@ -155,7 +152,7 @@ class DatabaseTableController extends BaseController
             $returned = pg_fetch_all($res);
             $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
             $insertedRecordId = $returned[0][$primaryKeyColumnName];
-            $tableName = $this->mapper->getTableName();
+            $tableName = $this->mapper->getTableName(false);
 
             $this->systemEvents->insertInfo("Inserted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName:$insertedRecordId");
 
@@ -163,12 +160,12 @@ class DatabaseTableController extends BaseController
                 $settings = $this->container->get('settings');
                 $this->mailer->send(
                     $_SERVER['SERVER_NAME'] . " Event",
-                    "Inserted into $tableName." . PHP_EOL . " See event log for details.",
+                    "Inserted $tableName." . PHP_EOL . " See event log for details.",
                     [$settings['emails']['programmer']]
                 );
             }
 
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted record $insertedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted $tableName $insertedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
 
             return true;
 
@@ -193,7 +190,7 @@ class DatabaseTableController extends BaseController
 
             $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
             $updatedRecordId = $args['primaryKey'];
-            $tableName = $this->mapper->getTableName();
+            $tableName = $this->mapper->getTableName(false);
 
             $this->systemEvents->insertInfo("Updated $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName:$updatedRecordId");
 
@@ -215,14 +212,10 @@ class DatabaseTableController extends BaseController
         }
     }
 
-    protected function delete($primaryKey, string $returnColumn = null, bool $sendEmail = false)
+    protected function delete($primaryKey, ?string $returnColumn = null, ?string $emailTo = null)
     {
-        $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
-        $tableName = $this->mapper->getTableName();
-        $eventNote = "$primaryKeyColumnName:$primaryKey";
-
         try {
-            if (!$res = $this->mapper->deleteByPrimaryKey($primaryKey, $returnColumn)) {
+            if (!$dbResult = $this->mapper->deleteByPrimaryKey($primaryKey, $returnColumn)) {
                 $this->systemEvents->insertWarning('Primary key not found for delete', (int) $this->authentication->getAdministratorId(), $eventNote);
                 $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$primaryKey.' not found', 'adminNoticeFailure'];
                 return false;
@@ -232,25 +225,38 @@ class DatabaseTableController extends BaseController
             return false;
         }
 
-        $adminMessage = 'Deleted record '.$primaryKey;
+        $this->deleted($dbResult, $primaryKey, $returnColumn, $emailTo);
+        return true;
+    }
+
+    // call after a record has been successfully deleted
+    protected function deleted($dbResult, $primaryKey, ?string $returnColumn = null, ?string $emailTo = null)
+    {
+        $tableName = $this->mapper->getTableName(false);
+        $eventNote = $this->mapper->getPrimaryKeyColumnName().":$primaryKey";
+
+        $adminMessage = "Deleted $tableName $primaryKey";
         if ($returnColumn != null) {
-            $returned = pg_fetch_all($res);
+            $returned = pg_fetch_all($dbResult);
             $eventNote .= "|$returnColumn:".$returned[0][$returnColumn];
             $adminMessage .= " ($returnColumn ".$returned[0][$returnColumn].")";
         }
 
         $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), $eventNote);
 
-        if ($sendEmail) {
+        if ($emailTo !== null) {
             $settings = $this->container->get('settings');
-            $this->mailer->send(
-                $_SERVER['SERVER_NAME'] . " Event",
-                "Deleted record from $tableName." . PHP_EOL . "See event log for details.",
-                [$settings['emails']['programmer']]
-            );
+            if (isset($settings['emails'][$emailTo])) {
+                $this->mailer->send(
+                    $_SERVER['SERVER_NAME'] . " Event",
+                    "Deleted $tableName" . PHP_EOL . "See event log for details.",
+                    [$settings['emails'][$emailTo]]
+                );
+            } else {
+                $this->systemEvents->insertInfo("Invalid email", (int) $this->authentication->getAdministratorId(), $emailTo);
+            }
         }
 
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$adminMessage, App::STATUS_ADMIN_NOTICE_SUCCESS];
-        return true;
     }
 }

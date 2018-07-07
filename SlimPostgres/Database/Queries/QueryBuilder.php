@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres\Database\Queries;
 
 use SlimPostgres\Database\Postgres;
+use SlimPostgres\Exception\QueryFailureException;
 
 class QueryBuilder extends Postgres
 {
@@ -86,20 +87,23 @@ class QueryBuilder extends Postgres
         if (!$result = pg_query_params($this->sql, $this->args)) {
             // note pg_last_error seems to often not return anything
             $msg = pg_last_error() . " " . $this->sql . PHP_EOL . " Args: " . var_export($this->args, true);
-            throw new \Exception("Query Execution Failure: $msg");
+            throw new QueryFailureException($msg);
         }
 
         $this->resetQuery(); // prevent accidental multiple execution
         return $result;
     }
 
-    // this should only be used with INSERT, UPDATE, and DELETE queries 
+    // this should only be used with INSERT, UPDATE, and DELETE queries, and the query should include a RETURNING clause
     public function executeWithReturn(string $returnField)
     {
         if ($result = $this->execute()) {
-            $returned = pg_fetch_all($result);
-            return $returned[0][$returnField];
+            if (pg_num_rows($result) > 0) {
+                $returned = pg_fetch_all($result);
+                return $returned[0][$returnField];
+            }
         }
+        // nothing was found
         return false;
     }
 

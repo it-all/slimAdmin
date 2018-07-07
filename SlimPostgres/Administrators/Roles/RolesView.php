@@ -33,7 +33,7 @@ class RolesView extends DatabaseTableListView
 
         $allowDeleteRoles = [];
         foreach ($results as $row) {
-            if (!$this->mapper::hasAdministrator((int) $row['id'])) {
+            if (!$this->mapper->hasAdministrator((int) $row['id'])) {
                 $allowDeleteRoles[] = $row['id'];
             }
         }

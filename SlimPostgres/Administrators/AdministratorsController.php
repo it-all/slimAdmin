@@ -203,27 +203,13 @@ class AdministratorsController extends BaseController
             return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsMapper->getPrimaryTableMapper(), 'delete');
         }
 
-        // make sure the current administrator is not deleting themself
-        if ((int) $primaryKey == $this->container->authentication->getAdministratorId()) {
-            throw new \Exception('You cannot delete yourself from administrators');
-        }
+        list ($deleted, $errorMessage) = $administrator->delete($this->container->authentication, $this->container->systemEvents);
 
-        // make sure there are no system events for administrator being deleted
-        if ($this->container->systemEvents->hasForAdmin((int) $primaryKey)) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["System events exist for administrator id $primaryKey", App::STATUS_ADMIN_NOTICE_FAILURE];
+        if (!$deleted) {
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["$errorMessage for administrator id $primaryKey", App::STATUS_ADMIN_NOTICE_FAILURE];
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
         }
 
-        // make sure there are no login attempts for administrator being deleted
-        $loginsMapper = LoginAttemptsMapper::getInstance();
-        if ($loginsMapper->hasAdministrator((int) $primaryKey)) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Login attempts exist for administrator id $primaryKey", App::STATUS_ADMIN_NOTICE_FAILURE];
-            return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
-        }
-
-        $this->administratorsMapper->delete((int) $primaryKey);
-
-        // the event and notification code below is duplication from DatabaseTableController -> look to DRY
         $eventNote = "$primaryKeyColumnName:$primaryKey|username:" . $administrator->getUsername();
         $adminMessage = "Deleted record $primaryKey(username:" . $administrator->getUsername() . ")";
 
@@ -231,6 +217,7 @@ class AdministratorsController extends BaseController
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$adminMessage, App::STATUS_ADMIN_NOTICE_SUCCESS];
         
         unset($administrator);
+        
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     
     }

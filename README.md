@@ -9,7 +9,7 @@ Built on <a target="_blank" href="https://slimframework.com">Slim framework</a>,
 <a href="#authe">Authentication</a> (Log In/Out)  
 <a href="#autho">Authorization</a> (Permissions for Resource and Functionality Access)   
 <a target="_blank" href="#admin">Administrative User Interface and Navigation</a>  
-<a href="#se">Database Logging of system events, login attempts, and errors</a>  
+<a href="#se">Built-in Database Logging/Reporting of system events, login attempts, and errors</a>  
 <a href="#eh">Error Handling</a>  
 <a href="emailing">Emailing</a> with <a target="_blank" href="https://github.com/PHPMailer/PHPMailer">PHPMailer</a>    
 <a href="#csrf">CSRF Checking</a>  

@@ -22,13 +22,13 @@ abstract class InsertUpdateBuilder extends QueryBuilder
      * executes query
      * @return recordset
      */
-    public function execute()
+    public function execute(bool $alterBooleanArgs = false)
     {
         if (!isset($this->sql)) {
             $this->setSql();
         }
         try {
-            return parent::execute();
+            return parent::execute($alterBooleanArgs);
         } catch(\Exception $exception) {
             throw $exception;
         }

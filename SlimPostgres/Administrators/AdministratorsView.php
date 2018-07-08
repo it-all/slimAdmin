@@ -42,11 +42,6 @@ class AdministratorsView extends AdminListView
         $this->setDelete($this->container->authorization->isAuthorized($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
     }
 
-    private function pwFieldsHaveError(): bool
-    {
-        return mb_strlen(FormHelper::getFieldError('password')) > 0 || mb_strlen(FormHelper::getFieldError('password_confirm')) > 0;
-    }
-
     private function getForm(Request $request, string $action = 'insert', int $primaryKey = null, Administrator $administrator = null)
     {
         if ($action != 'insert' && $action != 'update') {
@@ -91,8 +86,13 @@ class AdministratorsView extends AdminListView
             $passwordValue = '';
             $passwordConfirmationValue = '';
         } else {
-            $passwordValue = ($this->pwFieldsHaveError()) ? '' : $fieldValues['password'];
-            $passwordConfirmationValue = ($this->pwFieldsHaveError()) ? '' : $fieldValues['password_confirm'];
+            if (mb_strlen(FormHelper::getFieldError('password')) > 0 || mb_strlen(FormHelper::getFieldError('password_confirm')) > 0) {
+                $passwordValue = '';
+                $passwordConfirmationValue = '';
+            } else  {
+                $passwordValue = $fieldValues['password'];
+                $passwordConfirmationValue = $fieldValues['password_confirm'];
+            }
         }
 
         $passwordFieldAttributes = ['name' => 'password', 'id' => 'password', 'type' => 'password', 'value' => $passwordValue];

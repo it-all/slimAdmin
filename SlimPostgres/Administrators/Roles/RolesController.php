@@ -23,19 +23,17 @@ class RolesController extends DatabaseTableController
     {
         try {
             $dbResult = $this->mapper->deleteByPrimaryKey($primaryKey, $returnColumn);
-        } catch (Exceptions\InvalidArgumentException $e) {
-            throw $e;
         } catch (Exceptions\UnallowedQueryException $e) {
-            $this->systemEvents->insertWarning($e->getMessage(), (int) $this->authentication->getAdministratorId(), $eventNote);
+            $this->systemEvents->insertWarning('Unallowed Query', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), 'adminNoticeFailure'];
             return false;
         } catch (Exceptions\QueryResultsNotFoundException $e) {
-            $this->systemEvents->insertWarning($e->getMessage(), (int) $this->authentication->getAdministratorId(), $eventNote);
+            $this->systemEvents->insertWarning('Query Results Not Found', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), 'adminNoticeFailure'];
             return false;
         } catch (Exceptions\QueryFailureException $e) {
-            $this->systemEvents->insertWarning($e->getMessage(), (int) $this->authentication->getAdministratorId(), $eventNote);
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), 'adminNoticeFailure'];
+            $this->systemEvents->insertError('Query Failure', (int) $this->authentication->getAdministratorId(), $e->getMessage());
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Delete Failed', 'adminNoticeFailure'];
             return false;
         }
 

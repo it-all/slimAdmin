@@ -181,9 +181,7 @@ final class RolesMapper extends TableMapper
         try {
             $dbResult = parent::deleteByPrimaryKey($primaryKeyValue, $returning);
         } catch (Exceptions\QueryResultsNotFoundException $e) {
-            throw new Exceptions\QueryResultsNotFoundException("Role not found");
-        } catch (\Exception $e) {
-            throw $e;
+            throw new Exceptions\QueryResultsNotFoundException("Role not found: id $primaryKeyValue");
         }
 
         return $dbResult;

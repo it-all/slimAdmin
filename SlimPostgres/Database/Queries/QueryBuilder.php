@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres\Database\Queries;
 
 use SlimPostgres\Database\Postgres;
-use SlimPostgres\Exception\QueryFailureException;
+use SlimPostgres\Exceptions\QueryFailureException;
 
 class QueryBuilder extends Postgres
 {

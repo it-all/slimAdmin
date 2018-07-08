@@ -175,7 +175,7 @@ final class RolesMapper extends TableMapper
 
         // make sure role is not being used
         if ($this->hasAdministrator((int) $primaryKeyValue)) {
-            throw new Exceptions\UnallowedQueryException("Role in use: id $primaryKeyValue");
+            throw new Exceptions\UnallowedActionException("Role in use: id $primaryKeyValue");
         }
 
         try {

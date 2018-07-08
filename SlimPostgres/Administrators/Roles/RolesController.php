@@ -23,7 +23,7 @@ class RolesController extends DatabaseTableController
     {
         try {
             $dbResult = $this->mapper->deleteByPrimaryKey($primaryKey, $returnColumn);
-        } catch (Exceptions\UnallowedQueryException $e) {
+        } catch (Exceptions\UnallowedActionException $e) {
             $this->systemEvents->insertWarning('Unallowed Query', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), 'adminNoticeFailure'];
             return false;

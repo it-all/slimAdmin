@@ -21,14 +21,12 @@ class AdministratorsController extends BaseController
     private $administratorsMapper;
     private $view;
     private $routePrefix;
-    private $administratorsDatabaseTableController;
 
     public function __construct(Container $container)
     {
         $this->administratorsMapper = AdministratorsMapper::getInstance();
         $this->view = new AdministratorsView($container);
         $this->routePrefix = ROUTEPREFIX_ADMINISTRATORS;
-        $this->administratorsDatabaseTableController = new DatabaseTableController($container, $this->administratorsMapper->getPrimaryTableMapper(), $this->view, $this->routePrefix);
         parent::__construct($container);
     }
 
@@ -66,11 +64,9 @@ class AdministratorsController extends BaseController
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS));
     }
 
-    private function getChangedFieldValues(Administrator $administrator): array 
+    private function getChangedFieldValues(Administrator $administrator, array $input): array 
     {
         $changedFieldValues = [];
-
-        $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
         // if all roles have been unchecked it won't be included in user input
         if (!isset($input['roles'])) {
@@ -83,7 +79,9 @@ class AdministratorsController extends BaseController
         if ($administrator->getUsername() != $input['username']) {
             $changedFieldValues['username'] = $input['username'];
         }
-        if (mb_strlen($input['password']) > 0 && $administrator->getPasswordHash() != $this->$administratorsDatabaseTableController->getHashedPassword($input['password'])) {
+
+        // only check the password if it has been supplied (entered in the form)
+        if (mb_strlen($input['password']) > 0 && !password_verify($input['password'], $administrator->getPasswordHash())) {
             $changedFieldValues['password'] = $input['password'];
         }
 
@@ -138,11 +136,10 @@ class AdministratorsController extends BaseController
 
         $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
-        // if no changes made, redirect
+        // if no changes made, display error message
         // note, if password field is blank, it will not be included in changed fields check
-        // debatable whether this should be part of validation and stay on page with error
 
-        $changedFields = $this->getChangedFieldValues($administrator);
+        $changedFields = $this->getChangedFieldValues($administrator, $input);
 
         if (count($changedFields) == 0) {
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made", 'adminNoticeFailure'];
@@ -219,6 +216,5 @@ class AdministratorsController extends BaseController
         unset($administrator);
         
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
-    
     }
 }

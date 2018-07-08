@@ -62,6 +62,11 @@ class Administrator
         return $this->roles;
     }
 
+    public function getRoleIds(): array 
+    {
+        return array_keys($this->roles);
+    }
+
     // returns array [bool deleted, ?string error]
     public function delete(AuthenticationService $authentication, SystemEventsMapper $systemEvents): array 
     {

@@ -66,7 +66,7 @@ class AdministratorsView extends AdminListView
                 $fieldValues['name'] = $administrator->getName();
                 $fieldValues['username'] = $administrator->getUsername();
                 $fieldValues['password'] = $administrator->getPasswordHash();
-                $fieldValues['roles'] = $administrator->getRoles();
+                $fieldValues['roles'] = $administrator->getRoleIds();
             } else {
                 $fieldValues = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
             }
@@ -118,7 +118,7 @@ class AdministratorsView extends AdminListView
                 'class' => 'inlineFormField'
             ];
             // checked?
-            if (isset($fieldValues['roles']) && array_key_exists($roleId, $fieldValues['roles'])) {
+            if (isset($fieldValues['roles']) && in_array($roleId, $fieldValues['roles'])) {
                 $rolesCheckboxAttributes['checked'] = 'checked';
             }
             $rolesCheckboxes[] = new CheckboxRadioInputField($roleData['role'], $rolesCheckboxAttributes);

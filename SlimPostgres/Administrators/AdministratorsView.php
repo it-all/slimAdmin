@@ -230,6 +230,4 @@ class AdministratorsView extends AdminListView
             ]
         );
     }
-
-
 }

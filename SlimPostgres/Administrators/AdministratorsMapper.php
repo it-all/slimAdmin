@@ -4,11 +4,16 @@ declare(strict_types=1);
 namespace SlimPostgres\Administrators;
 
 use SlimPostgres\App;
+use SlimPostgres\Exceptions;
 use SlimPostgres\Utilities\Functions;
 use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\Queries\SelectBuilder;
 use SlimPostgres\Database\DataMappers\MultiTableMapper;
+use SlimPostgres\Security\Authentication\AuthenticationService;
+use SlimPostgres\SystemEvents\SystemEventsMapper;
+use SlimPostgres\Administrators\Logins\LoginAttemptsMapper;
+
 
 // Singleton
 final class AdministratorsMapper extends MultiTableMapper
@@ -234,18 +239,40 @@ final class AdministratorsMapper extends MultiTableMapper
         return $administrators;
     }
 
-    private function deleteAdministrator(int $administratorId): ?string
+    // does validation for delete then deletes and returns deleted username
+    public function delete(int $id, AuthenticationService $authentication, SystemEventsMapper $systemEvents): string
     {
-        $q = new QueryBuilder("DELETE FROM ".self::TABLE_NAME." WHERE id = $1 RETURNING username", $administratorId);
-        if ($username = $q->executeWithReturn('username')) {
-            return $username;
+        // make sure there is an administrator for the primary key
+        if (!$administrator = $this->getObjectById($id)) {
+            throw new Exceptions\QueryResultsNotFoundException();
         }
 
-        return null;
+        // make sure the current administrator is not deleting her/himself
+        if ($id == $authentication->getAdministratorId()) {
+            throw new Exceptions\UnallowedActionException("Administrator cannot delete own account: id $id");
+        }
+
+        // make sure there are no system events for administrator being deleted
+        if ($systemEvents->hasForAdmin($id)) {
+            throw new Exceptions\UnallowedActionException("System events exist for administrator: id $id");
+        }
+
+        // make sure there are no login attempts for administrator being deleted
+        $loginsMapper = LoginAttemptsMapper::getInstance();
+        if ($loginsMapper->hasAdministrator($id)) {
+            throw new Exceptions\UnallowedActionException("Login attempts exist for administrator: id $id");
+        }
+
+        $this->doDelete($id);
+
+        $username = $administrator->getUsername();
+        unset($administrator);
+
+        return $username;
     }
 
     // any necessary validation should be performed prior to calling
-    public function delete(int $administratorId)
+    private function doDelete(int $administratorId)
     {
         $q = new QueryBuilder("BEGIN");
         $q->execute();
@@ -255,19 +282,31 @@ final class AdministratorsMapper extends MultiTableMapper
         $q->execute();
     }
 
-    public function deleteAdministratorRoles(int $administratorId)
+    // deletes the record in the join table
+    private function deleteAdministratorRoles(int $administratorId)
     {
         $q = new QueryBuilder("DELETE FROM ".self::ADM_ROLES_TABLE_NAME." WHERE administrator_id = $1", $administratorId);
         $q->execute();
     }
 
     // todo find out if 1 was deleted, and if not - throw an exception or at least put in a system event
-    public function deleteAdministratorRole(int $administratorId, int $roleId)
+    private function deleteAdministratorRole(int $administratorId, int $roleId)
     {
         $q = new QueryBuilder("DELETE FROM administrator_roles WHERE administrator_id = $1 AND role_id = $2", $administratorId, $roleId);
         $q->execute();
     }
 
+    // deletes the administrators record
+    private function deleteAdministrator(int $administratorId): ?string
+    {
+        $q = new QueryBuilder("DELETE FROM ".self::TABLE_NAME." WHERE id = $1 RETURNING username", $administratorId);
+        if ($username = $q->executeWithReturn('username')) {
+            return $username;
+        }
+
+        return null;
+    }
+    
     private function getChangedAdministratorFields(array $changedFields): array 
     {
         $searchFields = self::ADMINISTRATORS_UPDATE_FIELDS;

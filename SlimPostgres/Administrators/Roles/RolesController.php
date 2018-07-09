@@ -24,7 +24,7 @@ class RolesController extends DatabaseTableController
         try {
             $dbResult = $this->mapper->deleteByPrimaryKey($primaryKey, $returnColumn);
         } catch (Exceptions\UnallowedActionException $e) {
-            $this->systemEvents->insertWarning('Unallowed Query', (int) $this->authentication->getAdministratorId(), $e->getMessage());
+            $this->systemEvents->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), 'adminNoticeFailure'];
             return false;
         } catch (Exceptions\QueryResultsNotFoundException $e) {
@@ -40,7 +40,7 @@ class RolesController extends DatabaseTableController
         parent::deleted($dbResult, $primaryKey, $returnColumn, $emailTo);
     }
 
-    // can override for custom validator - example
+    // EXAMPLE - can override for custom validator
     // public function postInsert(Request $request, Response $response, $args)
     // {
     //     if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'insert'))) {

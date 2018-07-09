@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres;
 
 use SlimPostgres\App;
+use SlimPostgres\Exceptions;
 use SlimPostgres\ResponseUtilities;
 use SlimPostgres\BaseController;
 use SlimPostgres\Database\DataMappers\TableMapper;
@@ -215,14 +216,21 @@ class DatabaseTableController extends BaseController
     protected function delete($primaryKey, ?string $returnColumn = null, ?string $emailTo = null)
     {
         try {
-            if (!$dbResult = $this->mapper->deleteByPrimaryKey($primaryKey, $returnColumn)) {
-                $this->systemEvents->insertWarning('Primary key not found for delete', (int) $this->authentication->getAdministratorId(), $eventNote);
-                $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$primaryKey.' not found', 'adminNoticeFailure'];
-                return false;
-            }
-        } catch (\Exception $e) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Query Failure', 'adminNoticeFailure'];
+            $dbResult = $this->mapper->deleteByPrimaryKey($primaryKey, $returnColumn);
+        } catch (Exceptions\QueryResultsNotFoundException $e) {
+
+            // enter system event
+            $this->systemEvents->insertWarning('Query Results Not Found', (int) $this->authentication->getAdministratorId(), $this->mapper->getPrimaryKeyColumnName().":$primaryKey|Table:".$this->mapper->getTableName());
+
+            // set admin notice
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$primaryKey.' not found', 'adminNoticeFailure'];
             return false;
+
+        } catch (\Exception $e) {
+
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Deletion Failure', 'adminNoticeFailure'];
+            return false;
+            
         }
 
         $this->deleted($dbResult, $primaryKey, $returnColumn, $emailTo);

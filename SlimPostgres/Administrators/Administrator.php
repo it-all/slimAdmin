@@ -66,29 +66,4 @@ class Administrator
     {
         return array_keys($this->roles);
     }
-
-    // returns array [bool deleted, ?string error]
-    public function delete(AuthenticationService $authentication, SystemEventsMapper $systemEvents): array 
-    {
-        // make sure the current administrator is not deleting her/himself
-        if ((int) $primaryKey == $authentication->getAdministratorId()) {
-            throw new \Exception('You cannot delete yourself from administrators');
-        }
-
-        // make sure there are no system events for administrator being deleted
-        if ($systemEvents->hasForAdmin($this->id)) {
-            return [false, "System events exist"];
-        }
-
-        // make sure there are no login attempts for administrator being deleted
-        $loginsMapper = LoginAttemptsMapper::getInstance();
-        if ($loginsMapper->hasAdministrator($this->id)) {
-            return [false, "Login attempts exist"];
-        }
-
-        $administratorsMapper = AdministratorsMapper::getInstance();
-        $administratorsMapper->delete($this->id);
-
-        return [true, null];
-    }
 }

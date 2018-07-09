@@ -10,6 +10,7 @@ use SlimPostgres\ResponseUtilities;
 use SlimPostgres\BaseController;
 use SlimPostgres\DatabaseTableController;
 use SlimPostgres\Forms\FormHelper;
+use SlimPostgres\Exceptions;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -193,28 +194,29 @@ class AdministratorsController extends BaseController
             throw new \Exception('No permission.');
         }
 
-        $primaryKey = $args['primaryKey'];
+        $primaryKey = (int) $args['primaryKey'];
 
-        // make sure there is an administrator for the primary key
-        if (!$administrator = $this->administratorsMapper->getObjectById((int) $primaryKey)) {
-            return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsMapper->getPrimaryTableMapper(), 'delete');
-        }
-
-        list ($deleted, $errorMessage) = $administrator->delete($this->container->authentication, $this->container->systemEvents);
-
-        if (!$deleted) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["$errorMessage for administrator id $primaryKey", App::STATUS_ADMIN_NOTICE_FAILURE];
+        try {
+            // $administrator->delete($this->container->authentication, $this->container->systemEvents);
+            $username = $this->administratorsMapper->delete($primaryKey, $this->container->authentication, $this->container->systemEvents);
+        } catch (Exceptions\QueryResultsNotFoundException $e) {
+            return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsMapper->getPrimaryTableMapper(), 'delete', 'Administrator');
+        } catch (Exceptions\UnallowedActionException $e) {
+            $this->systemEvents->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), 'adminNoticeFailure'];
+            return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
+        } catch (\Exception $e) {
+            $this->systemEvents->insertError('Administrator Deletion Failure', (int) $this->authentication->getAdministratorId(), $e->getMessage());
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Deletion Failure', 'adminNoticeFailure'];
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
         }
 
-        $eventNote = "$primaryKeyColumnName:$primaryKey|username:" . $administrator->getUsername();
-        $adminMessage = "Deleted record $primaryKey(username:" . $administrator->getUsername() . ")";
+        $eventNote = $this->administratorsMapper->getPrimaryTableMapper()->getPrimaryKeyColumnName() . ":$primaryKey|username: $username";
+        $adminMessage = "Deleted record $primaryKey(username: $username)";
 
-        $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), $eventNote);
+        $this->systemEvents->insertInfo("Deleted ".$this->administratorsMapper->getPrimaryTableMapper()->getTableName(false), (int) $this->authentication->getAdministratorId(), $eventNote);
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$adminMessage, App::STATUS_ADMIN_NOTICE_SUCCESS];
-        
-        unset($administrator);
-        
+                
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
 }

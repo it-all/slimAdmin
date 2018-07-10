@@ -181,14 +181,33 @@ final class AdministratorsMapper extends MultiTableMapper
         return $q->execute();
     }
 
-    private function addAdministratorToArray(array &$results, int $id, string $name, string $username, array $roles)
+    private function addRecordToArray(array &$results, array $record) 
     {
         $results[] = [
-            'id' => $id,
-            'name' => $name,
-            'username' => $username,
-            'roles' => $roles
+            'id' => (int) $record['id'],
+            'name' => $record['name'],
+            'username' => $record['username'],
+            'roles' => [$record['role']]
         ];
+    }
+
+    // adds new role to administrator results array for results key
+    private function addRoleToResult(array &$results, int $resultsKey, string $role) 
+    {
+        array_push($results[$resultsKey]['roles'], $role);
+    }
+
+    // returns key of results array for matching 'id' key, null if not found
+    // note, careful when checking return value as 0 can be returned (evaluates to false)
+    private function getResultsKeyForId(array $results, int $id): ?int 
+    {
+        foreach ($results as $key => $administrator) {
+            if ($administrator['id'] == $id) {
+                return $key;
+            }
+        }
+
+        return null;
     }
 
     // returns array of results instead of recordset
@@ -197,37 +216,22 @@ final class AdministratorsMapper extends MultiTableMapper
         $results = []; // populate with 1 entry per administrator with an array of roles
         if ($pgResults = $this->select($columns, $whereColumnsInfo)) {
             if (pg_num_rows($pgResults) > 0) {
-                $lastId = 0;
-                $roles = [];
                 while ($record = pg_fetch_assoc($pgResults)) {
-                    $id = $record['id'];
-    
-                    if ($id != $lastId) {
-                        if ($lastId > 0) {
-                            // enter last administrator looped through before processing then start a new one
-                            $this->addAdministratorToArray($results, (int) $lastId, $name, $username, $roles);
-                            // reset roles
-                            $roles = [];
-                        }
-    
-                        $name = $record['name'];
-                        $username = $record['username'];
-                        $roles[] = $record['role'];
-    
-                        $lastId = $id;
-    
+                    
+                    // either add new administrator or just new role based on whether administrator already exists
+                    $resultsKey = $this->getResultsKeyForId($results, (int) $record['id']);
+                    if ($resultsKey !== null) {
+                        $this->addRoleToResult($results, $resultsKey, $record['role']);
                     } else {
-                        // continuation of same administrator with new role
-                        $roles[] = $record['role'];
+                        $this->addRecordToArray($results, $record);
                     }
                 }
-                // add last administrator
-                $this->addAdministratorToArray($results, (int) $lastId, $name, $username, $roles);    
             }
         }
         return $results;
     }
 
+    // instead of having roles returned as an array, it will be returned as a string
     public function selectArrayWithRolesString(string $columns = "*", array $whereColumnsInfo = null): array
     {
         $administrators = [];

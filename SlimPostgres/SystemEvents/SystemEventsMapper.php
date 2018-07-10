@@ -132,13 +132,13 @@ final class SystemEventsMapper extends MultiTableMapper
         $selectClause = "SELECT $columns";
         $fromClause = "FROM ".self::PRIMARY_TABLE_NAME." JOIN ".self::TYPES_TABLE_NAME." ON ".self::PRIMARY_TABLE_NAME.".event_type = ".self::TYPES_TABLE_NAME.".id LEFT OUTER JOIN ".self::ADMINISTRATORS_TABLE_NAME." ON ".self::PRIMARY_TABLE_NAME.".administrator_id = ".self::ADMINISTRATORS_TABLE_NAME.".id";
 
-        $orderByClause = "ORDER BY ".self::PRIMARY_TABLE_NAME.".created DESC";
+        $orderBy = self::PRIMARY_TABLE_NAME.".created DESC";
 
         if ($filterColumnsInfo != null) {
             $this->validateFilterColumns($filterColumnsInfo);
         }
 
-        $q = new SelectBuilder($selectClause, $fromClause, $filterColumnsInfo, $orderByClause);
+        $q = new SelectBuilder($selectClause, $fromClause, $filterColumnsInfo, $orderBy);
         return $q->execute();
     }
 

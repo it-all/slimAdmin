@@ -8,15 +8,15 @@ class SelectBuilder extends QueryBuilder
 {
     private $argCounter;
 
-    function __construct(string $selectClause, string $fromClause, array $whereColumnsInfo = null, string $orderByClause = null)
+    function __construct(string $selectClause, string $fromClause, array $whereColumnsInfo = null, string $orderBy = null)
     {
         parent::__construct("$selectClause $fromClause");
         if ($whereColumnsInfo != null) {
             $this->argCounter = 1;
             $this->addWhereClause($whereColumnsInfo);
         }
-        if ($orderByClause != null) {
-            $this->add(" $orderByClause");
+        if ($orderBy != null) {
+            $this->add(" ORDER BY $orderBy");
         }
     }
 

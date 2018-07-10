@@ -136,14 +136,14 @@ final class AdministratorsMapper extends MultiTableMapper
         return "FROM administrators JOIN administrator_roles ON administrators.id = administrator_roles.administrator_id JOIN roles ON administrator_roles.role_id = roles.id";
     }
 
-    private function getOrderByClause(): string 
+    private function getOrderBy(): string 
     {
-        return 'ORDER BY roles.level';
+        return 'roles.level';
     }
 
     private function getObject(array $whereColumnsInfo): ?Administrator
     {
-        $q = new SelectBuilder($this->getSelectClause(), $this->getFromClause(), $whereColumnsInfo, $this->getOrderByClause()); // order by level
+        $q = new SelectBuilder($this->getSelectClause(), $this->getFromClause(), $whereColumnsInfo, $this->getOrderBy()); // order by level
         return $this->getForResults($q->execute());
     }
 
@@ -169,15 +169,15 @@ final class AdministratorsMapper extends MultiTableMapper
         return $this->getObject($whereColumnsInfo);
     }
 
-    public function select(string $columns = "*", array $whereColumnsInfo = null, string $orderByClause = null)
+    public function select(string $columns = "*", array $whereColumnsInfo = null, string $orderBy = null)
     {
         $selectClause = "SELECT $columns";
         $fromClause = "FROM ".self::TABLE_NAME." JOIN ".self::ADM_ROLES_TABLE_NAME." ON ".self::TABLE_NAME.".id = ".self::ADM_ROLES_TABLE_NAME.".administrator_id JOIN ".self::ROLES_TABLE_NAME." ON ".self::ADM_ROLES_TABLE_NAME.".role_id = ".self::ROLES_TABLE_NAME.".id";
-        $orderByClause = ($orderByClause == null) ? $this->getOrderByClause() : $orderByClause;
+        $orderBy = ($orderBy == null) ? $this->getOrderBy() : $orderBy;
         if ($whereColumnsInfo != null) {
             $this->validateFilterColumns($whereColumnsInfo);
         }
-        $q = new SelectBuilder($selectClause, $fromClause, $whereColumnsInfo, $orderByClause);
+        $q = new SelectBuilder($selectClause, $fromClause, $whereColumnsInfo, $orderBy);
         return $q->execute();
     }
 

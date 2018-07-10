@@ -123,11 +123,11 @@ class TableMapper implements TableMappers
 
     public function select(string $columns = "*", array $where = null)
     {
-        $q = new SelectBuilder("SELECT $columns", "FROM $this->tableName", $where, $this->getOrderByClause($this->orderByColumnName, $this->orderByAsc));
+        $q = new SelectBuilder("SELECT $columns", "FROM $this->tableName", $where, $this->getOrderBy($this->orderByColumnName, $this->orderByAsc));
         return $q->execute();
     }
 
-    private function getOrderByClause(string $orderByColumn = null, bool $orderByAsc = true): ?string
+    private function getOrderBy(string $orderByColumn = null, bool $orderByAsc = true): ?string
     {
         if ($orderByColumn != null) {
             if ($orderByColumn == 'PRIMARYKEY') {
@@ -136,7 +136,7 @@ class TableMapper implements TableMappers
                 }
                 $orderByColumn = $this->primaryKeyColumnName;
             }
-            $orderByString = " ORDER BY $orderByColumn";
+            $orderByString = "$orderByColumn";
             if (!$orderByAsc) {
                 $orderByString .= " DESC";
             }

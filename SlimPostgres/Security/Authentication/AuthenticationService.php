@@ -75,9 +75,10 @@ class AuthenticationService
         }
 
         // by role
+        // note highest role comes first
         foreach ($this->getAdministratorRoles() as $roleId => $roleInfo) {
             if (isset($this->administratorHomeRoutes['roles'][$roleInfo['roleName']])) {
-                $homeRoute = $this->administratorHomeRoutes['roles'][$roleInfo['roleName']];
+                return $this->administratorHomeRoutes['roles'][$roleInfo['roleName']];
             }
         }
         

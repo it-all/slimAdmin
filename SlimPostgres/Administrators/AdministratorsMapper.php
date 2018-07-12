@@ -14,7 +14,6 @@ use SlimPostgres\Security\Authentication\AuthenticationService;
 use SlimPostgres\SystemEvents\SystemEventsMapper;
 use SlimPostgres\Administrators\Logins\LoginAttemptsMapper;
 
-
 // Singleton
 final class AdministratorsMapper extends MultiTableMapper
 {
@@ -57,35 +56,38 @@ final class AdministratorsMapper extends MultiTableMapper
         $q = new QueryBuilder("BEGIN");
         $q->execute();
 
-        if ($administratorId = $this->insert($name, $username, $password)) {
-            if ($this->insertAdministratorRoles((int) $administratorId, $roleIds)) {
-                $q = new QueryBuilder("COMMIT");
-                $q->execute();
-                return $administratorId;
-            }
+        try {
+            $administratorId = $this->insert($name, $username, $password);
+        } catch (\Exception $e) {
+            $q = new QueryBuilder("ROLLBACK");
+            $q->execute();
+            throw $e;
         }
 
-        // a failure occurred
-        $q = new QueryBuilder("ROLLBACK");
+        try {
+            $this->insertAdministratorRoles((int) $administratorId, $roleIds);
+        } catch (\Exception $e) {
+            $q = new QueryBuilder("ROLLBACK");
+            $q->execute();
+            throw $e;
+        }
+
+        $q = new QueryBuilder("COMMIT");
         $q->execute();
-        return false;
+        return $administratorId;
     }
 
-    private function insertAdministratorRoles(int $administratorId, array $roleIds): bool
+    private function insertAdministratorRoles(int $administratorId, array $roleIds)
     {
         foreach ($roleIds as $roleId) {
-            if (!$administratorRoleId = $this->insertAdministratorRole($administratorId, (int) $roleId)) {
-                return false;
-            }
+            $this->insertAdministratorRole($administratorId, (int) $roleId);
         }
-        return true;
     }
 
     private function insertAdministratorRole(int $administratorId, int $roleId)
     {
-        $returnField = 'id';
-        $q = new QueryBuilder("INSERT INTO ".self::ADM_ROLES_TABLE_NAME." (administrator_id, role_id) VALUES($1, $2) RETURNING $returnField", $administratorId, $roleId);
-        return $q->executeWithReturn($returnField);
+        $q = new QueryBuilder("INSERT INTO ".self::ADM_ROLES_TABLE_NAME." (administrator_id, role_id) VALUES($1, $2)", $administratorId, $roleId);
+        return $q->executeWithReturnField('id');
     }
 
     // returns hashed password for insert/update 
@@ -96,9 +98,8 @@ final class AdministratorsMapper extends MultiTableMapper
 
     private function insert(string $name, string $username, string $password)
     {
-        $returnField = 'id';
-        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash) VALUES($1, $2, $3) RETURNING $returnField", $name, $username, $this->getHashedPassword($password));
-        return $q->executeWithReturn($returnField);
+        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash) VALUES($1, $2, $3)", $name, $username, $this->getHashedPassword($password));
+        return $q->executeWithReturnField('id');
     }
 
     // receives query results for administrators joined to roles and loads and returns model object
@@ -303,8 +304,8 @@ final class AdministratorsMapper extends MultiTableMapper
     // deletes the administrators record
     private function deleteAdministrator(int $administratorId): ?string
     {
-        $q = new QueryBuilder("DELETE FROM ".self::TABLE_NAME." WHERE id = $1 RETURNING username", $administratorId);
-        if ($username = $q->executeWithReturn('username')) {
+        $q = new QueryBuilder("DELETE FROM ".self::TABLE_NAME." WHERE id = $1", $administratorId);
+        if ($username = $q->executeWithReturnField('username')) {
             return $username;
         }
 

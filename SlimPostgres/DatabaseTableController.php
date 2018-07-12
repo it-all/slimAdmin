@@ -132,7 +132,10 @@ class DatabaseTableController extends BaseController
         return $this->deleteHelper($response, $args['primaryKey']);
     }
 
-    // this can be called by child classes
+    /**
+     * this can be called by child classes
+     * $emailTo is an email title from $settings['emails']
+     */
     public function deleteHelper(Response $response, $primaryKey, ?string $returnColumn = null, ?string $emailTo = null, $routeType = 'index')
     {
         if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'delete'))) {
@@ -145,7 +148,10 @@ class DatabaseTableController extends BaseController
         return $response->withRedirect($this->router->pathFor($redirectRoute));
     }
 
-    protected function insert(bool $sendEmail = false)
+    /**
+     * $emailTo is an email title from $settings['emails']
+     */
+    protected function insert(?string $emailTo = null)
     {
         // attempt insert
         try {
@@ -157,13 +163,17 @@ class DatabaseTableController extends BaseController
 
             $this->systemEvents->insertInfo("Inserted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName:$insertedRecordId");
 
-            if ($sendEmail) {
+            if ($emailTo !== null) {
                 $settings = $this->container->get('settings');
-                $this->mailer->send(
-                    $_SERVER['SERVER_NAME'] . " Event",
-                    "Inserted $tableName." . PHP_EOL . " See event log for details.",
-                    [$settings['emails']['programmer']]
-                );
+                if (isset($settings['emails'][$emailTo])) {
+                    $this->mailer->send(
+                        $_SERVER['SERVER_NAME'] . " Event",
+                        "Inserted $tableName" . PHP_EOL . "See event log for details.",
+                        [$settings['emails'][$emailTo]]
+                    );
+                } else {
+                    $this->systemEvents->insertInfo("Invalid email", (int) $this->authentication->getAdministratorId(), $emailTo);
+                }
             }
 
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted $tableName $insertedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
@@ -175,7 +185,10 @@ class DatabaseTableController extends BaseController
         }
     }
 
-    protected function update(Response $response, $args, array $changedColumnValues = [], array $record = [], bool $sendEmail = false)
+    /**
+     * $emailTo is an email title from $settings['emails']
+     */
+    protected function update(Response $response, $args, array $changedColumnValues = [], array $record = [], ?string $emailTo = null)
     {
         // attempt to update
         try {
@@ -195,16 +208,20 @@ class DatabaseTableController extends BaseController
 
             $this->systemEvents->insertInfo("Updated $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName:$updatedRecordId");
 
-            if ($sendEmail) {
+            if ($emailTo !== null) {
                 $settings = $this->container->get('settings');
-                $this->mailer->send(
-                    $_SERVER['SERVER_NAME'] . " Event",
-                    "Updated $tableName." . PHP_EOL . " See event log for details.",
-                    [$settings['emails']['programmer']]
-                );
+                if (isset($settings['emails'][$emailTo])) {
+                    $this->mailer->send(
+                        $_SERVER['SERVER_NAME'] . " Event",
+                        "Updated $tableName" . PHP_EOL . "See event log for details.",
+                        [$settings['emails'][$emailTo]]
+                    );
+                } else {
+                    $this->systemEvents->insertInfo("Invalid email", (int) $this->authentication->getAdministratorId(), $emailTo);
+                }
             }
 
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated record $updatedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated $tableName $updatedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
 
             return true;
 
@@ -213,6 +230,9 @@ class DatabaseTableController extends BaseController
         }
     }
 
+    /**
+     * $emailTo is an email title from $settings['emails']
+     */
     protected function delete($primaryKey, ?string $returnColumn = null, ?string $emailTo = null)
     {
         try {
@@ -237,7 +257,10 @@ class DatabaseTableController extends BaseController
         return true;
     }
 
-    // call after a record has been successfully deleted
+    /**
+     * call after a record has been successfully deleted
+     * $emailTo is an email title from $settings['emails']
+     */
     protected function deleted($dbResult, $primaryKey, ?string $returnColumn = null, ?string $emailTo = null)
     {
         $tableName = $this->mapper->getTableName(false);

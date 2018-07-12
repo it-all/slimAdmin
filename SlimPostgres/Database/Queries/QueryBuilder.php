@@ -5,6 +5,7 @@ namespace SlimPostgres\Database\Queries;
 
 use SlimPostgres\Database\Postgres;
 use SlimPostgres\Exceptions\QueryFailureException;
+use SlimPostgres\Exceptions\QueryResultsNotFoundException;
 
 class QueryBuilder extends Postgres
 {
@@ -94,17 +95,24 @@ class QueryBuilder extends Postgres
         return $result;
     }
 
-    // this should only be used with INSERT, UPDATE, and DELETE queries, and the query should include a RETURNING clause
-    public function executeWithReturn(string $returnField)
+    /**
+     * this should only be used with INSERT, UPDATE, and DELETE queries, and the query should include a RETURNING clause with the $returnField in it
+     * note that in practice RETURNING can include multiple fields or expressions. For these, simply call execute() and process the returned result
+     */
+    public function executeWithReturnField(string $returnField)
     {
-        if ($result = $this->execute()) {
-            if (pg_num_rows($result) > 0) {
-                $returned = pg_fetch_all($result);
-                return $returned[0][$returnField];
+        $this->add(" RETURNING $returnField");
+        $result = $this->execute();
+        if (pg_num_rows($result) > 0) {
+            $returned = pg_fetch_all($result);
+            if (!isset($returned[0][$returnField])) {
+                throw new \InvalidArgumentException("$returnField column does not exist");
             }
+            return $returned[0][$returnField];
+        } else {
+            // nothing was found - ie an update or delete that found no matches to the WHERE clause
+            throw new QueryResultsNotFoundException();
         }
-        // nothing was found
-        return false;
     }
 
     /**

@@ -11,6 +11,7 @@ use SlimPostgres\BaseController;
 use SlimPostgres\DatabaseTableController;
 use SlimPostgres\Forms\FormHelper;
 use SlimPostgres\Exceptions;
+use SlimPostgres\Utilities\Functions;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -22,6 +23,7 @@ class AdministratorsController extends BaseController
     private $administratorsMapper;
     private $view;
     private $routePrefix;
+    private $changedFieldsString;
 
     public function __construct(Container $container)
     {
@@ -67,9 +69,11 @@ class AdministratorsController extends BaseController
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS));
     }
 
+    /** also sets changedFieldsString property */
     private function getChangedFieldValues(Administrator $administrator, array $input): array 
     {
         $changedFieldValues = [];
+        $this->changedFieldsString = "";
 
         // if all roles have been unchecked it won't be included in user input
         if (!isset($input['roles'])) {
@@ -78,6 +82,7 @@ class AdministratorsController extends BaseController
 
         if ($administrator->getName() != $input['name']) {
             $changedFieldValues['name'] = $input['name'];
+            $this->changedFieldsString .= "name: ".$administrator->getName()." => ".$input['name'];
         }
         if ($administrator->getUsername() != $input['username']) {
             $changedFieldValues['username'] = $input['username'];
@@ -117,6 +122,42 @@ class AdministratorsController extends BaseController
         }
 
         return $changedFieldValues;
+    }
+
+    public function getUpdateChangedFieldsString(array $changedFields, Administrator $administrator): string 
+    {
+        $changedString = "";
+        foreach ($changedFields as $fieldName => $newValue) {
+            $oldValue = $administrator->{"get".ucfirst($fieldName)}();
+            
+            if ($fieldName == 'roles') {
+
+                $rolesMapper = RolesMapper::getInstance();
+
+                $addRoleIds = (isset($newValue['add'])) ? $newValue['add'] : [];
+                $removeRoleIds = (isset($newValue['remove'])) ? $newValue['remove'] : [];
+
+                // update values based on add/remove and old roles
+                $updatedNewValue = "";
+                $updatedOldValue = "";
+                foreach ($oldValue as $roleId => $roleInfo) {
+                    $updatedOldValue .= $roleInfo['roleName']." ";
+                    // don't put the roles being removed into the new value
+                    if (!in_array($roleId, $removeRoleIds)) {
+                        $updatedNewValue .= $roleInfo['roleName']." ";
+                    }
+                }
+                foreach ($addRoleIds as $roleId) {
+                    $updatedNewValue .= $rolesMapper->getRoleForRoleId((int) $roleId) . " ";
+                }
+                $newValue = $updatedNewValue;
+                $oldValue = $updatedOldValue;
+            }
+
+            $changedString .= " $fieldName: $oldValue => $newValue, ";
+        }
+
+        return substr($changedString, 0, strlen($changedString)-2);
     }
 
     public function putUpdate(Request $request, Response $response, $args)
@@ -163,7 +204,7 @@ class AdministratorsController extends BaseController
             $this->updateAdministratorSession($changedFields);
         }
 
-        $this->systemEvents->insertInfo("Updated administrator", (int) $this->authentication->getAdministratorId(), "id:$primaryKey");
+        $this->systemEvents->insertInfo("Updated administrator", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$this->getUpdateChangedFieldsString($changedFields, $administrator));
 
         FormHelper::unsetFormSessionVars();
 

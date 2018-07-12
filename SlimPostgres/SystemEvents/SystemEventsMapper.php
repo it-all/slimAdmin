@@ -121,10 +121,13 @@ final class SystemEventsMapper extends MultiTableMapper
         return $res;
     }
 
-    public function getEventTypeId(string $eventType): bool
+    /**
+     * getOne returns null if not found
+     */
+    public function getEventTypeId(string $eventType): ?string
     {
         $q = new QueryBuilder("SELECT id FROM ".self::TYPES_TABLE_NAME." WHERE event_type = $1", $eventType);
-        return (bool) $q->getOne();
+        return $q->getOne();
     }
 
     public function select(string $columns = '*', array $filterColumnsInfo = null)

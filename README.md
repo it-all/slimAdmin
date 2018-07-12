@@ -1,7 +1,7 @@
 # slim-postgres  
 WORK IN PROGRESS  
   
-slim-postgres is a PHP 7, PostgreSQL RESTful web platform with built-in administration and other features, based on <a target="_blank" href="https://www.slimframework.com/">Slim Framework</a>.  
+slim-postgres is a PHP 7.1+, PostgreSQL RESTful web platform with built-in administration and other features, based on <a target="_blank" href="https://www.slimframework.com/">Slim Framework</a>.  
 
 FEATURES  
 Built on <a target="_blank" href="https://slimframework.com">Slim framework</a>, a front-controller micro-framework for PHP 

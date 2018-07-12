@@ -115,16 +115,16 @@ final class SystemEventsMapper extends MultiTableMapper
             $res = $q->execute();
         } catch (\Exception $e) {
             // suppress exception as it will result in infinite loop in error handler, which also calls this fn
-            return false;
+            return;
         }
 
         return $res;
     }
 
-    public function getEventTypeId(string $eventType)
+    public function getEventTypeId(string $eventType): bool
     {
         $q = new QueryBuilder("SELECT id FROM ".self::TYPES_TABLE_NAME." WHERE event_type = $1", $eventType);
-        return $q->getOne();
+        return (bool) $q->getOne();
     }
 
     public function select(string $columns = '*', array $filterColumnsInfo = null)

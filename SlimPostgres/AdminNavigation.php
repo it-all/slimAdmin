@@ -93,12 +93,12 @@ class AdminNavigation
     }
 
     /** add nav components as necessary based on user role */
-    private function getSectionForUserRecurs(array $section, string $sectionName)
+    private function getSectionForUserRecurs(array $section, string $sectionName): array
     {
         // if there are section permissions and they are not met, do not put section in user's nav
         if ($permissions = $this->getSectionPermissions($section, $sectionName)) {
             if (!$this->container->authorization->isAuthorized($permissions)) {
-                return false;
+                return [];
             }
         }
 
@@ -115,8 +115,7 @@ class AdminNavigation
             foreach ($section['subSections'] as $subSectionName => $subSection) {
 
                 $updatedSubSection = $this->getSectionForUserRecurs($subSection, $subSectionName);
-                // CAREFUL, empty arrays evaluate to false
-                if ($updatedSubSection !== false) {
+                if (count($updatedSubSection) > 0) {
                     $updatedSubSections[$subSectionName] = $updatedSubSection;
                 }
             }
@@ -136,8 +135,7 @@ class AdminNavigation
 
         foreach ($this->nav as $sectionName => $section) {
             $updatedSection = $this->getSectionForUserRecurs($section, $sectionName);
-            // CAREFUL, empty arrays evaluate to false
-            if ($updatedSection !== false) {
+            if (count($updatedSection) > 0) {
                 $nav[$sectionName] = $updatedSection;
             }
         }

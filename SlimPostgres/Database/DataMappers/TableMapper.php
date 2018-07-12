@@ -83,9 +83,12 @@ class TableMapper implements TableMappers
 
     protected function setColumns()
     {
-        if (!$rs = Postgres::getTableMetaData($this->tableName)) {
+        try {
+            $rs = Postgres::getTableMetaData($this->tableName);
+        } catch (\Exception $e) {
             throw new \Exception("Unable to set columns for table $this->tableName");
         }
+
         while ($columnInfo = pg_fetch_assoc($rs)) {
             $columnInfo['is_unique'] = in_array($columnInfo['column_name'], $this->uniqueColumnNames);
             $c = new ColumnMapper($this, $columnInfo);
@@ -148,7 +151,7 @@ class TableMapper implements TableMappers
     public function hasColumnValue(ColumnMapper $databaseColumnMapper, $value): bool
     {
         $q = new QueryBuilder("SELECT ".$this->getPrimaryKeyColumnName()." FROM $this->tableName WHERE ".$databaseColumnMapper->getName()." = $1", [$value]);
-        return $q->getOne();
+        return (bool) $q->getOne();
     }
 
     public function selectForPrimaryKey($primaryKeyValue, string $columns = "*")

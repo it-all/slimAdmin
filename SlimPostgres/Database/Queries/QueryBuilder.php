@@ -116,36 +116,30 @@ class QueryBuilder extends Postgres
     }
 
     /**
-     * returns the value of the one column in one record
-     * or false if 0 or multiple records result
+     * returns the value of the one column in one record or null if 0 records result
      */
     public function getOne()
     {
-        if ($result = $this->execute()) {
-            if (pg_num_rows($result) == 1) {
-                // make sure only 1 field in query
-                if (pg_num_fields($result) == 1) {
-                    return pg_fetch_array($result)[0];
-                }
-                else {
-                    throw new \Exception("Too many result fields");
-                }
+        $result = $this->execute();
+        if (pg_num_rows($result) == 1) {
+            // make sure only 1 field in query
+            if (pg_num_fields($result) == 1) {
+                return pg_fetch_array($result)[0];
             }
             else {
-                // either 0 or multiple records in result
-                // if 0
-                if (pg_num_rows($result) == 0) {
-                    // no error here. client can error if appropriate
-                    return false;
-                }
-                else {
-                    throw new \Exception("Multiple results");
-                }
+                throw new \Exception("Too many result fields");
             }
         }
         else {
-            // query failed. error triggered already in execute
-            return false;
+            // either 0 or multiple records in result
+            // if 0
+            if (pg_num_rows($result) == 0) {
+                // no error here. client can error if appropriate
+                return null;
+            }
+            else {
+                throw new \Exception("Multiple results");
+            }
         }
     }
 

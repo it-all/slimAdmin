@@ -26,15 +26,15 @@ class RolesController extends DatabaseTableController
         } catch (Exceptions\UnallowedActionException $e) {
             $this->systemEvents->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), 'adminNoticeFailure'];
-            return false;
+            throw $e;
         } catch (Exceptions\QueryResultsNotFoundException $e) {
             $this->systemEvents->insertWarning('Query Results Not Found', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), 'adminNoticeFailure'];
-            return false;
+            throw $e;
         } catch (Exceptions\QueryFailureException $e) {
             $this->systemEvents->insertError('Query Failure', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Delete Failed', 'adminNoticeFailure'];
-            return false;
+            throw $e;
         }
 
         parent::deleted($dbResult, $primaryKey, $returnColumn, $emailTo);

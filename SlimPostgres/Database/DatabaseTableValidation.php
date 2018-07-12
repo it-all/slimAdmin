@@ -43,6 +43,7 @@ class DatabaseTableValidation
         return array_keys($this->validationRules);
     }
 
+    // returns true, false, or validation value
     public static function getDatabaseColumnValidationValue(ColumnMapper $databaseColumnMapper, string $validationType)
     {
         foreach (self::getDatabaseColumnValidation($databaseColumnMapper) as $validation) {

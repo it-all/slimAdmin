@@ -93,7 +93,7 @@ Class Postgres
 
         $rs = $q->execute();
         if (pg_num_rows($rs) == 0) {
-            return false;
+            throw new \InvalidArgumentException();
         }
 
         return $rs;

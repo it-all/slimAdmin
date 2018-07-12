@@ -190,6 +190,6 @@ class ColumnMapper
     public function recordExistsForValue($value): bool
     {
         $q = new QueryBuilder("SELECT ".$this->tableMapper->getPrimaryKeyColumnName()." FROM ".$this->tableMapper->getTableName()." WHERE $this->name = $1", $value);
-        return ($q->getOne()) ? true : false;
+        return (bool) $q->getOne();
     }
 }

@@ -244,17 +244,16 @@ class DatabaseTableController extends BaseController
 
             // set admin notice
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$primaryKey.' not found', 'adminNoticeFailure'];
-            return false;
+            throw $e;
 
         } catch (\Exception $e) {
 
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Deletion Failure', 'adminNoticeFailure'];
-            return false;
+            throw $e;
             
         }
 
         $this->deleted($dbResult, $primaryKey, $returnColumn, $emailTo);
-        return true;
     }
 
     /**

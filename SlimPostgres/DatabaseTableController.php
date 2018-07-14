@@ -153,36 +153,38 @@ class DatabaseTableController extends BaseController
      */
     protected function insert(?string $emailTo = null)
     {
-        // attempt insert
-        try {
-            $res = $this->mapper->insert($_SESSION[App::SESSION_KEY_REQUEST_INPUT]);
-            $returned = pg_fetch_all($res);
-            $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
-            $insertedRecordId = $returned[0][$primaryKeyColumnName];
-            $tableName = $this->mapper->getTableName(false);
+        $res = $this->mapper->insert($_SESSION[App::SESSION_KEY_REQUEST_INPUT]);
+        $returned = pg_fetch_all($res);
+        $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
+        $insertedRecordId = $returned[0][$primaryKeyColumnName];
+        $tableName = $this->mapper->getTableName(false);
 
-            $this->systemEvents->insertInfo("Inserted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName:$insertedRecordId");
+        $this->systemEvents->insertInfo("Inserted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName:$insertedRecordId");
 
-            if ($emailTo !== null) {
-                $settings = $this->container->get('settings');
-                if (isset($settings['emails'][$emailTo])) {
-                    $this->mailer->send(
-                        $_SERVER['SERVER_NAME'] . " Event",
-                        "Inserted $tableName" . PHP_EOL . "See event log for details.",
-                        [$settings['emails'][$emailTo]]
-                    );
-                } else {
-                    $this->systemEvents->insertInfo("Invalid email", (int) $this->authentication->getAdministratorId(), $emailTo);
-                }
+        if ($emailTo !== null) {
+            $settings = $this->container->get('settings');
+            if (isset($settings['emails'][$emailTo])) {
+                $this->mailer->send(
+                    $_SERVER['SERVER_NAME'] . " Event",
+                    "Inserted $tableName" . PHP_EOL . "See event log for details.",
+                    [$settings['emails'][$emailTo]]
+                );
+            } else {
+                $this->systemEvents->insertInfo("Invalid email", (int) $this->authentication->getAdministratorId(), $emailTo);
             }
-
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted $tableName $insertedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
-
-            return true;
-
-        } catch(\Exception $exception) {
-            throw $exception;
         }
+
+        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted $tableName $insertedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
+    }
+
+    private function getChangedFieldsString(array $changedFields, array $record): string 
+    {
+        $changedString = "";
+        foreach ($changedFields as $fieldName => $newValue) {
+            $changedString .= " $fieldName: ".$record[$fieldName]." => $newValue, ";
+        }
+
+        return substr($changedString, 0, strlen($changedString)-2);
     }
 
     /**
@@ -190,44 +192,36 @@ class DatabaseTableController extends BaseController
      */
     protected function update(Response $response, $args, array $changedColumnValues = [], array $record = [], ?string $emailTo = null)
     {
-        // attempt to update
-        try {
-            if (count($changedColumnValues) > 0) {
-                $updateColumnValues = $changedColumnValues;
-                $sendChangedColumnsOnly = false;
-            } else {
-                $updateColumnValues = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
-                $sendChangedColumnsOnly = true;
+        // get changed column values if not sent in arg. will need record too.
+        if (count($changedColumnValues) == 0) {
+            if (count($record) == 0) {
+                $record = $this->mapper->selectForPrimaryKey($args['primaryKey']);
             }
-
-            $this->mapper->updateByPrimaryKey($updateColumnValues, $args['primaryKey'], $sendChangedColumnsOnly, $record);
-
-            $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
-            $updatedRecordId = $args['primaryKey'];
-            $tableName = $this->mapper->getTableName(false);
-
-            $this->systemEvents->insertInfo("Updated $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName:$updatedRecordId");
-
-            if ($emailTo !== null) {
-                $settings = $this->container->get('settings');
-                if (isset($settings['emails'][$emailTo])) {
-                    $this->mailer->send(
-                        $_SERVER['SERVER_NAME'] . " Event",
-                        "Updated $tableName" . PHP_EOL . "See event log for details.",
-                        [$settings['emails'][$emailTo]]
-                    );
-                } else {
-                    $this->systemEvents->insertInfo("Invalid email", (int) $this->authentication->getAdministratorId(), $emailTo);
-                }
-            }
-
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated $tableName $updatedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
-
-            return true;
-
-        } catch(\Exception $exception) {
-            throw $exception;
+            $changedColumnValues = $this->mapper->getChangedColumnsValues($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $record);
         }
+
+        $this->mapper->updateByPrimaryKey($changedColumnValues, $args['primaryKey']);
+
+        $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
+        $updatedRecordId = $args['primaryKey'];
+        $tableName = $this->mapper->getTableName(false);
+
+        $this->systemEvents->insertInfo("Updated $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName:$updatedRecordId|".$this->getChangedFieldsString($changedColumnValues, $record));
+
+        if ($emailTo !== null) {
+            $settings = $this->container->get('settings');
+            if (isset($settings['emails'][$emailTo])) {
+                $this->mailer->send(
+                    $_SERVER['SERVER_NAME'] . " Event",
+                    "Updated $tableName" . PHP_EOL . "See event log for details.",
+                    [$settings['emails'][$emailTo]]
+                );
+            } else {
+                $this->systemEvents->insertInfo("Invalid email", (int) $this->authentication->getAdministratorId(), $emailTo);
+            }
+        }
+
+        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated $tableName $updatedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
     }
 
     /**

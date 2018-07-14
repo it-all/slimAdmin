@@ -61,7 +61,7 @@ class AdministratorsController extends BaseController
             throw new \Exception("Administrator create failure. ".$e->getMessage());
         }
 
-        $this->systemEvents->insertInfo("Inserted administrator", (int) $this->authentication->getAdministratorId(), "id:$administratorId");
+        $this->systemEvents->insertInfo("Inserted Administrator", (int) $this->authentication->getAdministratorId(), "id:$administratorId");
 
         FormHelper::unsetFormSessionVars();
 
@@ -124,7 +124,7 @@ class AdministratorsController extends BaseController
         return $changedFieldValues;
     }
 
-    public function getUpdateChangedFieldsString(array $changedFields, Administrator $administrator): string 
+    private function getChangedFieldsString(array $changedFields, Administrator $administrator): string 
     {
         $changedString = "";
         foreach ($changedFields as $fieldName => $newValue) {
@@ -204,7 +204,7 @@ class AdministratorsController extends BaseController
             $this->updateAdministratorSession($changedFields);
         }
 
-        $this->systemEvents->insertInfo("Updated administrator", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$this->getUpdateChangedFieldsString($changedFields, $administrator));
+        $this->systemEvents->insertInfo("Updated Administrator", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$this->getChangedFieldsString($changedFields, $administrator));
 
         FormHelper::unsetFormSessionVars();
 
@@ -254,10 +254,9 @@ class AdministratorsController extends BaseController
         }
 
         $eventNote = $this->administratorsMapper->getPrimaryTableMapper()->getPrimaryKeyColumnName() . ":$primaryKey|username: $username";
-        $adminMessage = "Deleted administrator $primaryKey(username: $username)";
+        $this->systemEvents->insertInfo("Deleted Administrator", (int) $this->authentication->getAdministratorId(), $eventNote);
 
-        $this->systemEvents->insertInfo("Deleted administrator", (int) $this->authentication->getAdministratorId(), $eventNote);
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$adminMessage, App::STATUS_ADMIN_NOTICE_SUCCESS];
+        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Deleted administrator $primaryKey(username: $username)", App::STATUS_ADMIN_NOTICE_SUCCESS];
                 
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }

@@ -205,35 +205,34 @@ class TableMapper implements TableMappers
     }
 
     /**
-     * @param array $columnValues
+     * @param array $input
      * @param $primaryKeyValue
-     * @param bool $getChangedColumnsOnly :: if false sends all received $columnValues. set false if calling with only changed columns as $columnValues in order to not duplicate checking for changes.
-     * @param array $record :: input if $getChangedColumnsOnly false in order to not duplicate select query
+     * @param bool $getChangedValues :: default true. if true calls getChangedColumnsValues in order to send only changed to update builder, otherwise all $input is sent to update builder. set false if input only includes changed values in order to not duplicate checking for changes.
+     * @param array $record :: best to include if $getChangedValues is true in order to not duplicate select query
      * @return \SlimPostgres\Database\Queries\recordset
      * @throws \Exception
      */
-    public function updateByPrimaryKey(array $columnValues, $primaryKeyValue, bool $getChangedColumnsOnly = true, array $record = [])
+    public function updateByPrimaryKey(array $input, $primaryKeyValue, bool $getChangedValues = true, array $record = [])
     {
-        $primaryKeyName = $this->getPrimaryKeyColumnName();
+        $input = $this->addBooleanColumnValues($input);
 
-        $columnValues = $this->addBooleanColumnValues($columnValues);
-
-        if ($getChangedColumnsOnly) {
+        if ($getChangedValues) {
             if (count($record) == 0) {
                 $record = $this->selectForPrimaryKey($primaryKeyValue);
             }
-            $updateColumnValues = $this->getChangedColumnsValues($columnValues, $record);
+            $updateColumnValues = $this->getChangedColumnsValues($input, $record);
         } else {
-            $updateColumnValues = $columnValues;
+            $updateColumnValues = $input;
         }
 
-        $ub = new UpdateBuilder($this->tableName, $primaryKeyName, $primaryKeyValue);
+        return $this->doUpdate($updateColumnValues, $primaryKeyValue);
+    }
+
+    private function doUpdate(array $updateColumnValues, $primaryKeyValue) 
+    {
+        $ub = new UpdateBuilder($this->tableName, $this->getPrimaryKeyColumnName(), $primaryKeyValue);
         $this->addColumnsToBuilder($ub, $updateColumnValues);
-        try {
-            return $ub->execute();
-        } catch(\Exception $exception) {
-            throw $exception;
-        }
+        return $ub->execute();
     }
 
     // returns query result

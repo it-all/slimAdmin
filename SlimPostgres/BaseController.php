@@ -143,4 +143,33 @@ abstract class BaseController
 
         return $filterColumnsInfo;
     }
+
+    /** 
+     * @param string $emailTo must be in $settings['emails'] array or error will be inserted to system events
+     * @param string $mainBody
+     * @param bool $addEventLogStatement defaults true, if true adds 'See event log for details' after $mainBody
+     * @param bool $throwExceptionOnError defaults false, if true exception is thrown if no match for $emailTo
+     */
+    protected function sendEventNotificationEmail(string $emailTo, string $mainBody, bool $addEventLogStatement = true, bool $throwExceptionOnError = false)
+    {
+        if ($emailTo !== null) {
+            $settings = $this->container->get('settings');
+            if (isset($settings['emails'][$emailTo])) {
+                $emailBody = $mainBody;
+                if ($addEventLogStatement) {
+                    $emailBody .= PHP_EOL . "See event log for details.";
+                }
+                $this->mailer->send(
+                    $_SERVER['SERVER_NAME'] . " Event",
+                    $emailBody,
+                    [$settings['emails'][$emailTo]]
+                );
+            } else {
+                $this->systemEvents->insertError("Email Not Found", (int) $this->authentication->getAdministratorId(), $emailTo);
+                if ($throwExceptionOnError) {
+                    throw new \InvalidArgumentException("Email Not Found: $emailTo");
+                }
+            }
+        }
+    }
 }

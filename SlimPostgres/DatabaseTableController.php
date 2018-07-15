@@ -162,16 +162,7 @@ class DatabaseTableController extends BaseController
         $this->systemEvents->insertInfo("Inserted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName:$insertedRecordId");
 
         if ($emailTo !== null) {
-            $settings = $this->container->get('settings');
-            if (isset($settings['emails'][$emailTo])) {
-                $this->mailer->send(
-                    $_SERVER['SERVER_NAME'] . " Event",
-                    "Inserted $tableName" . PHP_EOL . "See event log for details.",
-                    [$settings['emails'][$emailTo]]
-                );
-            } else {
-                $this->systemEvents->insertInfo("Invalid email", (int) $this->authentication->getAdministratorId(), $emailTo);
-            }
+            $this->sendEventNotificationEmail("Inserted $tableName", $emailTo);
         }
 
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted $tableName $insertedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
@@ -209,16 +200,7 @@ class DatabaseTableController extends BaseController
         $this->systemEvents->insertInfo("Updated $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName:$updatedRecordId|".$this->getChangedFieldsString($changedColumnValues, $record));
 
         if ($emailTo !== null) {
-            $settings = $this->container->get('settings');
-            if (isset($settings['emails'][$emailTo])) {
-                $this->mailer->send(
-                    $_SERVER['SERVER_NAME'] . " Event",
-                    "Updated $tableName" . PHP_EOL . "See event log for details.",
-                    [$settings['emails'][$emailTo]]
-                );
-            } else {
-                $this->systemEvents->insertInfo("Invalid email", (int) $this->authentication->getAdministratorId(), $emailTo);
-            }
+            $this->sendEventNotificationEmail("Updated $tableName", $emailTo);
         }
 
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated $tableName $updatedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
@@ -269,16 +251,7 @@ class DatabaseTableController extends BaseController
         $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), $eventNote);
 
         if ($emailTo !== null) {
-            $settings = $this->container->get('settings');
-            if (isset($settings['emails'][$emailTo])) {
-                $this->mailer->send(
-                    $_SERVER['SERVER_NAME'] . " Event",
-                    "Deleted $tableName" . PHP_EOL . "See event log for details.",
-                    [$settings['emails'][$emailTo]]
-                );
-            } else {
-                $this->systemEvents->insertInfo("Invalid email", (int) $this->authentication->getAdministratorId(), $emailTo);
-            }
+            $this->sendEventNotificationEmail("Deleted $tableName", $emailTo);
         }
 
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$adminMessage, App::STATUS_ADMIN_NOTICE_SUCCESS];

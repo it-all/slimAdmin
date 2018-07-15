@@ -66,7 +66,7 @@ abstract class BaseController
         }
     }
 
-    protected function setIndexFilter(Request $request, Response $response, $args, array $listViewColumns, string $redirectRoute, AdminListView $view)
+    protected function setIndexFilter(Request $request, Response $response, $args, array $listViewColumns, stringsetIndexFilter $redirectRoute, AdminListView $view)
     {
         $this->setRequestInput($request);
 
@@ -74,8 +74,10 @@ abstract class BaseController
             throw new \Exception("session filter input must be set");
         }
 
+        // note, ! will be true for both null and empty array return values, test to make sure both cases should redisplay form with error
         if (!$filterColumnsInfo = $this->getFilterColumns($view->getSessionFilterFieldKey(), $listViewColumns)) {
             // redisplay form with error
+            FormHelper::setFieldErrors([$filterFieldName => 'Not Entered']);
             return $view->indexView($response);
         } else {
             $_SESSION[$view->getSessionFilterColumnsKey()] = $filterColumnsInfo;
@@ -91,7 +93,6 @@ abstract class BaseController
         $filterColumnsInfo = [];
         $filterParts = explode(",", $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$filterFieldName]);
         if (mb_strlen($filterParts[0]) == 0) {
-            FormHelper::setFieldErrors([$filterFieldName => 'Not Entered']);
             return null;
         } else {
 

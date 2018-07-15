@@ -168,7 +168,7 @@ final class RolesMapper extends TableMapper
     {
         // make sure returning column exists
         if ($returning !== null) {
-            if (!$returnColumn = $this->getColumnByName($returning)) {
+            if (null === $returnColumn = $this->getColumnByName($returning)) {
                 throw new \InvalidArgumentException("Invalid return column $returning");
             }
         }

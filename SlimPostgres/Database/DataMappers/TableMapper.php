@@ -257,7 +257,7 @@ class TableMapper implements TableMappers
     {
         foreach ($columnValues as $name => $value) {
             // make sure this is truly a column
-            if ($column = $this->getColumnByName($name)) {
+            if (null !== $column = $this->getColumnByName($name)) {
                 if (is_string($value) && mb_strlen($value) == 0) {
                     $value = $this->handleBlankValue($column);
                 }

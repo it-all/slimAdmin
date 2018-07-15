@@ -90,7 +90,7 @@ class AuthenticationService
     {
         $administratorsMapper = AdministratorsMapper::getInstance();
         // check if administrator exists
-        if (!$administrator = $administratorsMapper->getObjectByUsername($username)) {
+        if (null === $administrator = $administratorsMapper->getObjectByUsername($username)) {
             $this->loginFailed($username, null);
             return false;
         }

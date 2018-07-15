@@ -161,7 +161,7 @@ class AdministratorsView extends AdminListView
     public function updateView(Request $request, Response $response, $args)
     {
         // make sure there is an administrator for the primary key
-        if (!$administrator = $this->administratorsMapper->getObjectById((int) $args['primaryKey'])) {
+        if (null === $administrator = $this->administratorsMapper->getObjectById((int) $args['primaryKey'])) {
             return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->administratorsMapper->getPrimaryTableMapper(), 'update');
         }
 

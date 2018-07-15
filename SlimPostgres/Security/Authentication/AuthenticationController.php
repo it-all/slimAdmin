@@ -66,7 +66,7 @@ class AuthenticationController extends BaseController
 
     public function getLogout(Request $request, Response $response)
     {
-        if (!$username = $this->authentication->getAdministratorUsername()) {
+        if (null === $username = $this->authentication->getAdministratorUsername()) {
             $this->systemEvents->insertWarning('Attempted logout for non-logged-in visitor');
         } else {
             $this->systemEvents->insertInfo('Logout', (int) $this->authentication->getAdministratorId());

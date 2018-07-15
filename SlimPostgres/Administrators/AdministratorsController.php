@@ -174,7 +174,7 @@ class AdministratorsController extends BaseController
         $redirectRoute = App::getRouteName(true, $this->routePrefix,'index');
 
         // make sure there is an administrator for the primary key
-        if (!$administrator = $this->administratorsMapper->getObjectById((int) $primaryKey)) {
+        if (null === $administrator = $this->administratorsMapper->getObjectById((int) $primaryKey)) {
             return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsMapper->getPrimaryTableMapper(), 'update');
         }
 

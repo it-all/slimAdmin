@@ -85,7 +85,7 @@ final class SystemEventsMapper extends MultiTableMapper
 
     public function insertEvent(string $title, string $eventType = 'info', int $adminId = null, string $notes = null)
     {
-        if (!$eventTypeId = $this->getEventTypeId($eventType)) {
+        if (null === $eventTypeId = $this->getEventTypeId($eventType)) {
             throw new \Exception("Invalid eventType: $eventType");
         }
 

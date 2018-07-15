@@ -32,17 +32,15 @@ class FormHelper
 
     /**
      * @param string $fieldName
-     * @param bool $returnNull
-     * @return null|string
-     * Either null or an empty string can be returned if the session field error is not set. defaults to empty string
+     * Note, perhaps it's better to return null than an empty string if session var not set, but it's much easier to test the string return type.
      */
-    public static function getFieldError(string $fieldName, bool $returnNull = false): ?string
+    public static function getFieldError(string $fieldName): string
     {
         if (isset($_SESSION[self::SESSION_ERRORS_KEY][$fieldName])) {
             return $_SESSION[self::SESSION_ERRORS_KEY][$fieldName];
         }
 
-        return ($returnNull) ? null : '';
+        return '';
     }
 
     public static function getFieldValue(string $fieldName): string

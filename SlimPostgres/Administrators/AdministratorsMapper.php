@@ -220,8 +220,7 @@ final class AdministratorsMapper extends MultiTableMapper
                 while ($record = pg_fetch_assoc($pgResults)) {
                     
                     // either add new administrator or just new role based on whether administrator already exists
-                    $resultsKey = $this->getResultsKeyForId($results, (int) $record['id']);
-                    if ($resultsKey !== null) {
+                    if (null !== $resultsKey = $this->getResultsKeyForId($results, (int) $record['id'])) {
                         $this->addRoleToResult($results, $resultsKey, $record['role']);
                     } else {
                         $this->addRecordToArray($results, $record);
@@ -248,12 +247,12 @@ final class AdministratorsMapper extends MultiTableMapper
     public function delete(int $id, AuthenticationService $authentication, SystemEventsMapper $systemEvents): string
     {
         // make sure there is an administrator for the primary key
-        if (!$administrator = $this->getObjectById($id)) {
+        if (null === $administrator = $this->getObjectById($id)) {
             throw new Exceptions\QueryResultsNotFoundException();
         }
 
         // make sure the current administrator is not deleting her/himself
-        if ($id == $authentication->getAdministratorId()) {
+        if ($id === $authentication->getAdministratorId()) {
             throw new Exceptions\UnallowedActionException("Administrator cannot delete own account: id $id");
         }
 

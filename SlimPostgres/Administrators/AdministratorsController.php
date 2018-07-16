@@ -35,7 +35,7 @@ class AdministratorsController extends BaseController
 
     public function postIndexFilter(Request $request, Response $response, $args)
     {
-        return $this->setIndexFilter($request, $response, $args, $this->administratorsMapper::SELECT_COLUMNS, ROUTE_ADMINISTRATORS, $this->view);
+        return $this->setIndexFilter($request, $response, $args, $this->administratorsMapper::SELECT_COLUMNS, $this->view);
     }
 
     public function postInsert(Request $request, Response $response, $args)

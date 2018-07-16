@@ -67,7 +67,7 @@ abstract class BaseController
     }
 
     /** called by children for posted filter form entry methods */
-    protected function setIndexFilter(Request $request, Response $response, $args, array $listViewColumns, string $redirectRoute, AdminListView $view)
+    protected function setIndexFilter(Request $request, Response $response, $args, array $listViewColumns, AdminListView $view)
     {
         $this->setRequestInput($request);
 
@@ -88,7 +88,7 @@ abstract class BaseController
 
             FormHelper::unsetFormSessionVars();
 
-            return $response->withRedirect($this->router->pathFor($redirectRoute));
+            return $view->indexView($response);
         }
     }
 

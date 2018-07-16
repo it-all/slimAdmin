@@ -66,6 +66,7 @@ abstract class BaseController
         }
     }
 
+    /** called by children for posted filter form entry methods */
     protected function setIndexFilter(Request $request, Response $response, $args, array $listViewColumns, string $redirectRoute, AdminListView $view)
     {
         $this->setRequestInput($request);
@@ -74,10 +75,9 @@ abstract class BaseController
             throw new \Exception("session filter input must be set");
         }
 
-        // note, ! will be true for both null and empty array return values, test to make sure both cases should redisplay form with error
-        if (!$filterColumnsInfo = $this->getFilterColumns($view->getSessionFilterFieldKey(), $listViewColumns)) {
+        if (null === $filterColumnsInfo = $this->getFilterColumns($view->getSessionFilterFieldKey(), $listViewColumns)) {
             // redisplay form with error
-            FormHelper::setFieldErrors([$filterFieldName => 'Not Entered']);
+            FormHelper::setFieldErrors([$view->getSessionFilterFieldKey() => 'Not Entered']);
             return $view->indexView($response);
         } else {
             /** store in session to remember filtration */

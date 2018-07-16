@@ -17,7 +17,7 @@ use SlimPostgres\Administrators\AdministratorsController;
 use SlimPostgres\Administrators\Roles\RolesView;
 use SlimPostgres\Administrators\Roles\RolesController;
 
-$administratorPermissions = $config['slim']['authorization']['administratorPermissions'];
+$administratorPermissions = $config['authorization']['administratorPermissions'];
 
 /////////////////////////////////////////
 // Routes that anyone can access

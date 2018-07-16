@@ -76,7 +76,7 @@ class App
 
     public function __construct()
     {
-        $this->commonConfigSettingsKeys = ['isLive', 'businessName', 'businessDba', 'administratorDefaultRole', 'emails'];
+        $this->commonConfigSettingsKeys = ['isLive', 'businessName', 'businessDba', 'administratorDefaultRole', 'emails', 'authentication', 'authorization', 'administratorDefaultRole', 'trimAllUserInput'];
         $dotenv = new Dotenv(APPLICATION_ROOT_DIRECTORY);
         $dotenv->load();
 

@@ -40,60 +40,48 @@ return [
 
     'mbInternalEncoding' => 'UTF-8',
 
-    'slim' => [
-
-        'outputBuffering' => 'append',
-
-        'templatesPath' => APPLICATION_ROOT_DIRECTORY . '/templates/', // note slim requires trailing slash
-
-        'addContentLengthHeader' => false, // if this is not disabled, slim/App.php threw an exception related to error handling, when the php set_error_handler() function was triggered
-
-        // routerCacheFile should only be set in production (when routes are stable)
-        // https://akrabat.com/slims-route-cache-file/
-//            'routerCacheFile' => APPLICATION_ROOT_DIRECTORY . '/storage/cache/router.txt',
-
-        'authentication' => [
-            'maxFailedLogins' => 5, // If met or exceeded in a session, will insert a system event and disallow further login attempts by redirecting to the homepage
-            'administratorHomeRoutes' => [
-                'usernames' => [
-                    'director' => ROUTE_ADMINISTRATORS
-                ],
-                'roles' => [
-                    'owner' => ROUTE_SYSTEM_EVENTS
-                ]
+    'authentication' => [
+        'maxFailedLogins' => 5, // If met or exceeded in a session, will insert a system event and disallow further login attempts by redirecting to the homepage
+        'administratorHomeRoutes' => [
+            'usernames' => [
+                'director' => ROUTE_ADMINISTRATORS
             ],
+            'roles' => [
+                'owner' => ROUTE_SYSTEM_EVENTS
+            ]
+        ],
+    ],
+
+    'authorization' => [
+        'topRole' => 'owner', // must match database role with level 1
+        /* Either functionalityCategory => permissions or functionalityCategory.functionality => permissions where permissions is either a string set to the minimum authorized role or an array of authorized roles */
+        // Important to properly match the indexes to routes authorization
+        // The role values must be in the database: roles.role
+        // If the index is not defined for a route or nav section, no authorization check is performed (all administrators (logged in users) will be able to access resource or view nav section). therefore, indexes only need to be defined for routes and nav sections that require authorization greater than the base (least permission) role.
+        // Note also that it's possible to give a role access to a resource, but then hide the navigation to to that resource to that role, which would usually be undesirable. For example, below the bookkeeper is authorized to view System Events, but will not see the System nav section because of the NAV_ADMIN_SYSTEM entry permissions being set to 'owner'
+        'administratorPermissions' => [
+            ROUTE_LOGIN_ATTEMPTS => ['owner', 'director'],
+            ROUTE_SYSTEM_EVENTS => 'bookkeeper',
+            ROUTE_ADMINISTRATORS => 'bookkeeper',
+            ROUTE_ADMINISTRATORS_RESET => 'bookkeeper',
+            ROUTE_ADMINISTRATORS_INSERT => 'bookkeeper',
+            ROUTE_ADMINISTRATORS_UPDATE => 'bookkeeper',
+            ROUTE_ADMINISTRATORS_DELETE => 'bookkeeper',
+            ROUTE_ADMINISTRATORS_ROLES => 'owner',
+            ROUTE_ADMINISTRATORS_ROLES_INSERT => 'owner',
+            ROUTE_ADMINISTRATORS_ROLES_UPDATE => 'owner',
+            ROUTE_ADMINISTRATORS_ROLES_DELETE => 'owner',
+            NAV_ADMIN_SYSTEM => 'bookkeeper',
         ],
 
-        'authorization' => [
-            'topRole' => 'owner', // must match database role with level 1
-            /* Either functionalityCategory => permissions or functionalityCategory.functionality => permissions where permissions is either a string set to the minimum authorized role or an array of authorized roles */
-            // Important to properly match the indexes to routes authorization
-            // The role values must be in the database: roles.role
-            // If the index is not defined for a route or nav section, no authorization check is performed (all administrators (logged in users) will be able to access resource or view nav section). therefore, indexes only need to be defined for routes and nav sections that require authorization greater than the base (least permission) role.
-            // Note also that it's possible to give a role access to a resource, but then hide the navigation to to that resource to that role, which would usually be undesirable. For example, below the bookkeeper is authorized to view System Events, but will not see the System nav section because of the NAV_ADMIN_SYSTEM entry permissions being set to 'owner'
-            'administratorPermissions' => [
-                ROUTE_LOGIN_ATTEMPTS => ['owner', 'director'],
-                ROUTE_SYSTEM_EVENTS => 'bookkeeper',
-                ROUTE_ADMINISTRATORS => 'bookkeeper',
-                ROUTE_ADMINISTRATORS_RESET => 'bookkeeper',
-                ROUTE_ADMINISTRATORS_INSERT => 'bookkeeper',
-                ROUTE_ADMINISTRATORS_UPDATE => 'bookkeeper',
-                ROUTE_ADMINISTRATORS_DELETE => 'bookkeeper',
-                ROUTE_ADMINISTRATORS_ROLES => 'owner',
-                ROUTE_ADMINISTRATORS_ROLES_INSERT => 'owner',
-                ROUTE_ADMINISTRATORS_ROLES_UPDATE => 'owner',
-                ROUTE_ADMINISTRATORS_ROLES_DELETE => 'owner',
-                NAV_ADMIN_SYSTEM => 'bookkeeper',
-            ],
+    ],
 
-        ],
+    'administratorDefaultRole' => 'user',
 
-        'administratorDefaultRole' => 'user',
+    // if true removes leading and trailing blank space on all inputs
+    'trimAllUserInput' => true,
 
-        // if true removes leading and trailing blank space on all inputs
-        'trimAllUserInput' => true,
-
-        // how to add admin nav menu options
+    // how to add admin nav menu options
 //        'adminNav' => [
 //            'Test' => [
 //                'route' => ROUTE_TEST,
@@ -105,6 +93,18 @@ return [
 //            ]
 //        ],
 
-    ] // end slim specific config
+    /** slim specific config */
+    'slim' => [
 
+        'outputBuffering' => 'append',
+
+        'templatesPath' => APPLICATION_ROOT_DIRECTORY . '/templates/', // note slim requires trailing slash
+
+        'addContentLengthHeader' => false, // if this is not disabled, slim/App.php threw an exception related to error handling, when the php set_error_handler() function was triggered
+
+        // routerCacheFile should only be set in production (when routes are stable)
+        // https://akrabat.com/slims-route-cache-file/
+        // 'routerCacheFile' => APPLICATION_ROOT_DIRECTORY . '/storage/cache/router.txt',
+
+    ] // end slim specific config
 ];

@@ -189,7 +189,8 @@ class AdministratorsView extends AdminListView
             return $this->resetFilter($response, $this->indexRoute);
         }
 
-        $filterColumnsInfo = (isset($_SESSION[$this->sessionFilterColumnsKey])) ? $_SESSION[$this->sessionFilterColumnsKey] : null;
+        $filterColumnsInfo = (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][parent::SESSION_FILTER_COLUMNS_KEY])) ? $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][parent::SESSION_FILTER_COLUMNS_KEY] : null;
+
         if ($results = $this->mapper->selectArray($this->mapper->getSelectColumnsString(), $filterColumnsInfo)) {
             $numResults = count($results);
         } else {

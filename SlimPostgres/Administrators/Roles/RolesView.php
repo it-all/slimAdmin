@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Administrators\Roles;
 
+use SlimPostgres\App;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\DatabaseTableListView;
 use SlimPostgres\Forms\FormHelper;
@@ -23,7 +24,8 @@ class RolesView extends DatabaseTableListView
             return $this->resetFilter($response, $this->indexRoute);
         }
 
-        $filterColumnsInfo = (isset($_SESSION[$this->sessionFilterColumnsKey])) ? $_SESSION[$this->sessionFilterColumnsKey] : null;
+        $filterColumnsInfo = (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][parent::SESSION_FILTER_COLUMNS_KEY])) ? $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][parent::SESSION_FILTER_COLUMNS_KEY] : null;
+
         if ($results = pg_fetch_all($this->mapper->select("*", $filterColumnsInfo))) {
             $numResults = count($results);
         } else {

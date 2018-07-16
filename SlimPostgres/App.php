@@ -16,22 +16,43 @@ use SlimPostgres\Utilities;
 class App
 {
     private $config;
+
     /** @var array config settings that get added to slim so framework can access through container */
     private $commonConfigSettingsKeys;
+
     private $environmentalVariables;
     private $database;
     private $systemEventsMapper;
     private $mailer;
 
     const PATH_PHP_ERRORS_LOG = APPLICATION_ROOT_DIRECTORY . '/storage/logs/phpErrors.log';
+
+    /** session variable keys */
+
     const SESSION_KEY_LAST_ACTIVITY = 'lastActivity';
+
+    /** front end notifications */
     const SESSION_KEY_NOTICE = 'notice';
+
+    /** administrative notifications */
     const SESSION_KEY_ADMIN_NOTICE = 'adminNotice';
+
+    /** administrative resource to load upon login */
     const SESSION_KEY_GOTO_ADMIN_PATH = 'gotoAdminPath';
+
+    /** tracks number of login failures */
     const SESSION_KEY_NUM_FAILED_LOGINS = 'numFailedLogins';
+
+    /** stores user input  */
     const SESSION_KEY_REQUEST_INPUT = 'requestInput';
+
+    /** filter field values for admin list views */
+    const SESSION_KEY_ADMIN_LIST_VIEW_FILTER = 'adminListViewFilter';
+
+    /** info concerning logged on administrator */
     const SESSION_KEY_ADMINISTRATOR = 'administrator';
-    // administrator sub-keys
+
+    /** administrator sub-keys */
     const SESSION_ADMINISTRATOR_KEY_ID = 'id';
     const SESSION_ADMINISTRATOR_KEY_NAME = 'name';
     const SESSION_ADMINISTRATOR_KEY_USERNAME = 'username';
@@ -39,20 +60,19 @@ class App
     const SESSION_ADMINISTRATOR_KEY_ROLES_NAME = 'roleName';
     const SESSION_ADMINISTRATOR_KEY_ROLES_LEVEL = 'roleLevel';
 
-    // frontend notice statuses (can be used as css classes)
+    /** frontend notice statuses (can be used as css classes) */
     const STATUS_NOTICE_SUCCESS = 'noticeSuccess';
     const STATUS_NOTICE_FAILURE = 'noticeFailure';
     const STATUS_NOTICE_CAUTION = 'noticeCaution';
     const STATUS_NOTICE_MUTED = 'noticeMuted';
 
-    // admin notice statuses (can be used as css classes)
+    /** admin notice statuses (can be used as css classes) */
     const STATUS_ADMIN_NOTICE_SUCCESS = 'adminNoticeSuccess';
     const STATUS_ADMIN_NOTICE_FAILURE = 'adminNoticeFailure';
     const STATUS_ADMIN_NOTICE_CAUTION = 'adminNoticeCaution';
     const STATUS_ADMIN_NOTICE_MUTED = 'adminNoticeMuted';
 
     const VALID_ROUTE_TYPES = ['index', 'index.reset', 'insert', 'update', 'delete'];
-
 
     public function __construct()
     {
@@ -62,7 +82,7 @@ class App
 
         $this->environmentalVariables = getenv();
 
-        // validate .env (note, not thorough validation)
+        /** validate .env (note, not thorough validation) */
         $dotenv->required('PHPMAILER_PROTOCOL')->allowedValues(['smtp', 'sendmail', 'mail', 'qmail']);
         $phpMailerProtocol = $this->environmentalVariables['PHPMAILER_PROTOCOL'];
         if ($phpMailerProtocol == 'smtp') {
@@ -74,10 +94,10 @@ class App
 
         mb_internal_encoding($this->config['mbInternalEncoding']); // so no need to set encoding for mb_strlen()
 
-        // add some .env to config
+        /** add some .env to config */
         $this->config['isLive'] = !in_array(strtolower($this->environmentalVariables['IS_LIVE']), [false, 0, 'false', '0', 'off', 'no']); // bool
 
-        // set up emailer, which is used in error handler and container
+        /** set up emailer, which is used in error handler and container */
         $phpMailerSmtpHost = (array_key_exists('PHPMAILER_SMTP_HOST', $this->environmentalVariables)) ? $this->environmentalVariables['PHPMAILER_SMTP_HOST'] : null;
         $phpMailerSmtpPort = (array_key_exists('PHPMAILER_SMTP_PORT', $this->environmentalVariables)) ? (int) $this->environmentalVariables['PHPMAILER_SMTP_PORT'] : null;
         $disableMailerSend = !$this->config['isLive'] && !$this->config['errors']['emailDev'];
@@ -91,7 +111,7 @@ class App
             $disableMailerSend
         );
 
-        // error handling
+        /** error handling */
         $echoErrors = !$this->config['isLive'];
         $emailErrors = $this->config['isLive'] || $this->config['errors']['emailDev'];
         $emailErrorsTo = [];
@@ -108,26 +128,33 @@ class App
             $this->mailer
         );
 
-        // workaround for catching some fatal errors like parse errors. note that parse errors in this file and index.php are not handled, but cause a fatal error with display (not displayed if display_errors is off in php.ini, but the ini_set call will not affect it).
+        /** workaround for catching some fatal errors like parse errors. note that parse errors in this file and index.php are not handled, but cause a fatal error with display (not displayed if display_errors is off in php.ini, but the ini_set call will not affect it). */
         register_shutdown_function(array($errorHandler, 'shutdownFunction'));
         set_error_handler(array($errorHandler, 'phpErrorHandler'));
         set_exception_handler(array($errorHandler, 'throwableHandler'));
 
-        error_reporting( -1 ); // all, including future types
-        // do not have php display errors, since this will be determined by config and done in error handler
+        /**  all, including future types */
+        error_reporting( -1 ); 
+
+        /** do not have php display errors, since this will be determined by config and done in error handler */
         ini_set( 'display_errors', 'off' );
         ini_set( 'display_startup_errors', 'off' );
 
-        // any errors prior to this point will not be logged
-        ini_set('error_log', self::PATH_PHP_ERRORS_LOG); // even though the error handler logs errors, this ensures errors in the error handler itself or in this file after this point will be logged. note, if using slim error handling, this will log all php errors
+        /** 
+         * any errors prior to this point will not be logged
+         * even though the error handler logs errors, this ensures errors in the error handler itself or in this file after this point will be logged. note, if using slim error handling, this will log all php errors
+         */
+        ini_set('error_log', self::PATH_PHP_ERRORS_LOG);
 
-        // set up and connect to postgres, which is used in error handler and container
-        // this is done after setting error handler in case connection fails
-        // note, injected to error handler below
+        /** 
+         * set up and connect to postgres, which is used in error handler and container
+         * this is done after setting error handler in case connection fails
+         * note, injected to error handler below
+         */
         $postgresConnectionString = (array_key_exists('POSTGRES_CONNECTION_STRING', $this->environmentalVariables)) ? $this->environmentalVariables['POSTGRES_CONNECTION_STRING'] : '';
         $this->database = new Postgres($postgresConnectionString);
 
-        // used in error handler and container
+        /** used in error handler and container */
         $this->systemEventsMapper = SystemEventsMapper::getInstance();
 
         if ($this->config['errors']['logToDatabase']) {
@@ -156,7 +183,9 @@ class App
                 session_save_path($this->config['session']['savePath']);
             }
             session_start();
-            $_SESSION[self::SESSION_KEY_LAST_ACTIVITY] = time(); // update last activity time stamp
+
+            /** update last activity time stamp */
+            $_SESSION[self::SESSION_KEY_LAST_ACTIVITY] = time();
         }
 
     }
@@ -181,18 +210,18 @@ class App
     {
         $slimSettings['settings'] = $this->config['slim'];
 
-        // add common config settings
+        /** add common config settings */
         foreach ($this->commonConfigSettingsKeys as $key) {
             if (isset($this->config[$key])) {
                 $slimSettings['settings'][$key] = $this->config[$key];
             }
         }
 
-        //Override the default Not Found Handler
+        /** Override the default Not Found Handler */
         $slimSettings['notFoundHandler'] = function ($container) {
             return function ($request, $response) use ($container) {
 
-                // log error
+                /** log error */
                 $this->systemEventsMapper->insertEvent('404 Page Not Found', 'notice', $container->authentication->getAdministratorId());
 
                 $_SESSION[App::SESSION_KEY_NOTICE] = [$this->config['pageNotFoundText'], App::STATUS_NOTICE_FAILURE];
@@ -208,7 +237,7 @@ class App
 
     private function setSlimDependences($container, Postgres $database, SystemEventsMapper $systemEventsMapper, Utilities\PhpMailerService $mailer)
     {
-        // Template
+        /** Template */
         $container['view'] = function ($container) {
             $settings = $container->get('settings');
             $templateVariables = [
@@ -227,37 +256,42 @@ class App
             return new \Slim\Views\PhpRenderer($settings['templatesPath'], $templateVariables);
         };
 
-        // Database
+        /** Database */
         $container['database'] = function($container) use ($database) {
             return $database;
         };
 
-        // Authentication
+        /** Authentication */
         $container['authentication'] = function($container) {
             $settings = $container->get('settings');
             return new AuthenticationService($settings['authentication']['maxFailedLogins'], $settings['authentication']['administratorHomeRoutes']);
         };
 
-        // Authorization
+        /** Authorization */
         $container['authorization'] = function($container) {
             $settings = $container->get('settings');
             return new AuthorizationService($settings['authorization']['topRole'], $settings['authorization']['administratorPermissions']);
         };
 
-        // System Events (Database Log)
+        /** System Events (Database Log) */
         $container['systemEvents'] = function($container) use ($systemEventsMapper) {
             return $systemEventsMapper;
         };
 
-        // Mailer
+        /** Mailer */
         $container['mailer'] = function($container) use ($mailer) {
             return $mailer;
         };
 
-        // CSRF
+        /** CSRF */
         $container['csrf'] = function ($container) {
-            $storage = null; // cannot directly pass null because received by reference.
-            // setting the persistentTokenMode parameter true allows redisplaying a form with errors with a render rather than redirect call and will not cause CSRF failure if the page is refreshed (http://blog.ircmaxell.com/2013/02/preventing-csrf-attacks.html)
+            /** cannot directly pass null because received by reference */
+            $storage = null; 
+
+            /** 
+             * setting the persistentTokenMode parameter true allows redisplaying a form with errors with a render rather than redirect call and will not cause CSRF failure if the page is refreshed 
+             * (http://blog.ircmaxell.com/2013/02/preventing-csrf-attacks.html)
+             */
             $guard = new \Slim\Csrf\Guard('csrf', $storage, null, 200, 16, true);
             $guard->setFailureCallable(function ($request, $response, $next) {
                 $request = $request->withAttribute("csrf_status", false);
@@ -276,20 +310,22 @@ class App
     /** Global middleware registration */
     private function setSlimMiddleware(\Slim\App $slim, $slimContainer)
     {
-        // handle CSRF check failures and allow template to access and insert CSRF fields to forms
+        /** handle CSRF check failures and allow template to access and insert CSRF fields to forms */
         $slim->add(new CsrfMiddleware($slimContainer));
-        // slim CSRF check middleware
+
+        /** slim CSRF check middleware */
         $slim->add($slimContainer->csrf);
     }
 
     /** note need the arguments for routes.php to access */
     private function registerSlimRoutes(\Slim\App $slim, $slimContainer)
     {
-        $config = $this->config; // make available to routes file
+        /** make available to routes file */
+        $config = $this->config; 
         require APPLICATION_ROOT_DIRECTORY . '/config/routes.php';
     }
 
-    // if called with no args, redirects to current URI with proper protocol, www or not based on config, and query string
+    /** if called with no args, redirects to current URI with proper protocol, www or not based on config, and query string */
     private function redirect(string $toURI = null)
     {
         header("Location: ".$this->getRedirect($toURI));
@@ -305,7 +341,7 @@ class App
             $toURI = $this->getCurrentUri(true);
         }
 
-        // add initial '/' if nec
+        /** add initial '/' if nec */
         if (substr($toURI, 0, 1) != "/") {
             $toURI = "/" . $toURI;
         }

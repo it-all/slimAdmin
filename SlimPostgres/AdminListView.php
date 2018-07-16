@@ -13,25 +13,33 @@ use Slim\Http\Response;
 
 abstract class AdminListView extends AdminView
 {
-    protected $sessionFilterColumnsKey;
-    protected $sessionFilterValueKey;
+    /** user entered value of the filter field. subkey of request input */
     protected $sessionFilterFieldKey;
+
+    protected $filterKey;
+
     protected $indexRoute;
     protected $mapper;
     protected $template;
     protected $filterResetRoute;
-    protected $insertLink; // false or ['text' => {link text}, 'route' => {route}]
+
+    /** false or ['text' => {link text}, 'route' => {route}] */
+    protected $insertLink; 
+
     protected $updatePermitted;
     protected $updateColumn;
     protected $updateRoute;
     protected $addDeleteColumn;
     protected $deleteRoute;
+    
+    const SESSION_FILTER_COLUMNS_KEY = 'columns';
+    const SESSION_FILTER_VALUE_KEY = 'value';
 
     public function __construct(Container $container, string $filterFieldsPrefix, string $indexRoute, TableMappers $mapper, string $filterResetRoute, string $template = 'admin/lists/list.php')
     {
-        $this->sessionFilterColumnsKey = $filterFieldsPrefix . 'FilterColumns';
-        $this->sessionFilterValueKey = $filterFieldsPrefix . 'FilterValue';
         $this->sessionFilterFieldKey = $filterFieldsPrefix . 'Filter';
+        $this->filterKey = $filterFieldsPrefix;
+
         $this->indexRoute = $indexRoute;
         $this->mapper = $mapper;
         $this->template = $template;
@@ -43,6 +51,11 @@ abstract class AdminListView extends AdminView
         $this->deleteRoute = null; // initialize
         $this->insertLink = false; // initialize
         parent::__construct($container);
+    }
+
+    public function getFilterKey(): string 
+    {
+        return $this->filterKey;
     }
 
     protected function setInsert($insertLink)
@@ -83,7 +96,8 @@ abstract class AdminListView extends AdminView
             return $this->resetFilter($response, $this->indexRoute);
         }
 
-        $filterColumnsInfo = (isset($_SESSION[$this->sessionFilterColumnsKey])) ? $_SESSION[$this->sessionFilterColumnsKey] : null;
+        $filterColumnsInfo = (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_COLUMNS_KEY])) ? $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_COLUMNS_KEY] : null;
+
         if ($results = pg_fetch_all($this->mapper->select($this->mapper->getSelectColumnsString(), $filterColumnsInfo))) {
             $numResults = count($results);
         } else {
@@ -127,12 +141,14 @@ abstract class AdminListView extends AdminView
 
     protected function resetFilter(Response $response, string $redirectRoute)
     {
-        if (isset($_SESSION[$this->sessionFilterColumnsKey])) {
-            unset($_SESSION[$this->sessionFilterColumnsKey]);
+        if (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_COLUMNS_KEY])) {
+            unset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_COLUMNS_KEY]);
         }
-        if (isset($_SESSION[$this->sessionFilterValueKey])) {
-            unset($_SESSION[$this->sessionFilterValueKey]);
+
+        if (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_VALUE_KEY])) {
+            unset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_VALUE_KEY]);
         }
+
         // redirect to the clean url
         return $response->withRedirect($this->router->pathFor($redirectRoute));
     }
@@ -142,21 +158,11 @@ abstract class AdminListView extends AdminView
     {
         if (isset($_SESSION[App::SESSION_KEY_REQUEST_INPUT][$this->sessionFilterFieldKey])) {
             return $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$this->sessionFilterFieldKey];
-        } elseif (isset($_SESSION[$this->sessionFilterValueKey])) {
-            return $_SESSION[$this->sessionFilterValueKey];
+        } elseif (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_VALUE_KEY])) {
+            return $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_VALUE_KEY];
         } else {
             return '';
         }
-    }
-
-    public function getSessionFilterColumnsKey(): string
-    {
-        return $this->sessionFilterColumnsKey;
-    }
-
-    public function getSessionFilterValueKey(): string
-    {
-        return $this->sessionFilterValueKey;
     }
 
     public function getSessionFilterFieldKey(): string

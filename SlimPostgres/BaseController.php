@@ -66,7 +66,7 @@ abstract class BaseController
         }
     }
 
-    protected function setIndexFilter(Request $request, Response $response, $args, array $listViewColumns, stringsetIndexFilter $redirectRoute, AdminListView $view)
+    protected function setIndexFilter(Request $request, Response $response, $args, array $listViewColumns, string $redirectRoute, AdminListView $view)
     {
         $this->setRequestInput($request);
 
@@ -80,9 +80,14 @@ abstract class BaseController
             FormHelper::setFieldErrors([$filterFieldName => 'Not Entered']);
             return $view->indexView($response);
         } else {
-            $_SESSION[$view->getSessionFilterColumnsKey()] = $filterColumnsInfo;
-            $_SESSION[$view->getSessionFilterValueKey()] = $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$view->getSessionFilterFieldKey()];
+            /** store in session to remember filtration */
+            $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$view->getFilterKey()][$view::SESSION_FILTER_COLUMNS_KEY] = $filterColumnsInfo;
+
+            /** store in session so form field can be repopulated */
+            $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$view->getFilterKey()][$view::SESSION_FILTER_VALUE_KEY] = $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$view->getSessionFilterFieldKey()];
+
             FormHelper::unsetFormSessionVars();
+
             return $response->withRedirect($this->router->pathFor($redirectRoute));
         }
     }

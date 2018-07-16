@@ -11,6 +11,9 @@ use SlimPostgres\Database\DataMappers\MultiTableMapper;
 // Singleton
 final class SystemEventsMapper extends MultiTableMapper
 {
+    /** @var array of system_event_types records: id => [eventy_type, description]. Populated at construction in order to reduce future queries */
+    private $eventTypes;
+
     const PRIMARY_TABLE_NAME = 'system_events';
     const TYPES_TABLE_NAME = 'system_event_types';
     const ADMINISTRATORS_TABLE_NAME = 'administrators';
@@ -39,8 +42,24 @@ final class SystemEventsMapper extends MultiTableMapper
 
     private function __construct()
     {
+        $this->setEventTypes();
+
         // note time_stamp is the alias for created used in view query
         parent::__construct(new TableMapper(self::PRIMARY_TABLE_NAME, '*', 'time_stamp', false), self::SELECT_COLUMNS);
+    }
+
+    public function setEventTypes()
+    {
+        $this->eventTypes = [];
+
+        $q = new QueryBuilder("SELECT * FROM ".self::TYPES_TABLE_NAME." ORDER BY id");
+        $results = $q->execute();
+        while ($record = pg_fetch_assoc($results)) {
+            $this->eventTypes[$record['id']] = [
+                'eventType' => $record['event_type'],
+                'description' => $record['description']
+            ];
+        }
     }
 
     public function insertDebug(string $title, int $adminId = null, string $notes = null)
@@ -121,13 +140,15 @@ final class SystemEventsMapper extends MultiTableMapper
         return $res;
     }
 
-    /**
-     * getOne returns null if not found
-     */
-    public function getEventTypeId(string $eventType): ?string
+    public function getEventTypeId(string $eventType): ?int
     {
-        $q = new QueryBuilder("SELECT id FROM ".self::TYPES_TABLE_NAME." WHERE event_type = $1", $eventType);
-        return $q->getOne();
+        foreach ($this->eventTypes as $eventTypeId => $eventTypeData) {
+            if ($eventTypeData['eventType'] == $eventType) {
+                return (int) $eventTypeId;
+            }
+        }
+
+        return null;
     }
 
     public function select(string $columns = '*', array $filterColumnsInfo = null)

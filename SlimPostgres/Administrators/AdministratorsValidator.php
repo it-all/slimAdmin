@@ -34,8 +34,7 @@ class AdministratorsValidator extends ValitronValidatorExtension
         if ($inserting || mb_strlen($inputData['password']) > 0) {
             $this->rule('required', ['password', 'password_confirm']);
             // https://stackoverflow.com/questions/8141125/regex-for-password-php
-//            $this->rule('regex', 'password', '%^\S*(?=\S{4,})\S*$%')->message('Must be at least 12 characters long');
-            $this->rule('lengthMin', 'password', 4);
+            $this->rule('regex', 'password', '%^\S*(?=\S{12,})\S*$%')->message('Must be at least 12 characters long');
             $this->rule('equals', 'password', 'password_confirm')->message('must be the same as Confirm Password');
         }
 

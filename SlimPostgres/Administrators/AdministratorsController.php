@@ -123,6 +123,7 @@ class AdministratorsController extends BaseController
         FormHelper::unsetFormSessionVars();
 
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated administrator $primaryKey", App::STATUS_ADMIN_NOTICE_SUCCESS];
+        
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
     }
 

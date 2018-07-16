@@ -66,7 +66,7 @@ class AdministratorsView extends AdminListView
                 $fieldValues = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
             }
             $formAction = $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $primaryKey]);
-            $passwordLabel = 'Password [leave blank to keep existing]';
+            $passwordLabel = 'Password [leave blank to keep existing password]';
             $passwordFieldsRequired = false;
             $fields[] = FormHelper::getPutMethodField();
         }

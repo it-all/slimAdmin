@@ -69,97 +69,6 @@ class AdministratorsController extends BaseController
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS));
     }
 
-    /** also sets changedFieldsString property */
-    private function getChangedFieldValues(Administrator $administrator, array $input): array 
-    {
-        $changedFieldValues = [];
-        $this->changedFieldsString = "";
-
-        // if all roles have been unchecked it won't be included in user input
-        if (!isset($input['roles'])) {
-            $input['roles'] = [];
-        }
-
-        if ($administrator->getName() != $input['name']) {
-            $changedFieldValues['name'] = $input['name'];
-            $this->changedFieldsString .= "name: ".$administrator->getName()." => ".$input['name'];
-        }
-        if ($administrator->getUsername() != $input['username']) {
-            $changedFieldValues['username'] = $input['username'];
-        }
-
-        // only check the password if it has been supplied (entered in the form)
-        if (mb_strlen($input['password']) > 0 && !password_verify($input['password'], $administrator->getPasswordHash())) {
-            $changedFieldValues['password'] = $input['password'];
-        }
-
-        // roles - only add to main array if changed
-        $addRoles = []; // populate with ids of new roles
-        $removeRoles = []; // populate with ids of former roles
-        
-        $currentRoles = $administrator->getRoles();
-
-        // search roles to add
-        foreach ($input['roles'] as $newRoleId) {
-            if (!array_key_exists($newRoleId, $currentRoles)) {
-                $addRoles[] = $newRoleId;
-            }
-        }
-
-        // search roles to remove
-        foreach ($currentRoles as $currentRoleId => $currentRoleInfo) {
-            if (!in_array($currentRoleId, $input['roles'])) {
-                $removeRoles[] = $currentRoleId;
-            }
-        }
-
-        if (count($addRoles) > 0) {
-            $changedFieldValues['roles']['add'] = $addRoles;
-        }
-
-        if (count($removeRoles) > 0) {
-            $changedFieldValues['roles']['remove'] = $removeRoles;
-        }
-
-        return $changedFieldValues;
-    }
-
-    private function getChangedFieldsString(array $changedFields, Administrator $administrator): string 
-    {
-        $changedString = "";
-        foreach ($changedFields as $fieldName => $newValue) {
-            $oldValue = $administrator->{"get".ucfirst($fieldName)}();
-            
-            if ($fieldName == 'roles') {
-
-                $rolesMapper = RolesMapper::getInstance();
-
-                $addRoleIds = (isset($newValue['add'])) ? $newValue['add'] : [];
-                $removeRoleIds = (isset($newValue['remove'])) ? $newValue['remove'] : [];
-
-                // update values based on add/remove and old roles
-                $updatedNewValue = "";
-                $updatedOldValue = "";
-                foreach ($oldValue as $roleId => $roleInfo) {
-                    $updatedOldValue .= $roleInfo['roleName']." ";
-                    // don't put the roles being removed into the new value
-                    if (!in_array($roleId, $removeRoleIds)) {
-                        $updatedNewValue .= $roleInfo['roleName']." ";
-                    }
-                }
-                foreach ($addRoleIds as $roleId) {
-                    $updatedNewValue .= $rolesMapper->getRoleForRoleId((int) $roleId) . " ";
-                }
-                $newValue = $updatedNewValue;
-                $oldValue = $updatedOldValue;
-            }
-
-            $changedString .= " $fieldName: $oldValue => $newValue, ";
-        }
-
-        return substr($changedString, 0, strlen($changedString)-2);
-    }
-
     public function putUpdate(Request $request, Response $response, $args)
     {
         if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'update'))) {
@@ -180,11 +89,16 @@ class AdministratorsController extends BaseController
 
         $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
+        // if all roles have been unchecked it won't be included in user input
+        if (!isset($input['roles'])) {
+            $input['roles'] = [];
+        }
+
+        // check for changes made
+        // only check the password if it has been supplied (entered in the form)
+        $changedFields = $administrator->getChangedFieldValues($input['name'], $input['username'], $input['roles'], mb_strlen($input['password']) > 0, $input['password']);
+
         // if no changes made, display error message
-        // note, if password field is blank, it will not be included in changed fields check
-
-        $changedFields = $this->getChangedFieldValues($administrator, $input);
-
         if (count($changedFields) == 0) {
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made", 'adminNoticeFailure'];
             return $this->view->updateView($request, $response, $args);
@@ -204,7 +118,7 @@ class AdministratorsController extends BaseController
             $this->updateAdministratorSession($changedFields);
         }
 
-        $this->systemEvents->insertInfo("Updated Administrator", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$this->getChangedFieldsString($changedFields, $administrator));
+        $this->systemEvents->insertInfo("Updated Administrator", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$administrator->getChangedFieldsString($changedFields, $administrator));
 
         FormHelper::unsetFormSessionVars();
 

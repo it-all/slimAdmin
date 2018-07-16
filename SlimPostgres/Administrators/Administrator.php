@@ -6,6 +6,7 @@ namespace SlimPostgres\Administrators;
 use SlimPostgres\Administrators\Logins\LoginAttemptsMapper;
 use SlimPostgres\SystemEvents\SystemEventsMapper;
 use SlimPostgres\Security\Authentication\AuthenticationService;
+use SlimPostgres\Administrators\Roles\RolesMapper;
 
 // the model of an Administrator stored in the database, which includes the record from administrators, plus an array of assigned roles.
 class Administrator
@@ -65,5 +66,96 @@ class Administrator
     public function getRoleIds(): array 
     {
         return array_keys($this->roles);
+    }
+
+    public function getChangedFieldValues(string $name, string $username, array $roles, bool $includePassword = true, ?string $password = null): array 
+    {
+        $changedFieldValues = [];
+
+        if ($this->getName() != $name) {
+            $changedFieldValues['name'] = $name;
+        }
+        if ($this->getUsername() != $username) {
+            $changedFieldValues['username'] = $username;
+        }
+
+        if ($includePassword && !password_verify($password, $this->getPasswordHash())) {
+            $changedFieldValues['password'] = $password;
+        }
+
+        // roles - only add to main array if changed
+        $addRoles = []; // populate with ids of new roles
+        $removeRoles = []; // populate with ids of former roles
+        
+        $currentRoles = $this->getRoles();
+
+        // search roles to add
+        foreach ($roles as $newRoleId) {
+            if (!array_key_exists($newRoleId, $currentRoles)) {
+                $addRoles[] = $newRoleId;
+            }
+        }
+
+        // search roles to remove
+        foreach ($currentRoles as $currentRoleId => $currentRoleInfo) {
+            if (!in_array($currentRoleId, $roles)) {
+                $removeRoles[] = $currentRoleId;
+            }
+        }
+
+        if (count($addRoles) > 0) {
+            $changedFieldValues['roles']['add'] = $addRoles;
+        }
+
+        if (count($removeRoles) > 0) {
+            $changedFieldValues['roles']['remove'] = $removeRoles;
+        }
+
+        return $changedFieldValues;
+    }
+
+    public function getChangedFieldsString(array $changedFields): string 
+    {
+        $allowedChangedFieldsKeys = ['name', 'username', 'roles', 'password'];
+
+        $changedString = "";
+
+        foreach ($changedFields as $fieldName => $newValue) {
+
+            // make sure only correct fields have been input
+            if (!in_array($fieldName, $allowedChangedFieldsKeys)) {
+                throw new \InvalidArgumentException("$fieldName not allowed in changedFields");
+            }
+
+            $oldValue = $this->{"get".ucfirst($fieldName)}();
+            
+            if ($fieldName == 'roles') {
+
+                $rolesMapper = RolesMapper::getInstance();
+
+                $addRoleIds = (isset($newValue['add'])) ? $newValue['add'] : [];
+                $removeRoleIds = (isset($newValue['remove'])) ? $newValue['remove'] : [];
+
+                // update values based on add/remove and old roles
+                $updatedNewValue = "";
+                $updatedOldValue = "";
+                foreach ($oldValue as $roleId => $roleInfo) {
+                    $updatedOldValue .= $roleInfo['roleName']." ";
+                    // don't put the roles being removed into the new value
+                    if (!in_array($roleId, $removeRoleIds)) {
+                        $updatedNewValue .= $roleInfo['roleName']." ";
+                    }
+                }
+                foreach ($addRoleIds as $roleId) {
+                    $updatedNewValue .= $rolesMapper->getRoleForRoleId((int) $roleId) . " ";
+                }
+                $newValue = $updatedNewValue;
+                $oldValue = $updatedOldValue;
+            }
+
+            $changedString .= " $fieldName: $oldValue => $newValue, ";
+        }
+
+        return substr($changedString, 0, strlen($changedString)-2);
     }
 }

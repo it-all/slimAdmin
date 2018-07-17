@@ -10,7 +10,8 @@ $htmlBodyContent .= '<main><div id="simpleContainer"><h1>'.$title.'</h1>'.$form-
 $htmlBodyContent .= $footer;
 $htmlBodyJs = '<script type="text/javascript" src="/js/uiHelper.js"></script>';
 
-if (mb_strlen($form->getFocusFieldId()) > 0) {
+// set $hideFocus true to have no form field focus
+if ( (!isset($hideFocus) || !$hideFocus) && mb_strlen($form->getFocusFieldId()) > 0) {
     $htmlBodyJs .= '<script type="text/javascript">window.onload = document.getElementById(\''.$form->getFocusFieldId().'\').focus();</script>';
 }
 

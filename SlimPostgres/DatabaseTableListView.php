@@ -87,7 +87,8 @@ abstract class DatabaseTableListView extends AdminListView
                 'title' => 'Update ' . $this->mapper->getFormalTableName(false),
                 'form' => $form,
                 'primaryKey' => $args['primaryKey'],
-                'navigationItems' => $this->navigationItems
+                'navigationItems' => $this->navigationItems,
+                'hideFocus' => true
             ]
         );
     }

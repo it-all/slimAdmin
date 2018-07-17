@@ -172,7 +172,8 @@ class AdministratorsView extends AdminListView
                 'title' => 'Update ' . $this->administratorsMapper->getPrimaryTableMapper()->getFormalTableName(false),
                 'form' => $this->getForm($request, 'update', (int) $args['primaryKey'], $administrator),
                 'primaryKey' => $args['primaryKey'],
-                'navigationItems' => $this->navigationItems
+                'navigationItems' => $this->navigationItems,
+                'hideFocus' => true
             ]
         );
     }

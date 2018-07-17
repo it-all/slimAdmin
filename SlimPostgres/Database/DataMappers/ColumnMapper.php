@@ -79,8 +79,8 @@ class ColumnMapper
                 case 'USER-DEFINED':
                     // formatted like 'default'::tableName_columnName
                     // parse out default
-                    $parseColDef = explode("'", $columnDefault);
-                    $this->defaultValue = $parseColDef[1];
+                    $parseColumnDefault = explode("'", $columnDefault);
+                    $this->defaultValue = $parseColumnDefault[1];
                     break;
                 case 'boolean':
                     // overwrite to be congruous with a postgres value returned from select

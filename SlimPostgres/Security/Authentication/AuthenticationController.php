@@ -27,7 +27,7 @@ class AuthenticationController extends BaseController
         }
 
         if (!$this->authentication->attemptLogin($username, $password)) {
-            $this->systemEvents->insertWarning('Unsuccessful login', null, 'Username: '.$username);
+            $this->systemEvents->insertWarning('Unsuccessful Login', null, 'Username: '.$username);
 
             if ($this->authentication->tooManyFailedLogins()) {
                 $eventTitle = 'Maximum unsuccessful login attempts exceeded';

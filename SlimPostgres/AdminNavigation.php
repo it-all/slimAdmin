@@ -51,10 +51,6 @@ class AdminNavigation
 
                     'Events' => [
                         'route' => ROUTE_SYSTEM_EVENTS,
-                    ],
-
-                    'Login Attempts' => [
-                        'route' => ROUTE_LOGIN_ATTEMPTS
                     ]
 
                 ]

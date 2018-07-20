@@ -38,7 +38,7 @@ abstract class DatabaseTableListView extends AdminListView
 
     }
 
-    public function getInsert(Request $request, Response $response, $args)
+    public function routeGetInsert(Request $request, Response $response, $args)
     {
         return $this->insertView($request, $response, $args);
     }
@@ -62,7 +62,7 @@ abstract class DatabaseTableListView extends AdminListView
         );
     }
 
-    public function getUpdate(Request $request, Response $response, $args)
+    public function routeGetUpdate(Request $request, Response $response, $args)
     {
         return $this->updateView($request, $response, $args);
     }

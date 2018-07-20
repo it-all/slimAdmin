@@ -9,7 +9,7 @@ use Slim\Http\Response;
 
 class HomeView extends BaseView
 {
-    public function index(Request $request, Response $response)
+    public function routeIndex($request, Response $response)
     {
         return $this->view->render(
             $response,

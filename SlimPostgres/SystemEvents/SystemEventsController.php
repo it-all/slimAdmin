@@ -20,7 +20,7 @@ class SystemEventsController extends BaseController
         $this->mapper = $this->systemEvents; // already in container as a service
     }
 
-    public function postIndexFilter(Request $request, Response $response, $args)
+    public function routePostIndexFilter(Request $request, Response $response, $args)
     {
         return $this->setIndexFilter($request, $response, $args, $this->mapper::SELECT_COLUMNS, $this->view);
     }

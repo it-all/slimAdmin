@@ -33,12 +33,12 @@ class AdministratorsController extends BaseController
         parent::__construct($container);
     }
 
-    public function postIndexFilter(Request $request, Response $response, $args)
+    public function routePostIndexFilter(Request $request, Response $response, $args)
     {
         return $this->setIndexFilter($request, $response, $args, $this->administratorsMapper::SELECT_COLUMNS, $this->view);
     }
 
-    public function postInsert(Request $request, Response $response, $args)
+    public function routePostInsert(Request $request, Response $response, $args)
     {
         if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'insert'))) {
             throw new \Exception('No permission.');
@@ -52,7 +52,7 @@ class AdministratorsController extends BaseController
         if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
             FormHelper::setFieldErrors($validator->getFirstErrors());
-            return $this->view->getInsert($request, $response, $args);
+            return $this->view->routeGetInsert($request, $response, $args);
         }
 
         try {
@@ -69,7 +69,7 @@ class AdministratorsController extends BaseController
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS));
     }
 
-    public function putUpdate(Request $request, Response $response, $args)
+    public function routePutUpdate(Request $request, Response $response, $args)
     {
         if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'update'))) {
             throw new \Exception('No permission.');
@@ -146,7 +146,7 @@ class AdministratorsController extends BaseController
     }
 
     // override for custom validation and return column
-    public function getDelete(Request $request, Response $response, $args)
+    public function routeGetDelete(Request $request, Response $response, $args)
     {
         if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'delete'))) {
             throw new \Exception('No permission.');

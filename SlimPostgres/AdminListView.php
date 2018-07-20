@@ -79,12 +79,12 @@ abstract class AdminListView extends AdminView
         $this->deleteRoute = $deleteRoute;
     }
 
-    public function index(Request $request, Response $response, $args)
+    public function routeIndex($request, Response $response, $args)
     {
         return $this->indexView($response);
     }
 
-    public function indexResetFilter(Request $request, Response $response, $args)
+    public function routeIndexResetFilter(Request $request, Response $response, $args)
     {
         // redirect to the clean url
         return $this->indexView($response, true);

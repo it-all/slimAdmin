@@ -37,7 +37,7 @@ class AdministratorsView extends AdminListView
         $insertLink = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->administratorsMapper->getPrimaryTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
         $this->setInsert($insertLink);
 
-        $this->setUpdate($this->authorization->isAuthorized($this->getPermissions('update')), $this->administratorsMapper->getUpdateColumnName(), App::getRouteName(true, $this->routePrefix, 'update'));
+        $this->setUpdate($this->authorization->isAuthorized($this->getPermissions('update')), $this->administratorsMapper->routeGetUpdateColumnName(), App::getRouteName(true, $this->routePrefix, 'update'));
 
         $this->setDelete($this->container->authorization->isAuthorized($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
     }
@@ -139,7 +139,7 @@ class AdministratorsView extends AdminListView
     }
 
     /** this can be called for both the initial get and the posted form if errors exist (from controller) */
-    public function getInsert(Request $request, Response $response, $args)
+    public function routeGetInsert(Request $request, Response $response, $args)
     {
         return $this->view->render(
             $response,
@@ -152,7 +152,7 @@ class AdministratorsView extends AdminListView
         );
     }
 
-    public function getUpdate(Request $request, Response $response, $args)
+    public function routeGetUpdate(Request $request, Response $response, $args)
     {
         return $this->updateView($request, $response, $args);
     }

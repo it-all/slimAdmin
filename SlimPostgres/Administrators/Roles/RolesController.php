@@ -41,7 +41,7 @@ class RolesController extends DatabaseTableController
     }
 
     // EXAMPLE - can override for custom validator
-    // public function postInsert(Request $request, Response $response, $args)
+    // public function routePostInsert(Request $request, Response $response, $args)
     // {
     //     if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'insert'))) {
     //         throw new \Exception('No permission.');

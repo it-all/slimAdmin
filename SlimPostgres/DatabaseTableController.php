@@ -45,12 +45,12 @@ class DatabaseTableController extends BaseController
         return $listViewColumns;
     }
 
-    public function postIndexFilter(Request $request, Response $response, $args)
+    public function routePostIndexFilter(Request $request, Response $response, $args)
     {
         return $this->setIndexFilter($request, $response, $args, $this->getListViewColumns(), $this->view);
     }
 
-    public function postInsert(Request $request, Response $response, $args)
+    public function routePostInsert(Request $request, Response $response, $args)
     {
         if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'insert'))) {
             throw new \Exception('No permission.');
@@ -87,7 +87,7 @@ class DatabaseTableController extends BaseController
         return $booleanFieldNames;
     }
 
-    public function putUpdate(Request $request, Response $response, $args)
+    public function routePutUpdate(Request $request, Response $response, $args)
     {
         if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'update'))) {
             throw new \Exception('No permission.');
@@ -127,7 +127,7 @@ class DatabaseTableController extends BaseController
         return $response->withRedirect($this->router->pathFor($redirectRoute));
     }
 
-    public function getDelete(Request $request, Response $response, $args)
+    public function routeGetDelete(Request $request, Response $response, $args)
     {
         return $this->deleteHelper($response, $args['primaryKey']);
     }

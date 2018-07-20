@@ -11,7 +11,7 @@ use Slim\Http\Response;
 
 class AuthenticationController extends BaseController
 {
-    function postLogin(Request $request, Response $response, $args)
+    function routePostLogin(Request $request, Response $response, $args)
     {
         $this->setRequestInput($request);
         $username = $_SESSION[App::SESSION_KEY_REQUEST_INPUT]['username'];
@@ -64,7 +64,7 @@ class AuthenticationController extends BaseController
         return $response->withRedirect($redirect);
     }
 
-    public function getLogout(Request $request, Response $response)
+    public function routeGetLogout(Request $request, Response $response)
     {
         if (null === $username = $this->authentication->getAdministratorUsername()) {
             $this->systemEvents->insertWarning('Attempted logout for non-logged-in visitor');

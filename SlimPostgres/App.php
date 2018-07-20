@@ -92,6 +92,14 @@ class App
 
         $this->config = require APPLICATION_ROOT_DIRECTORY . '/config/settings.php';
 
+        if (isset($this->config['emails'])) {
+            foreach ($this->config['emails'] as $emailRole => $email) {
+                if (isset($this->environmentalVariables['EMAILS_'.strtoupper($emailRole)])) {
+                    $this->config['emails'][$emailRole] = $this->environmentalVariables['EMAILS_'.strtoupper($emailRole)];
+                }
+            }
+        }
+
         mb_internal_encoding($this->config['mbInternalEncoding']); // so no need to set encoding for mb_strlen()
 
         /** add some .env to config */

@@ -18,7 +18,7 @@ return [
         'fatalMessage' => 'Apologies, there has been an error on our site. We have been alerted and will correct it as soon as possible.',
         'logToDatabase' => true,
         'echoDev' => true, // echo on dev servers (note, live server will never echo)
-        'emailDev' => false // email on dev servers (note, live server will always email)
+        'emailDev' => true // email on dev servers (note, live server will always email)
     ],
 
     'domainUseWww' => false,
@@ -28,8 +28,9 @@ return [
         'savePath' => APPLICATION_ROOT_DIRECTORY . '/storage/sessions' // note probably requires chmod 777
     ],
 
-    'adminPath' => 'private',
+    'adminPath' => 'private', // access site administration
 
+    /** these can be overridden in .env for dev testing */
     'emails' => [
         'owner' => "owner@".$domainName,
         'programmer' => "programmer@".$domainName,

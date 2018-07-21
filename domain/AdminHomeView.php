@@ -7,7 +7,7 @@ use SlimPostgres\AdminView;
 
 class AdminHomeView extends AdminView
 {
-    public function routeIndex$request, $response, $args)
+    public function routeIndex($request, $response, $args)
     {
         $respnseStatus = (array_key_exists('status', $args)) ? $args['status'] : 200;
         return $this->view->render(

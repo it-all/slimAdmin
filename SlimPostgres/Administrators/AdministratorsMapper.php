@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Administrators;
 
+use SlimPostgres\ListViewMappers;
 use SlimPostgres\App;
 use SlimPostgres\Exceptions;
 use SlimPostgres\Utilities\Functions;
@@ -11,8 +12,9 @@ use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\Queries\SelectBuilder;
 use SlimPostgres\Database\DataMappers\MultiTableMapper;
 use SlimPostgres\Security\Authentication\AuthenticationService;
+use SlimPostgres\Security\Authorization\AuthorizationService;
 use SlimPostgres\SystemEvents\SystemEventsMapper;
-use SlimPostgres\Administrators\Logins\LoginAttemptsMapper;
+use SlimPostgres\Administrators\LoginAttempts\LoginAttemptsMapper;
 
 // Singleton
 final class AdministratorsMapper extends MultiTableMapper
@@ -26,6 +28,7 @@ final class AdministratorsMapper extends MultiTableMapper
         'id' => self::TABLE_NAME . '.id',
         'name' => self::TABLE_NAME . '.name',
         'username' => self::TABLE_NAME . '.username',
+        'passwordHash' => self::TABLE_NAME . '.password_hash',
         'role' => self::ROLES_TABLE_NAME . '.role',
         'level' => self::ROLES_TABLE_NAME . '.level'
     ];
@@ -103,7 +106,8 @@ final class AdministratorsMapper extends MultiTableMapper
     }
 
     // receives query results for administrators joined to roles and loads and returns model object
-    private function getForResults($results): ?Administrator 
+    // note this only works for single administrator results (ie select by id)
+    private function getObjectForResults($results): ?Administrator 
     {
         if (pg_numrows($results) > 0) {
             // there will be 1 record for each role
@@ -145,7 +149,7 @@ final class AdministratorsMapper extends MultiTableMapper
     private function getObject(array $whereColumnsInfo): ?Administrator
     {
         $q = new SelectBuilder($this->getSelectClause(), $this->getFromClause(), $whereColumnsInfo, $this->getOrderBy()); // order by level
-        return $this->getForResults($q->execute());
+        return $this->getObjectForResults($q->execute());
     }
 
     public function getObjectById(int $id): ?Administrator 
@@ -184,25 +188,28 @@ final class AdministratorsMapper extends MultiTableMapper
 
     private function addRecordToArray(array &$results, array $record) 
     {
-        $results[] = [
+        $newRecord = [
             'id' => (int) $record['id'],
             'name' => $record['name'],
             'username' => $record['username'],
+            'passwordHash' => $record['password_hash'],
             'roles' => [$record['role']]
         ];
+
+        $results[] = $newRecord;
     }
 
     // adds new role to administrator results array for results key
-    private function addRoleToResult(array &$results, int $resultsKey, string $role) 
+    private function addRoleToAdministratorRoles(array &$administratorsArray, int $key, string $role) 
     {
-        array_push($results[$resultsKey]['roles'], $role);
+        array_push($administratorsArray[$key]['roles'], $role);
     }
 
     // returns key of results array for matching 'id' key, null if not found
     // note, careful when checking return value as 0 can be returned (evaluates to false)
-    private function getResultsKeyForId(array $results, int $id): ?int 
+    private function getAdministratorsArrayKeyForId(array $administratorsArray, int $id): ?int 
     {
-        foreach ($results as $key => $administrator) {
+        foreach ($administratorsArray as $key => $administrator) {
             if ($administrator['id'] == $id) {
                 return $key;
             }
@@ -212,23 +219,37 @@ final class AdministratorsMapper extends MultiTableMapper
     }
 
     // returns array of results instead of recordset
-    public function selectArray(string $columns = "*", array $whereColumnsInfo = null): array
+    public function selectArray(?string $selectColumns = null, array $whereColumnsInfo = null): array
     {
-        $results = []; // populate with 1 entry per administrator with an array of roles
-        if ($pgResults = $this->select($columns, $whereColumnsInfo)) {
+        if ($selectColumns == null) {
+            $selectColumns = $this->getSelectColumnsString();
+        }
+
+        $administratorsArray = []; // populate with 1 entry per administrator with an array of roles
+        if ($pgResults = $this->select($selectColumns, $whereColumnsInfo)) {
             if (pg_num_rows($pgResults) > 0) {
                 while ($record = pg_fetch_assoc($pgResults)) {
-                    
                     // either add new administrator or just new role based on whether administrator already exists
-                    if (null !== $resultsKey = $this->getResultsKeyForId($results, (int) $record['id'])) {
-                        $this->addRoleToResult($results, $resultsKey, $record['role']);
+                    if (null !== $key = $this->getAdministratorsArrayKeyForId($administratorsArray, (int) $record['id'])) {
+                        $this->addRoleToAdministratorRoles($administratorsArray, $key, $record['role']);
                     } else {
-                        $this->addRecordToArray($results, $record);
+                        $this->addRecordToArray($administratorsArray, $record);
                     }
                 }
             }
         }
-        return $results;
+
+        return $administratorsArray;
+    }
+
+    public function getObjects(array $whereColumnsInfo = null, AuthenticationService $authentication, AuthorizationService $authorization): array 
+    {
+        $administrators = [];
+        foreach ($this->selectArray(null, $whereColumnsInfo) as $administratorArray) {
+            $administrators[] = new Administrator($administratorArray['id'], $administratorArray['name'], $administratorArray['username'], $administratorArray['passwordHash'], $administratorArray['roles'], $authentication, $authorization);
+        }
+
+        return $administrators;
     }
 
     // instead of having roles returned as an array, it will be returned as a string
@@ -243,21 +264,23 @@ final class AdministratorsMapper extends MultiTableMapper
         return $administrators;
     }
 
-    // does validation for delete then deletes and returns deleted username
-    public function delete(int $id, AuthenticationService $authentication, SystemEventsMapper $systemEvents): string
+    /** ensure that $administrator can be deleted based on business rules */
+    public function validateDelete(Administrator $administrator) 
     {
-        // make sure there is an administrator for the primary key
-        if (null === $administrator = $this->getObjectById($id)) {
-            throw new Exceptions\QueryResultsNotFoundException();
-        }
+        $id = $administrator->getId();
 
         // make sure the current administrator is not deleting her/himself
-        if ($id === $authentication->getAdministratorId()) {
+        if ($administrator->isLoggedIn()) {
             throw new Exceptions\UnallowedActionException("Administrator cannot delete own account: id $id");
         }
 
+        // non-top dogs cannot delete top dogs
+        if (!$administrator->getAuthorization()->hasTopRole() && $administrator->hasTopRole()) {
+            throw new Exceptions\UnallowedActionException("Not authorized to delete administrator: id $id");
+        }
+
         // make sure there are no system events for administrator being deleted
-        if ($systemEvents->hasForAdmin($id)) {
+        if ($administrator->hasSystemEvents()) {
             throw new Exceptions\UnallowedActionException("System events exist for administrator: id $id");
         }
 
@@ -266,6 +289,20 @@ final class AdministratorsMapper extends MultiTableMapper
         if ($loginsMapper->hasAdministrator($id)) {
             throw new Exceptions\UnallowedActionException("Login attempts exist for administrator: id $id");
         }
+    }
+
+    // does validation for delete then deletes and returns deleted username
+    public function delete(int $id, AuthenticationService $authentication, AuthorizationService $authorization): string
+    {
+        // make sure there is an administrator for the primary key
+        if (null === $administrator = $this->getObjectById($id)) {
+            throw new Exceptions\QueryResultsNotFoundException();
+        }
+
+        $administrator->setAuth($authentication, $authorization);
+
+        /** will throw exception if not valid */
+        $this->validateDelete($administrator);
 
         $this->doDelete($id);
 

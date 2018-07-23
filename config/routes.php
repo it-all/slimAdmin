@@ -10,8 +10,8 @@ use SlimPostgres\Security\Authentication\AuthenticationMiddleware;
 use Domain\AdminHomeView;
 use SlimPostgres\SystemEvents\SystemEventsView;
 use SlimPostgres\SystemEvents\SystemEventsController;
-use SlimPostgres\Administrators\Logins\LoginAttemptsView;
-use SlimPostgres\Administrators\Logins\LoginAttemptsController;
+use SlimPostgres\Administrators\LoginAttempts\LoginAttemptsView;
+use SlimPostgres\Administrators\LoginAttempts\LoginAttemptsController;
 use SlimPostgres\Administrators\AdministratorsView;
 use SlimPostgres\Administrators\AdministratorsController;
 use SlimPostgres\Administrators\Roles\RolesView;
@@ -45,7 +45,7 @@ $slim->post('/' . $config['adminPath'], AuthenticationController::class . ':rout
 
 // admin home
 $slim->get('/' . $config['adminPath'] . '/home',
-    AdminHomeView::class . ':index')
+    AdminHomeView::class . ':routeIndex')
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMIN_HOME_DEFAULT);
 

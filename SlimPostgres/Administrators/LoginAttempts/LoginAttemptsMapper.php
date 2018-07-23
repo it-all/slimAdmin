@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Administrators\Logins;
+namespace SlimPostgres\Administrators\LoginAttempts;
 
+use SlimPostgres\ListViewMappers;
 use SlimPostgres\Administrators\Administrator;
 use SlimPostgres\Database\Postgres;
 use SlimPostgres\Database\DataMappers\TableMapper;

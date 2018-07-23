@@ -6,7 +6,7 @@ namespace SlimPostgres\Security\Authentication;
 use It_All\FormFormer\Form;
 use SlimPostgres\Administrators\Administrator;
 use SlimPostgres\Administrators\AdministratorsMapper;
-use SlimPostgres\Administrators\Logins\LoginAttemptsMapper;
+use SlimPostgres\Administrators\LoginAttempts\LoginAttemptsMapper;
 use SlimPostgres\App;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Forms\FormHelper;
@@ -22,6 +22,7 @@ class AuthenticationService
         $this->administratorHomeRoutes = $administratorHomeRoutes;
     }
 
+    /** returns session info for logged in administrator */
     public function getAdministrator(): ?array
     {
         if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR])) {
@@ -66,7 +67,8 @@ class AuthenticationService
         }
         return null;
     }
- // determine home route: either by username, by role, or default
+    
+    // determine home route: either by username, by role, or default
     public function getAdminHomeRouteForAdministrator(): string
     {
         // by username
@@ -77,8 +79,8 @@ class AuthenticationService
         // by role
         // note highest role comes first
         foreach ($this->getAdministratorRoles() as $roleId => $roleInfo) {
-            if (isset($this->administratorHomeRoutes['roles'][$roleInfo['roleName']])) {
-                return $this->administratorHomeRoutes['roles'][$roleInfo['roleName']];
+            if (isset($this->administratorHomeRoutes['roles'][$roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME]])) {
+                return $this->administratorHomeRoutes['roles'][$roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME]];
             }
         }
         

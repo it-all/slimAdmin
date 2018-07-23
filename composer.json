@@ -23,7 +23,8 @@
     "autoload": {
         "psr-4": {
             "SlimPostgres\\": "SlimPostgres",
-            "Domain\\": "domain"
+            "Domain\\": "domain",
+            "Templates\\": "templates"
         }
     }
 }

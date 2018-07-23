@@ -25,19 +25,17 @@ class AdministratorsView extends AdminListView
     use ResponseUtilities;
 
     protected $routePrefix;
-    protected $administratorsMapper;
 
     public function __construct(Container $container)
     {
         $this->routePrefix = ROUTEPREFIX_ADMINISTRATORS;
-        $this->administratorsMapper = AdministratorsMapper::getInstance();
 
-        parent::__construct($container, 'administrators', ROUTE_ADMINISTRATORS, $this->administratorsMapper, ROUTE_ADMINISTRATORS_RESET, 'admin/lists/administratorsList.php');
+        parent::__construct($container, 'administrators', ROUTE_ADMINISTRATORS, AdministratorsMapper::getInstance(), ROUTE_ADMINISTRATORS_RESET, 'admin/lists/objectsList.php');
 
-        $insertLink = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->administratorsMapper->getPrimaryTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
-        $this->setInsert($insertLink);
+        $insertLinkInfo = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->mapper->getPrimaryTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
+        $this->setInsert($insertLinkInfo);
 
-        $this->setUpdate($this->authorization->isAuthorized($this->getPermissions('update')), $this->administratorsMapper->routeGetUpdateColumnName(), App::getRouteName(true, $this->routePrefix, 'update'));
+        $this->setUpdate($this->authorization->isAuthorized($this->getPermissions('update')), $this->mapper->getUpdateColumnName(), App::getRouteName(true, $this->routePrefix, 'update'));
 
         $this->setDelete($this->container->authorization->isAuthorized($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
     }
@@ -73,11 +71,11 @@ class AdministratorsView extends AdminListView
 
         // Name Field
         $nameValue = (isset($fieldValues['name'])) ? $fieldValues['name'] : '';
-        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($this->administratorsMapper->getPrimaryTableMapper()->getColumnByName('name'), null, $nameValue);
+        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getPrimaryTableMapper()->getColumnByName('name'), null, $nameValue);
 
         // Username Field
         $usernameValue = (isset($fieldValues['username'])) ? $fieldValues['username'] : '';
-        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($this->administratorsMapper->getPrimaryTableMapper()->getColumnByName('username'), null, $usernameValue);
+        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getPrimaryTableMapper()->getColumnByName('username'), null, $usernameValue);
 
         // Password Fields
         // determine values of pw and pw conf fields
@@ -86,7 +84,7 @@ class AdministratorsView extends AdminListView
             $passwordValue = '';
             $passwordConfirmationValue = '';
         } else {
-            if (mb_strlen(FormHelper::getFieldError('password')) > 0 || mb_strlen(FormHelper::getFieldError('password_confirm')) > 0) {
+            if (mb_strlen(FormHelper::getFieldError('password') > 0) || mb_strlen(FormHelper::getFieldError('password_confirm') > 0)) {
                 $passwordValue = '';
                 $passwordConfirmationValue = '';
             } else  {
@@ -145,7 +143,7 @@ class AdministratorsView extends AdminListView
             $response,
             'admin/form.php',
             [
-                'title' => 'Insert '. $this->administratorsMapper->getPrimaryTableName(false),
+                'title' => 'Insert '. $this->mapper->getPrimaryTableName(false),
                 'form' => $this->getForm($request),
                 'navigationItems' => $this->navigationItems
             ]
@@ -161,15 +159,15 @@ class AdministratorsView extends AdminListView
     public function updateView(Request $request, Response $response, $args)
     {
         // make sure there is an administrator for the primary key
-        if (null === $administrator = $this->administratorsMapper->getObjectById((int) $args['primaryKey'])) {
-            return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->administratorsMapper->getPrimaryTableMapper(), 'update');
+        if (null === $administrator = $this->mapper->getObjectById((int) $args['primaryKey'])) {
+            return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->mapper->getPrimaryTableMapper(), 'update');
         }
 
         return $this->view->render(
             $response,
             'admin/form.php',
             [
-                'title' => 'Update ' . $this->administratorsMapper->getPrimaryTableMapper()->getFormalTableName(false),
+                'title' => 'Update ' . $this->mapper->getPrimaryTableMapper()->getFormalTableName(false),
                 'form' => $this->getForm($request, 'update', (int) $args['primaryKey'], $administrator),
                 'primaryKey' => $args['primaryKey'],
                 'navigationItems' => $this->navigationItems,
@@ -192,40 +190,34 @@ class AdministratorsView extends AdminListView
 
         $filterColumnsInfo = (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][parent::SESSION_FILTER_COLUMNS_KEY])) ? $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][parent::SESSION_FILTER_COLUMNS_KEY] : null;
 
-        if ($results = $this->mapper->selectArray($this->mapper->getSelectColumnsString(), $filterColumnsInfo)) {
-            $numResults = count($results);
-        } else {
-            $results = [];
-            $numResults = 0;
-        }
-
         $filterFieldValue = $this->getFilterFieldValue();
         $filterErrorMessage = FormHelper::getFieldError($this->sessionFilterFieldKey);
 
         // make sure all session input necessary to send to template is produced above
         FormHelper::unsetFormSessionVars();
 
+        $administrators = $this->mapper->getObjects($filterColumnsInfo, $this->authentication, $this->authorization);
+
         return $this->view->render(
             $response,
             $this->template,
             [
                 'title' => $this->mapper->getFormalTableName(),
-                'insertLink' => $this->insertLink,
+                'insertLinkInfo' => $this->insertLinkInfo,
                 'filterOpsList' => QueryBuilder::getWhereOperatorsText(),
                 'filterValue' => $filterFieldValue,
                 'filterErrorMessage' => $filterErrorMessage,
                 'filterFormActionRoute' => $this->indexRoute,
                 'filterFieldName' => $this->sessionFilterFieldKey,
-                'isFiltered' => $filterColumnsInfo,
+                'isFiltered' => $filterColumnsInfo != null,
                 'resetFilterRoute' => $this->filterResetRoute,
+                'updatesPermitted' => $this->updatesPermitted,
                 'updateColumn' => $this->updateColumn,
-                'updatePermitted' => $this->updatePermitted,
                 'updateRoute' => $this->updateRoute,
-                'addDeleteColumn' => $this->addDeleteColumn,
+                'deletesPermitted' => $this->deletesPermitted,
                 'deleteRoute' => $this->deleteRoute,
-                'results' => $results,
-                'numResults' => $numResults,
-                'numColumns' => $this->mapper->getCountSelectColumns(),
+                'displayItems' => $administrators,
+                'columnCount' => count($administrators[0]->getListViewFields()),
                 'sortColumn' => $this->mapper->getOrderByColumnName(),
                 'sortByAsc' => $this->mapper->getOrderByAsc(),
                 'navigationItems' => $this->navigationItems

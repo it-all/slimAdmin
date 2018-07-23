@@ -32,7 +32,7 @@ class FormHelper
 
     /**
      * @param string $fieldName
-     * Note, perhaps it's better to return null than an empty string if session var not set, but it's much easier to test the string return type.
+     * returns empty string rather than null to be compatible with FormFormer field instantiation
      */
     public static function getFieldError(string $fieldName): string
     {

@@ -57,7 +57,7 @@ abstract class MultiTableMapper implements TableMappers
         return $this->getPrimaryTableName($plural);
     }
 
-    public function routeGetUpdateColumnName(): ?string
+    public function getUpdateColumnName(): ?string
     {
         return $this->primaryTableMapper->getPrimaryKeyColumnName();
     }

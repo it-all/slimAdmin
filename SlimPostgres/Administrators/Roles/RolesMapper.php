@@ -43,7 +43,7 @@ final class RolesMapper extends TableMapper
         while ($row = pg_fetch_array($rs)) {
             $this->roles[(int) $row['id']] = [
                 'role' => $row['role'],
-                'level' => $row['level']
+                'level' => (int) $row['level']
             ];
         }
     }
@@ -75,7 +75,7 @@ final class RolesMapper extends TableMapper
     {
         foreach ($this->roles as $roleId => $roleData) {
             if ($roleIdSearch == $roleId) {
-                return (int) $roleData['level'];
+                return $roleData['level'];
             }
         }
 
@@ -86,7 +86,7 @@ final class RolesMapper extends TableMapper
     {
         foreach ($this->roles as $roleId => $roleData) {
             if ($roleSearch == $roleData['role']) {
-                return (int) $roleData['level'];
+                return $roleData['level'];
             }
         }
 
@@ -96,7 +96,7 @@ final class RolesMapper extends TableMapper
     public function getObject(int $primaryKey): ?Role 
     {
         if ($record = $this->selectForPrimaryKey($primaryKey)) {
-            return new Role((int) $record['id'], $record['role'], $record['level']);
+            return new Role((int) $record['id'], $record['role'], (int) $record['level']);
         }
 
         return null;
@@ -126,7 +126,7 @@ final class RolesMapper extends TableMapper
     // the last level is the base level since setRoles orders by level
     public function getBaseLevel(): int
     {
-        return (int) end($this->roles)['level'];
+        return end($this->roles)['level'];
     }
 
     public function hasAdministrator(int $roleId): bool
@@ -162,6 +162,17 @@ final class RolesMapper extends TableMapper
         return new SelectField($rolesOptions, (string) $selectedOption, $fieldLabel, $fieldAttributes, $fieldError);
     }
 
+    public function isUpdatable(): bool
+    {
+        return true;
+    }
+
+    // true if not being used
+    public function isDeletable(int $id): bool 
+    {
+        return !$this->hasAdministrator($id);
+    }
+
     // override for validation
     // return query result
     public function deleteByPrimaryKey($primaryKeyValue, string $returning = null) 
@@ -173,8 +184,10 @@ final class RolesMapper extends TableMapper
             }
         }
 
-        // make sure role is not being used
-        if ($this->hasAdministrator((int) $primaryKeyValue)) {
+        /** this is currently the only reason it wouldn't be deletable.
+         *  if more reasons are discovered then exception message would have to change.
+         */
+        if (!$this->isDeletable((int) $primaryKeyValue)) {
             throw new Exceptions\UnallowedActionException("Role in use: id $primaryKeyValue");
         }
 
@@ -185,5 +198,16 @@ final class RolesMapper extends TableMapper
         }
 
         return $dbResult;
+    }
+
+    /** convert roles property to array of objects and return */
+    public function getObjects(array $whereColumnsInfo = null): array 
+    {
+        $roles = [];
+        foreach ($this->roles as $roleId => $roleInfo) {
+            $roles[] = new Role($roleId, $roleInfo['role'], $roleInfo['level']);
+        }
+
+        return $roles;
     }
 }

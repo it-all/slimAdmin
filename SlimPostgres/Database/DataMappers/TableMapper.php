@@ -19,10 +19,9 @@ class TableMapper implements TableMappers
     /** @var  array of column mapper objects */
     protected $columns;
 
-    /** @var string or false if no primary key column exists */
+    /** @var string or null if no primary key column exists */
     protected $primaryKeyColumnName;
 
-    /** @var bool|string  */
     protected $orderByColumnName;
 
     /** @var bool  */
@@ -306,9 +305,6 @@ class TableMapper implements TableMappers
         return $this->getFormalTableName($plural);
     }
 
-    /**
-     * @return string defaults to 'id', can be overridden by children
-     */
     public function getPrimaryKeyColumnName(): ?string
     {
         return $this->primaryKeyColumnName;

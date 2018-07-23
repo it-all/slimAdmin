@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Administrators\Roles;
 
+use SlimPostgres\ListViewModels;
+
 // model 
-class Role 
+class Role implements ListViewModels
 {
     private $id;
     private $roleName;
@@ -30,5 +32,34 @@ class Role
     public function getLevel(): int 
     {
         return $this->level;
+    }
+
+    /** returns array of list view fields [fieldName => fieldValue] */
+    public function getListViewFields(): array
+    {
+        return [
+            'id' => $this->id,
+            'roleName' => $this->roleName,
+            'level' => $this->level,
+        ];
+    }
+
+    /** whether model is allowed to be updated */
+    public function isUpdatable(): bool
+    {
+        return (RolesMapper::getInstance())->isUpdatable($this->id);
+    }
+
+    /** whether this model is allowed to be deleted 
+     *  do not allow roles in use (assigned to administrators) to be deleted
+     */
+    public function isDeletable(): bool
+    {
+        return (RolesMapper::getInstance())->isDeletable($this->id);
+    }
+
+    public function getUniqueId(): ?string
+    {
+        return (string) $this->id;
     }
 }

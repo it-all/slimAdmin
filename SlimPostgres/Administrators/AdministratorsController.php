@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres\Administrators;
 
 use SlimPostgres\Administrators\Roles\RolesMapper;
-use SlimPostgres\Administrators\Logins\LoginAttemptsMapper;
+use SlimPostgres\Administrators\LoginAttempts\LoginAttemptsMapper;
 use SlimPostgres\App;
 use SlimPostgres\ResponseUtilities;
 use SlimPostgres\BaseController;
@@ -155,7 +155,7 @@ class AdministratorsController extends BaseController
         $primaryKey = (int) $args['primaryKey'];
 
         try {
-            $username = $this->administratorsMapper->delete($primaryKey, $this->container->authentication, $this->container->systemEvents);
+            $username = $this->administratorsMapper->delete($primaryKey, $this->authentication, $this->authorization);
         } catch (Exceptions\QueryResultsNotFoundException $e) {
             return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsMapper->getPrimaryTableMapper(), 'delete', 'Administrator');
         } catch (Exceptions\UnallowedActionException $e) {

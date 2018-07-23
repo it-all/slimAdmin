@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Administrators\Logins;
+namespace SlimPostgres\Administrators\LoginAttempts;
 
 use SlimPostgres\AdminListView;
 use Slim\Container;

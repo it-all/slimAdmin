@@ -166,9 +166,9 @@ final class SystemEventsMapper extends MultiTableMapper
         return $q->execute();
     }
 
-    public function hasForAdmin(int $adminId): bool
+    public function hasForAdministrator(int $administratorId): bool
     {
-        $q = new QueryBuilder("SELECT COUNT(*) FROM ".self::PRIMARY_TABLE_NAME." WHERE administrator_id = $1", $adminId);
+        $q = new QueryBuilder("SELECT COUNT(*) FROM ".self::PRIMARY_TABLE_NAME." WHERE administrator_id = $1", $administratorId);
         return (bool) $q->getOne();
     }
 }

@@ -27,8 +27,8 @@ abstract class DatabaseTableListView extends AdminListView
 
         parent::__construct($container, $routePrefix, App::getRouteName(true, $routePrefix, 'index'), $this->mapper, App::getRouteName(true, $routePrefix, 'index.reset'));
 
-        $insertLink = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->mapper->getFormalTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
-        $this->setInsert($insertLink);
+        $insertLinkInfo = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->mapper->getFormalTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
+        $this->setInsert($insertLinkInfo);
 
         $allowUpdate = $this->authorization->isAuthorized($this->getPermissions('update')) && $this->mapper->getPrimaryKeyColumnName() !== null;
 

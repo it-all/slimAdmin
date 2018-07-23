@@ -67,7 +67,14 @@ class AuthorizationService
         if (!$this->validateRole($role)) {
             throw new \Exception("Invalid role $role");
         }
-        return in_array($role, $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES]);
+
+        foreach ($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES] as $roleId => $roleInfo) {
+            if ($role == $roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME]) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // if any role of the session administrator meet or exceed the minimum role level, return true. otherwise, return false
@@ -107,7 +114,7 @@ class AuthorizationService
         }
 
         foreach ($this->getAdministratorRoles() as $roleId => $roleInfo) {
-            if (in_array($roleInfo['roleName'], $authorizedRoles)) {
+            if (in_array($roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME], $authorizedRoles)) {
                 return true;
             }
         }

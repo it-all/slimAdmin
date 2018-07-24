@@ -84,7 +84,7 @@ class AdministratorsView extends AdminListView
             $passwordValue = '';
             $passwordConfirmationValue = '';
         } else {
-            if (mb_strlen(FormHelper::getFieldError('password') > 0) || mb_strlen(FormHelper::getFieldError('password_confirm') > 0)) {
+            if (mb_strlen(FormHelper::getFieldError('password')) > 0 || mb_strlen(FormHelper::getFieldError('password_confirm')) > 0) {
                 $passwordValue = '';
                 $passwordConfirmationValue = '';
             } else  {

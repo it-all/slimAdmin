@@ -27,7 +27,7 @@ class AuthorizationMiddleware extends BaseMiddleware
             $this->container->systemEvents->insertAlert('No authorization for resource', $this->container->authentication->getAdministratorId());
 
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['No permission', 'adminNoticeFailure'];
-            return (new AdminHomeView($this->container))->index($request, $response, ['status' => 403]);
+            return (new AdminHomeView($this->container))->routeIndex($request, $response, ['status' => 403]);
         }
 
 		$response = $next($request, $response);

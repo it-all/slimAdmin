@@ -22,7 +22,7 @@ $administratorPermissions = $config['authorization']['administratorPermissions']
 /////////////////////////////////////////
 // Routes that anyone can access
 
-$slim->get('/', HomeView::class . ':index')->setName(ROUTE_HOME);
+$slim->get('/', HomeView::class . ':routeIndex')->setName(ROUTE_HOME);
 
 // remainder of front end pages to go here
 

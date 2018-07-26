@@ -28,7 +28,9 @@ abstract class DatabaseTableFormValidator extends ValitronValidatorExtension
     {
         $this->mapFieldsRules($this->databaseTableValidation->getValidationRules());
 
-        if (count($this->mapper->getUniqueColumns()) > 0) {
+        $uniqueColumns = $this->mapper->getUniqueColumns();
+
+        if (count($uniqueColumns) > 0) {
             self::addRule('unique', function($field, $value, array $params = [], array $fields = []) {
                 if (!$params[1]->errors($field)) {
                     return !$params[0]->recordExistsForValue($value);
@@ -36,10 +38,11 @@ abstract class DatabaseTableFormValidator extends ValitronValidatorExtension
                 return true; // skip validation if there is already an error for the field
             }, 'already exists');
 
-            foreach ($this->mapper->getUniqueColumns() as $databaseColumnMapper) {
-                // only set rule for changed columns
-                if (!$skipUniqueForUnchanged || $this->inputData[$databaseColumnMapper->getName()] != $record[$databaseColumnMapper->getName()]) {
-                    $this->rule('unique', $databaseColumnMapper->getName(), $databaseColumnMapper, $this);
+            foreach ($uniqueColumns as $databaseColumnMapper) {
+                $field = $databaseColumnMapper->getName();
+                // only set rule for changed columns if $skipUniqueForUnchanged is set true
+                if ( !($skipUniqueForUnchanged && $this->inputData[$field] == $record[$field]) ) {
+                    $this->rule('unique', $field, $databaseColumnMapper, $this);
                 }
             }
         }

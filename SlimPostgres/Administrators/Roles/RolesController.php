@@ -41,29 +41,41 @@ class RolesController extends DatabaseTableController
     }
 
     // EXAMPLE - can override for custom validator
-    // public function routePostInsert(Request $request, Response $response, $args)
+    // public function routePutUpdate(Request $request, Response $response, $args)
     // {
-    //     if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'insert'))) {
+    //     if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'update'))) {
     //         throw new \Exception('No permission.');
     //     }
 
     //     $this->setRequestInput($request, $this->getBooleanFieldNames());
 
-    //     $validator = new RolesValidator($_SESSION[App::SESSION_KEY_REQUEST_INPUT]);
+    //     // make sure there is a record for the primary key
+    //     if (!$record = $this->mapper->selectForPrimaryKey($args['primaryKey'])) {
+    //         return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->mapper, 'update');
+    //     }
+
+    //     // if no changes made stay on page with error
+    //     $changedColumnsValues = $this->getMapper()->getChangedColumnsValues($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $record);
+    //     if (count($changedColumnsValues) == 0) {
+    //         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made", 'adminNoticeFailure'];
+    //         return $this->view->updateView($request, $response, $args);
+    //     }
+
+    //     $validator = new RolesValidator($_SESSION[App::SESSION_KEY_REQUEST_INPUT], 'update', $record);
 
     //     if (!$validator->validate()) {
     //         // redisplay the form with input values and error(s)
     //         FormHelper::setFieldErrors($validator->getFirstErrors());
-    //         return $this->view->insertView($request, $response, $args);
+    //         return $this->view->updateView($request, $response, $args);
     //     }
 
     //     try {
-    //         $this->insert();
+    //         $this->update();
     //     } catch (\Exception $e) {
-    //         throw new \Exception("Insert failure. ".$e->getMessage());
+    //         throw new \Exception("Update failure. ".$e->getMessage());
     //     }
 
     //     FormHelper::unsetFormSessionVars();
     //     return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
-    // }
+    // }    
 }

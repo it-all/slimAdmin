@@ -119,6 +119,10 @@ class AdministratorsView extends AdminListView
             if (isset($fieldValues['roles']) && in_array($roleId, $fieldValues['roles'])) {
                 $rolesCheckboxAttributes['checked'] = 'checked';
             }
+            // disabled? - if current administrator is non-top-dog disable top-dog role checkbox
+            if (!$this->authorization->hasTopRole() && $roleData['role'] == $this->authorization->getTopRole()) {
+                $rolesCheckboxAttributes['disabled'] = 'disabled';
+            }
             $rolesCheckboxes[] = new CheckboxRadioInputField($roleData['role'], $rolesCheckboxAttributes);
         }
         $fields[] = new Fieldset($rolesCheckboxes, [], true, 'Roles', null, FormHelper::getFieldError('roles', true));

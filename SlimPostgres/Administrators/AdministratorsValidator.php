@@ -63,7 +63,5 @@ class AdministratorsValidator extends ValitronValidatorExtension
                 }
             }
         }
-
-        
     }
 }

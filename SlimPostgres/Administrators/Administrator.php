@@ -96,7 +96,7 @@ class Administrator implements ListViewModels
         }
 
         if ($includePassword && !password_verify($password, $this->getPasswordHash())) {
-            $changedFieldValues['password'] = $password;
+            $changedFieldValues['passwordHash'] = $password;
         }
 
         // roles - only add to main array if changed

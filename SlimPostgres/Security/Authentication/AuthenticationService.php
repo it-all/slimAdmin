@@ -117,6 +117,17 @@ class AuthenticationService
         ];
     }
 
+    /** this should only be called when the logged in administrator updates her/his own info */
+    public function updateAdministratorSession(Administrator $administrator)
+    {
+        // be sure the current id matches the new one
+        if ($this->getAdministratorId() != $administrator->getId()) {
+            throw new \InvalidArgumentException("Administrator id to update must match current administrator id");
+        }
+        
+        $this->setAdministratorSession($administrator);
+    }
+
     private function loginSucceeded(string $username, Administrator $administrator)
     {
         $this->setAdministratorSession($administrator);

@@ -113,9 +113,14 @@ class AdministratorsController extends BaseController
         
         $this->administratorsMapper->update((int) $primaryKey, $changedFields);
 
-        // if the administrator changed her/his own info, update the session
-        if ($primaryKey == $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID]) {
-            $this->updateAdministratorSession($changedFields);
+        // if the administrator changed her/his own info, refresh administrator then update the session
+        if ((int) $primaryKey === $this->authentication->getAdministratorId()) {
+            // refreshes $administrator to updated db values
+            if (null !== $administrator = $this->administratorsMapper->getObjectById((int) $primaryKey)) {
+                $this->authentication->updateAdministratorSession($administrator);
+            } else {
+                throw new \Exception("Get administrator object failed");
+            }
         }
 
         $this->systemEvents->insertInfo("Updated Administrator", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$administrator->getChangedFieldsString($changedFields, $administrator));
@@ -125,24 +130,6 @@ class AdministratorsController extends BaseController
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated administrator $primaryKey", App::STATUS_ADMIN_NOTICE_SUCCESS];
         
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
-    }
-
-    /** update whatever has changed of name, username, roles if the currently logged on administrator has changed own info */
-    private function updateAdministratorSession(array $changedFields)
-    {
-        foreach ($changedFields as $fieldName => $fieldValue) {
-            if ($fieldName == 'name') {
-                $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_NAME] = $fieldValue;
-            } elseif ($fieldName == 'username') {
-                $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_USERNAME] = $fieldValue;
-            } elseif ($fieldName == 'role_id') {
-                $rolesMapper = RolesMapper::getInstance();
-                if (!$newRole = $rolesMapper->getRoleForRoleId((int) $fieldValue)) {
-                    throw new \Exception('Role not found for changed role id: '.$fieldValue);
-                }
-                $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES] = $newRole;
-            }
-        }
     }
 
     // override for custom validation and return column

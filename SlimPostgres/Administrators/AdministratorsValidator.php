@@ -6,11 +6,12 @@ namespace SlimPostgres\Administrators;
 use SlimPostgres\Database\DatabaseTableValidation;
 use SlimPostgres\Utilities\ValitronValidatorExtension;
 use SlimPostgres\Administrators\Roles\RolesMapper;
+use SlimPostgres\Security\Authorization\AuthorizationService;
 
 class AdministratorsValidator extends ValitronValidatorExtension
 {
     // if this is for an update there must be changed fields
-    public function __construct(array $inputData, array $changedFieldValues = [])
+    public function __construct(array $inputData, AuthorizationService $authorization, array $changedFieldValues = [])
     {
         $fields = ['name', 'username', 'password', 'password_confirm', 'roles'];
         parent::__construct($inputData, $fields);
@@ -47,5 +48,22 @@ class AdministratorsValidator extends ValitronValidatorExtension
         $this->rule('array', 'roles');
         $rolesMapper = RolesMapper::getInstance();
         $this->rule('in', 'roles.*', array_keys($rolesMapper->getRoles())); // role ids
+
+        // non-top-dogs cannot assign top-dog role to themselves or other non-top-dogs
+        // and cannot unassign top role
+        if (!$authorization->hasTopRole()) {
+
+            $topRoleId = $authorization->getTopRoleId();
+
+            $this->rule('notIn', 'roles.*', [$topRoleId])->message('No permission to set '.$authorization->getTopRole());
+
+            if (!$inserting) {
+                if (isset($changedFieldValues['roles']['remove']) && in_array($topRoleId, $changedFieldValues['roles']['remove'])) {
+                    $this->rule('in', 'roles.*', [$topRoleId])->message('No permission to unset '.$authorization->getTopRole());
+                }
+            }
+        }
+
+        
     }
 }

@@ -48,7 +48,7 @@ class AdministratorsController extends BaseController
 
         $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
 
-        $validator = new AdministratorsValidator($input);
+        $validator = new AdministratorsValidator($input, $this->authorization);
         if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
             FormHelper::setFieldErrors($validator->getFirstErrors());
@@ -104,7 +104,7 @@ class AdministratorsController extends BaseController
             return $this->view->updateView($request, $response, $args);
         }
 
-        $validator = new AdministratorsValidator($input, $changedFields);
+        $validator = new AdministratorsValidator($input, $this->authorization, $changedFields);
         if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
             FormHelper::setFieldErrors($validator->getFirstErrors());

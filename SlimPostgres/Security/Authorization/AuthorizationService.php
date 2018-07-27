@@ -28,6 +28,11 @@ class AuthorizationService
         return $this->topRole;
     }
 
+    public function getTopRoleId(): int 
+    {
+        return $this->rolesMapper->getRoleIdForRole($this->topRole);
+    }
+
     public function hasTopRole(): bool
     {
         return $this->hasRole($this->topRole);

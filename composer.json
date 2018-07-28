@@ -15,7 +15,7 @@
         "slim/slim": "^3.0",
         "phpmailer/phpmailer": "^5.2",
         "slim/csrf": "^0.8.1",
-        "it-all/form-former": "^2.0",
+        "it-all/form-former": "dev-master",
         "vlucas/valitron": "^1.4",
         "vlucas/phpdotenv": "^2.4",
         "slim/php-view": "^2.2"

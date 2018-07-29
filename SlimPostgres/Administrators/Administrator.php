@@ -262,13 +262,6 @@ class Administrator implements ListViewModels
         return (string) $this->id;
     }
 
-    /** returns true if this administrator has 1 or more system events */
-    public function hasSystemEvents(): bool
-    {
-        $q = new QueryBuilder("SELECT COUNT(*) FROM ".SystemEventsMapper::PRIMARY_TABLE_NAME." WHERE administrator_id = $1", $this->id);
-        return (bool) $q->getOne();
-    }
-
     public function isLoggedIn(): bool 
     {
         if (is_null($this->authentication)) {

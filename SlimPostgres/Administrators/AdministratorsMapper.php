@@ -280,7 +280,7 @@ final class AdministratorsMapper extends MultiTableMapper
         }
 
         // make sure there are no system events for administrator being deleted
-        if ($administrator->hasSystemEvents()) {
+        if ((SystemEventsMapper::getInstance())->existForAdministrator($id)) {
             throw new Exceptions\UnallowedActionException("System events exist for administrator: id $id");
         }
 

@@ -100,9 +100,11 @@ abstract class AdminListView extends AdminView
 
         $filterColumnsInfo = (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_COLUMNS_KEY])) ? $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_COLUMNS_KEY] : null;
 
-        if (!$results = pg_fetch_all($this->mapper->select($this->mapper->getSelectColumnsString(), $filterColumnsInfo))) {
+        if (!$results = pg_fetch_all($pgResults = $this->mapper->select($this->mapper->getSelectColumnsString(), $filterColumnsInfo))) {
             $results = [];
         }
+
+        pg_free_result($pgResults);
 
         $filterFieldValue = $this->getFilterFieldValue();
         $filterErrorMessage = FormHelper::getFieldError($this->sessionFilterFieldKey);

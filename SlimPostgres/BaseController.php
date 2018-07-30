@@ -14,6 +14,7 @@ use SlimPostgres\AdminListView;
 abstract class BaseController
 {
     protected $container; // dependency injection container
+    protected $requestInput; // user input data
 
     public function __construct(Container $container)
     {
@@ -23,6 +24,27 @@ abstract class BaseController
     public function __get($name)
     {
         return $this->container->{$name};
+    }
+
+    protected function setRequestInputNew(Request $request, array $booleanFieldNames = [])
+    {
+        $this->requestInput = [];
+        foreach ($request->getParsedBody() as $key => $value) {
+            if (is_string($value) && $this->settings['trimAllUserInput']) {
+                $this->requestInput[$key] = trim($value);
+            } elseif (is_array($value)) {
+                // go 1 level deeper only
+                foreach ($value as $deeperKey => $deeperValue) {
+                    if (is_string($deeperValue) && $this->settings['trimAllUserInput']) {
+                        $this->requestInput[$key][$deeperKey] = trim($deeperValue);
+                    }
+                }
+            }
+        }
+
+        if (count($booleanFieldNames) > 0) {
+            $this->addBooleanFieldsToRequestInput($booleanFieldNames);
+        }
     }
 
     protected function setRequestInput(Request $request, array $booleanFieldNames = [])
@@ -63,6 +85,18 @@ abstract class BaseController
             $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$booleanFieldName] = $this->database::BOOLEAN_TRUE;
         } else {
             throw new \Exception('Invalid value for boolean session var '.$booleanFieldName.': '.$_SESSION[App::SESSION_KEY_REQUEST_INPUT][$booleanFieldName]);
+        }
+    }
+
+    // give them the same boolean value as in the database
+    private function addBooleanFieldToRequestInputNew(string $booleanFieldName)
+    {
+        if (!isset($this->requestInput[$booleanFieldName])) {
+            $this->requestInput[$booleanFieldName] = $this->database::BOOLEAN_FALSE;
+        } elseif ($this->requestInput[$booleanFieldName] == 'on') {
+            $this->requestInput[$booleanFieldName] = $this->database::BOOLEAN_TRUE;
+        } else {
+            throw new \Exception('Invalid value for boolean input var '.$booleanFieldName.': '.$this->requestInput[$booleanFieldName]);
         }
     }
 

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Forms;
 
+use It_All\FormFormer\Fields\Field;
 use It_All\FormFormer\Fields\InputField;
 use It_All\FormFormer\Fields\InputFields\CheckboxRadioInputField;
 use It_All\FormFormer\Fields\SelectField;
@@ -128,8 +129,8 @@ class DatabaseTableForm extends Form
     // static for access to column field only
     public static function getFieldFromDatabaseColumn(
         ColumnMapper $column,
-        bool $isRequiredOverride = null,
-        string $valueOverride = null,
+        ?bool $isRequiredOverride = null,
+        ?string $valueOverride = null,
         string $labelOverride = '',
         string $inputTypeOverride = '',
         string $nameOverride = '',

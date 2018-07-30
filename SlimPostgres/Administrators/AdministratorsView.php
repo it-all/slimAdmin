@@ -6,6 +6,8 @@ namespace SlimPostgres\Administrators;
 use It_All\FormFormer\Fields\InputFields\CheckboxRadioInputField;
 use It_All\FormFormer\Fieldset;
 use SlimPostgres\Administrators\Administrator;
+use SlimPostgres\Administrators\Forms\AdministratorInsertForm;
+use SlimPostgres\Administrators\Forms\AdministratorUpdateForm;
 use SlimPostgres\Administrators\Roles\Roles;
 use SlimPostgres\Administrators\Roles\RolesMapper;
 use It_All\FormFormer\Fields\InputField;
@@ -40,115 +42,23 @@ class AdministratorsView extends AdminListView
         $this->setDelete($this->container->authorization->isAuthorized($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
     }
 
-    private function getForm(Request $request, string $action = 'insert', int $primaryKey = null, Administrator $administrator = null)
+    public function routeGetInsert(Request $request, Response $response, $args)
     {
-        if ($action != 'insert' && $action != 'update') {
-            throw new \Exception("Invalid action $action");
-        }
-
-        $fields = [];
-
-        // pw fields are not required on edit forms (leave blank to keep existing)
-        if ($action == 'insert') {
-            $fieldValues = ($request->isGet()) ? [] : $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
-            $formAction = $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'insert', 'post'));
-            $passwordLabel = 'Password';
-            $passwordFieldsRequired = true;
-        } else { // update
-            if ($request->isGet()) { // database values
-                $fieldValues['name'] = $administrator->getName();
-                $fieldValues['username'] = $administrator->getUsername();
-                $fieldValues['password'] = $administrator->getPasswordHash();
-                $fieldValues['roles'] = $administrator->getRoleIds();
-            } else {
-                $fieldValues = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
-            }
-            $formAction = $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $primaryKey]);
-            $passwordLabel = 'Password [leave blank to keep existing password]';
-            $passwordFieldsRequired = false;
-            $fields[] = FormHelper::getPutMethodField();
-        }
-
-        // Name Field
-        $nameValue = (isset($fieldValues['name'])) ? $fieldValues['name'] : '';
-        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getPrimaryTableMapper()->getColumnByName('name'), null, $nameValue);
-
-        // Username Field
-        $usernameValue = (isset($fieldValues['username'])) ? $fieldValues['username'] : '';
-        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getPrimaryTableMapper()->getColumnByName('username'), null, $usernameValue);
-
-        // Password Fields
-        // determine values of pw and pw conf fields
-        // values will persist if no errors in either field
-        if ($request->isGet()) {
-            $passwordValue = '';
-            $passwordConfirmationValue = '';
-        } else {
-            if (mb_strlen(FormHelper::getFieldError('password')) > 0 || mb_strlen(FormHelper::getFieldError('password_confirm')) > 0) {
-                $passwordValue = '';
-                $passwordConfirmationValue = '';
-            } else  {
-                $passwordValue = $fieldValues['password'];
-                $passwordConfirmationValue = $fieldValues['password_confirm'];
-            }
-        }
-
-        $passwordFieldAttributes = ['name' => 'password', 'id' => 'password', 'type' => 'password', 'value' => $passwordValue];
-        $passwordConfirmationFieldAttributes = ['name' => 'password_confirm', 'id' => 'password_confirm', 'type' => 'password', 'value' => $passwordConfirmationValue];
-        if ($passwordFieldsRequired) {
-            $passwordFieldAttributes = array_merge($passwordFieldAttributes, ['required' => 'required']);
-            $passwordConfirmationFieldAttributes = array_merge($passwordConfirmationFieldAttributes, ['required' => 'required']);
-        }
-
-        $fields[] = new InputField($passwordLabel, $passwordFieldAttributes, FormHelper::getFieldError($passwordFieldAttributes['name']));
-
-        $fields[] = new InputField('Confirm Password', $passwordConfirmationFieldAttributes, FormHelper::getFieldError($passwordConfirmationFieldAttributes['name']));
-
-        // Roles Checkboxes
-        $rolesMapper = RolesMapper::getInstance();
-        $rolesCheckboxes = [];
-        foreach ($rolesMapper->getRoles() as $roleId => $roleData) {
-            $rolesCheckboxAttributes = [
-                'type' => 'checkbox',
-                'name' => 'roles[]',
-                'value' => $roleId,
-                'id' => 'roles' . $roleData['role'],
-                'class' => 'inlineFormField'
-            ];
-            // checked?
-            if (isset($fieldValues['roles']) && in_array($roleId, $fieldValues['roles'])) {
-                $rolesCheckboxAttributes['checked'] = 'checked';
-            }
-            // disabled? - if current administrator is non-top-dog disable top-dog role checkbox
-            if (!$this->authorization->hasTopRole() && $roleData['role'] == $this->authorization->getTopRole()) {
-                $rolesCheckboxAttributes['disabled'] = 'disabled';
-            }
-            $rolesCheckboxes[] = new CheckboxRadioInputField($roleData['role'], $rolesCheckboxAttributes);
-        }
-        $fields[] = new Fieldset($rolesCheckboxes, [], true, 'Roles', null, FormHelper::getFieldError('roles', true));
-
-        // CSRF Fields
-        $fields[] = FormHelper::getCsrfNameField($this->csrf->getTokenNameKey(), $this->csrf->getTokenName());
-        $fields[] = FormHelper::getCsrfValueField($this->csrf->getTokenValueKey(), $this->csrf->getTokenValue());
-
-        // Submit Field
-        $fields[] = FormHelper::getSubmitField();
-
-        $form = new Form($fields, ['method' => 'post', 'action' => $formAction, 'novalidate' => 'novalidate'], FormHelper::getGeneralError());
-        FormHelper::unsetFormSessionVars();
-
-        return $form;
+        return $this->insertView($request, $response, $args);
     }
 
     /** this can be called for both the initial get and the posted form if errors exist (from controller) */
-    public function routeGetInsert(Request $request, Response $response, $args)
+    public function insertView(Request $request, Response $response, $args)
     {
+        $formAction = $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'insert', 'post'));
+        $fieldValues = (isset($args['input'])) ? $args['input'] : [];
+
         return $this->view->render(
             $response,
             'admin/form.php',
             [
                 'title' => 'Insert '. $this->mapper->getPrimaryTableName(false),
-                'form' => $this->getForm($request),
+                'form' => (new AdministratorInsertForm($formAction, $this->container, $fieldValues))->getForm(),
                 'navigationItems' => $this->navigationItems
             ]
         );
@@ -167,12 +77,23 @@ class AdministratorsView extends AdminListView
             return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->mapper->getPrimaryTableMapper(), 'update');
         }
 
+        $formAction = $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]);
+
+        /** if input set we are redisplaying after invalid form submission */
+        if (isset($args['input'])) {
+            $updateForm = new AdministratorUpdateForm($formAction, $this->container, $args['input']);
+        } else {
+            $updateForm = new AdministratorUpdateForm($formAction, $this->container);
+            $updateForm->setFieldValuesToAdministrator($administrator);
+        }
+
         return $this->view->render(
             $response,
             'admin/form.php',
             [
                 'title' => 'Update ' . $this->mapper->getPrimaryTableMapper()->getFormalTableName(false),
-                'form' => $this->getForm($request, 'update', (int) $args['primaryKey'], $administrator),
+                'form' => $updateForm->getForm(),
+                // 'form' => $this->getForm($request, 'update', (int) $args['primaryKey'], $administrator),
                 'primaryKey' => $args['primaryKey'],
                 'navigationItems' => $this->navigationItems,
                 'hideFocus' => true

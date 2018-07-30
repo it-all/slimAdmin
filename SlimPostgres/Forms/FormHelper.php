@@ -62,7 +62,7 @@ class FormHelper
         if (mb_strlen(self::getFieldError($fieldName)) > 0) {
             if (array_key_exists('class', $addAttributes)) {
                 $attributes['class'] = $addAttributes['class'] . " " . self::FIELD_ERROR_CLASS;
-                unset($addAttributes['name']);
+                unset($addAttributes['class']);
             } else {
                 $attributes['class'] = self::FIELD_ERROR_CLASS;
             }
@@ -76,9 +76,9 @@ class FormHelper
         $attributes = [];
 
         // value - does not overwrite if in addAttributes
-        if (!array_key_exists('value', $addAttributes) && $insertValue) {
-            $attributes['value'] = self::getFieldValue($fieldName);
-        }
+        // if (!array_key_exists('value', $addAttributes) && $insertValue) {
+        //     $attributes['value'] = self::getFieldValue($fieldName);
+        // }
         return array_merge(self::getCommonFieldAttributes($fieldName, $addAttributes), $attributes);
     }
 

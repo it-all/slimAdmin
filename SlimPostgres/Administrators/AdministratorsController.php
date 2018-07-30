@@ -52,7 +52,8 @@ class AdministratorsController extends BaseController
         if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
             FormHelper::setFieldErrors($validator->getFirstErrors());
-            return $this->view->routeGetInsert($request, $response, $args);
+            $args['input'] = $input;
+            return $this->view->insertView($request, $response, $args);
         }
 
         try {
@@ -108,6 +109,7 @@ class AdministratorsController extends BaseController
         if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
             FormHelper::setFieldErrors($validator->getFirstErrors());
+            $args['input'] = $input;
             return $this->view->updateView($request, $response, $args);
         }
         

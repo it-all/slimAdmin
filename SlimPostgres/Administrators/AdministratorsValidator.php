@@ -27,7 +27,7 @@ class AdministratorsValidator extends ValitronValidatorExtension
                 return !$params[0]->recordExistsForValue($value);
             }
             return true; // skip validation if there is already an error for the field
-        }, 'Already exists.');
+        }, 'Already exists');
 
         $this->rule('required', ['name', 'username', 'roles']);
         $this->rule('regex', 'name', '%^[a-zA-Z\s]+$%')->message('must be letters and spaces only');

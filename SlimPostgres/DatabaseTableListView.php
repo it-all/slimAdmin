@@ -46,10 +46,10 @@ abstract class DatabaseTableListView extends AdminListView
     /** this can be called for both the initial get and the posted form if errors exist (from controller) */
     public function insertView(Request $request, Response $response, $args)
     {
-        $formFieldData = ($request->isGet()) ? null : $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
+        $formFieldData = ($request->isPost() && isset($args[App::USER_INPUT_KEY])) ? $args[App::USER_INPUT_KEY] : null;
 
-        $form = new DatabaseTableForm($this->mapper, $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'insert', 'post')), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'insert', $formFieldData);
-        FormHelper::unsetFormSessionVars();
+        $form = new DatabaseTableForm($this->mapper, $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'insert', 'post')), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'insert', $formFieldData, false);
+        FormHelper::unsetSessionFormErrors();
 
         return $this->view->render(
             $response,
@@ -75,10 +75,10 @@ abstract class DatabaseTableListView extends AdminListView
             return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->mapper, 'update');
         }
 
-        $formFieldData = ($request->isGet()) ? $record : $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
+        $formFieldData = ($request->isPut() && isset($args[App::USER_INPUT_KEY])) ? $args[App::USER_INPUT_KEY] : $record;
 
-        $form = new DatabaseTableForm($this->mapper, $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'update', $formFieldData);
-        FormHelper::unsetFormSessionVars();
+        $form = new DatabaseTableForm($this->mapper, $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'update', $formFieldData, false);
+        FormHelper::unsetSessionFormErrors();
 
         return $this->view->render(
             $response,

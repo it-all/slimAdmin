@@ -40,6 +40,17 @@ abstract class AdministratorForm
     const PASSWORDCONFIRM_FIELD_NAME = 'password_confirm';
     const ROLES_FIELDSET_NAME = 'roles';
 
+    public static function getFields(): array
+    {
+        return [
+            self::NAME_FIELD_NAME,
+            self::USERNAME_FIELD_NAME,
+            self::PASSWORD_FIELD_NAME,
+            self::PASSWORDCONFIRM_FIELD_NAME,
+            self::ROLES_FIELDSET_NAME
+        ];
+    }
+    
     public function __construct(string $formAction, Container $container, array $fieldValues = [])
     {
         $this->formAction = $formAction;
@@ -134,8 +145,8 @@ abstract class AdministratorForm
 
     public function getForm()
     {
-        return new Form($this->getNodes(), ['method' => 'post', 'action' => $this->formAction, 'novalidate' => 'novalidate'], FormHelper::getGeneralError());
-        FormHelper::unsetFormSessionVars();;
+        return new Form($this->getNodes(), ['method' => 'post', 'action' => $this->formAction], FormHelper::getGeneralError());
+        FormHelper::unsetSessionFormErrors();;
     }
 
 }

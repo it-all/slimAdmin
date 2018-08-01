@@ -13,16 +13,17 @@ class AuthenticationController extends BaseController
 {
     function routePostLogin(Request $request, Response $response, $args)
     {
-        $this->setRequestInput($request);
-        $username = $_SESSION[App::SESSION_KEY_REQUEST_INPUT]['username'];
-        $password = $_SESSION[App::SESSION_KEY_REQUEST_INPUT]['password_hash'];
+        $this->setRequestInput($request, $this->authentication->getLoginFields());
+        $username = $this->requestInput[$this->authentication->getUsernameFieldName()];
+        $password = $this->requestInput[$this->authentication->getPasswordFieldName()];
 
-        $validator = new AuthenticationValidator($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $this->authentication);
+        $validator = new AuthenticationValidator($this->requestInput, $this->authentication);
 
         if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
             FormHelper::setFieldErrors($validator->getFirstErrors());
             $av = new AuthenticationView($this->container);
+            $args[App::USER_INPUT_KEY] = $this->requestInput;
             return $av->getLogin($request, $response, $args);
         }
 
@@ -41,8 +42,8 @@ class AuthenticationController extends BaseController
 
             FormHelper::setGeneralError('Login Unsuccessful');
 
-            // reset password.
-            $_SESSION[App::SESSION_KEY_REQUEST_INPUT]['password_hash'] = '';
+            // reset password for security.
+            $this->requestInput[$this->authentication->getPasswordFieldName()] = '';
 
             // redisplay the form with input values and error(s), and with 401 unauthenticated status
             $args = array_merge($args, ['status' => 401]);
@@ -50,7 +51,7 @@ class AuthenticationController extends BaseController
         }
 
         // successful login
-        FormHelper::unsetFormSessionVars();
+        FormHelper::unsetSessionFormErrors();
         $this->systemEvents->insertInfo('Login', (int) $this->authentication->getAdministratorId());
 
         // redirect to proper resource

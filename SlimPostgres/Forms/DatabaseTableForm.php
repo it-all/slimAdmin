@@ -16,9 +16,16 @@ use SlimPostgres\Database\DatabaseTableValidation;
 
 class DatabaseTableForm extends Form
 {
+    private static $tableMapper;
+
+    /** @var array of form field columns */
+    private static $fieldColumns;
+
+    /** @var array */
+    private static $fieldNames;
+
     const TEXTAREA_COLS = 50;
     const TEXTAREA_ROWS = 5;
-    private static $tableMapper;
 
     public function __construct(TableMapper $databaseTableMapper, string $formAction, string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $databaseAction = 'insert', array $fieldData = null, bool $jsValidate = true)
     {
@@ -28,10 +35,54 @@ class DatabaseTableForm extends Form
         if (!$jsValidate) {
             $formTagAttributes['novalidate'] = 'novalidate';
         }
+
+        /** also sets field names */
+        self::setFieldColumns();
+
         $fields = $this->getFields($csrfNameKey, $csrfNameValue, $csrfValueKey, $csrfValueValue, $databaseAction, $fieldData);
 
         parent::__construct($fields, $formTagAttributes, FormHelper::getGeneralError());
+    }
 
+    private static function setFieldColumns() 
+    {
+        self::$fieldColumns = [];
+        self::$fieldNames = [];
+        foreach (self::$tableMapper->getColumns() as $column) {
+            if (self::includeFieldForColumn($column)) {
+                self::$fieldColumns[] = $column;
+                self::$fieldNames[] = $column->getName();
+            }
+        }
+    }
+
+    /**
+     * conditions for returning false:
+     * - primary column
+     */
+    protected static function includeFieldForColumn(ColumnMapper $column): bool
+    {
+        if ($column->isPrimaryKey()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /** allow access without constructing */
+    public static function getFieldNames(TableMapper $databaseTableMapper): array 
+    {
+        if (!isset(self::$tableMapper)) {
+            self::$tableMapper = $databaseTableMapper;
+        } elseif (self::$tableMapper !== $databaseTableMapper) {
+            throw new \InvalidArgumentException("Table mapper mismatch");
+        }
+
+        if (!isset(self::$fieldNames)) {
+            self::setFieldColumns();
+        }
+
+        return self::$fieldNames;
     }
 
     private function getFields(string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $databaseAction = 'insert', array $fieldData = null)
@@ -40,17 +91,15 @@ class DatabaseTableForm extends Form
 
         $fields = [];
 
-        foreach (self::$tableMapper->getColumns() as $column) {
-            if ($this->includeFieldForColumn($column, $databaseAction)) {
-                // value
-                if (isset($fieldData)) {
-                    $columnValue = (isset($fieldData[$column->getName()])) ? $fieldData[$column->getName()] : ''; // sending '' instead of null takes care of checkbox fields where nothing is posted if unchecked
-                } else {
-                    $columnValue = null;
-                }
-
-                $fields[] = $this->getFieldFromDatabaseColumn($column, null, $columnValue);
+        foreach (self::$fieldColumns as $fieldColumn) {
+            // value
+            if (isset($fieldData)) {
+                $columnValue = (isset($fieldData[$fieldColumn->getName()])) ? $fieldData[$fieldColumn->getName()] : ''; // sending '' instead of null takes care of checkbox fields where nothing is posted if unchecked
+            } else {
+                $columnValue = null;
             }
+
+            $fields[] = $this->getFieldFromDatabaseColumn($fieldColumn, null, $columnValue);
         }
 
         if ($databaseAction == 'update') {
@@ -69,19 +118,6 @@ class DatabaseTableForm extends Form
         if ($databaseAction != 'insert' && $databaseAction != 'update') {
             throw new \Exception("databaseAction must be insert or update ".$databaseAction);
         }
-    }
-
-   /**
-     * conditions for returning false:
-     * - primary column
-     */
-    protected function includeFieldForColumn(ColumnMapper $column): bool
-    {
-        if ($column->isPrimaryKey()) {
-            return false;
-        }
-
-        return true;
     }
 
     protected static function getMinMaxForIntegerTypes(ColumnMapper $column): array

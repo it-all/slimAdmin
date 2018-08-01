@@ -16,6 +16,9 @@ class AuthenticationService
     private $maxFailedLogins;
     private $administratorHomeRoutes;
 
+    const USERNAME_FIELD = 'username';
+    const PASSWORD_FIELD = 'password_hash';
+
     public function __construct(int $maxFailedLogins, array $administratorHomeRoutes)
     {
         $this->maxFailedLogins = $maxFailedLogins;
@@ -182,7 +185,7 @@ class AuthenticationService
 
     public function getLoginFields(): array
     {
-        return ['username', 'password_hash'];
+        return [self::USERNAME_FIELD, self::PASSWORD_FIELD];
     }
 
     /** note there should be different validation rules for logging in than creating users.
@@ -191,21 +194,32 @@ class AuthenticationService
     public function getLoginFieldValidationRules(): array
     {
         return [
-            'required' => [['username'], ['password_hash']]
+            'required' => [[self::USERNAME_FIELD], [self::PASSWORD_FIELD]]
         ];
     }
 
-    public function getForm(string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $action)
+    /** no need to refresh passwordValue */
+    public function getForm(string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $action, ?string $usernameValue = null)
     {
         $administratorsMapper = AdministratorsMapper::getInstance();
 
         $fields = [];
-        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($administratorsMapper->getColumnByName('username'));
-        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($administratorsMapper->getColumnByName('password_hash'), null, null, 'Password', 'password');
+        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($administratorsMapper->getColumnByName(self::USERNAME_FIELD), null, $usernameValue);
+        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($administratorsMapper->getColumnByName(self::PASSWORD_FIELD), null, null, 'Password', 'password');
         $fields[] = FormHelper::getCsrfNameField($csrfNameKey, $csrfNameValue);
         $fields[] = FormHelper::getCsrfValueField($csrfValueKey, $csrfValueValue);
         $fields[] = FormHelper::getSubmitField();
 
         return new Form($fields, ['method' => 'post', 'action' => $action, 'novalidate' => 'novalidate'], FormHelper::getGeneralError());
+    }
+
+    public function getUsernameFieldName(): string 
+    {
+        return self::USERNAME_FIELD;
+    }
+
+    public function getPasswordFieldName(): string 
+    {
+        return self::PASSWORD_FIELD;
     }
 }

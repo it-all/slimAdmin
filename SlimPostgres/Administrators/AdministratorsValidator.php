@@ -14,6 +14,10 @@ class AdministratorsValidator extends ValitronValidatorExtension
     public function __construct(array $inputData, AuthorizationService $authorization, array $changedFieldValues = [])
     {
         $fields = ['name', 'username', 'password', 'password_confirm', 'roles'];
+        /** note, roles is an array field but empty arrays ([]) pass required validation, so if empty set null to fail */
+        if (empty($inputData['roles'])) {
+            $inputData['roles'] = null;
+        }
         parent::__construct($inputData, $fields);
 
         $administratorsMapper = AdministratorsMapper::getInstance();

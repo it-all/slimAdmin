@@ -9,6 +9,7 @@ use SlimPostgres\ResponseUtilities;
 use SlimPostgres\BaseController;
 use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Forms\FormHelper;
+use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\DatabaseTableInsertFormValidator;
 use Slim\Container;
 use Slim\Http\Request;
@@ -56,13 +57,14 @@ class DatabaseTableController extends BaseController
             throw new \Exception('No permission.');
         }
 
-        $this->setRequestInput($request, $this->getBooleanFieldNames());
+        $this->setRequestInput($request, DatabaseTableForm::getFieldNames($this->mapper), $this->getBooleanFieldNames());
 
-        $validator = new DatabaseTableInsertFormValidator($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $this->mapper);
+        $validator = new DatabaseTableInsertFormValidator($this->requestInput, $this->mapper);
 
         if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
             FormHelper::setFieldErrors($validator->getFirstErrors());
+            $args[App::USER_INPUT_KEY] = $this->requestInput;
             return $this->view->insertView($request, $response, $args);
         }
 
@@ -72,7 +74,7 @@ class DatabaseTableController extends BaseController
             throw new \Exception("Insert failure. ".$e->getMessage());
         }
 
-        FormHelper::unsetFormSessionVars();
+        FormHelper::unsetSessionFormErrors();
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
 
@@ -93,7 +95,7 @@ class DatabaseTableController extends BaseController
             throw new \Exception('No permission.');
         }
 
-        $this->setRequestInput($request, $this->getBooleanFieldNames());
+        $this->setRequestInput($request, DatabaseTableForm::getFieldNames($this->mapper), $this->getBooleanFieldNames());
 
         $redirectRoute = App::getRouteName(true, $this->routePrefix, 'index');
 
@@ -103,17 +105,18 @@ class DatabaseTableController extends BaseController
         }
 
         // if no changes made stay on page with error
-        $changedColumnsValues = $this->getMapper()->getChangedColumnsValues($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $record);
+        $changedColumnsValues = $this->getMapper()->getChangedColumnsValues($this->requestInput, $record);
         if (count($changedColumnsValues) == 0) {
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made", 'adminNoticeFailure'];
             return $this->view->updateView($request, $response, $args);
         }
 
-        $validator = new DatabaseTableUpdateFormValidator($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $this->mapper, $record);
+        $validator = new DatabaseTableUpdateFormValidator($this->requestInput, $this->mapper, $record);
 
         if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
             FormHelper::setFieldErrors($validator->getFirstErrors());
+            $args[App::USER_INPUT_KEY] = $this->requestInput;
             return $this->view->updateView($request, $response, $args);
         }
 
@@ -123,7 +126,7 @@ class DatabaseTableController extends BaseController
             throw new \Exception("Update failure. ".$e->getMessage());
         }
 
-        FormHelper::unsetFormSessionVars();
+        FormHelper::unsetSessionFormErrors();
         return $response->withRedirect($this->router->pathFor($redirectRoute));
     }
 
@@ -153,7 +156,7 @@ class DatabaseTableController extends BaseController
      */
     protected function insert(?string $emailTo = null)
     {
-        $res = $this->mapper->insert($_SESSION[App::SESSION_KEY_REQUEST_INPUT]);
+        $res = $this->mapper->insert($this->requestInput);
         $returned = pg_fetch_all($res);
         $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
         $insertedRecordId = $returned[0][$primaryKeyColumnName];
@@ -188,7 +191,7 @@ class DatabaseTableController extends BaseController
             if (count($record) == 0) {
                 $record = $this->mapper->selectForPrimaryKey($args['primaryKey']);
             }
-            $changedColumnValues = $this->mapper->getChangedColumnsValues($_SESSION[App::SESSION_KEY_REQUEST_INPUT], $record);
+            $changedColumnValues = $this->mapper->getChangedColumnsValues($this->requestInput, $record);
         }
 
         $this->mapper->updateByPrimaryKey($changedColumnValues, $args['primaryKey']);

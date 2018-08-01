@@ -5,6 +5,7 @@ namespace SlimPostgres\Administrators;
 
 use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\Administrators\LoginAttempts\LoginAttemptsMapper;
+use SlimPostgres\Administrators\Forms\AdministratorForm;
 use SlimPostgres\App;
 use SlimPostgres\ResponseUtilities;
 use SlimPostgres\BaseController;
@@ -44,15 +45,14 @@ class AdministratorsController extends BaseController
             throw new \Exception('No permission.');
         }
 
-        $this->setRequestInput($request); // no boolean fields to add
-
-        $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
+        $this->setRequestInput($request, AdministratorForm::getFields());
+        $input = $this->requestInput;
 
         $validator = new AdministratorsValidator($input, $this->authorization);
         if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
             FormHelper::setFieldErrors($validator->getFirstErrors());
-            $args['input'] = $input;
+            $args[App::USER_INPUT_KEY] = $input;
             return $this->view->insertView($request, $response, $args);
         }
 
@@ -64,7 +64,7 @@ class AdministratorsController extends BaseController
 
         $this->systemEvents->insertInfo("Inserted Administrator", (int) $this->authentication->getAdministratorId(), "id:$administratorId");
 
-        FormHelper::unsetFormSessionVars();
+        FormHelper::unsetSessionFormErrors();
 
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted administrator $administratorId", App::STATUS_ADMIN_NOTICE_SUCCESS];
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS));
@@ -78,21 +78,18 @@ class AdministratorsController extends BaseController
 
         $primaryKey = $args['primaryKey'];
 
-        $this->setRequestInput($request);
-        // no boolean fields to add
+        $this->setRequestInput($request, AdministratorForm::getFields());
+        // if all roles have been unchecked it won't be included in user input
+        if ($this->requestInput['roles'] == null) {
+            $this->requestInput['roles'] = [];
+        }
+        $input = $this->requestInput;
 
         $redirectRoute = App::getRouteName(true, $this->routePrefix,'index');
 
         // make sure there is an administrator for the primary key
         if (null === $administrator = $this->administratorsMapper->getObjectById((int) $primaryKey)) {
             return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsMapper->getPrimaryTableMapper(), 'update');
-        }
-
-        $input = $_SESSION[App::SESSION_KEY_REQUEST_INPUT];
-
-        // if all roles have been unchecked it won't be included in user input
-        if (!isset($input['roles'])) {
-            $input['roles'] = [];
         }
 
         // check for changes made
@@ -109,7 +106,7 @@ class AdministratorsController extends BaseController
         if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
             FormHelper::setFieldErrors($validator->getFirstErrors());
-            $args['input'] = $input;
+            $args[App::USER_INPUT_KEY] = $input;
             return $this->view->updateView($request, $response, $args);
         }
         
@@ -127,7 +124,7 @@ class AdministratorsController extends BaseController
 
         $this->systemEvents->insertInfo("Updated Administrator", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$administrator->getChangedFieldsString($changedFields, $administrator));
 
-        FormHelper::unsetFormSessionVars();
+        FormHelper::unsetSessionFormErrors();
 
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated administrator $primaryKey", App::STATUS_ADMIN_NOTICE_SUCCESS];
         

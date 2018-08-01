@@ -43,10 +43,7 @@ class App
     /** tracks number of login failures */
     const SESSION_KEY_NUM_FAILED_LOGINS = 'numFailedLogins';
 
-    /** stores user input  */
-    const SESSION_KEY_REQUEST_INPUT = 'requestInput';
-
-    /** filter field values for admin list views */
+    /** filter field values for admin list views, stored in session in order to keep filter on through multiple requests */
     const SESSION_KEY_ADMIN_LIST_VIEW_FILTER = 'adminListViewFilter';
 
     /** info concerning logged on administrator */
@@ -73,6 +70,9 @@ class App
     const STATUS_ADMIN_NOTICE_MUTED = 'adminNoticeMuted';
 
     const VALID_ROUTE_TYPES = ['index', 'index.reset', 'insert', 'update', 'delete'];
+
+    /** args array key so controllers can pass user input data to views */
+    const USER_INPUT_KEY = 'userInput';
 
     public function __construct()
     {

@@ -43,11 +43,6 @@ class FormHelper
         return '';
     }
 
-    public static function getFieldValue(string $fieldName): string
-    {
-        return (isset($_SESSION[App::SESSION_KEY_REQUEST_INPUT][$fieldName])) ? $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$fieldName] : '';
-    }
-
     private static function getCommonFieldAttributes(string $fieldName = '', array $addAttributes = []): array
     {
         $attributes = [];
@@ -73,13 +68,7 @@ class FormHelper
 
     public static function getInputFieldAttributes(string $fieldName = '', array $addAttributes = [], bool $insertValue = true): array
     {
-        $attributes = [];
-
-        // value - does not overwrite if in addAttributes
-        // if (!array_key_exists('value', $addAttributes) && $insertValue) {
-        //     $attributes['value'] = self::getFieldValue($fieldName);
-        // }
-        return array_merge(self::getCommonFieldAttributes($fieldName, $addAttributes), $attributes);
+        return self::getCommonFieldAttributes($fieldName, $addAttributes);
     }
 
     public static function getTextareaFieldAttributes(string $fieldName = '', array $addAttributes = []): array
@@ -113,23 +102,10 @@ class FormHelper
         return new InputField('', ['type' => 'submit', 'name' => 'cancel', 'value' => $value, 'onclick' => 'if(confirm(\'Press OK to cancel\nPress Cancel to cancel canceling\')){return true;}']);
     }
 
-    public static function unsetSessionInput()
-    {
-        if (isset($_SESSION[App::SESSION_KEY_REQUEST_INPUT])) {
-            unset($_SESSION[App::SESSION_KEY_REQUEST_INPUT]);
-        }
-    }
-
     public static function unsetSessionFormErrors()
     {
         if (isset($_SESSION[self::SESSION_ERRORS_KEY])) {
             unset($_SESSION[self::SESSION_ERRORS_KEY]);
         }
-    }
-
-    public static function unsetFormSessionVars()
-    {
-        self::unsetSessionInput();
-        self::unsetSessionFormErrors();
     }
 }

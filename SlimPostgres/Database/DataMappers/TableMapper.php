@@ -19,6 +19,9 @@ class TableMapper implements TableMappers
     /** @var  array of column mapper objects */
     protected $columns;
 
+    /** @var array of columnNames */
+    protected $columnNames;
+
     /** @var string or null if no primary key column exists */
     protected $primaryKeyColumnName;
 
@@ -88,10 +91,13 @@ class TableMapper implements TableMappers
             throw new \Exception("Unable to set columns for table $this->tableName");
         }
 
+        $this->columnNames = [];
+
         while ($columnInfo = pg_fetch_assoc($rs)) {
             $columnInfo['is_unique'] = in_array($columnInfo['column_name'], $this->uniqueColumnNames);
             $c = new ColumnMapper($this, $columnInfo);
             $this->columns[] = $c;
+            $this->columnNames[] = $columnInfo['column_name'];
             if ($columnInfo['is_unique']) {
                 $this->uniqueColumns[] = $c;
             }
@@ -326,6 +332,11 @@ class TableMapper implements TableMappers
             throw new \Exception('No columns in table '.$this->tableName);
         }
         return $this->columns;
+    }
+
+    public function getColumnNames(): array 
+    {
+        return $this->columnNames;
     }
 
     public function getColumnByName(string $columnName): ?ColumnMapper

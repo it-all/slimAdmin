@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Security\Authentication;
 
+use SlimPostgres\App;
 use SlimPostgres\AdminView;
 use SlimPostgres\Forms\Form;
 use SlimPostgres\Forms\FormHelper;
@@ -17,9 +18,11 @@ class AuthenticationView extends AdminView
             return $response->withRedirect($this->router->pathFor(ROUTE_HOME));
         }
 
-        $form = $this->authentication->getForm($this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), $this->router->pathFor(ROUTE_LOGIN_POST));
+        $usernameValue = (isset($args[App::USER_INPUT_KEY])) ? $args[App::USER_INPUT_KEY][$this->authentication->getUsernameFieldName()] : null;
 
-        FormHelper::unsetFormSessionVars();
+        $form = $this->authentication->getForm($this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), $this->router->pathFor(ROUTE_LOGIN_POST), $usernameValue);
+
+        FormHelper::unsetSessionFormErrors();
 
         $renderStatus = (array_key_exists('status', $args)) ? $args['status'] : 200;
 

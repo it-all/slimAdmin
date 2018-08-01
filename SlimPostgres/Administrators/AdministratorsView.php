@@ -42,6 +42,56 @@ class AdministratorsView extends AdminListView
         $this->setDelete($this->container->authorization->isAuthorized($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
     }
 
+    /**
+     * override in order to populate roles with multiple if necessary
+     * @param Response $response
+     * @param bool $resetFilter
+     * @return AdministratorsView|AdminListView
+     */
+    public function indexView(Response $response, bool $resetFilter = false, ?string $filterFieldValue = null)
+    {
+        if ($resetFilter) {
+            return $this->resetFilter($response, $this->indexRoute);
+        }
+
+        $filterColumnsInfo = $this->getFilterColumnsInfo();
+
+        /** save error in var prior to unsetting */
+        $filterErrorMessage = FormHelper::getFieldError($this->sessionFilterFieldKey);
+        FormHelper::unsetSessionFormErrors();
+
+        // make sure all session input necessary to send to template is produced above
+        FormHelper::unsetSessionFormErrors();
+
+        $administrators = $this->mapper->getObjects($filterColumnsInfo, $this->authentication, $this->authorization);
+
+        return $this->view->render(
+            $response,
+            $this->template,
+            [
+                'title' => $this->mapper->getFormalTableName(),
+                'insertLinkInfo' => $this->insertLinkInfo,
+                'filterOpsList' => QueryBuilder::getWhereOperatorsText(),
+                'filterValue' => $this->getFilterFieldValue(),
+                'filterErrorMessage' => $filterErrorMessage,
+                'filterFormActionRoute' => $this->indexRoute,
+                'filterFieldName' => $this->sessionFilterFieldKey,
+                'isFiltered' => $filterColumnsInfo != null,
+                'resetFilterRoute' => $this->filterResetRoute,
+                'updatesPermitted' => $this->updatesPermitted,
+                'updateColumn' => $this->updateColumn,
+                'updateRoute' => $this->updateRoute,
+                'deletesPermitted' => $this->deletesPermitted,
+                'deleteRoute' => $this->deleteRoute,
+                'displayItems' => $administrators,
+                'columnCount' => count($administrators[0]->getListViewFields()),
+                'sortColumn' => $this->mapper->getOrderByColumnName(),
+                'sortByAsc' => $this->mapper->getOrderByAsc(),
+                'navigationItems' => $this->navigationItems
+            ]
+        );
+    }
+
     public function routeGetInsert(Request $request, Response $response, $args)
     {
         return $this->insertView($request, $response, $args);
@@ -51,7 +101,7 @@ class AdministratorsView extends AdminListView
     public function insertView(Request $request, Response $response, $args)
     {
         $formAction = $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'insert', 'post'));
-        $fieldValues = (isset($args['input'])) ? $args['input'] : [];
+        $fieldValues = ($request->isPost() && isset($args[App::USER_INPUT_KEY])) ? $args[App::USER_INPUT_KEY] : [];
 
         return $this->view->render(
             $response,
@@ -80,8 +130,8 @@ class AdministratorsView extends AdminListView
         $formAction = $this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]);
 
         /** if input set we are redisplaying after invalid form submission */
-        if (isset($args['input'])) {
-            $updateForm = new AdministratorUpdateForm($formAction, $this->container, $args['input']);
+        if ($request->isPut() && isset($args[App::USER_INPUT_KEY])) {
+            $updateForm = new AdministratorUpdateForm($formAction, $this->container, $args[App::USER_INPUT_KEY]);
         } else {
             $updateForm = new AdministratorUpdateForm($formAction, $this->container);
             $updateForm->setFieldValuesToAdministrator($administrator);
@@ -97,55 +147,6 @@ class AdministratorsView extends AdminListView
                 'primaryKey' => $args['primaryKey'],
                 'navigationItems' => $this->navigationItems,
                 'hideFocus' => true
-            ]
-        );
-    }
-
-    /**
-     * override in order to populate roles with multiple if necessary
-     * @param Response $response
-     * @param bool $resetFilter
-     * @return AdministratorsView|AdminListView
-     */
-    public function indexView(Response $response, bool $resetFilter = false)
-    {
-        if ($resetFilter) {
-            return $this->resetFilter($response, $this->indexRoute);
-        }
-
-        $filterColumnsInfo = (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][parent::SESSION_FILTER_COLUMNS_KEY])) ? $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][parent::SESSION_FILTER_COLUMNS_KEY] : null;
-
-        $filterFieldValue = $this->getFilterFieldValue();
-        $filterErrorMessage = FormHelper::getFieldError($this->sessionFilterFieldKey);
-
-        // make sure all session input necessary to send to template is produced above
-        FormHelper::unsetFormSessionVars();
-
-        $administrators = $this->mapper->getObjects($filterColumnsInfo, $this->authentication, $this->authorization);
-
-        return $this->view->render(
-            $response,
-            $this->template,
-            [
-                'title' => $this->mapper->getFormalTableName(),
-                'insertLinkInfo' => $this->insertLinkInfo,
-                'filterOpsList' => QueryBuilder::getWhereOperatorsText(),
-                'filterValue' => $filterFieldValue,
-                'filterErrorMessage' => $filterErrorMessage,
-                'filterFormActionRoute' => $this->indexRoute,
-                'filterFieldName' => $this->sessionFilterFieldKey,
-                'isFiltered' => $filterColumnsInfo != null,
-                'resetFilterRoute' => $this->filterResetRoute,
-                'updatesPermitted' => $this->updatesPermitted,
-                'updateColumn' => $this->updateColumn,
-                'updateRoute' => $this->updateRoute,
-                'deletesPermitted' => $this->deletesPermitted,
-                'deleteRoute' => $this->deleteRoute,
-                'displayItems' => $administrators,
-                'columnCount' => count($administrators[0]->getListViewFields()),
-                'sortColumn' => $this->mapper->getOrderByColumnName(),
-                'sortByAsc' => $this->mapper->getOrderByAsc(),
-                'navigationItems' => $this->navigationItems
             ]
         );
     }

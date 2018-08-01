@@ -18,20 +18,18 @@ class RolesView extends DatabaseTableListView
     }
 
     // override in order to not show delete link for roles in use
-    public function indexView(Response $response, bool $resetFilter = false)
+    public function indexView(Response $response, bool $resetFilter = false, ?string $filterFieldValue = null)
     {
         if ($resetFilter) {
             return $this->resetFilter($response, $this->indexRoute);
         }
 
-        $filterColumnsInfo = (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][parent::SESSION_FILTER_COLUMNS_KEY])) ? $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][parent::SESSION_FILTER_COLUMNS_KEY] : null;
+        $filterColumnsInfo = $this->getFilterColumnsInfo();
 
-        $filterFieldValue = $this->getFilterFieldValue();
+        /** save error in var prior to unsetting */
         $filterErrorMessage = FormHelper::getFieldError($this->sessionFilterFieldKey);
-
-        // make sure all session input necessary to send to template is produced above
-        FormHelper::unsetFormSessionVars();
-
+        FormHelper::unsetSessionFormErrors();
+        
         $roles = $this->mapper->getObjects($filterColumnsInfo);
 
         return $this->view->render(
@@ -41,7 +39,7 @@ class RolesView extends DatabaseTableListView
                 'title' => $this->mapper->getTableName(),
                 'insertLinkInfo' => $this->insertLinkInfo,
                 'filterOpsList' => QueryBuilder::getWhereOperatorsText(),
-                'filterValue' => $filterFieldValue,
+                'filterValue' => $this->getFilterFieldValue(),
                 'filterErrorMessage' => $filterErrorMessage,
                 'filterFormActionRoute' => $this->indexRoute,
                 'filterFieldName' => $this->sessionFilterFieldKey,

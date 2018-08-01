@@ -26,86 +26,43 @@ abstract class BaseController
         return $this->container->{$name};
     }
 
-    protected function setRequestInputNew(Request $request, array $booleanFieldNames = [])
+    protected function setRequestInput(Request $request, array $fieldNames, array $booleanFieldNames = [])
     {
         $this->requestInput = [];
-        foreach ($request->getParsedBody() as $key => $value) {
-            if (is_string($value) && $this->settings['trimAllUserInput']) {
-                $this->requestInput[$key] = trim($value);
-            } elseif (is_array($value)) {
-                // go 1 level deeper only
-                foreach ($value as $deeperKey => $deeperValue) {
-                    if (is_string($deeperValue) && $this->settings['trimAllUserInput']) {
-                        $this->requestInput[$key][$deeperKey] = trim($deeperValue);
-                    }
+
+        foreach ($fieldNames as $fieldName) {
+            /** will be null if $fieldName does not exist
+             *  note, this is true of array fields with no checked options
+             */
+            $this->requestInput[$fieldName] = $request->getParsedBodyParam($fieldName);
+
+            /** trim if necessary depending on config */
+            if (is_string($this->requestInput[$fieldName]) && $this->settings['trimAllUserInput']) {
+                $this->requestInput[$fieldName] = trim($this->requestInput[$fieldName]);
+            }
+
+            /** handle boolean fields 
+             *  if not set convert to false
+             *  if 'on' convert to true
+             */
+            if (in_array($fieldName, $booleanFieldNames)) {
+                if ($this->requestInput[$fieldName] === null) {
+                    $this->requestInput[$booleanFieldName] = $this->database::BOOLEAN_FALSE;
+                } elseif ($this->requestInput[$fieldName] === 'on') {
+                    $this->requestInput[$booleanFieldName] = $this->database::BOOLEAN_TRUE;
+                } else {
+                    throw new \Exception('Invalid value for boolean input var '.$booleanFieldName.': '.$this->requestInput[$booleanFieldName]);
                 }
             }
-        }
-
-        if (count($booleanFieldNames) > 0) {
-            $this->addBooleanFieldsToRequestInput($booleanFieldNames);
-        }
-    }
-
-    protected function setRequestInput(Request $request, array $booleanFieldNames = [])
-    {
-        $_SESSION[App::SESSION_KEY_REQUEST_INPUT] = [];
-        foreach ($request->getParsedBody() as $key => $value) {
-            if (is_string($value) && $this->settings['trimAllUserInput']) {
-                $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$key] = trim($value);
-            } elseif (is_array($value)) {
-                // go 1 level deeper only
-                foreach ($value as $deeperKey => $deeperValue) {
-                    if (is_string($deeperValue) && $this->settings['trimAllUserInput']) {
-                        $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$key][$deeperKey] = trim($deeperValue);
-                    }
-                }
-            }
-        }
-
-        if (count($booleanFieldNames) > 0) {
-            $this->addBooleanFieldsToRequestInput($booleanFieldNames);
-        }
-    }
-
-    // since a boolean field (ie checkbox) with a false value (ie unchecked) does not appear in the post, they must be added to the input array
-    private function addBooleanFieldsToRequestInput(array $booleanFieldNames)
-    {
-        foreach ($booleanFieldNames as $fieldName) {
-            $this->addBooleanFieldToRequestInput($fieldName);
-        }
-    }
-
-    // give them the same boolean value as in the database
-    private function addBooleanFieldToRequestInput(string $booleanFieldName)
-    {
-        if (!isset($_SESSION[App::SESSION_KEY_REQUEST_INPUT][$booleanFieldName])) {
-            $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$booleanFieldName] = $this->database::BOOLEAN_FALSE;
-        } elseif ($_SESSION[App::SESSION_KEY_REQUEST_INPUT][$booleanFieldName] == 'on') {
-            $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$booleanFieldName] = $this->database::BOOLEAN_TRUE;
-        } else {
-            throw new \Exception('Invalid value for boolean session var '.$booleanFieldName.': '.$_SESSION[App::SESSION_KEY_REQUEST_INPUT][$booleanFieldName]);
-        }
-    }
-
-    // give them the same boolean value as in the database
-    private function addBooleanFieldToRequestInputNew(string $booleanFieldName)
-    {
-        if (!isset($this->requestInput[$booleanFieldName])) {
-            $this->requestInput[$booleanFieldName] = $this->database::BOOLEAN_FALSE;
-        } elseif ($this->requestInput[$booleanFieldName] == 'on') {
-            $this->requestInput[$booleanFieldName] = $this->database::BOOLEAN_TRUE;
-        } else {
-            throw new \Exception('Invalid value for boolean input var '.$booleanFieldName.': '.$this->requestInput[$booleanFieldName]);
         }
     }
 
     /** called by children for posted filter form entry methods */
     protected function setIndexFilter(Request $request, Response $response, $args, array $listViewColumns, AdminListView $view)
     {
-        $this->setRequestInput($request);
+        $this->setRequestInput($request, [$view->getSessionFilterFieldKey()]);
 
-        if (!isset($_SESSION[App::SESSION_KEY_REQUEST_INPUT][$view->getSessionFilterFieldKey()])) {
+        if (!isset($this->requestInput[$view->getSessionFilterFieldKey()])) {
             throw new \Exception("session filter input must be set");
         }
 
@@ -114,23 +71,23 @@ abstract class BaseController
             FormHelper::setFieldErrors([$view->getSessionFilterFieldKey() => 'Not Entered']);
             return $view->indexView($response);
         } else {
-            /** store in session to remember filtration */
+            /** store parsed info in session to remember filtration */
             $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$view->getFilterKey()][$view::SESSION_FILTER_COLUMNS_KEY] = $filterColumnsInfo;
 
-            /** store in session so form field can be repopulated */
-            $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$view->getFilterKey()][$view::SESSION_FILTER_VALUE_KEY] = $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$view->getSessionFilterFieldKey()];
+            /** store entered field value in session so form field can be repopulated */
+            $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$view->getFilterKey()][$view::SESSION_FILTER_VALUE_KEY] = $this->requestInput[$view->getSessionFilterFieldKey()];
 
-            FormHelper::unsetFormSessionVars();
+            FormHelper::unsetSessionFormErrors();
 
-            return $view->indexView($response);
+            return $view->indexView($response, false, $this->requestInput[$view->getSessionFilterFieldKey()]);
         }
     }
 
-    // parse the where filter field
+    // parse the where filter field into [ column name => [operators, values] ] 
     protected function getFilterColumns(string $filterFieldName, array $listViewColumns): ?array
     {
         $filterColumnsInfo = [];
-        $filterParts = explode(",", $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$filterFieldName]);
+        $filterParts = explode(",", $this->requestInput[$filterFieldName]);
         if (mb_strlen($filterParts[0]) == 0) {
             return null;
         } else {

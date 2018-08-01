@@ -93,10 +93,15 @@ final class RolesMapper extends TableMapper
         throw new \Exception("Invalid role searched: $roleSearch");
     }
 
+    public function buildRole(int $id, string $role, int $level): Role 
+    {
+        return new Role($id, $role, $level);
+    }
+
     public function getObject(int $primaryKey): ?Role 
     {
         if ($record = $this->selectForPrimaryKey($primaryKey)) {
-            return new Role((int) $record['id'], $record['role'], (int) $record['level']);
+            return $this->buildRole((int) $record['id'], $record['role'], (int) $record['level']);
         }
 
         return null;
@@ -200,14 +205,18 @@ final class RolesMapper extends TableMapper
         return $dbResult;
     }
 
-    /** convert roles property to array of objects and return */
+    /** selects roles and converts recordset to array of objects and return */
     public function getObjects(array $whereColumnsInfo = null): array 
     {
         $roles = [];
-        foreach ($this->roles as $roleId => $roleInfo) {
-            $roles[] = new Role($roleId, $roleInfo['role'], $roleInfo['level']);
-        }
 
+        if ($pgResults = $this->select("*", $whereColumnsInfo)) {
+            if (pg_num_rows($pgResults) > 0) {
+                while ($record = pg_fetch_assoc($pgResults)) {
+                    $roles[] = $this->buildRole((int) $record['id'], $record['role'], (int) $record['level']);
+                }
+            }
+        }
         return $roles;
     }
 }

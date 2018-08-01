@@ -92,13 +92,13 @@ abstract class AdminListView extends AdminView
         return $this->indexView($response, true);
     }
 
-    public function indexView(Response $response, bool $resetFilter = false)
+    public function indexView(Response $response, bool $resetFilter = false, ?string $filterFieldValue = null)
     {
         if ($resetFilter) {
             return $this->resetFilter($response, $this->indexRoute);
         }
 
-        $filterColumnsInfo = (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_COLUMNS_KEY])) ? $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_COLUMNS_KEY] : null;
+        $filterColumnsInfo = $this->getFilterColumnsInfo();
 
         if (!$results = pg_fetch_all($pgResults = $this->mapper->select($this->mapper->getSelectColumnsString(), $filterColumnsInfo))) {
             $results = [];
@@ -106,11 +106,9 @@ abstract class AdminListView extends AdminView
 
         pg_free_result($pgResults);
 
-        $filterFieldValue = $this->getFilterFieldValue();
+        /** save error in var prior to unsetting */
         $filterErrorMessage = FormHelper::getFieldError($this->sessionFilterFieldKey);
-
-        // make sure all session input necessary to send to template is produced above
-        FormHelper::unsetFormSessionVars();
+        FormHelper::unsetSessionFormErrors();
 
         return $this->view->render(
             $response,
@@ -119,7 +117,7 @@ abstract class AdminListView extends AdminView
                 'title' => $this->mapper->getFormalTableName(),
                 'insertLinkInfo' => $this->insertLinkInfo,
                 'filterOpsList' => QueryBuilder::getWhereOperatorsText(),
-                'filterValue' => $filterFieldValue,
+                'filterValue' => $this->getFilterFieldValue(),
                 'filterErrorMessage' => $filterErrorMessage,
                 'filterFormActionRoute' => $this->indexRoute,
                 'filterFieldName' => $this->sessionFilterFieldKey,
@@ -139,6 +137,21 @@ abstract class AdminListView extends AdminView
         );
     }
 
+    protected function getFilterColumnsInfo(): ?array 
+    {
+        return (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_COLUMNS_KEY])) ? $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_COLUMNS_KEY] : null;
+    }
+
+    /** either session value or empty string */
+    protected function getFilterFieldValue(): string
+    {
+        if (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_VALUE_KEY])) {
+            return $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_VALUE_KEY];
+        } else {
+            return '';
+        }
+    }
+        
     protected function resetFilter(Response $response, string $redirectRoute)
     {
         if (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_COLUMNS_KEY])) {
@@ -151,18 +164,6 @@ abstract class AdminListView extends AdminView
 
         // redirect to the clean url
         return $response->withRedirect($this->router->pathFor($redirectRoute));
-    }
-
-    // new input takes precedence over session value
-    protected function getFilterFieldValue(): string
-    {
-        if (isset($_SESSION[App::SESSION_KEY_REQUEST_INPUT][$this->sessionFilterFieldKey])) {
-            return $_SESSION[App::SESSION_KEY_REQUEST_INPUT][$this->sessionFilterFieldKey];
-        } elseif (isset($_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_VALUE_KEY])) {
-            return $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$this->getFilterKey()][self::SESSION_FILTER_VALUE_KEY];
-        } else {
-            return '';
-        }
     }
 
     public function getSessionFilterFieldKey(): string

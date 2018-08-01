@@ -122,7 +122,7 @@ EOT;
         $filterForm = <<< EOT
 <form name="filter" method="post" style="display: inline" action="$ffAction">
     SELECT WHERE
-    <input type="text" name="$this->filterFieldName" value="$this->filterValue" size="58" maxlength="500" placeholder="field1:{op}:value 1[,field2...] op in [$this->filterOpsList]" required>
+    <input type="text" name="$this->filterFieldName" value="$this->filterValue" size="58" maxlength="500" placeholder="field1:op:val1[,field2...] op in [$this->filterOpsList]" required>
     <input type="submit" value="Filter">
     $ffError
     $ffReset

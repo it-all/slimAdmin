@@ -44,12 +44,12 @@ final class AdministratorsMapper extends MultiTableMapper
 
     private function __construct()
     {
-        parent::__construct(new TableMapper(self::TABLE_NAME), self::SELECT_COLUMNS);
+        parent::__construct(new TableMapper(self::TABLE_NAME, '*', 'name'), self::SELECT_COLUMNS);
     }
 
     public function getOrderByColumnName(): ?string
     {
-        return 'level';
+        return 'name';
     }
 
     // will be performing validation here. for now, assume validation has been performed
@@ -143,7 +143,7 @@ final class AdministratorsMapper extends MultiTableMapper
 
     private function getOrderBy(): string 
     {
-        return 'roles.level';
+        return 'administrators.name';
     }
 
     private function getObject(array $whereColumnsInfo): ?Administrator
@@ -219,14 +219,14 @@ final class AdministratorsMapper extends MultiTableMapper
     }
 
     // returns array of results instead of recordset
-    public function selectArray(?string $selectColumns = null, array $whereColumnsInfo = null): array
+    public function selectArray(?string $selectColumns = null, array $whereColumnsInfo = null, string $orderBy = null): array
     {
         if ($selectColumns == null) {
             $selectColumns = $this->getSelectColumnsString();
         }
 
         $administratorsArray = []; // populate with 1 entry per administrator with an array of roles
-        if ($pgResults = $this->select($selectColumns, $whereColumnsInfo)) {
+        if ($pgResults = $this->select($selectColumns, $whereColumnsInfo, $orderBy)) {
             if (pg_num_rows($pgResults) > 0) {
                 while ($record = pg_fetch_assoc($pgResults)) {
                     // either add new administrator or just new role based on whether administrator already exists
@@ -242,10 +242,10 @@ final class AdministratorsMapper extends MultiTableMapper
         return $administratorsArray;
     }
 
-    public function getObjects(array $whereColumnsInfo = null, AuthenticationService $authentication, AuthorizationService $authorization): array 
+    public function getObjects(array $whereColumnsInfo = null, string $orderBy = null, AuthenticationService $authentication, AuthorizationService $authorization): array 
     {
         $administrators = [];
-        foreach ($this->selectArray(null, $whereColumnsInfo) as $administratorArray) {
+        foreach ($this->selectArray(null, $whereColumnsInfo, $orderBy) as $administratorArray) {
             $administrators[] = new Administrator($administratorArray['id'], $administratorArray['name'], $administratorArray['username'], $administratorArray['passwordHash'], $administratorArray['roles'], $authentication, $authorization);
         }
 

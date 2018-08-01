@@ -63,7 +63,7 @@ class AdministratorsView extends AdminListView
         // make sure all session input necessary to send to template is produced above
         FormHelper::unsetSessionFormErrors();
 
-        $administrators = $this->mapper->getObjects($filterColumnsInfo, $this->authentication, $this->authorization);
+        $administrators = $this->mapper->getObjects($filterColumnsInfo, null, $this->authentication, $this->authorization);
 
         return $this->view->render(
             $response,

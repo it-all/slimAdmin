@@ -45,7 +45,7 @@ final class SystemEventsMapper extends MultiTableMapper
         $this->setEventTypes();
 
         // note time_stamp is the alias for created used in view query
-        parent::__construct(new TableMapper(self::PRIMARY_TABLE_NAME, '*', 'time_stamp', false), self::SELECT_COLUMNS);
+        parent::__construct(new TableMapper(self::PRIMARY_TABLE_NAME, '*', 'created', false), self::SELECT_COLUMNS);
     }
 
     public function setEventTypes()

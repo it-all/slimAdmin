@@ -98,7 +98,7 @@ class AdministratorsController extends BaseController
 
         // if no changes made, display error message
         if (count($changedFields) == 0) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made", 'adminNoticeFailure'];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made", App::STATUS_ADMIN_NOTICE_FAILURE];
             return $this->view->updateView($request, $response, $args);
         }
 
@@ -146,11 +146,11 @@ class AdministratorsController extends BaseController
             return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsMapper->getPrimaryTableMapper(), 'delete', 'Administrator');
         } catch (Exceptions\UnallowedActionException $e) {
             $this->systemEvents->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), 'adminNoticeFailure'];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), App::STATUS_ADMIN_NOTICE_FAILURE];
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
         } catch (\Exception $e) {
             $this->systemEvents->insertError('Administrator Deletion Failure', (int) $this->authentication->getAdministratorId(), $e->getMessage());
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Deletion Failure', 'adminNoticeFailure'];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Deletion Failure', App::STATUS_ADMIN_NOTICE_FAILURE];
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
         }
 

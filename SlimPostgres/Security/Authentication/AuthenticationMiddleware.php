@@ -14,7 +14,7 @@ class AuthenticationMiddleware extends BaseMiddleware
 	{
 		if (!$this->container->authentication->isAuthenticated()) {
 		    $this->container->systemEvents->insertWarning('Login Required');
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Login required", 'adminNoticeFailure'];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Login required", App::STATUS_ADMIN_NOTICE_FAILURE];
             $_SESSION[App::SESSION_KEY_GOTO_ADMIN_PATH] = $request->getUri()->getPath();
             return $response->withRedirect($this->container->router->pathFor(ROUTE_LOGIN));
 		}

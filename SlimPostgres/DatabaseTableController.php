@@ -107,7 +107,7 @@ class DatabaseTableController extends BaseController
         // if no changes made stay on page with error
         $changedColumnsValues = $this->getMapper()->getChangedColumnsValues($this->requestInput, $record);
         if (count($changedColumnsValues) == 0) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made", 'adminNoticeFailure'];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made", App::STATUS_ADMIN_NOTICE_FAILURE];
             return $this->view->updateView($request, $response, $args);
         }
 
@@ -222,12 +222,12 @@ class DatabaseTableController extends BaseController
             $this->systemEvents->insertWarning('Query Results Not Found', (int) $this->authentication->getAdministratorId(), $this->mapper->getPrimaryKeyColumnName().":$primaryKey|Table:".$this->mapper->getTableName());
 
             // set admin notice
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$primaryKey.' not found', 'adminNoticeFailure'];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$primaryKey.' not found', App::STATUS_ADMIN_NOTICE_FAILURE];
             throw $e;
 
         } catch (\Exception $e) {
 
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Deletion Failure', 'adminNoticeFailure'];
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Deletion Failure', App::STATUS_ADMIN_NOTICE_FAILURE];
             throw $e;
             
         }

@@ -23,7 +23,7 @@ trait ResponseUtilities
 
         // set admin notice
         $noticeTitle = ($title != null) ? $title: 'Record';
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["$noticeTitle $primaryKey Not Found", 'adminNoticeFailure'];
+        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["$noticeTitle $primaryKey Not Found", App::STATUS_ADMIN_NOTICE_FAILURE];
         
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }

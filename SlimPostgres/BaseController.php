@@ -31,7 +31,7 @@ abstract class BaseController
         $this->requestInput = [];
 
         foreach ($fieldNames as $fieldName) {
-            /** will be null if $fieldName does not exist
+            /** will be null if $fieldName does not exist in parsed body
              *  note, this is true of array fields with no checked options
              */
             $this->requestInput[$fieldName] = $request->getParsedBodyParam($fieldName);

@@ -68,18 +68,26 @@ abstract class BaseController
 
         if (null === $filterColumnsInfo = $this->getFilterColumns($view->getSessionFilterFieldKey(), $listViewColumns)) {
             // redisplay form with error (error set in getFilterColumns)
+            
+            $this->repopulateFilterField($view);
             return $view->indexView($response);
+
         } else {
+            
             /** store parsed info in session to remember filtration */
             $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$view->getFilterKey()][$view::SESSION_FILTER_COLUMNS_KEY] = $filterColumnsInfo;
 
-            /** store entered field value in session so form field can be repopulated */
-            $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$view->getFilterKey()][$view::SESSION_FILTER_VALUE_KEY] = $this->requestInput[$view->getSessionFilterFieldKey()];
-
+            $this->repopulateFilterField($view);
             FormHelper::unsetSessionFormErrors();
 
             return $view->indexView($response, false, $this->requestInput[$view->getSessionFilterFieldKey()]);
         }
+    }
+
+    private function repopulateFilterField(AdminListView $view) 
+    {
+        /** store entered field value in session so form field can be repopulated */
+        $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$view->getFilterKey()][$view::SESSION_FILTER_VALUE_KEY] = $this->requestInput[$view->getSessionFilterFieldKey()];
     }
 
     // parse the where filter field into [ column name => [operators, values] ] 

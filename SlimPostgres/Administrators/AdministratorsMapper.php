@@ -174,14 +174,42 @@ final class AdministratorsMapper extends MultiTableMapper
         return $this->getObject($whereColumnsInfo);
     }
 
+    /** to filter the administrators with certain roles and return all the roles the administrators have */
+    private function selectWithRoleSubquery(string $columns = "*", array $whereColumnsInfo = null, string $orderBy = null)
+    {
+        /** start subquery */
+        $q = new QueryBuilder("SELECT $columns FROM administrators JOIN administrator_roles ON administrators.id=administrator_roles.administrator_id JOIN roles ON administrator_roles.role_id=roles.id WHERE administrators.id IN (SELECT administrators.id FROM administrators JOIN administrator_roles ON administrators.id=administrator_roles.administrator_id JOIN roles ON administrator_roles.role_id=roles.id WHERE");
+
+        /** build subquery */
+        $opCount = 0;
+        foreach ($whereColumnsInfo['roles.role']['operators'] as $op) {
+            $sqlVarCount = $opCount + 1;
+            if ($opCount > 0) {
+                $q->add(" OR ");
+            }
+            $q->add(" roles.role $op $$sqlVarCount", $whereColumnsInfo['roles.role']['values'][$opCount]);
+            ++$opCount;
+        }
+        $q->add(")");
+
+        return $q->execute();
+    }
+
     public function select(string $columns = "*", array $whereColumnsInfo = null, string $orderBy = null)
     {
-        $selectClause = "SELECT $columns";
-        $fromClause = "FROM ".self::TABLE_NAME." JOIN ".self::ADM_ROLES_TABLE_NAME." ON ".self::TABLE_NAME.".id = ".self::ADM_ROLES_TABLE_NAME.".administrator_id JOIN ".self::ROLES_TABLE_NAME." ON ".self::ADM_ROLES_TABLE_NAME.".role_id = ".self::ROLES_TABLE_NAME.".id";
-        $orderBy = ($orderBy == null) ? $this->getOrderBy() : $orderBy;
         if ($whereColumnsInfo != null) {
             $this->validateFilterColumns($whereColumnsInfo);
         }
+        
+        /** simply adding to the where clause below with the roles field will yield incomplete results, as not all roles for an administrator will be selected, so the subquery fn is called */
+        if (array_key_exists('roles.role', $whereColumnsInfo)) {
+            return $this->selectWithRoleSubquery($columns, $whereColumnsInfo, $orderBy);
+        }
+        
+        $selectClause = "SELECT $columns";
+        $fromClause = "FROM ".self::TABLE_NAME." JOIN ".self::ADM_ROLES_TABLE_NAME." ON ".self::TABLE_NAME.".id = ".self::ADM_ROLES_TABLE_NAME.".administrator_id JOIN ".self::ROLES_TABLE_NAME." ON ".self::ADM_ROLES_TABLE_NAME.".role_id = ".self::ROLES_TABLE_NAME.".id";
+        $orderBy = ($orderBy == null) ? $this->getOrderBy() : $orderBy;
+        
         $q = new SelectBuilder($selectClause, $fromClause, $whereColumnsInfo, $orderBy);
         return $q->execute();
     }

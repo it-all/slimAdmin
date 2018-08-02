@@ -29,7 +29,7 @@ final class AdministratorsMapper extends MultiTableMapper
         'name' => self::TABLE_NAME . '.name',
         'username' => self::TABLE_NAME . '.username',
         'passwordHash' => self::TABLE_NAME . '.password_hash',
-        'role' => self::ROLES_TABLE_NAME . '.role',
+        'roles' => self::ROLES_TABLE_NAME . '.role',
         'level' => self::ROLES_TABLE_NAME . '.level'
     ];
 

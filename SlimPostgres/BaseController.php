@@ -67,21 +67,24 @@ abstract class BaseController
         }
 
         if (null === $filterColumnsInfo = $this->getFilterColumns($view->getSessionFilterFieldKey(), $listViewColumns)) {
+
             // redisplay form with error (error set in getFilterColumns)
-            
             $this->repopulateFilterField($view);
             return $view->indexView($response);
 
         } else {
-            
-            /** store parsed info in session to remember filtration */
-            $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$view->getFilterKey()][$view::SESSION_FILTER_COLUMNS_KEY] = $filterColumnsInfo;
 
+            /** store parsed info and field value in session to remember filtration */
+            $this->storeFilterColumnsInfoInSession($filterColumnsInfo, $view);
             $this->repopulateFilterField($view);
-            FormHelper::unsetSessionFormErrors();
 
             return $view->indexView($response, false, $this->requestInput[$view->getSessionFilterFieldKey()]);
         }
+    }
+
+    private function storeFilterColumnsInfoInSession(array $filterColumnsInfo, AdminListView $view)
+    {
+        $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$view->getFilterKey()][$view::SESSION_FILTER_COLUMNS_KEY] = $filterColumnsInfo;
     }
 
     private function repopulateFilterField(AdminListView $view) 

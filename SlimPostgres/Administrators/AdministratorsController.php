@@ -64,8 +64,6 @@ class AdministratorsController extends BaseController
 
         $this->systemEvents->insertInfo("Inserted Administrator", (int) $this->authentication->getAdministratorId(), "id:$administratorId");
 
-        FormHelper::unsetSessionFormErrors();
-
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted administrator $administratorId", App::STATUS_ADMIN_NOTICE_SUCCESS];
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS));
     }
@@ -123,8 +121,6 @@ class AdministratorsController extends BaseController
         }
 
         $this->systemEvents->insertInfo("Updated Administrator", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$administrator->getChangedFieldsString($changedFields, $administrator));
-
-        FormHelper::unsetSessionFormErrors();
 
         $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated administrator $primaryKey", App::STATUS_ADMIN_NOTICE_SUCCESS];
         

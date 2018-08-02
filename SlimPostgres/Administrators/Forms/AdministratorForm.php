@@ -146,7 +146,6 @@ abstract class AdministratorForm
     public function getForm()
     {
         return new Form($this->getNodes(), ['method' => 'post', 'action' => $this->formAction], FormHelper::getGeneralError());
-        FormHelper::unsetSessionFormErrors();;
     }
 
 }

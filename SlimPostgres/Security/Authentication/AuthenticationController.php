@@ -51,7 +51,6 @@ class AuthenticationController extends BaseController
         }
 
         // successful login
-        FormHelper::unsetSessionFormErrors();
         $this->systemEvents->insertInfo('Login', (int) $this->authentication->getAdministratorId());
 
         // redirect to proper resource

@@ -60,9 +60,6 @@ class AdministratorsView extends AdminListView
         $filterErrorMessage = FormHelper::getFieldError($this->sessionFilterFieldKey);
         FormHelper::unsetSessionFormErrors();
 
-        // make sure all session input necessary to send to template is produced above
-        FormHelper::unsetSessionFormErrors();
-
         $administrators = $this->mapper->getObjects($filterColumnsInfo, null, $this->authentication, $this->authorization);
 
         return $this->view->render(

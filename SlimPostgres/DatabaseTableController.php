@@ -74,7 +74,6 @@ class DatabaseTableController extends BaseController
             throw new \Exception("Insert failure. ".$e->getMessage());
         }
 
-        FormHelper::unsetSessionFormErrors();
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
 
@@ -126,7 +125,6 @@ class DatabaseTableController extends BaseController
             throw new \Exception("Update failure. ".$e->getMessage());
         }
 
-        FormHelper::unsetSessionFormErrors();
         return $response->withRedirect($this->router->pathFor($redirectRoute));
     }
 

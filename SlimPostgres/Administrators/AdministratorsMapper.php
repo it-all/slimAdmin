@@ -202,7 +202,7 @@ final class AdministratorsMapper extends MultiTableMapper
         }
         
         /** simply adding to the where clause below with the roles field will yield incomplete results, as not all roles for an administrator will be selected, so the subquery fn is called */
-        if (array_key_exists('roles.role', $whereColumnsInfo)) {
+        if (is_array($whereColumnsInfo) && array_key_exists('roles.role', $whereColumnsInfo)) {
             return $this->selectWithRoleSubquery($columns, $whereColumnsInfo, $orderBy);
         }
         

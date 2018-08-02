@@ -76,11 +76,8 @@ class AdministratorsController extends BaseController
 
         $primaryKey = $args['primaryKey'];
 
+        // if all roles have been unchecked it won't be included in the post will be set null
         $this->setRequestInput($request, AdministratorForm::getFields());
-        // if all roles have been unchecked it won't be included in user input
-        if ($this->requestInput['roles'] == null) {
-            $this->requestInput['roles'] = [];
-        }
         $input = $this->requestInput;
 
         $redirectRoute = App::getRouteName(true, $this->routePrefix,'index');

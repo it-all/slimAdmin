@@ -84,7 +84,7 @@ class Administrator implements ListViewModels
         return $this->authorization;
     }
 
-    public function getChangedFieldValues(string $name, string $username, array $roles, bool $includePassword = true, ?string $password = null): array 
+    public function getChangedFieldValues(string $name, string $username, ?array $roles, bool $includePassword = true, ?string $password = null): array 
     {
         $changedFieldValues = [];
 
@@ -100,6 +100,9 @@ class Administrator implements ListViewModels
         }
 
         // roles - only add to main array if changed
+        if ($roles === null) {
+            $roles = [];
+        }
         $addRoles = []; // populate with ids of new roles
         $removeRoles = []; // populate with ids of former roles
         

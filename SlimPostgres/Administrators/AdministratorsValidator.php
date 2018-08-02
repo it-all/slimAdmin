@@ -15,7 +15,7 @@ class AdministratorsValidator extends ValitronValidatorExtension
     {
         $fields = ['name', 'username', 'password', 'password_confirm', 'roles'];
         /** note, roles is an array field but empty arrays ([]) pass required validation, so if empty set null to fail */
-        if (empty($inputData['roles'])) {
+        if (is_array($inputData['roles']) && empty($inputData['roles'])) {
             $inputData['roles'] = null;
         }
         parent::__construct($inputData, $fields);

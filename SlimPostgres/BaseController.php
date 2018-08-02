@@ -67,8 +67,7 @@ abstract class BaseController
         }
 
         if (null === $filterColumnsInfo = $this->getFilterColumns($view->getSessionFilterFieldKey(), $listViewColumns)) {
-            // redisplay form with error
-            FormHelper::setFieldErrors([$view->getSessionFilterFieldKey() => 'Not Entered']);
+            // redisplay form with error (error set in getFilterColumns)
             return $view->indexView($response);
         } else {
             /** store parsed info in session to remember filtration */
@@ -89,6 +88,7 @@ abstract class BaseController
         $filterColumnsInfo = [];
         $filterParts = explode(",", $this->requestInput[$filterFieldName]);
         if (mb_strlen($filterParts[0]) == 0) {
+            FormHelper::setFieldErrors([$filterFieldName => 'Not Entered']);
             return null;
         } else {
 

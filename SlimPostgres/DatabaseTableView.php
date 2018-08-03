@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres;
 
 use SlimPostgres\App;
+use SlimPostgres\InsertUpdateViews;
 use SlimPostgres\ResponseUtilities;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Database\DataMappers\TableMappers;
@@ -13,19 +14,19 @@ use Slim\Http\Request;
 use Slim\Http\Response;
 
 // a list view class for a single database table
-abstract class DatabaseTableListView extends AdminListView
+abstract class DatabaseTableView extends AdminListView implements InsertUpdateViews
 {
     use ResponseUtilities;
 
     protected $routePrefix;
     protected $mapper;
 
-    public function __construct(Container $container, TableMappers $mapper, string $routePrefix, bool $addDeleteColumnToListView = true)
+    public function __construct(Container $container, TableMappers $mapper, string $routePrefix, bool $addDeleteColumnToListView = true, string $listViewTemplate = 'admin/lists/resultsList.php')
     {
         $this->mapper = $mapper;
         $this->routePrefix = $routePrefix;
 
-        parent::__construct($container, $routePrefix, App::getRouteName(true, $routePrefix, 'index'), $this->mapper, App::getRouteName(true, $routePrefix, 'index.reset'));
+        parent::__construct($container, $routePrefix, App::getRouteName(true, $routePrefix, 'index'), $this->mapper, App::getRouteName(true, $routePrefix, 'index.reset'), $listViewTemplate);
 
         $insertLinkInfo = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->mapper->getFormalTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
         $this->setInsert($insertLinkInfo);

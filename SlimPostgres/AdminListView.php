@@ -81,7 +81,7 @@ abstract class AdminListView extends AdminView
         $this->deleteRoute = $deleteRoute;
     }
 
-    public function routeIndex($request, Response $response, $args)
+    public function routeIndex(Request $request, Response $response, $args)
     {
         return $this->indexView($response);
     }
@@ -92,19 +92,21 @@ abstract class AdminListView extends AdminView
         return $this->indexView($response, true);
     }
 
-    public function indexView(Response $response, bool $resetFilter = false, ?string $filterFieldValue = null)
+    /** display items can be passed in as an array of records or objects, if objects, the appropriate template should be passed to this constructor. */
+    public function indexView(Response $response, bool $resetFilter = false, ?array $displayItems = null)
     {
         if ($resetFilter) {
             return $this->resetFilter($response, $this->indexRoute);
         }
 
-        $filterColumnsInfo = $this->getFilterColumnsInfo();
-
-        if (!$results = pg_fetch_all($pgResults = $this->mapper->select($this->mapper->getSelectColumnsString(), $filterColumnsInfo))) {
-            $results = [];
+        if ($displayItems === null) {
+            $filterColumnsInfo = $this->getFilterColumnsInfo();
+            if (!$displayItems = pg_fetch_all($pgResults = $this->mapper->select($this->mapper->getSelectColumnsString(), $filterColumnsInfo))) {
+                $displayItems = [];
+            }
+    
+            pg_free_result($pgResults);
         }
-
-        pg_free_result($pgResults);
 
         /** save error in var prior to unsetting */
         $filterErrorMessage = FormHelper::getFieldError($this->sessionFilterFieldKey);
@@ -121,14 +123,14 @@ abstract class AdminListView extends AdminView
                 'filterErrorMessage' => $filterErrorMessage,
                 'filterFormActionRoute' => $this->indexRoute,
                 'filterFieldName' => $this->sessionFilterFieldKey,
-                'isFiltered' => $filterColumnsInfo != null,
+                'isFiltered' => $this->getFilterFieldValue() != '',
                 'resetFilterRoute' => $this->filterResetRoute,
                 'updatesPermitted' => $this->updatesPermitted,
                 'updateColumn' => $this->updateColumn,
                 'updateRoute' => $this->updateRoute,
                 'deletesPermitted' => $this->deletesPermitted,
                 'deleteRoute' => $this->deleteRoute,
-                'displayItems' => $results,
+                'displayItems' => $displayItems,
                 'columnCount' => $this->mapper->getCountSelectColumns(),
                 'sortColumn' => $this->mapper->getOrderByColumnName(),
                 'sortByAsc' => $this->mapper->getOrderByAsc(),

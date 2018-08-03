@@ -13,6 +13,8 @@ use SlimPostgres\Administrators\Roles\RolesMapper;
 use It_All\FormFormer\Fields\InputField;
 use It_All\FormFormer\Form;
 use SlimPostgres\App;
+use SlimPostgres\ObjectsListViews;
+use SlimPostgres\InsertUpdateViews;
 use SlimPostgres\ResponseUtilities;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\AdminListView;
@@ -22,7 +24,7 @@ use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class AdministratorsView extends AdminListView
+class AdministratorsView extends AdminListView implements ObjectsListViews, InsertUpdateViews
 {
     use ResponseUtilities;
 
@@ -42,51 +44,25 @@ class AdministratorsView extends AdminListView
         $this->setDelete($this->container->authorization->isAuthorized($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
     }
 
-    /**
-     * override in order to populate roles with multiple if necessary
-     * @param Response $response
-     * @param bool $resetFilter
-     * @return AdministratorsView|AdminListView
-     */
-    public function indexView(Response $response, bool $resetFilter = false, ?string $filterFieldValue = null)
+    /** overrides in order to get administrator objects and send to indexView */
+    public function routeIndex($request, Response $response, $args)
     {
-        if ($resetFilter) {
-            return $this->resetFilter($response, $this->indexRoute);
-        }
+        return $this->indexViewObjects($response);
+    }
 
+    /** overrides in order to get administrator objects and send to indexView */
+    public function routeIndexResetFilter(Request $request, Response $response, $args)
+    {
+        // redirect to the clean url
+        return $this->indexViewObjects($response, true);
+    }
+
+    /** get objects and send to parent indexView */
+    private function indexViewObjects(Response $response, bool $resetFilter = false)
+    {
         $filterColumnsInfo = $this->getFilterColumnsInfo();
-
-        /** save error in var prior to unsetting */
-        $filterErrorMessage = FormHelper::getFieldError($this->sessionFilterFieldKey);
-        FormHelper::unsetSessionFormErrors();
-
         $administrators = $this->mapper->getObjects($filterColumnsInfo, null, $this->authentication, $this->authorization);
-
-        return $this->view->render(
-            $response,
-            $this->template,
-            [
-                'title' => $this->mapper->getFormalTableName(),
-                'insertLinkInfo' => $this->insertLinkInfo,
-                'filterOpsList' => QueryBuilder::getWhereOperatorsText(),
-                'filterValue' => $this->getFilterFieldValue(),
-                'filterErrorMessage' => $filterErrorMessage,
-                'filterFormActionRoute' => $this->indexRoute,
-                'filterFieldName' => $this->sessionFilterFieldKey,
-                'isFiltered' => $filterColumnsInfo != null,
-                'resetFilterRoute' => $this->filterResetRoute,
-                'updatesPermitted' => $this->updatesPermitted,
-                'updateColumn' => $this->updateColumn,
-                'updateRoute' => $this->updateRoute,
-                'deletesPermitted' => $this->deletesPermitted,
-                'deleteRoute' => $this->deleteRoute,
-                'displayItems' => $administrators,
-                'columnCount' => count($administrators[0]->getListViewFields()),
-                'sortColumn' => $this->mapper->getOrderByColumnName(),
-                'sortByAsc' => $this->mapper->getOrderByAsc(),
-                'navigationItems' => $this->navigationItems
-            ]
-        );
+        return $this->indexView($response, $resetFilter, $administrators);
     }
 
     public function routeGetInsert(Request $request, Response $response, $args)

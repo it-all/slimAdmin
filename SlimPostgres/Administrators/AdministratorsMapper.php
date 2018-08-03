@@ -198,7 +198,7 @@ final class AdministratorsMapper extends MultiTableMapper
     public function select(string $columns = "*", array $whereColumnsInfo = null, string $orderBy = null)
     {
         if ($whereColumnsInfo != null) {
-            $this->validateFilterColumns($whereColumnsInfo);
+            $this->validateWhere($whereColumnsInfo);
         }
         
         /** simply adding to the where clause below with the roles field will yield incomplete results, as not all roles for an administrator will be selected, so the subquery fn is called */

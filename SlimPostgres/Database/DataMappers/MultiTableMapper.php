@@ -28,9 +28,9 @@ abstract class MultiTableMapper implements TableMappers
     }
 
     // make sure each columnNameSql in columns
-    protected function validateFilterColumns(array $filterColumnsInfo)
+    protected function validateWhere(array $whereColumnsInfo)
     {
-        foreach ($filterColumnsInfo as $columnNameSql => $columnWhereInfo) {
+        foreach ($whereColumnsInfo as $columnNameSql => $columnWhereInfo) {
             if (!in_array($columnNameSql, $this->selectColumns)) {
                 throw new \Exception("Invalid where column $columnNameSql");
             }

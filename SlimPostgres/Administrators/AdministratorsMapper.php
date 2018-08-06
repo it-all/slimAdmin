@@ -7,6 +7,7 @@ use SlimPostgres\ListViewMappers;
 use SlimPostgres\App;
 use SlimPostgres\Exceptions;
 use SlimPostgres\Utilities\Functions;
+use SlimPostgres\Database\Postgres;
 use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\Queries\SelectBuilder;
@@ -22,7 +23,7 @@ final class AdministratorsMapper extends MultiTableMapper
     const TABLE_NAME = 'administrators';
     const ROLES_TABLE_NAME = 'roles';
     const ADM_ROLES_TABLE_NAME = 'administrator_roles';
-    const ADMINISTRATORS_UPDATE_FIELDS = ['name', 'username', 'password'];
+    const ADMINISTRATORS_UPDATE_FIELDS = ['name', 'username', 'password', 'active'];
 
     const SELECT_COLUMNS = [
         'id' => self::TABLE_NAME . '.id',
@@ -30,7 +31,8 @@ final class AdministratorsMapper extends MultiTableMapper
         'username' => self::TABLE_NAME . '.username',
         'passwordHash' => self::TABLE_NAME . '.password_hash',
         'roles' => self::ROLES_TABLE_NAME . '.role',
-        'level' => self::ROLES_TABLE_NAME . '.level'
+        'level' => self::ROLES_TABLE_NAME . '.level',
+        'active' => self::TABLE_NAME . '.active'
     ];
 
     public static function getInstance()
@@ -53,14 +55,14 @@ final class AdministratorsMapper extends MultiTableMapper
     }
 
     // will be performing validation here. for now, assume validation has been performed
-    public function create(string $name, string $username, string $password, array $roleIds)
+    public function create(string $name, string $username, string $password, array $roleIds, bool $active)
     {
         // insert administrator then administrator_roles in a transaction
         $q = new QueryBuilder("BEGIN");
         $q->execute();
 
         try {
-            $administratorId = $this->insert($name, $username, $password);
+            $administratorId = $this->insert($name, $username, $password, $active);
         } catch (\Exception $e) {
             $q = new QueryBuilder("ROLLBACK");
             $q->execute();
@@ -99,9 +101,9 @@ final class AdministratorsMapper extends MultiTableMapper
         return password_hash($password, PASSWORD_DEFAULT);
     }
 
-    private function insert(string $name, string $username, string $password)
+    private function insert(string $name, string $username, string $password, bool $active)
     {
-        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash) VALUES($1, $2, $3)", $name, $username, $this->getHashedPassword($password));
+        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash, active) VALUES($1, $2, $3, $4)", $name, $username, $this->getHashedPassword($password), Postgres::convertBoolToPostgresBool($active));
         return $q->executeWithReturnField('id');
     }
 
@@ -122,9 +124,10 @@ final class AdministratorsMapper extends MultiTableMapper
                     App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME => $row['role'],
                     App::SESSION_ADMINISTRATOR_KEY_ROLES_LEVEL => $row['role_level']
                 ];
+                $active = $row['active'];
             }
 
-            return new Administrator((int) $id, $name, $username, $passwordHash, $roles);
+            return new Administrator((int) $id, $name, $username, $passwordHash, $roles, Postgres::convertPostgresBoolToBool($active));
 
         } else {
             return null;
@@ -221,7 +224,8 @@ final class AdministratorsMapper extends MultiTableMapper
             'name' => $record['name'],
             'username' => $record['username'],
             'passwordHash' => $record['password_hash'],
-            'roles' => [$record['role']]
+            'roles' => [$record['role']],
+            'active' => Postgres::convertPostgresBoolToBool($record['active']),
         ];
 
         $results[] = $newRecord;
@@ -274,7 +278,7 @@ final class AdministratorsMapper extends MultiTableMapper
     {
         $administrators = [];
         foreach ($this->selectArray(null, $whereColumnsInfo, $orderBy) as $administratorArray) {
-            $administrators[] = new Administrator($administratorArray['id'], $administratorArray['name'], $administratorArray['username'], $administratorArray['passwordHash'], $administratorArray['roles'], $authentication, $authorization);
+            $administrators[] = new Administrator($administratorArray['id'], $administratorArray['name'], $administratorArray['username'], $administratorArray['passwordHash'], $administratorArray['roles'], $administratorArray['active'], $authentication, $authorization);
         }
 
         return $administrators;
@@ -385,6 +389,8 @@ final class AdministratorsMapper extends MultiTableMapper
             if (array_key_exists($searchField, $changedFields)) {
                 if ($searchField == 'password') {
                     $changedAdministratorFields['password_hash'] = $this->getHashedPassword($changedFields['password']);
+                } elseif ($searchField == 'active') {
+                    $changedAdministratorFields['active'] = Postgres::convertBoolToPostgresBool($changedFields['active']);
                 } else {
                     $changedAdministratorFields[$searchField] = $changedFields[$searchField];
                 }
@@ -415,6 +421,7 @@ final class AdministratorsMapper extends MultiTableMapper
             }
         }
         $q = new QueryBuilder("END");
+        $sql = $q->getSql();
         $q->execute();
     }
 }

@@ -108,4 +108,9 @@ class FormHelper
             unset($_SESSION[self::SESSION_ERRORS_KEY]);
         }
     }
+
+    public static function getBoolForCheckboxField(?string $checkboxFieldInput): bool
+    {
+        return $checkboxFieldInput == 'on';
+    }
 }

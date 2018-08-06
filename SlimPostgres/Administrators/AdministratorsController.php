@@ -57,7 +57,7 @@ class AdministratorsController extends BaseController
         }
 
         try {
-            $administratorId = $this->administratorsMapper->create($input['name'], $input['username'], $input['password'], $input['roles']);
+            $administratorId = $this->administratorsMapper->create($input['name'], $input['username'], $input['password'], $input['roles'], FormHelper::getBoolForCheckboxField($input['active']));
         } catch (\Exception $e) {
             throw new \Exception("Administrator create failure. ".$e->getMessage());
         }
@@ -89,7 +89,7 @@ class AdministratorsController extends BaseController
 
         // check for changes made
         // only check the password if it has been supplied (entered in the form)
-        $changedFields = $administrator->getChangedFieldValues($input['name'], $input['username'], $input['roles'], mb_strlen($input['password']) > 0, $input['password']);
+        $changedFields = $administrator->getChangedFieldValues($input['name'], $input['username'], $input['roles'], FormHelper::getBoolForCheckboxField($input['active']), mb_strlen($input['password']) > 0, $input['password']);
 
         // if no changes made, display error message
         if (count($changedFields) == 0) {

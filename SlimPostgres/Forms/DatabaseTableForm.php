@@ -13,6 +13,7 @@ use It_All\FormFormer\Form;
 use SlimPostgres\Database\DataMappers\ColumnMapper;
 use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Database\DatabaseTableValidation;
+use SlimPostgres\Database\Postgres;
 
 class DatabaseTableForm extends Form
 {
@@ -163,6 +164,7 @@ class DatabaseTableForm extends Form
     }
 
     // static for access to column field only
+    // valueOverride for checkboxes should be 't' or 'f' to match postgres bool
     public static function getFieldFromDatabaseColumn(
         ColumnMapper $column,
         ?bool $isRequiredOverride = null,
@@ -274,7 +276,7 @@ class DatabaseTableForm extends Form
                     }
                     $fieldInfo['tag'] = 'input';
                     $fieldInfo['attributes']['type'] = 'checkbox';
-                    if ($value == 't') {
+                    if ($value == Postgres::BOOLEAN_TRUE) {
                         $fieldInfo['attributes']['checked'] = 'checked';
                     }
                     $formField = new CheckboxRadioInputField($fieldInfo['label'], FormHelper::getInputFieldAttributes($fieldInfo['attributes']['name'], $fieldInfo['attributes'], false), FormHelper::getFieldError($fieldInfo['attributes']['name']), true);

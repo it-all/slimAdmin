@@ -26,6 +26,7 @@ class AdministratorUpdateForm extends AdministratorForm
             parent::PASSWORD_FIELD_NAME => '',
             parent::PASSWORDCONFIRM_FIELD_NAME => '',
             parent::ROLES_FIELDSET_NAME => $administrator->getRoleIds(),
+            parent::ACTIVE_FIELD_NAME => $administrator->getActive(),
         ]);
     }
 }

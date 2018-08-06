@@ -11,6 +11,7 @@ use SlimPostgres\Security\Authorization\AuthorizationService;
 use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\ListViewModels;
 use SlimPostgres\Database\Queries\QueryBuilder;
+use SlimPostgres\Database\Postgres;
 
 // the model of an Administrator stored in the database, which includes the record from administrators, plus an array of assigned roles.
 class Administrator implements ListViewModels
@@ -30,17 +31,21 @@ class Administrator implements ListViewModels
     /** array [role_id => ['roleName' => 'owner', 'roleLevel' => 1], ...] */
     private $roles;
 
+    /** bool */
+    private $active;
+
     /** only used for certain functions. set in constructor or setAuth() */
     private $authentication;
     private $authorization;
 
-    public function __construct(int $id, string $name, string $username, string $passwordHash, array $roles, ?AuthenticationService $authentication = null, ?AuthorizationService $authorization = null)
+    public function __construct(int $id, string $name, string $username, string $passwordHash, array $roles, bool $active, ?AuthenticationService $authentication = null, ?AuthorizationService $authorization = null)
     {
         $this->id = $id;
         $this->name = $name;
         $this->username = $username;
         $this->passwordHash = $passwordHash;
         $this->roles = $roles;
+        $this->active = $active;
 
         $this->authentication = $authentication;
         $this->authorization = $authorization;
@@ -74,6 +79,11 @@ class Administrator implements ListViewModels
         return $this->roles;
     }
 
+    public function getActive(): bool
+    {
+        return $this->active;
+    }
+
     public function getRoleIds(): array 
     {
         return array_keys($this->roles);
@@ -84,7 +94,7 @@ class Administrator implements ListViewModels
         return $this->authorization;
     }
 
-    public function getChangedFieldValues(string $name, string $username, ?array $roles, bool $includePassword = true, ?string $password = null): array 
+    public function getChangedFieldValues(string $name, string $username, ?array $roles, bool $active, bool $includePassword = true, ?string $password = null): array 
     {
         $changedFieldValues = [];
 
@@ -97,6 +107,10 @@ class Administrator implements ListViewModels
 
         if ($includePassword && !password_verify($password, $this->getPasswordHash())) {
             $changedFieldValues['passwordHash'] = $password;
+        }
+
+        if ($this->active !== $active) {
+            $changedFieldValues['active'] = $active;
         }
 
         // roles - only add to main array if changed
@@ -135,7 +149,7 @@ class Administrator implements ListViewModels
 
     public function getChangedFieldsString(array $changedFields): string 
     {
-        $allowedChangedFieldsKeys = ['name', 'username', 'roles', 'password'];
+        $allowedChangedFieldsKeys = ['name', 'username', 'roles', 'password', 'active'];
 
         $changedString = "";
 
@@ -185,7 +199,8 @@ class Administrator implements ListViewModels
             'id' => $this->id,
             'name' => $this->name,
             'username' => $this->username,
-            'roles' => implode(", ", $this->roles)
+            'roles' => implode(", ", $this->roles),
+            'active' => Postgres::convertBoolToPostgresBool($this->active), // send 't' / 'f'
         ];
     }
 
@@ -272,5 +287,10 @@ class Administrator implements ListViewModels
         }
 
         return $this->id === $this->authentication->getAdministratorId();
+    }
+
+    public function isActive(): bool 
+    {
+        return $this->getActive;
     }
 }

@@ -14,6 +14,7 @@ use It_All\FormFormer\Form;
 use It_All\FormFormer\Fieldset;
 use It_All\FormFormer\Fields\InputField;
 use It_All\FormFormer\Fields\InputFields\CheckboxRadioInputField;
+use SlimPostgres\Database\Postgres;
 
 abstract class AdministratorForm
 {
@@ -31,6 +32,7 @@ abstract class AdministratorForm
     private $passwordValue;
     private $passwordConfirmationValue;
     private $rolesValue; /** @var array */
+    private $activeValue; /** @var bool */
     protected $passwordLabel;
     protected $arePasswordFieldsRequired; /** @var bool */
 
@@ -39,6 +41,7 @@ abstract class AdministratorForm
     const PASSWORD_FIELD_NAME = 'password';
     const PASSWORDCONFIRM_FIELD_NAME = 'password_confirm';
     const ROLES_FIELDSET_NAME = 'roles';
+    const ACTIVE_FIELD_NAME = 'active';
 
     public static function getFields(): array
     {
@@ -47,7 +50,8 @@ abstract class AdministratorForm
             self::USERNAME_FIELD_NAME,
             self::PASSWORD_FIELD_NAME,
             self::PASSWORDCONFIRM_FIELD_NAME,
-            self::ROLES_FIELDSET_NAME
+            self::ROLES_FIELDSET_NAME,
+            self::ACTIVE_FIELD_NAME,
         ];
     }
     
@@ -63,10 +67,16 @@ abstract class AdministratorForm
     protected function setFieldValues(array $fieldValues = [])
     {
         $this->nameValue = (isset($fieldValues[self::NAME_FIELD_NAME])) ? $fieldValues[self::NAME_FIELD_NAME] : '';
+
         $this->usernameValue = (isset($fieldValues[self::USERNAME_FIELD_NAME])) ? $fieldValues[self::USERNAME_FIELD_NAME] : '';
+
         $this->passwordValue = (isset($fieldValues[self::PASSWORD_FIELD_NAME])) ? $fieldValues[self::PASSWORD_FIELD_NAME] : '';
+
         $this->passwordConfirmationValue = (isset($fieldValues[self::PASSWORDCONFIRM_FIELD_NAME])) ? $fieldValues[self::PASSWORDCONFIRM_FIELD_NAME] : '';
+
         $this->rolesValue = (isset($fieldValues[self::ROLES_FIELDSET_NAME])) ? $fieldValues[self::ROLES_FIELDSET_NAME] : [];
+
+        $this->activeValue = (isset($fieldValues[self::ACTIVE_FIELD_NAME])) ? $fieldValues[self::ACTIVE_FIELD_NAME] : '';
     }
 
     private function getNameField()
@@ -120,14 +130,20 @@ abstract class AdministratorForm
         }
         
         return new Fieldset($rolesCheckboxes, [], true, 'Roles', null, FormHelper::getFieldError(self::ROLES_FIELDSET_NAME, true));
-
     }
+
+    private function getActiveField()
+    {
+        return DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName('active'), null, Postgres::convertBoolToPostgresBool($this->activeValue));
+    }
+
     protected function getNodes(): array 
     {
         $nodes = [];
         if ($this->formMethod == 'put') {
             $nodes[] = FormHelper::getPutMethodField();
         }
+        $nodes[] = $this->getActiveField();
         $nodes[] = $this->getNameField();
         $nodes[] = $this->getUsernameField();
         $this->setPasswordFields($nodes);

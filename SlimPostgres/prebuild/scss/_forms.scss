@@ -21,7 +21,8 @@ input, select, textarea, button, meter, progress, output {
   color: black;
   font-size: 1em;
   padding: .2em;
-  margin: .1em .5em 1em .1em;
+  margin-bottom: 1em;
+  // margin: .1em .5em 1em .1em;
 }
 
 .inlineFormField {
@@ -34,6 +35,7 @@ input, select, textarea, button, meter, progress, output {
 .afterLabel {
   display: inline-block;
   //margin: 0 0 1em 1.5em;
+  margin-left: .2em;
   margin-right: 2em;
   //vertical-align: middle;
 }
@@ -45,8 +47,9 @@ input[type="checkbox"] {
   -webkit-transform: scale(1.6); /* Safari and Chrome */
   -o-transform: scale(1.6); /* Opera */
   //vertical-align: top;
-  //margin: .4em 1em 1.1em .6em;
-  //padding: 10px;
+  // margin: .4em 1em 1.1em .6em;
+  // padding: 10px;
+  margin-left: .3em;
 }
 
 input[type="submit"] {
@@ -59,7 +62,7 @@ input[type="submit"] {
 label {
   color: $formLabelColor;
   font-size: 1em;
-  margin: 0 .3em 0 .2em;
+  margin: 0 .3em 0 0;
 }
 
 .fieldRequired {

@@ -98,4 +98,18 @@ Class Postgres
 
         return $rs;
     }
+
+    public static function convertPostgresBoolToBool(string $pgBool): bool 
+    {
+        if ($pgBool !== self::BOOLEAN_TRUE && $pgBool !== self::BOOLEAN_FALSE) {
+            throw new \InvalidArgumentException("pgBool must be valid postgres boolean");
+        }
+
+        return $pgBool === self::BOOLEAN_TRUE;
+    }
+
+    public static function convertBoolToPostgresBool(bool $bool): string 
+    {
+        return ($bool) ? self::BOOLEAN_TRUE : self::BOOLEAN_FALSE;
+    }
 }

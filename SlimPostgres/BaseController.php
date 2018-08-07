@@ -78,7 +78,7 @@ abstract class BaseController
             $this->storeFilterColumnsInfoInSession($filterColumnsInfo, $view);
             $this->repopulateFilterField($view);
 
-            return $view->indexView($response, false, $this->requestInput[$view->getSessionFilterFieldKey()]);
+            return $view->indexView($response, false);
         }
     }
 
@@ -138,14 +138,12 @@ abstract class BaseController
                 }
 
                 if (!isset($filterColumnsInfo[$columnNameSql])) {
-                    $filterColumnsInfo[$columnNameSql] = [
-                        'operators' => [$whereOperator],
-                        'values' => [$whereValue]
-                    ];
-                } else {
-                    $filterColumnsInfo[$columnNameSql]['operators'][] = $whereOperator;
-                    $filterColumnsInfo[$columnNameSql]['values'][] = $whereValue;
+                    $filterColumnsInfo[$columnNameSql] = [];
+                    $filterColumnsInfo[$columnNameSql]['operators'] = [];
+                    $filterColumnsInfo[$columnNameSql]['values'] = [];
                 }
+                $filterColumnsInfo[$columnNameSql]['operators'][] = $whereOperator;
+                $filterColumnsInfo[$columnNameSql]['values'][] = $whereValue;
             }
         }
 

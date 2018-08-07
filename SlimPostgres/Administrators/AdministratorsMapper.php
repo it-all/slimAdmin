@@ -166,7 +166,7 @@ final class AdministratorsMapper extends MultiTableMapper
         return $this->getObject($whereColumnsInfo);
     }
 
-    public function getObjectByUsername(string $username): ?Administrator
+    public function getObjectByUsername(string $username, bool $activeOnly = true): ?Administrator
     {
         $whereColumnsInfo = [
             'administrators.username' => [
@@ -174,6 +174,12 @@ final class AdministratorsMapper extends MultiTableMapper
                 'values' => [$username]
             ]
         ];
+        if ($activeOnly) {
+            $whereColumnsInfo['administrators.active'] = [
+                'operators' => ["="],
+                'values' => [Postgres::BOOLEAN_TRUE]
+            ];
+        }
         return $this->getObject($whereColumnsInfo);
     }
 

@@ -89,7 +89,7 @@ class QueryBuilder extends Postgres
         if (!$result = pg_query_params($this->sql, $this->args)) {
             // note pg_last_error seems to often not return anything
             $msg = pg_last_error() . " " . $this->sql . PHP_EOL . " Args: " . var_export($this->args, true);
-            throw new QueryFailureException($msg);
+            throw new QueryFailureException($msg, E_ERROR);
         }
 
         $this->resetQuery(); // prevent accidental multiple execution

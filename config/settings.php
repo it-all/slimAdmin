@@ -77,8 +77,6 @@ return [
 
     ],
 
-    'administratorDefaultRole' => 'user',
-
     // if true removes leading and trailing blank space on all inputs
     'trimAllUserInput' => true,
 

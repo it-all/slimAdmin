@@ -60,7 +60,7 @@ abstract class AdminListView extends AdminView
         return $this->filterKey;
     }
 
-    protected function setInsert($insertLinkInfo)
+    protected function setInsert(?array $insertLinkInfo)
     {
         $this->insertLinkInfo = $insertLinkInfo;
     }

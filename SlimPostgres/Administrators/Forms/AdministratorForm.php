@@ -43,6 +43,9 @@ abstract class AdministratorForm
     const ROLES_FIELDSET_NAME = 'roles';
     const ACTIVE_FIELD_NAME = 'active';
 
+    /** bool, controls whether insert checkbox defaults to checked (true) or unchecked (false) */
+    const DEFAULT_ACTIVE_VALUE = false;
+
     public static function getFields(): array
     {
         return [
@@ -76,7 +79,7 @@ abstract class AdministratorForm
 
         $this->rolesValue = (isset($fieldValues[self::ROLES_FIELDSET_NAME])) ? $fieldValues[self::ROLES_FIELDSET_NAME] : [];
 
-        $this->activeValue = (isset($fieldValues[self::ACTIVE_FIELD_NAME])) ? $fieldValues[self::ACTIVE_FIELD_NAME] : '';
+        $this->activeValue = (isset($fieldValues[self::ACTIVE_FIELD_NAME])) ? $fieldValues[self::ACTIVE_FIELD_NAME] : self::DEFAULT_ACTIVE_VALUE;
     }
 
     private function getNameField()

@@ -1,6 +1,8 @@
 <?php
 
-function navSection($key, $navItem, $router)
+use Slim\Router;
+
+function navSection($key, $navItem, Router $router)
 {
     $navSection = '<li>';
 

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Templates\Admin\Lists;
 
+use Slim\Router;
+
 abstract class ListTemplate
 {
     protected $title;
@@ -34,7 +36,7 @@ abstract class ListTemplate
 
     protected $numResults;
 
-    public function __construct(string $title, $router, int $columnCount, bool $deletesPermitted, array $displayItems, ?array $insertLinkInfo, string $sortColumn, bool $sortByAsc, string $filterFormActionRoute, string $filterOpsList, string $filterValue, string $filterErrorMessage, string $filterFieldName, bool $isFiltered, string $resetFilterRoute, string $csrfNameKey, string $csrfName, string $csrfValueKey, string $csrfValue, bool $updatesPermitted, ?string $updateColumn, ?string $updateRoute, ?string $deleteRoute, array $headerFields)
+    public function __construct(string $title, Router $router, int $columnCount, bool $deletesPermitted, array $displayItems, ?array $insertLinkInfo, string $sortColumn, bool $sortByAsc, string $filterFormActionRoute, string $filterOpsList, string $filterValue, string $filterErrorMessage, string $filterFieldName, bool $isFiltered, string $resetFilterRoute, string $csrfNameKey, string $csrfName, string $csrfValueKey, string $csrfValue, bool $updatesPermitted, ?string $updateColumn, ?string $updateRoute, ?string $deleteRoute, array $headerFields)
     {
         $this->title = $title;
         $this->router = $router;
@@ -119,10 +121,11 @@ EOT;
         $ffError = (mb_strlen($this->filterErrorMessage) > 0) ? '<span class="ffErrorMsg">'.$this->filterErrorMessage.'</span>' : '';
         $ffReset = ($this->isFiltered) ? '<a href="'.$this->router->pathFor($this->resetFilterRoute).'">reset</a>' : '';
 
+        $filterValue = htmlspecialchars($this->filterValue, ENT_QUOTES|ENT_HTML5);
         $filterForm = <<< EOT
 <form name="filter" method="post" style="display: inline" action="$ffAction">
     SELECT WHERE
-    <input type="text" name="$this->filterFieldName" value="$this->filterValue" size="58" maxlength="500" placeholder="field1:op:val1[,field2...] op in [$this->filterOpsList]" required>
+    <input type="text" name="$this->filterFieldName" value="$filterValue" size="58" maxlength="500" placeholder="field1:op:val1[,field2...] op in [$this->filterOpsList]" required>
     <input type="submit" value="Filter">
     $ffError
     $ffReset

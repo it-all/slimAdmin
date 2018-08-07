@@ -68,7 +68,7 @@ abstract class BaseController
 
         if (null === $filterColumnsInfo = $this->getFilterColumns($view->getSessionFilterFieldKey(), $listViewColumns)) {
 
-            // redisplay form with error (error set in getFilterColumns)
+            /** redisplay form with error (error set in getFilterColumns) */
             $this->repopulateFilterField($view);
             return $view->indexView($response);
 

@@ -59,15 +59,15 @@ return [
         // Important to properly match the indexes to routes authorization
         // The role values must be in the database: roles.role
         // If the index is not defined for a route or nav section, no authorization check is performed (all administrators (logged in users) will be able to access resource or view nav section). therefore, indexes only need to be defined for routes and nav sections that require authorization greater than the base (least permission) role.
-        // Note also that it's possible to give a role access to a resource, but then hide the navigation to to that resource to that role, which would usually be undesirable. For example, below the bookkeeper is authorized to view System Events, but will not see the System nav section because of the NAV_ADMIN_SYSTEM entry permissions being set to 'owner'
+        // Note also that it's possible to give a role access to a resource, but then hide the navigation to to that resource to that role, which would usually be undesirable. 
         'administratorPermissions' => [
             ROUTE_LOGIN_ATTEMPTS => ['owner', 'director'],
             ROUTE_SYSTEM_EVENTS => 'bookkeeper',
             ROUTE_ADMINISTRATORS => 'bookkeeper',
-            ROUTE_ADMINISTRATORS_RESET => 'bookkeeper',
-            ROUTE_ADMINISTRATORS_INSERT => 'bookkeeper',
-            ROUTE_ADMINISTRATORS_UPDATE => 'bookkeeper',
-            ROUTE_ADMINISTRATORS_DELETE => 'bookkeeper',
+            ROUTE_ADMINISTRATORS_RESET => 'director',
+            ROUTE_ADMINISTRATORS_INSERT => 'director',
+            ROUTE_ADMINISTRATORS_UPDATE => 'director',
+            ROUTE_ADMINISTRATORS_DELETE => 'director',
             ROUTE_ADMINISTRATORS_ROLES => 'director',
             ROUTE_ADMINISTRATORS_ROLES_INSERT => 'director',
             ROUTE_ADMINISTRATORS_ROLES_UPDATE => 'director',

@@ -94,9 +94,15 @@ class AuthenticationService
     public function attemptLogin(string $username, string $password): bool
     {
         $administratorsMapper = AdministratorsMapper::getInstance();
-        // check if active administrator exists
-        if (null === $administrator = $administratorsMapper->getObjectByUsername($username)) {
+        // check if administrator exists
+        if (null === $administrator = $administratorsMapper->getObjectByUsername($username, false)) {
             $this->loginFailed($username, null);
+            return false;
+        }
+
+        // verify administrator is active
+        if (!$administrator->isActive()) {
+            $this->loginFailed($username, $administrator);
             return false;
         }
 

@@ -46,10 +46,7 @@ final class LoginAttemptsMapper extends TableMapper
 
     private function insertLoginAttempt(bool $success, string $username, ?int $administratorId)
     {
-        // bool must be converted to pg bool format
-        $successPg = ($success) ? Postgres::BOOLEAN_TRUE : Postgres::BOOLEAN_TRUE;
-
-        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (administrator_id, username, ip, success, created) VALUES($1, $2, $3, $4, NOW())", $administratorId, $username, $_SERVER['REMOTE_ADDR'], $successPg);
+        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (administrator_id, username, ip, success, created) VALUES($1, $2, $3, $4, NOW())", $administratorId, $username, $_SERVER['REMOTE_ADDR'], Postgres::convertBoolToPostgresBool($success));
         return $q->execute();
     }
 

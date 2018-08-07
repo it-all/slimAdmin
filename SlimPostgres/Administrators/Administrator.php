@@ -291,6 +291,6 @@ class Administrator implements ListViewModels
 
     public function isActive(): bool 
     {
-        return $this->getActive;
+        return $this->getActive();
     }
 }

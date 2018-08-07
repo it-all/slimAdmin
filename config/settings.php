@@ -63,7 +63,7 @@ return [
         'administratorPermissions' => [
             ROUTE_LOGIN_ATTEMPTS => ['owner', 'director'],
             ROUTE_SYSTEM_EVENTS => 'bookkeeper',
-            ROUTE_ADMINISTRATORS => 'bookkeeper',
+            ROUTE_ADMINISTRATORS => 'manager',
             ROUTE_ADMINISTRATORS_RESET => 'director',
             ROUTE_ADMINISTRATORS_INSERT => 'director',
             ROUTE_ADMINISTRATORS_UPDATE => 'director',

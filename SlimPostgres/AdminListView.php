@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres;
 
 use SlimPostgres\App;
+use SlimPostgres\Exceptions\QueryFailureException;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\DataMappers\TableMappers;
 use SlimPostgres\Forms\FormHelper;
@@ -99,13 +100,29 @@ abstract class AdminListView extends AdminView
             return $this->resetFilter($response, $this->indexRoute);
         }
 
+        /** if display items have not been passed in, get them from the mapper */
         if ($displayItems === null) {
-            $filterColumnsInfo = $this->getFilterColumnsInfo();
-            if (!$displayItems = pg_fetch_all($pgResults = $this->mapper->select($this->mapper->getSelectColumnsString(), $filterColumnsInfo))) {
-                $displayItems = [];
+
+            /** squelch the sql warning in case of ill-formed filter field and catch the exception instead in order to alert the administrator of mistake. note, ideally any value that causes a query failure will be invalidated in the controller, but this is an extra measure of avoiding an unhandled exception while still logging/displaying the alert */
+            if (null !== $filterColumnsInfo = $this->getFilterColumnsInfo()) {
+                try {
+                    $pgResults = @$this->mapper->select($this->mapper->getSelectColumnsString(), $filterColumnsInfo);
+                } catch (QueryFailureException $e) {
+                    $this->systemEvents->insertAlert("List View Filter Query Failure", (int) $this->authentication->getAdministratorId(), $e->getMessage());
+                    $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Query Failure", App::STATUS_ADMIN_NOTICE_FAILURE];
+                    $displayItems = [];
+                }
+            } else {
+                $pgResults = $this->mapper->select($this->mapper->getSelectColumnsString());
             }
-    
-            pg_free_result($pgResults);
+
+            if (isset($pgResults)) {
+                if (!$displayItems = pg_fetch_all($pgResults)) {
+                    /** no results for query */
+                    $displayItems = [];
+                }
+                pg_free_result($pgResults);
+            }
         }
 
         /** save error in var prior to unsetting */

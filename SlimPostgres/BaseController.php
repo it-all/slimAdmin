@@ -69,14 +69,14 @@ abstract class BaseController
         if (null === $filterColumnsInfo = $this->getFilterColumns($view->getSessionFilterFieldKey(), $listViewColumns)) {
 
             /** redisplay form with error (error set in getFilterColumns) */
-            $this->repopulateFilterField($view);
+            $this->storeFilterFieldValueInSession($view);
             return $view->indexView($response);
 
         } else {
 
             /** store parsed info and field value in session to remember filtration */
             $this->storeFilterColumnsInfoInSession($filterColumnsInfo, $view);
-            $this->repopulateFilterField($view);
+            $this->storeFilterFieldValueInSession($view);
 
             return $view->indexView($response, false);
         }
@@ -87,7 +87,7 @@ abstract class BaseController
         $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$view->getFilterKey()][$view::SESSION_FILTER_COLUMNS_KEY] = $filterColumnsInfo;
     }
 
-    private function repopulateFilterField(AdminListView $view) 
+    private function storeFilterFieldValueInSession(AdminListView $view) 
     {
         /** store entered field value in session so form field can be repopulated */
         $_SESSION[App::SESSION_KEY_ADMIN_LIST_VIEW_FILTER][$view->getFilterKey()][$view::SESSION_FILTER_VALUE_KEY] = $this->requestInput[$view->getSessionFilterFieldKey()];

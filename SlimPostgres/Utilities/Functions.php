@@ -12,11 +12,6 @@ class Functions
         return substr($in, 0, strlen($in) - 1);
     }
 
-    static public function getIntOrNull(?string $input)
-    {
-        return ($input == null) ? null : (int) $input;
-    }
-
     /**
      * converts array to string
      * @param array $arr

@@ -39,7 +39,7 @@ class Role implements ListViewModels
     {
         return [
             'id' => $this->id,
-            'roleName' => $this->roleName,
+            'name' => $this->roleName,
             'level' => $this->level,
         ];
     }

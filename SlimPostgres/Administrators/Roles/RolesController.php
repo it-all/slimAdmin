@@ -18,6 +18,13 @@ class RolesController extends DatabaseTableController
         parent::__construct($container, RolesMapper::getInstance(), new RolesView($container), ROUTEPREFIX_ROLES);
     }
 
+    /** override to call objects view */
+    public function routePostIndexFilter(Request $request, Response $response, $args)
+    {
+        $this->setIndexFilter($request, $response, $args, $this->getListViewColumns(), $this->view);
+        return $this->view->indexViewObjects($response);
+    }
+
     // override to check exceptions
     protected function delete($primaryKey, ?string $returnColumn = null, ?string $emailTo = null)
     {

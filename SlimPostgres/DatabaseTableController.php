@@ -36,7 +36,7 @@ class DatabaseTableController extends BaseController
         return $this->mapper;
     }
 
-    private function getListViewColumns(): array
+    protected function getListViewColumns(): array
     {
         $listViewColumns = [];
         foreach ($this->mapper->getColumns() as $column) {

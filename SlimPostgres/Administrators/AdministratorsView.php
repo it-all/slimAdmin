@@ -63,9 +63,13 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
     /** get objects and send to parent indexView */
     public function indexViewObjects(Response $response, bool $resetFilter = false)
     {
+        if ($resetFilter) {
+            return $this->resetFilter($response, $this->indexRoute);
+        }
+
         $filterColumnsInfo = $this->getFilterColumnsInfo();
         $administrators = $this->mapper->getObjects($filterColumnsInfo, null, $this->authentication, $this->authorization);
-        return $this->indexView($response, $resetFilter, $administrators);
+        return $this->indexView($response, $administrators);
     }
 
     public function routeGetInsert(Request $request, Response $response, $args)

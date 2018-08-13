@@ -35,7 +35,11 @@ class RolesView extends DatabaseTableView implements ObjectsListViews
     /** get role objects and send to parent indexView */
     private function indexViewObjects(Response $response, bool $resetFilter = false)
     {
+        if ($resetFilter) {
+            return $this->resetFilter($response, $this->indexRoute);
+        }
+
         $filterColumnsInfo = $this->getFilterColumnsInfo();
-        return $this->indexView($response, $resetFilter, $this->mapper->getObjects($filterColumnsInfo));
+        return $this->indexView($response, $this->mapper->getObjects($filterColumnsInfo));
     }
 }

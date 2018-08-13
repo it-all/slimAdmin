@@ -158,9 +158,9 @@ final class SystemEventsMapper extends MultiTableMapper
 
         $orderBy = self::PRIMARY_TABLE_NAME.".created DESC";
 
-        if ($filterColumnsInfo != null) {
-            $this->validateFilterColumns($filterColumnsInfo);
-        }
+        // if ($filterColumnsInfo != null) {
+        //     $this->validateFilterColumns($filterColumnsInfo);
+        // }
 
         $q = new SelectBuilder($selectClause, $fromClause, $filterColumnsInfo, $orderBy);
         return $q->execute();

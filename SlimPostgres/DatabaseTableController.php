@@ -48,7 +48,8 @@ class DatabaseTableController extends BaseController
 
     public function routePostIndexFilter(Request $request, Response $response, $args)
     {
-        return $this->setIndexFilter($request, $response, $args, $this->getListViewColumns(), $this->view);
+        $this->setIndexFilter($request, $response, $args, $this->getListViewColumns(), $this->view);
+        return $this->view->indexView($response);
     }
 
     public function routePostInsert(Request $request, Response $response, $args)

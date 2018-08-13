@@ -61,7 +61,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
     }
 
     /** get objects and send to parent indexView */
-    private function indexViewObjects(Response $response, bool $resetFilter = false)
+    public function indexViewObjects(Response $response, bool $resetFilter = false)
     {
         $filterColumnsInfo = $this->getFilterColumnsInfo();
         $administrators = $this->mapper->getObjects($filterColumnsInfo, null, $this->authentication, $this->authorization);

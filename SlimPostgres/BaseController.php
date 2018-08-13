@@ -66,19 +66,11 @@ abstract class BaseController
             throw new \Exception("session filter input must be set");
         }
 
-        if (null === $filterColumnsInfo = $this->getFilterColumns($view->getSessionFilterFieldKey(), $listViewColumns)) {
+        $this->storeFilterFieldValueInSession($view);
 
-            /** redisplay form with error (error set in getFilterColumns) */
-            $this->storeFilterFieldValueInSession($view);
-            return $view->indexView($response);
-
-        } else {
-
-            /** store parsed info and field value in session to remember filtration */
+        /** if there is an error in the filter field getFilterColumns will set the form error and return null */
+        if (null !== $filterColumnsInfo = $this->getFilterColumns($view->getSessionFilterFieldKey(), $listViewColumns)) {
             $this->storeFilterColumnsInfoInSession($filterColumnsInfo, $view);
-            $this->storeFilterFieldValueInSession($view);
-
-            return $view->indexView($response, false);
         }
     }
 

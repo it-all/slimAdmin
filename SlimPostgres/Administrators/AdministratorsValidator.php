@@ -34,7 +34,7 @@ class AdministratorsValidator extends ValitronValidatorExtension
         }, 'Already exists');
 
         $this->rule('required', ['name', 'username', 'roles']);
-        $this->rule('regex', 'name', '%^[a-zA-Z\s]+$%')->message('must be letters and spaces only');
+        $this->rule('regex', 'name', '%^[a-zA-Z\s\'-]+$%')->message('only letters, apostrophes, hyphens, and spaces allowed');
         $this->rule('lengthMin', 'username', 4);
         if ($inserting || mb_strlen($inputData['password']) > 0) {
             $this->rule('required', ['password', 'password_confirm']);

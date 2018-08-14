@@ -120,7 +120,7 @@ class App
         );
 
         /** error handling */
-        $echoErrors = !$this->config['isLive'];
+        $echoErrors = $this->config['errors']['echoDev'];
         $emailErrors = $this->config['isLive'] || $this->config['errors']['emailDev'];
         $emailErrorsTo = [];
         foreach ($this->config['errors']['emailTo'] as $roleEmail) {

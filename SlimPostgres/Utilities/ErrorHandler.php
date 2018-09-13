@@ -92,7 +92,7 @@ class ErrorHandler
                     $systemEventType = 'error';
             }
 
-            $databaseErrorMessage = explode('Stack Trace:', $errorMessage)[0].'.See phpErrors.log for further details.';
+            $databaseErrorMessage = explode('Stack Trace:', $errorMessage)[0].'...See PHP error log for further details.';
 
             $administratorId = (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID])) ? (int) $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID] : null;
 

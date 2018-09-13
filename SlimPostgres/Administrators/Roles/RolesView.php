@@ -39,7 +39,14 @@ class RolesView extends DatabaseTableView implements ObjectsListViews
             return $this->resetFilter($response, $this->indexRoute);
         }
 
-        $filterColumnsInfo = $this->getFilterColumnsInfo();
-        return $this->indexView($response, $this->mapper->getObjects($filterColumnsInfo));
+        try {
+            $roles = $this->mapper->getObjects($this->getFilterColumnsInfo());
+        } catch (\Exception $e) {
+            $roles = [];
+            // warning is inserted when query fails
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Query Failure', App::STATUS_ADMIN_NOTICE_FAILURE];
+        }
+        
+        return $this->indexView($response, $roles);
     }
 }

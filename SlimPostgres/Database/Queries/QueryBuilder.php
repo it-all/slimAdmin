@@ -84,8 +84,7 @@ class QueryBuilder extends Postgres
         if ($alterBooleanArgs) {
             $this->alterBooleanArgs();
         }
-
-        // best to throw exception for failed call to stop further script execution or caller can use try/catch to handle
+        
         if (!$result = pg_query_params($this->sql, $this->args)) {
             // note pg_last_error seems to often not return anything
             $msg = pg_last_error() . " " . $this->sql . PHP_EOL . " Args: " . var_export($this->args, true);
@@ -98,7 +97,7 @@ class QueryBuilder extends Postgres
 
     /**
      * this should only be used with INSERT, UPDATE, and DELETE queries, and the query should include a RETURNING clause with the $returnField in it
-     * note that in practice RETURNING can include multiple fields or expressions. For these, simply call execute() and process the returned result
+     * note that in practice RETURNING can include multiple fields or expressions. For these, simply call execute() instead and process the returned result
      */
     public function executeWithReturnField(string $returnField)
     {

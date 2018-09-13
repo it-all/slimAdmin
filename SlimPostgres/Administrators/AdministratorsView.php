@@ -68,7 +68,14 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
         }
 
         $filterColumnsInfo = $this->getFilterColumnsInfo();
-        $administrators = $this->mapper->getObjects($filterColumnsInfo, null, $this->authentication, $this->authorization);
+        try {
+            $administrators = $this->mapper->getObjects($filterColumnsInfo, null, $this->authentication, $this->authorization);
+        } catch (\Exception $e) {
+            $administrators = [];
+            // warning is inserted when query fails
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Query Failure', App::STATUS_ADMIN_NOTICE_FAILURE];
+        }
+        
         return $this->indexView($response, $administrators);
     }
 

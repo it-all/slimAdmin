@@ -264,15 +264,15 @@ final class AdministratorsMapper extends MultiTableMapper
         }
 
         $administratorsArray = []; // populate with 1 entry per administrator with an array of roles
-        if ($pgResults = $this->select($selectColumns, $whereColumnsInfo, $orderBy)) {
-            if (pg_num_rows($pgResults) > 0) {
-                while ($record = pg_fetch_assoc($pgResults)) {
-                    // either add new administrator or just new role based on whether administrator already exists
-                    if (null !== $key = $this->getAdministratorsArrayKeyForId($administratorsArray, (int) $record['id'])) {
-                        $this->addRoleToAdministratorRoles($administratorsArray, $key, $record['role']);
-                    } else {
-                        $this->addRecordToArray($administratorsArray, $record);
-                    }
+
+        $pgResults = $this->select($selectColumns, $whereColumnsInfo, $orderBy);
+        if (pg_num_rows($pgResults) > 0) {
+            while ($record = pg_fetch_assoc($pgResults)) {
+                // either add new administrator or just new role based on whether administrator already exists
+                if (null !== $key = $this->getAdministratorsArrayKeyForId($administratorsArray, (int) $record['id'])) {
+                    $this->addRoleToAdministratorRoles($administratorsArray, $key, $record['role']);
+                } else {
+                    $this->addRecordToArray($administratorsArray, $record);
                 }
             }
         }

@@ -70,7 +70,7 @@ class DatabaseTableController extends BaseController
         }
 
         try {
-            $result = $this->mapper->insert($this->requestInput);
+            $insertResult = $this->mapper->insert($this->requestInput);
         } catch (\Exception $e) {
             throw new \Exception("Insert failure. ".$e->getMessage());
         }
@@ -80,8 +80,7 @@ class DatabaseTableController extends BaseController
         $eventNote = "";
 
         if (null !== $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName()) {
-            $insertedRecordId = $result;
-            $adminNotification .= " $insertedRecordId";
+            $adminNotification .= " $insertResult"; // if primary key is set the new id is returned by mapper insert method
             $eventNote = "$primaryKeyColumnName: $insertedRecordId";
         }
         
@@ -103,19 +102,22 @@ class DatabaseTableController extends BaseController
         return $booleanFieldNames;
     }
 
+    /** the table must have a primary key column defined */
     public function routePutUpdate(Request $request, Response $response, $args)
     {
         if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'update'))) {
             throw new \Exception('No permission.');
         }
 
+        $primaryKeyValue = $args['primaryKey'];
+
         $this->setRequestInput($request, DatabaseTableForm::getFieldNames($this->mapper), $this->getBooleanFieldNames());
 
         $redirectRoute = App::getRouteName(true, $this->routePrefix, 'index');
 
         // make sure there is a record for the primary key
-        if (!$record = $this->mapper->selectForPrimaryKey($args['primaryKey'])) {
-            return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->mapper, 'update');
+        if (!$record = $this->mapper->selectForPrimaryKey($primaryKeyValue)) {
+            return $this->databaseRecordNotFound($response, $primaryKeyValue, $this->mapper, 'update');
         }
 
         // if no changes made stay on page with error
@@ -135,10 +137,19 @@ class DatabaseTableController extends BaseController
         }
 
         try {
-            $this->update($response, $args, $changedColumnsValues, $record);
+            // $this->update($response, $args, $changedColumnsValues, $record);
+            $this->mapper->updateByPrimaryKey($changedColumnsValues, $primaryKeyValue);
         } catch (\Exception $e) {
             throw new \Exception("Update failure. ".$e->getMessage());
         }
+
+        $noteStart = "Updated " . $this->mapper->getTableName(false);
+        $adminNotification = "$noteStart $primaryKeyValue";
+        $eventNote = $this->mapper->getPrimaryKeyColumnName() . ": " . $primaryKeyValue;
+
+        $this->systemEvents->insertInfo($noteStart, (int) $this->authentication->getAdministratorId(), $eventNote);
+
+        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$adminNotification, App::STATUS_ADMIN_NOTICE_SUCCESS];
 
         return $response->withRedirect($this->router->pathFor($redirectRoute));
     }

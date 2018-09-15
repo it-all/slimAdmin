@@ -18,7 +18,8 @@ return [
         'fatalMessage' => 'Apologies, there has been an error on our site. We have been alerted and will correct it as soon as possible.',
         'logToDatabase' => true,
         'echoDev' => false, // echo on dev servers (note, live server will never echo)
-        'emailDev' => false // email on dev servers (note, live server will always email)
+        'emailDev' => false, // email on dev servers (note, live server will always email)
+        'phpErrorLogPath' => APPLICATION_ROOT_DIRECTORY . '/storage/logs/phpErrors.log',
     ],
 
     'domainUseWww' => false,

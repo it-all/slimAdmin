@@ -25,8 +25,6 @@ class App
     private $systemEventsMapper;
     private $mailer;
 
-    const PATH_PHP_ERRORS_LOG = APPLICATION_ROOT_DIRECTORY . '/storage/logs/phpErrors.log';
-
     /** session variable keys */
 
     const SESSION_KEY_LAST_ACTIVITY = 'lastActivity';
@@ -110,7 +108,7 @@ class App
         $phpMailerSmtpPort = (array_key_exists('PHPMAILER_SMTP_PORT', $this->environmentalVariables)) ? (int) $this->environmentalVariables['PHPMAILER_SMTP_PORT'] : null;
         $disableMailerSend = !$this->config['isLive'] && !$this->config['errors']['emailDev'];
         $this->mailer = new Utilities\PhpMailerService(
-            self::PATH_PHP_ERRORS_LOG,
+            $this->config['errors']['phpErrorLogPath'],
             $this->config['emails']['service'],
             $this->config['businessName'],
             $phpMailerProtocol,
@@ -128,7 +126,7 @@ class App
         }
 
         $errorHandler = new Utilities\ErrorHandler(
-            self::PATH_PHP_ERRORS_LOG,
+            $this->config['errors']['phpErrorLogPath'],
             $this->getRedirect(),
             $echoErrors,
             $emailErrors,
@@ -152,7 +150,7 @@ class App
          * any errors prior to this point will not be logged
          * even though the error handler logs errors, this ensures errors in the error handler itself or in this file after this point will be logged. note, if using slim error handling, this will log all php errors
          */
-        ini_set('error_log', self::PATH_PHP_ERRORS_LOG);
+        ini_set('error_log', $this->config['errors']['phpErrorLogPath']);
 
         /** 
          * set up and connect to postgres, which is used in error handler and container

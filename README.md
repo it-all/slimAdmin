@@ -103,7 +103,7 @@ protectXSS() or arrayProtectRecursive() should be called for any user-input data
 *Note this includes database data that has been input by any user, including through the admin  
   
 <a name="errLog">PHP Error Log</a>  
-PHP Errors with stack trace are logged to the file set in config['storage']['logs']['pathPhpErrors']  
+PHP Errors with stack trace are logged to the file set in config['storage']['errors']['phpErrorLogPath']  
   
 Miscellaneous Instructions  
 

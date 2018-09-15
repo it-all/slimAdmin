@@ -190,11 +190,7 @@ class TableMapper implements TableMappers
             $ib->setPrimaryKeyName($this->getPrimaryKeyColumnName());
         }
         $this->addColumnsToBuilder($ib, $columnValues);
-        try {
-            return $ib->execute();
-        } catch(\Exception $exception) {
-            throw $exception;
-        }
+        return $ib->execute();
     }
 
     public function getChangedColumnsValues(array $inputValues, array $record): array

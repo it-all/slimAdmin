@@ -70,10 +70,24 @@ class DatabaseTableController extends BaseController
         }
 
         try {
-            $this->insert();
+            $result = $this->mapper->insert($this->requestInput);
         } catch (\Exception $e) {
             throw new \Exception("Insert failure. ".$e->getMessage());
         }
+
+        $noteStart = "Inserted " . $this->mapper->getTableName(false);
+        $adminNotification = $noteStart;
+        $eventNote = "";
+
+        if (null !== $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName()) {
+            $insertedRecordId = $result;
+            $adminNotification .= " $insertedRecordId";
+            $eventNote = "$primaryKeyColumnName: $insertedRecordId";
+        }
+        
+        $this->systemEvents->insertInfo($noteStart, (int) $this->authentication->getAdministratorId(), $eventNote);
+
+        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$adminNotification, App::STATUS_ADMIN_NOTICE_SUCCESS];
 
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
@@ -148,26 +162,6 @@ class DatabaseTableController extends BaseController
 
         $redirectRoute = App::getRouteName(true, $this->routePrefix, $routeType);
         return $response->withRedirect($this->router->pathFor($redirectRoute));
-    }
-
-    /**
-     * $emailTo is an email title from $settings['emails']
-     */
-    protected function insert(?string $emailTo = null)
-    {
-        $res = $this->mapper->insert($this->requestInput);
-        $returned = pg_fetch_all($res);
-        $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
-        $insertedRecordId = $returned[0][$primaryKeyColumnName];
-        $tableName = $this->mapper->getTableName(false);
-
-        $this->systemEvents->insertInfo("Inserted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName:$insertedRecordId");
-
-        if ($emailTo !== null) {
-            $this->sendEventNotificationEmail("Inserted $tableName", $emailTo);
-        }
-
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted $tableName $insertedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
     }
 
     private function getChangedFieldsString(array $changedFields, array $record): string 

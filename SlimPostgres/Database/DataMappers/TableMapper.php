@@ -190,7 +190,7 @@ class TableMapper implements TableMappers
             $ib->setPrimaryKeyName($this->getPrimaryKeyColumnName());
         }
         $this->addColumnsToBuilder($ib, $columnValues);
-        return $ib->execute();
+        return $ib->runExecute();
     }
 
     public function getChangedColumnsValues(array $inputValues, array $record): array
@@ -233,7 +233,7 @@ class TableMapper implements TableMappers
     {
         $ub = new UpdateBuilder($this->tableName, $this->getPrimaryKeyColumnName(), $primaryKeyValue);
         $this->addColumnsToBuilder($ub, $updateColumnValues);
-        return $ub->execute();
+        return $ub->runExecute();
     }
 
     // returns query result

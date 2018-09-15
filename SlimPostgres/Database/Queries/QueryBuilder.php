@@ -99,10 +99,10 @@ class QueryBuilder extends Postgres
      * this should only be used with INSERT, UPDATE, and DELETE queries, and the query should include a RETURNING clause with the $returnField in it
      * note that in practice RETURNING can include multiple fields or expressions. For these, simply call execute() instead and process the returned result
      */
-    public function executeWithReturnField(string $returnField)
+    public function executeWithReturnField(string $returnField, bool $alterBooleanArgs = false)
     {
         $this->add(" RETURNING $returnField");
-        $result = $this->execute();
+        $result = $this->execute($alterBooleanArgs);
         if (pg_num_rows($result) > 0) {
             $returned = pg_fetch_all($result);
             if (!isset($returned[0][$returnField])) {

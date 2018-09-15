@@ -36,8 +36,5 @@ class InsertBuilder extends InsertUpdateBuilder
     public function setSql()
     {
         $this->sql = "INSERT INTO $this->dbTable ($this->columns) VALUES($this->values)";
-        if (isset($this->primaryKeyName)) {
-            $this->sql .= " RETURNING ".$this->primaryKeyName;
-        }
     }
 }

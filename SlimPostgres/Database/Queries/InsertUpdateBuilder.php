@@ -19,15 +19,19 @@ abstract class InsertUpdateBuilder extends QueryBuilder
     abstract public function setSql();
 
     /**
-     * executes query
+     * calls appropriate parent method to execute query
      * @return recordset
      */
-    public function execute(bool $alterBooleanArgs = false)
+    public function runExecute(bool $alterBooleanArgs = false)
     {
         if (!isset($this->sql)) {
             $this->setSql();
         }
-        return parent::execute($alterBooleanArgs);
+        if (isset($this->primaryKeyName)) {
+            return parent::executeWithReturnField($this->primaryKeyName, $alterBooleanArgs);
+        } else {
+            return parent::execute($alterBooleanArgs);
+        }
     }
 
     public function setPrimaryKeyName(string $name)

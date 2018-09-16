@@ -7,7 +7,7 @@ namespace SlimPostgres\Utilities;
 // A place to store php helper functions, not App-related functions
 class Functions
 {
-    static public function removeLastCharFromString(string $in): string 
+    public static function removeLastCharFromString(string $in): string 
     {
         return substr($in, 0, strlen($in) - 1);
     }
@@ -18,7 +18,7 @@ class Functions
      * @param int $level
      * @return string
      */
-    static public function arrayWalkToStringRecursive(array $arr, int $level = 0, int $maxLevel = 1000, $newLine = '<br>'): string
+    public static function arrayWalkToStringRecursive(array $arr, int $level = 0, int $maxLevel = 1000, $newLine = '<br>'): string
     {
         $out = "";
         $tabs = " ";
@@ -46,7 +46,7 @@ class Functions
     /**
      * Returns true if the current script is running from the command line (ie, CLI).
      */
-    static public function isRunningFromCommandLine(): bool
+    public static function isRunningFromCommandLine(): bool
     {
         return php_sapi_name() == 'cli';
     }

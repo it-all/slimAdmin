@@ -417,7 +417,7 @@ class App
     }
 
     /** because of route naming conventions, only send resourceType of post, put, or patch */
-    static public function getRouteName(bool $isAdmin = true, string $routePrefix = null, string $routeType = null, string $requestMethod = null)
+    public static function getRouteName(bool $isAdmin = true, string $routePrefix = null, string $routeType = null, string $requestMethod = null)
     {
         $routeName = '';
 

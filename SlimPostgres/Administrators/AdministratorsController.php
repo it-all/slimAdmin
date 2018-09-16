@@ -65,7 +65,7 @@ class AdministratorsController extends BaseController
 
         $this->systemEvents->insertInfo("Inserted Administrator", (int) $this->authentication->getAdministratorId(), "id:$administratorId");
 
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Inserted administrator $administratorId", App::STATUS_ADMIN_NOTICE_SUCCESS];
+        App::setAdminNotice("Inserted administrator $administratorId");
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS));
     }
 
@@ -94,7 +94,7 @@ class AdministratorsController extends BaseController
 
         // if no changes made, display error message
         if (count($changedFields) == 0) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made", App::STATUS_ADMIN_NOTICE_FAILURE];
+            App::setAdminNotice("No changes made", 'failure');
             return $this->view->updateView($request, $response, $args);
         }
 
@@ -119,8 +119,7 @@ class AdministratorsController extends BaseController
         }
 
         $this->systemEvents->insertInfo("Updated Administrator", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$administrator->getChangedFieldsString($changedFields, $administrator));
-
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated administrator $primaryKey", App::STATUS_ADMIN_NOTICE_SUCCESS];
+        App::setAdminNotice("Updated administrator $primaryKey");
         
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
     }
@@ -140,19 +139,18 @@ class AdministratorsController extends BaseController
             return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsMapper->getPrimaryTableMapper(), 'delete', 'Administrator');
         } catch (Exceptions\UnallowedActionException $e) {
             $this->systemEvents->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), App::STATUS_ADMIN_NOTICE_FAILURE];
+            App::setAdminNotice($e->getMessage(), 'failure');
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
         } catch (\Exception $e) {
             $this->systemEvents->insertError('Administrator Deletion Failure', (int) $this->authentication->getAdministratorId(), $e->getMessage());
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Deletion Failure', App::STATUS_ADMIN_NOTICE_FAILURE];
+            App::setAdminNotice('Delete Failed', 'failure');
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
         }
 
         $eventNote = $this->administratorsMapper->getPrimaryTableMapper()->getPrimaryKeyColumnName() . ":$primaryKey|username: $username";
         $this->systemEvents->insertInfo("Deleted Administrator", (int) $this->authentication->getAdministratorId(), $eventNote);
+        App::setAdminNotice("Deleted administrator $primaryKey(username: $username)");
 
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Deleted administrator $primaryKey(username: $username)", App::STATUS_ADMIN_NOTICE_SUCCESS];
-                
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
 }

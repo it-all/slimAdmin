@@ -21,9 +21,8 @@ trait ResponseUtilities
         // enter system event
         $this->systemEvents->insertWarning("Query Results Not Found", (int) $this->authentication->getAdministratorId(), $mapper->getPrimaryKeyColumnName().":$primaryKey|Table: ".$mapper->getTableName());
 
-        // set admin notice
         $noticeTitle = ($title != null) ? $title: 'Record';
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["$noticeTitle $primaryKey Not Found", App::STATUS_ADMIN_NOTICE_FAILURE];
+        App::setAdminNotice("$noticeTitle $primaryKey Not Found", 'failure');
         
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }

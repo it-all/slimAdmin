@@ -451,20 +451,11 @@ class App
 
     public static function setAdminNotice(string $text, string $status = 'success') 
     {
-    //     const STATUS_ADMIN_NOTICE_SUCCESS = 'adminNoticeSuccess';
-    // const STATUS_ADMIN_NOTICE_FAILURE = 'adminNoticeFailure';
-    // const STATUS_ADMIN_NOTICE_CAUTION = 'adminNoticeCaution';
-    // const STATUS_ADMIN_NOTICE_MUTED = 'adminNoticeMuted';
-
-        $statusValues = ['success, failure', 'caution', 'muted'];
+        $statusValues = ['success', 'failure', 'caution', 'muted'];
         if (!in_array($status, $statusValues)) {
-            throw new \InvalidArgumentException("Invalid status $status");
+            throw new \InvalidArgumentException("Invalid admin notice status $status");
         }
 
-        $conststr = "STATUS_ADMIN_NOTICE_".strtoupper($status);
-
-        $notstat = self::$conststr;
-
-        $_SESSION[self::SESSION_KEY_ADMIN_NOTICE] = ["$text", $notstat];
+        $_SESSION[self::SESSION_KEY_ADMIN_NOTICE] = ["$text", 'adminNotice'.ucfirst($status)];
     }
 }

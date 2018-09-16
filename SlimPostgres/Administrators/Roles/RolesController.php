@@ -37,18 +37,18 @@ class RolesController extends DatabaseTableController
         $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
 
         try {
-            $dbResult = $this->mapper->deleteByPrimaryKey($primaryKey, $returnColumn);
+            $dbResult = $this->mapper->deleteByPrimaryKey($primaryKey);
             $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName: $primaryKey");
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Deleted $tableName $primaryKey", App::STATUS_ADMIN_NOTICE_SUCCESS];
+            App::setAdminNotice("Deleted $tableName $primaryKey");
         } catch (Exceptions\UnallowedActionException $e) {
             $this->systemEvents->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), App::STATUS_ADMIN_NOTICE_FAILURE];
+            App::setAdminNotice($e->getMessage(), 'failure');
         } catch (Exceptions\QueryResultsNotFoundException $e) {
             $this->systemEvents->insertWarning('Query Results Not Found', (int) $this->authentication->getAdministratorId(), $e->getMessage());
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), App::STATUS_ADMIN_NOTICE_FAILURE];
+            App::setAdminNotice($e->getMessage(), 'failure');
         } catch (Exceptions\QueryFailureException $e) {
             $this->systemEvents->insertError('Query Failure', (int) $this->authentication->getAdministratorId(), $e->getMessage());
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Delete Failed', App::STATUS_ADMIN_NOTICE_FAILURE];
+            App::setAdminNotice('Delete Failed', 'failure');
         }
 
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));

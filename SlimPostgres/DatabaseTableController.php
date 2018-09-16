@@ -81,12 +81,11 @@ class DatabaseTableController extends BaseController
 
         if (null !== $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName()) {
             $adminNotification .= " $insertResult"; // if primary key is set the new id is returned by mapper insert method
-            $eventNote = "$primaryKeyColumnName: $insertedRecordId";
+            $eventNote = "$primaryKeyColumnName: $insertResult";
         }
         
         $this->systemEvents->insertInfo($noteStart, (int) $this->authentication->getAdministratorId(), $eventNote);
-
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$adminNotification, App::STATUS_ADMIN_NOTICE_SUCCESS];
+        App::setAdminNotice($adminNotification);
 
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
@@ -123,7 +122,7 @@ class DatabaseTableController extends BaseController
         // if no changes made stay on page with error
         $changedColumnsValues = $this->getMapper()->getChangedColumnsValues($this->requestInput, $record);
         if (count($changedColumnsValues) == 0) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["No changes made", App::STATUS_ADMIN_NOTICE_FAILURE];
+            App::setAdminNotice("No changes made", 'failure');
             return $this->view->updateView($request, $response, $args);
         }
 
@@ -147,8 +146,7 @@ class DatabaseTableController extends BaseController
         $eventNote = $this->mapper->getPrimaryKeyColumnName() . ": " . $primaryKeyValue;
 
         $this->systemEvents->insertInfo($noteStart, (int) $this->authentication->getAdministratorId(), $eventNote);
-
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$adminNotification, App::STATUS_ADMIN_NOTICE_SUCCESS];
+        App::setAdminNotice($adminNotification);
 
         return $response->withRedirect($this->router->pathFor($redirectRoute));
     }
@@ -166,12 +164,12 @@ class DatabaseTableController extends BaseController
         try {
             $dbResult = $this->mapper->deleteByPrimaryKey($primaryKey);
             $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName: $primaryKey");
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Deleted $tableName $primaryKey", App::STATUS_ADMIN_NOTICE_SUCCESS];
+            App::setAdminNotice("Deleted $tableName $primaryKey");
         } catch (Exceptions\QueryResultsNotFoundException $e) {
             $this->systemEvents->insertWarning('Delete Attempt on Non-existing Record', (int) $this->authentication->getAdministratorId(), "Table: $tableName|$primaryKeyColumnName: $primaryKey");
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["$tableName $primaryKey Not Found", App::STATUS_ADMIN_NOTICE_FAILURE];
+            App::setAdminNotice("$tableName $primaryKey Not Found", 'failure');
         } catch (Exceptions\QueryFailureException $e) {
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Deletion Query Failure', App::STATUS_ADMIN_NOTICE_FAILURE];
+            App::setAdminNotice('Deletion Query Failure', 'failure');
         }
 
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));

@@ -141,7 +141,7 @@ class AuthenticationService
     {
         $this->setAdministratorSession($administrator);
         unset($_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS]);
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Logged in", App::STATUS_ADMIN_NOTICE_SUCCESS];
+		App::setAdminNotice("Logged in");
         (LoginAttemptsMapper::getInstance())->insertSuccessfulLogin($administrator);
     }
 

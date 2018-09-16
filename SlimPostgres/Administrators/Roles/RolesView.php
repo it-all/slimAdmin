@@ -44,7 +44,7 @@ class RolesView extends DatabaseTableView implements ObjectsListViews
         } catch (\Exception $e) {
             $roles = [];
             // warning is inserted when query fails
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Query Failure', App::STATUS_ADMIN_NOTICE_FAILURE];
+            App::setAdminNotice('Query Failed', 'failure');
         }
         
         return $this->indexView($response, $roles);

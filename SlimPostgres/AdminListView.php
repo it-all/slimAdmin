@@ -101,7 +101,7 @@ abstract class AdminListView extends AdminView
                 $pgResults = @$this->mapper->select($this->mapper->getSelectColumnsString(), $filterColumnsInfo);
             } catch (QueryFailureException $e) {
                 $this->systemEvents->insertAlert("List View Filter Query Failure", (int) $this->authentication->getAdministratorId(), $e->getMessage());
-                $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Query Failure", App::STATUS_ADMIN_NOTICE_FAILURE];
+                App::setAdminNotice('Query Failed', 'failure');
                 $displayItems = [];
             }
         } else {

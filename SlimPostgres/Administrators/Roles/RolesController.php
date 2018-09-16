@@ -26,24 +26,31 @@ class RolesController extends DatabaseTableController
     }
 
     // override to check exceptions
-    protected function delete($primaryKey, ?string $returnColumn = null, ?string $emailTo = null)
+    public function routeGetDelete(Request $request, Response $response, $args)
     {
+        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'delete'))) {
+            throw new \Exception('No permission.');
+        }
+
+        $primaryKey = $args['primaryKey'];
+        $tableName = $this->mapper->getTableName(false);
+        $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
+
         try {
             $dbResult = $this->mapper->deleteByPrimaryKey($primaryKey, $returnColumn);
+            $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName: $primaryKey");
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Deleted $tableName $primaryKey", App::STATUS_ADMIN_NOTICE_SUCCESS];
         } catch (Exceptions\UnallowedActionException $e) {
             $this->systemEvents->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), App::STATUS_ADMIN_NOTICE_FAILURE];
-            throw $e;
         } catch (Exceptions\QueryResultsNotFoundException $e) {
             $this->systemEvents->insertWarning('Query Results Not Found', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$e->getMessage(), App::STATUS_ADMIN_NOTICE_FAILURE];
-            throw $e;
         } catch (Exceptions\QueryFailureException $e) {
             $this->systemEvents->insertError('Query Failure', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Delete Failed', App::STATUS_ADMIN_NOTICE_FAILURE];
-            throw $e;
         }
 
-        parent::deleted($dbResult, $primaryKey, $returnColumn, $emailTo);
+        return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
 }

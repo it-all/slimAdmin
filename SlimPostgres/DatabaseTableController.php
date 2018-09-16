@@ -137,7 +137,6 @@ class DatabaseTableController extends BaseController
         }
 
         try {
-            // $this->update($response, $args, $changedColumnsValues, $record);
             $this->mapper->updateByPrimaryKey($changedColumnsValues, $primaryKeyValue);
         } catch (\Exception $e) {
             throw new \Exception("Update failure. ".$e->getMessage());
@@ -156,23 +155,26 @@ class DatabaseTableController extends BaseController
 
     public function routeGetDelete(Request $request, Response $response, $args)
     {
-        return $this->deleteHelper($response, $args['primaryKey']);
-    }
-
-    /**
-     * this can be called by child classes
-     * $emailTo is an email title from $settings['emails']
-     */
-    public function deleteHelper(Response $response, $primaryKey, ?string $returnColumn = null, ?string $emailTo = null, $routeType = 'index')
-    {
         if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'delete'))) {
             throw new \Exception('No permission.');
         }
 
-        $this->delete($primaryKey, $returnColumn, $emailTo); // sets success or failure notices
+        $primaryKey = $args['primaryKey'];
+        $tableName = $this->mapper->getTableName(false);
+        $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
 
-        $redirectRoute = App::getRouteName(true, $this->routePrefix, $routeType);
-        return $response->withRedirect($this->router->pathFor($redirectRoute));
+        try {
+            $dbResult = $this->mapper->deleteByPrimaryKey($primaryKey);
+            $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName: $primaryKey");
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Deleted $tableName $primaryKey", App::STATUS_ADMIN_NOTICE_SUCCESS];
+        } catch (Exceptions\QueryResultsNotFoundException $e) {
+            $this->systemEvents->insertWarning('Delete Attempt on Non-existing Record', (int) $this->authentication->getAdministratorId(), "Table: $tableName|$primaryKeyColumnName: $primaryKey");
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["$tableName $primaryKey Not Found", App::STATUS_ADMIN_NOTICE_FAILURE];
+        } catch (Exceptions\QueryFailureException $e) {
+            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Deletion Query Failure', App::STATUS_ADMIN_NOTICE_FAILURE];
+        }
+
+        return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
 
     private function getChangedFieldsString(array $changedFields, array $record): string 
@@ -183,84 +185,5 @@ class DatabaseTableController extends BaseController
         }
 
         return substr($changedString, 0, strlen($changedString)-2);
-    }
-
-    /**
-     * $emailTo is an email title from $settings['emails']
-     */
-    protected function update(Response $response, $args, array $changedColumnValues = [], array $record = [], ?string $emailTo = null)
-    {
-        // get changed column values if not sent in arg. will need record too.
-        if (count($changedColumnValues) == 0) {
-            if (count($record) == 0) {
-                $record = $this->mapper->selectForPrimaryKey($args['primaryKey']);
-            }
-            $changedColumnValues = $this->mapper->getChangedColumnsValues($this->requestInput, $record);
-        }
-
-        $this->mapper->updateByPrimaryKey($changedColumnValues, $args['primaryKey']);
-
-        $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
-        $updatedRecordId = $args['primaryKey'];
-        $tableName = $this->mapper->getTableName(false);
-
-        $this->systemEvents->insertInfo("Updated $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName:$updatedRecordId|".$this->getChangedFieldsString($changedColumnValues, $record));
-
-        if ($emailTo !== null) {
-            $this->sendEventNotificationEmail("Updated $tableName", $emailTo);
-        }
-
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ["Updated $tableName $updatedRecordId", App::STATUS_ADMIN_NOTICE_SUCCESS];
-    }
-
-    /**
-     * $emailTo is an email title from $settings['emails']
-     */
-    protected function delete($primaryKey, ?string $returnColumn = null, ?string $emailTo = null)
-    {
-        try {
-            $dbResult = $this->mapper->deleteByPrimaryKey($primaryKey, $returnColumn);
-        } catch (Exceptions\QueryResultsNotFoundException $e) {
-
-            // enter system event
-            $this->systemEvents->insertWarning('Query Results Not Found', (int) $this->authentication->getAdministratorId(), $this->mapper->getPrimaryKeyColumnName().":$primaryKey|Table:".$this->mapper->getTableName());
-
-            // set admin notice
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$primaryKey.' not found', App::STATUS_ADMIN_NOTICE_FAILURE];
-            throw $e;
-
-        } catch (\Exception $e) {
-
-            $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = ['Deletion Failure', App::STATUS_ADMIN_NOTICE_FAILURE];
-            throw $e;
-            
-        }
-
-        $this->deleted($dbResult, $primaryKey, $returnColumn, $emailTo);
-    }
-
-    /**
-     * call after a record has been successfully deleted
-     * $emailTo is an email title from $settings['emails']
-     */
-    protected function deleted($dbResult, $primaryKey, ?string $returnColumn = null, ?string $emailTo = null)
-    {
-        $tableName = $this->mapper->getTableName(false);
-        $eventNote = $this->mapper->getPrimaryKeyColumnName().":$primaryKey";
-
-        $adminMessage = "Deleted $tableName $primaryKey";
-        if ($returnColumn != null) {
-            $returned = pg_fetch_all($dbResult);
-            $eventNote .= "|$returnColumn:".$returned[0][$returnColumn];
-            $adminMessage .= " ($returnColumn ".$returned[0][$returnColumn].")";
-        }
-
-        $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), $eventNote);
-
-        if ($emailTo !== null) {
-            $this->sendEventNotificationEmail("Deleted $tableName", $emailTo);
-        }
-
-        $_SESSION[App::SESSION_KEY_ADMIN_NOTICE] = [$adminMessage, App::STATUS_ADMIN_NOTICE_SUCCESS];
     }
 }

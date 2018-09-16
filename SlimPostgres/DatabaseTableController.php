@@ -75,7 +75,7 @@ class DatabaseTableController extends BaseController
             throw new \Exception("Insert failure. ".$e->getMessage());
         }
 
-        $noteStart = "Inserted " . $this->mapper->getTableName(false);
+        $noteStart = "Inserted " . $this->mapper->getFormalTableName(false);
         $adminNotification = $noteStart;
         $eventNote = "";
 
@@ -141,7 +141,7 @@ class DatabaseTableController extends BaseController
             throw new \Exception("Update failure. ".$e->getMessage());
         }
 
-        $noteStart = "Updated " . $this->mapper->getTableName(false);
+        $noteStart = "Updated " . $this->mapper->getFormalTableName(false);
         $adminNotification = "$noteStart $primaryKeyValue";
         $eventNote = $this->mapper->getPrimaryKeyColumnName() . ": " . $primaryKeyValue;
 
@@ -158,7 +158,7 @@ class DatabaseTableController extends BaseController
         }
 
         $primaryKey = $args['primaryKey'];
-        $tableName = $this->mapper->getTableName(false);
+        $tableName = $this->mapper->getFormalTableName(false);
         $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
 
         try {

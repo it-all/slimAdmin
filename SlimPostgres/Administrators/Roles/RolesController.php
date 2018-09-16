@@ -33,7 +33,7 @@ class RolesController extends DatabaseTableController
         }
 
         $primaryKey = $args['primaryKey'];
-        $tableName = $this->mapper->getTableName(false);
+        $tableName = $this->mapper->getFormalTableName(false);
         $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
 
         try {

@@ -42,19 +42,19 @@ abstract class MultiTableMapper implements TableMappers
         return $this->primaryTableMapper;
     }
 
-    public function getPrimaryTableName(bool $plural = true): string
+    public function getPrimaryTableName(): string
     {
-        return $this->primaryTableMapper->getFormalTableName($plural);
+        return $this->primaryTableMapper->getTableName();
     }
 
-    public function getTableName(bool $plural = true): string
+    public function getTableName(): string
     {
-        return $this->getPrimaryTableName($plural);
+        return $this->getPrimaryTableName();
     }
 
     public function getFormalTableName(bool $plural = true): string
     {
-        return $this->getPrimaryTableName($plural);
+        return $this->primaryTableMapper->getFormalTableName($plural);
     }
 
     public function getUpdateColumnName(): ?string

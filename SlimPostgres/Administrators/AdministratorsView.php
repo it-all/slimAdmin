@@ -37,7 +37,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
         parent::__construct($container, 'administrators', ROUTE_ADMINISTRATORS, AdministratorsMapper::getInstance(), ROUTE_ADMINISTRATORS_RESET, 'admin/lists/objectsList.php');
 
         $insertLinkInfo = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? [
-            'text' => 'Insert '.$this->mapper->getPrimaryTableName(false), 
+            'text' => 'Insert '.$this->mapper->getFormalTableName(false), 
             'route' => App::getRouteName(true, $this->routePrefix, 'insert')
         ] : null;
         $this->setInsert($insertLinkInfo);
@@ -93,7 +93,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
             $response,
             'admin/form.php',
             [
-                'title' => 'Insert '. $this->mapper->getPrimaryTableName(false),
+                'title' => 'Insert '. $this->mapper->getFormalTableName(false),
                 'form' => (new AdministratorInsertForm($formAction, $this->container, $fieldValues))->getForm(),
                 'navigationItems' => $this->navigationItems
             ]

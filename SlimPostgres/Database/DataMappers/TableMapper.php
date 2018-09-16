@@ -290,7 +290,7 @@ class TableMapper implements TableMappers
     // getters
 
     /**
-     * @param bool $plural if false last character is removed
+     * @param bool $plural - if false last character is removed
      * @return string
      */
     public function getFormalTableName(bool $plural = true): string
@@ -302,9 +302,9 @@ class TableMapper implements TableMappers
         return $name;
     }
 
-    public function getTableName(bool $plural = true): string
+    public function getTableName(): string
     {
-        return $this->getFormalTableName($plural);
+        return $this->tableName;
     }
 
     public function getPrimaryKeyColumnName(): ?string

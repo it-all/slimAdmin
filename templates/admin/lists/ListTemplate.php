@@ -154,7 +154,7 @@ EOT;
         return $resultsRows;
     }
 
-    protected function getCell(string $fieldName, $fieldValue, bool $showUpdateLink, ?string $primaryKeyValue): string 
+    protected function getCell(string $fieldName, string $fieldValue, bool $showUpdateLink, ?string $primaryKeyValue): string 
     {
         if ($showUpdateLink && $this->updateRoute == null) {
             throw new \Exception("Must have updateRoute");
@@ -164,8 +164,9 @@ EOT;
             throw new \Exception("Must have primaryKeyValue");
         }
 
+        $fieldOutput = htmlentities($fieldValue, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         // either the update link or just the value
-        $cellValue = ($fieldName == $this->updateColumn && $showUpdateLink) ? '<a href="'.$this->router->pathFor($this->updateRoute, ["primaryKey" => $primaryKeyValue]).'" title="update">'.$fieldValue.'</a>' : $fieldValue;
+        $cellValue = ($fieldName == $this->updateColumn && $showUpdateLink) ? '<a href="'.$this->router->pathFor($this->updateRoute, ["primaryKey" => $primaryKeyValue]).'" title="update">'.$fieldOutput.'</a>' : $fieldOutput;
     
         return '<td>'.$cellValue.'</td>';
     }
@@ -190,7 +191,7 @@ EOT;
         
         $bodyRow = '<tr id="row'.$rowNumber.'">';
         foreach ($fields as $fieldName => $fieldValue) {
-            $bodyRow .= $this->getCell($fieldName, $fieldValue, $showUpdateLink, $primaryKeyValue);
+            $bodyRow .= $this->getCell($fieldName, (string) $fieldValue, $showUpdateLink, $primaryKeyValue);
         }
         if ($this->deletesPermitted) {
             $bodyRow .= $this->getDeleteCell($showDeleteLink, $primaryKeyValue);

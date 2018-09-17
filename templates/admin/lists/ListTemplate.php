@@ -164,7 +164,7 @@ EOT;
             throw new \Exception("Must have primaryKeyValue");
         }
 
-        $fieldOutput = htmlentities($fieldValue, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $fieldOutput = htmlentities($fieldValue, ENT_QUOTES | ENT_HTML5);
         // either the update link or just the value
         $cellValue = ($fieldName == $this->updateColumn && $showUpdateLink) ? '<a href="'.$this->router->pathFor($this->updateRoute, ["primaryKey" => $primaryKeyValue]).'" title="update">'.$fieldOutput.'</a>' : $fieldOutput;
     

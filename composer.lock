@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "6ac510429b575a165bae68457ca031ce",
+    "content-hash": "6ff78ca11b94e1303ff89622071a959c",
     "packages": [
         {
             "name": "container-interop/container-interop",
@@ -39,16 +39,16 @@
         },
         {
             "name": "it-all/form-former",
-            "version": "v2.0.2",
+            "version": "v2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/it-all/FormFormer.git",
-                "reference": "27de028b78287e50390a1f56c15e2dc5359c2fb6"
+                "reference": "4fd25ec89324ec79033fc27d9d94500761c2cb09"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/it-all/FormFormer/zipball/27de028b78287e50390a1f56c15e2dc5359c2fb6",
-                "reference": "27de028b78287e50390a1f56c15e2dc5359c2fb6",
+                "url": "https://api.github.com/repos/it-all/FormFormer/zipball/4fd25ec89324ec79033fc27d9d94500761c2cb09",
+                "reference": "4fd25ec89324ec79033fc27d9d94500761c2cb09",
                 "shasum": ""
             },
             "require": {
@@ -65,7 +65,7 @@
                 "MIT"
             ],
             "description": "HTML5 Form Creation Tool in PHP (7.1+)",
-            "time": "2018-06-15T13:09:13+00:00"
+            "time": "2018-09-18T14:26:28+00:00"
         },
         {
             "name": "nikic/fast-route",

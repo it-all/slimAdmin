@@ -67,6 +67,11 @@ abstract class AdministratorForm
         $this->setFieldValues($fieldValues);
     }
 
+    protected function setPasswordLabel(string $midText = '') 
+    {
+        $this->passwordLabel = "Password $midText <a href='https://www.schneier.com/blog/archives/2014/03/choosing_secure_1.html' target='_blank'>info</a>";
+    }
+
     protected function setFieldValues(array $fieldValues = [])
     {
         $this->nameValue = (isset($fieldValues[self::NAME_FIELD_NAME])) ? $fieldValues[self::NAME_FIELD_NAME] : '';

@@ -12,7 +12,7 @@ class AdministratorInsertForm extends AdministratorForm
     {
         $this->formMethod = 'post';
         $this->arePasswordFieldsRequired = true;
-        $this->passwordLabel = "Password";
         parent::__construct($formAction, $container, $fieldValues);
+        parent::setPasswordLabel();
     }
 }

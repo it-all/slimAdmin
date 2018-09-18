@@ -31,7 +31,7 @@ $slim->get('/', HomeView::class . ':routeIndex')->setName(ROUTE_HOME);
 /////////////////////////////////////////
 // Routes that only non-authenticated users (Guests) can access
 
-$slim->get('/' . $config['adminPath'], AuthenticationView::class . ':getLogin')
+$slim->get('/' . $config['adminPath'], AuthenticationView::class . ':routeGetLogin')
     ->add(new GuestMiddleware($slimContainer))
     ->setName(ROUTE_LOGIN);
 

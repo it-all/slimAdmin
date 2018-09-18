@@ -12,7 +12,7 @@ use Slim\Http\Response;
 
 class AuthenticationView extends AdminView
 {
-    public function getLogin(Request $request, Response $response, $args)
+    public function routeGetLogin(Request $request, Response $response, $args)
     {
         if ($this->authentication->tooManyFailedLogins()) {
             return $response->withRedirect($this->router->pathFor(ROUTE_HOME));

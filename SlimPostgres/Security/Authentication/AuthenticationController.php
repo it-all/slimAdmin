@@ -24,7 +24,7 @@ class AuthenticationController extends BaseController
             FormHelper::setFieldErrors($validator->getFirstErrors());
             $av = new AuthenticationView($this->container);
             $args[App::USER_INPUT_KEY] = $this->requestInput;
-            return $av->getLogin($request, $response, $args);
+            return (new AuthenticationView($this->container))->routeGetLogin($request, $response, $args);
         }
 
         if (!$this->authentication->attemptLogin($username, $password)) {

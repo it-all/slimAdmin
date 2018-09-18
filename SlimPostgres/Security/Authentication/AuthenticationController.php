@@ -47,7 +47,7 @@ class AuthenticationController extends BaseController
 
             // redisplay the form with input values and error(s), and with 401 unauthenticated status
             $args = array_merge($args, ['status' => 401]);
-            return (new AuthenticationView($this->container))->getLogin($request, $response, $args);
+            return (new AuthenticationView($this->container))->routeGetLogin($request, $response, $args);
         }
 
         // successful login

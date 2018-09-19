@@ -7,7 +7,7 @@ use SlimPostgres\Database\Postgres;
 use SlimPostgres\Exceptions\QueryFailureException;
 use SlimPostgres\Exceptions\QueryResultsNotFoundException;
 
-class QueryBuilder extends Postgres
+class QueryBuilder
 {
     protected $sql;
     protected $args = array();
@@ -84,15 +84,36 @@ class QueryBuilder extends Postgres
         if ($alterBooleanArgs) {
             $this->alterBooleanArgs();
         }
-        
-        if (!$result = pg_query_params($this->sql, $this->args)) {
-            // note pg_last_error seems to often not return anything
-            $msg = pg_last_error() . " " . $this->sql . PHP_EOL . " Args: " . var_export($this->args, true);
+
+        $postgresConnection = (Postgres::getInstance())->getConnection();
+
+        $sendResult = pg_send_query_params($postgresConnection, $this->sql, $this->args);
+        $queryResult = pg_get_result($postgresConnection);
+    
+        if (!$sendResult) {
+            $msg = pg_result_error($queryResult) . " " . $this->sql;
+            if (count($this->args) > 0) {
+                $msg .= PHP_EOL . " Args: " . var_export($this->args, true);
+            }
             throw new QueryFailureException($msg, E_ERROR);
-        }
+        } 
 
         $this->resetQuery(); // prevent accidental multiple execution
-        return $result;
+        return $queryResult;
+
+
+        // if (!$result = pg_query_params($this->sql, $this->args)) {
+        //     // note pg_last_error seems to often not return anything
+        //     $msg = pg_last_error() . " " . $this->sql;
+        //     if (count($this->args) > 0) {
+        //         $msg .= PHP_EOL . " Args: " . var_export($this->args, true);
+        //     }
+
+        //     throw new QueryFailureException($msg, E_ERROR);
+        // }
+
+        // $this->resetQuery(); // prevent accidental multiple execution
+        // return $result;
     }
 
     /**

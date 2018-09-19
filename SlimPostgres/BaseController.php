@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres;
 
 use SlimPostgres\App;
+use SlimPostgres\Database\Postgres;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Forms\FormHelper;
 use Slim\Container;
@@ -47,9 +48,9 @@ abstract class BaseController
              */
             if (in_array($fieldName, $booleanFieldNames)) {
                 if ($this->requestInput[$fieldName] === null) {
-                    $this->requestInput[$booleanFieldName] = $this->database::BOOLEAN_FALSE;
+                    $this->requestInput[$booleanFieldName] = Postgres::BOOLEAN_FALSE;
                 } elseif ($this->requestInput[$fieldName] === 'on') {
-                    $this->requestInput[$booleanFieldName] = $this->database::BOOLEAN_TRUE;
+                    $this->requestInput[$booleanFieldName] = Postgres::BOOLEAN_TRUE;
                 } else {
                     throw new \Exception('Invalid value for boolean input var '.$booleanFieldName.': '.$this->requestInput[$booleanFieldName]);
                 }

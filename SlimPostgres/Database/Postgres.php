@@ -37,19 +37,27 @@ Class Postgres
     const BOOLEAN_FALSE = 'f';
     const BOOLEAN_TRUE = 't';
 
-    private $pgConn;
+    private static $connection;
 
-    /** host and password may not be necessary depending on hba.conf */
-    public function __construct(string $connectionString = '')
+    private function __construct(string $connectionString = '')
     {
-        if (!$this->pgConn = pg_connect($connectionString)) {
+        if (!self::$connection = pg_connect($connectionString)) {
             throw new \Exception('Postgres connection failure');
         }
-        pg_set_error_verbosity($this->pgConn, PGSQL_ERRORS_VERBOSE);
+        pg_set_error_verbosity(self::$connection, PGSQL_ERRORS_VERBOSE);
     }
 
-    public function getPgConn() {
-        return $this->pgConn;
+    public static function getInstance(string $connectionString = '')
+    {
+        static $instance = null;
+        if ($instance === null) {
+            $instance = new Postgres($connectionString);
+        }
+        return $instance;
+    }
+
+    public function getConnection(string $connectionString = '') {
+        return self::$connection;
     }
 
     /**

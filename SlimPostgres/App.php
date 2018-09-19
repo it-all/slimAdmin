@@ -101,7 +101,14 @@ class App
         mb_internal_encoding($this->config['mbInternalEncoding']); // so no need to set encoding for mb_strlen()
 
         /** add some .env to config */
-        $this->config['isLive'] = !in_array(strtolower($this->environmentalVariables['IS_LIVE']), [false, 0, 'false', '0', 'off', 'no']); // bool
+        // assume this is a live server unless IS_LIVE env var set false
+        $this->config['isLive'] = !(array_key_exists('IS_LIVE', $this->environmentalVariables) && $this->environmentalVariables['IS_LIVE'] === "0");
+
+        // echo errors on dev sites unless env var ERRORS_ECHO_DEV set false
+        $this->config['errors']['echoDev'] = !(array_key_exists('ERRORS_ECHO_DEV', $this->environmentalVariables) && $this->environmentalVariables['ERRORS_ECHO_DEV'] === "0");
+
+        // do not email error notifications on dev sites unless env var ERRORS_EMAIL_DEV set true
+        $this->config['errors']['emailDev'] = array_key_exists('ERRORS_EMAIL_DEV', $this->environmentalVariables) && $this->environmentalVariables['ERRORS_EMAIL_DEV'] === "1";
 
         /** set up emailer, which is used in error handler and container */
         $phpMailerSmtpHost = (array_key_exists('PHPMAILER_SMTP_HOST', $this->environmentalVariables)) ? $this->environmentalVariables['PHPMAILER_SMTP_HOST'] : null;
@@ -118,11 +125,16 @@ class App
         );
 
         /** error handling */
-        $echoErrors = $this->config['errors']['echoDev'];
+
+        /** only echo on dev sites */
+        $echoErrors = !$this->config['isLive'] && $this->config['errors']['echoDev'];
+
         $emailErrors = $this->config['isLive'] || $this->config['errors']['emailDev'];
         $emailErrorsTo = [];
-        foreach ($this->config['errors']['emailTo'] as $roleEmail) {
-            $emailErrorsTo[] = $this->config['emails'][$roleEmail];
+        if (array_key_exists('emailTo', $this->config['errors'])) {
+            foreach ($this->config['errors']['emailTo'] as $roleEmail) {
+                $emailErrorsTo[] = $this->config['emails'][$roleEmail];
+            }
         }
 
         $errorHandler = new Utilities\ErrorHandler(
@@ -158,7 +170,7 @@ class App
          * note, injected to error handler below
          */
         $postgresConnectionString = (array_key_exists('POSTGRES_CONNECTION_STRING', $this->environmentalVariables)) ? $this->environmentalVariables['POSTGRES_CONNECTION_STRING'] : '';
-        $this->database = new Postgres($postgresConnectionString);
+        $postgres = Postgres::getInstance($postgresConnectionString);
 
         /** used in error handler and container */
         $this->systemEventsMapper = SystemEventsMapper::getInstance();
@@ -201,7 +213,7 @@ class App
         $slim = new \Slim\App($this->getSlimSettings());
         $slimContainer = $slim->getContainer();
 
-        $this->setSlimDependences($slimContainer, $this->database, $this->systemEventsMapper, $this->mailer);
+        $this->setSlimDependences($slimContainer, $this->systemEventsMapper, $this->mailer);
 
         $this->removeSlimErrorHandler($slimContainer);
 
@@ -241,7 +253,7 @@ class App
         return $slimSettings;
     }
 
-    private function setSlimDependences($container, Postgres $database, SystemEventsMapper $systemEventsMapper, Utilities\PhpMailerService $mailer)
+    private function setSlimDependences($container, SystemEventsMapper $systemEventsMapper, Utilities\PhpMailerService $mailer)
     {
         /** Template */
         $container['view'] = function ($container) {
@@ -260,11 +272,6 @@ class App
                 'csrfValue' => $container->csrf->getTokenValue(),
             ];
             return new \Slim\Views\PhpRenderer($settings['templatesPath'], $templateVariables);
-        };
-
-        /** Database */
-        $container['database'] = function($container) use ($database) {
-            return $database;
         };
 
         /** Authentication */

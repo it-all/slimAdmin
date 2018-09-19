@@ -64,22 +64,22 @@ Reporting Methods:
     All error details are logged to $config['storage']['logs']['pathPhpErrors'].
 
 3. Echo
-    Live Servers*
+    Live Sites*
     Error details are never echoed, rather, a generic error message is echoed. For fatal errors, this message is set in $config['errors']['fatalMessage'].
 
-    Dev Servers*
-    Error details are echoed if $config['errors']['echoDev'] is true
+    Dev Sites*
+    Error details are echoed unless the environmental variable ERRORS_ECHO_DEV is set to 0.  
     
 4. Email
     For security, error details are never emailed.
 
-    Live Servers
+    Live Sites*
     All errors cause generic error notifications to be emailed to $config['errors']['emailTo'].
     
-    Dev Servers*
-    Generic error notifications are emailed to $config['errors']['emailTo'] if $config['errors']['emailDev'] is true.
+    Dev Sites*
+    Generic error notifications are emailed to $config['errors']['emailTo'] if the environmental variable ERRORS_EMAIL_DEV is set to 1.  
     
-* $config['isLive'] boolean from .env determines whether this is a production site.  
+* The current site is considered a production (live) site unless the environmental variable IS_LIVE is set to 0.  
   
 See ErrorHandler.php for further info.  
   

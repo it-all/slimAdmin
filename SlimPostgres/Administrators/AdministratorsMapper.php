@@ -96,7 +96,7 @@ final class AdministratorsMapper extends MultiTableMapper
     }
 
     // returns hashed password for insert/update 
-    private function getHashedPassword(string $password): string 
+    public function getHashedPassword(string $password): string 
     {
         return password_hash($password, PASSWORD_DEFAULT);
     }

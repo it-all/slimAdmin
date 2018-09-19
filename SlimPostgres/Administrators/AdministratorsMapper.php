@@ -16,6 +16,7 @@ use SlimPostgres\Security\Authentication\AuthenticationService;
 use SlimPostgres\Security\Authorization\AuthorizationService;
 use SlimPostgres\SystemEvents\SystemEventsMapper;
 use SlimPostgres\Administrators\LoginAttempts\LoginAttemptsMapper;
+use SlimPostgres\Administrators\Roles\RolesMapper;
 
 // Singleton
 final class AdministratorsMapper extends MultiTableMapper
@@ -107,7 +108,7 @@ final class AdministratorsMapper extends MultiTableMapper
         return $q->executeWithReturnField('id');
     }
 
-    // receives query results for administrators joined to roles and loads and returns model object
+    // receives query results for administrators joined to roles and loads and returns model object or null if no results
     // note this only works for single administrator results (ie select by id)
     private function getObjectForResults($results): ?Administrator 
     {
@@ -181,6 +182,14 @@ final class AdministratorsMapper extends MultiTableMapper
             ];
         }
         return $this->getObject($whereColumnsInfo);
+    }
+
+    public function getAdministratorIdByUsername(string $username, bool $activeOnly = false): ?int 
+    {
+        if (null !== $administrator = $this->getObjectByUsername($username, $activeOnly)) {
+            return $administrator->getId();
+        }
+        return null;
     }
 
     /** to filter the administrators with certain roles and return all the roles the administrators have */
@@ -329,7 +338,7 @@ final class AdministratorsMapper extends MultiTableMapper
         }
     }
 
-    // does validation for delete then deletes and returns deleted username
+    /** does validation for delete then deletes and returns deleted username */
     public function delete(int $id, AuthenticationService $authentication, AuthorizationService $authorization): string
     {
         // make sure there is an administrator for the primary key
@@ -361,21 +370,27 @@ final class AdministratorsMapper extends MultiTableMapper
         $q->execute();
     }
 
-    // deletes the record in the join table
+    /** deletes the record(s) in the join table */
     private function deleteAdministratorRoles(int $administratorId)
     {
         $q = new QueryBuilder("DELETE FROM ".self::ADM_ROLES_TABLE_NAME." WHERE administrator_id = $1", $administratorId);
         $q->execute();
     }
 
-    // todo find out if 1 was deleted, and if not - throw an exception or at least put in a system event
-    private function deleteAdministratorRole(int $administratorId, int $roleId)
+    /** deletes a record in the join table and returns the id */
+    /** returns null if not found */
+    private function deleteAdministratorRole(int $administratorId, int $roleId): ?int
     {
-        $q = new QueryBuilder("DELETE FROM administrator_roles WHERE administrator_id = $1 AND role_id = $2", $administratorId, $roleId);
-        $q->execute();
+        $q = new QueryBuilder("DELETE FROM ".self::ADM_ROLES_TABLE_NAME." WHERE administrator_id = $1 AND role_id = $2", $administratorId, $roleId);
+        try {
+            $deletedId = $q->executeWithReturnField('id');
+        } catch (QueryResultsNotFoundException $e) {
+            return null;
+        }
+        return (int) $deletedId;
     }
 
-    // deletes the administrators record
+    /** deletes the administrators record */
     private function deleteAdministrator(int $administratorId): ?string
     {
         $q = new QueryBuilder("DELETE FROM ".self::TABLE_NAME." WHERE id = $1", $administratorId);
@@ -423,7 +438,9 @@ final class AdministratorsMapper extends MultiTableMapper
         }
         if (isset($changedFields['roles']['remove'])) {
             foreach ($changedFields['roles']['remove'] as $deleteRoleId) {
-                $this->deleteAdministratorRole($administratorId, (int) $deleteRoleId);
+                if ($this->deleteAdministratorRole($administratorId, (int) $deleteRoleId) === null) {
+                    throw new Exception("Role not found for administrator during delete attempt");
+                }
             }
         }
         $q = new QueryBuilder("END");

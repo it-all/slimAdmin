@@ -17,6 +17,7 @@ final class RolesMapper extends TableMapper
     private $roles;
 
     const TABLE_NAME = 'roles';
+    const ADMINISTRATORS_JOIN_TABLE_NAME = 'administrator_roles';
 
     public static function getInstance()
     {
@@ -136,7 +137,7 @@ final class RolesMapper extends TableMapper
 
     public function hasAdministrator(int $roleId): bool
     {
-        $q = new QueryBuilder("SELECT COUNT(id) FROM administrator_roles WHERE role_id = $1", $roleId);
+        $q = new QueryBuilder("SELECT COUNT(id) FROM ".self::ADMINISTRATORS_JOIN_TABLE_NAME." WHERE role_id = $1", $roleId);
         return (bool) $q->getOne();
     }
 
@@ -218,5 +219,11 @@ final class RolesMapper extends TableMapper
             }
         }
         return $roles;
+    }
+
+    public function deleteForAdministrator(int $administratorId) 
+    {
+        $q = new QueryBuilder("DELETE FROM ".self::ADMINISTRATORS_JOIN_TABLE_NAME." WHERE administrator_id = $1", $administratorId);
+        $q->execute();
     }
 }

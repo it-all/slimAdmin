@@ -87,43 +87,31 @@ class QueryBuilder
 
         $postgresConnection = (Postgres::getInstance())->getConnection();
 
-        $sendResult = pg_send_query_params($postgresConnection, $this->sql, $this->args);
-        $queryResult = pg_get_result($postgresConnection);
-    
-        if (!$sendResult) {
-            $msg = pg_result_error($queryResult) . " " . $this->sql;
+        if (!$result = pg_query_params($postgresConnection, $this->sql, $this->args)) {
+            /** note pg_last_error seems to often not return anything, but pg_query_params call will result in php warning */
+            $msg = pg_last_error($postgresConnection) . " " . $this->sql;
             if (count($this->args) > 0) {
                 $msg .= PHP_EOL . " Args: " . var_export($this->args, true);
             }
+
             throw new QueryFailureException($msg, E_ERROR);
-        } 
+        }
 
-        $this->resetQuery(); // prevent accidental multiple execution
-        return $queryResult;
-
-
-        // if (!$result = pg_query_params($this->sql, $this->args)) {
-        //     // note pg_last_error seems to often not return anything
-        //     $msg = pg_last_error() . " " . $this->sql;
-        //     if (count($this->args) > 0) {
-        //         $msg .= PHP_EOL . " Args: " . var_export($this->args, true);
-        //     }
-
-        //     throw new QueryFailureException($msg, E_ERROR);
-        // }
-
-        // $this->resetQuery(); // prevent accidental multiple execution
-        // return $result;
+        $this->resetQuery(); /** prevent accidental multiple execution */
+        return $result;
     }
 
     /**
-     * this should only be used with INSERT, UPDATE, and DELETE queries, and the query should include a RETURNING clause with the $returnField in it
-     * note that in practice RETURNING can include multiple fields or expressions. For these, simply call execute() instead and process the returned result
+     * In order to receive a column value back for INSERT, UPDATE, and DELETE queries
+     * Note that RETURNING can include multiple fields or expressions in SQL, but this only accepts one field. To receive multiple, simply call execute() instead and process the returned result similar to below
      */
     public function executeWithReturnField(string $returnField, bool $alterBooleanArgs = false)
     {
         $this->add(" RETURNING $returnField");
+
+        /** note, if query fails exception thrown in execute */
         $result = $this->execute($alterBooleanArgs);
+
         if (pg_num_rows($result) > 0) {
             $returned = pg_fetch_all($result);
             if (!isset($returned[0][$returnField])) {
@@ -131,7 +119,7 @@ class QueryBuilder
             }
             return $returned[0][$returnField];
         } else {
-            // nothing was found - ie an update or delete that found no matches to the WHERE clause
+            /** nothing was found - ie an update or delete that found no matches to the WHERE clause */
             throw new QueryResultsNotFoundException();
         }
     }

@@ -95,7 +95,7 @@ class ErrorHandler
 
         // echo
         if ($this->echoErrors) {
-            echo nl2br($errorMessage, false);
+            echo (Utilities\Functions::isRunningFromCommandLine()) ? $errorMessage : nl2br($errorMessage, false);
             if ($die) {
                 die();
             }

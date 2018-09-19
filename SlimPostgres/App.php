@@ -164,7 +164,7 @@ class App
         $this->systemEventsMapper = SystemEventsMapper::getInstance();
 
         if ($this->config['errors']['logToDatabase']) {
-            $errorHandler->setDatabaseAndSystemEventsMapper($this->database, $this->systemEventsMapper);
+            $errorHandler->setSystemEventsMapper($this->systemEventsMapper);
         }
 
         if (!Utilities\Functions::isRunningFromCommandLine()) {

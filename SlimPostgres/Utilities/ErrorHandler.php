@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Utilities;
 
-use SlimPostgres\Database\Postgres;
 use SlimPostgres\App;
 use SlimPostgres\Utilities;
 use SlimPostgres\SystemEvents\SystemEventsMapper;
@@ -16,7 +15,6 @@ class ErrorHandler
     private $echoErrors;
     private $mailer;
     private $emailTo;
-    private $database;
     private $systemEventsMapper;
     private $fatalMessage;
 
@@ -37,17 +35,6 @@ class ErrorHandler
         $this->mailer = $m;
         $this->emailTo = $emailTo;
         $this->fatalMessage = $fatalMessage;
-    }
-
-    public function setDatabaseAndSystemEventsMapper(Postgres $database, SystemEventsMapper $systemEventsMapper)
-    {
-        $this->setDatabase($database);
-        $this->setSystemEventsMapper($systemEventsMapper);
-    }
-
-    public function setDatabase(Postgres $database)
-    {
-        $this->database = $database;
     }
 
     public function setSystemEventsMapper(SystemEventsMapper $systemEventsMapper)
@@ -72,8 +59,8 @@ class ErrorHandler
         }
         $errorMessage = $this->generateMessage($messageBody);
 
-        // database
-        if (isset($this->database) && isset($this->systemEventsMapper)) {
+        // log to database
+        if (isset($this->systemEventsMapper)) {
             switch ($this->getErrorType($errno)) {
                 case 'Core Error':
                 case 'Parse Error':

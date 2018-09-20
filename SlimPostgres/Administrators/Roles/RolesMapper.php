@@ -226,4 +226,20 @@ final class RolesMapper extends TableMapper
         $q = new QueryBuilder("DELETE FROM ".self::ADMINISTRATORS_JOIN_TABLE_NAME." WHERE administrator_id = $1", $administratorId);
         $q->execute();
     }
+
+    public function getRoleIdsForRoles(array $roles): array 
+    {
+        if (count($roles) == 0) {
+            throw new \Exception("Roles array must be populated.");
+        }
+    
+        $roleIds = [];
+
+        foreach ($roles as $role) {
+            /** note exception will be thrown if doesn't exist */
+            $roleIds[] = $this->getRoleIdForRole($role);
+        }
+    
+        return $roleIds;
+    }
 }

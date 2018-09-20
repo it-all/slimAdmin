@@ -55,15 +55,14 @@ final class AdministratorsMapper extends MultiTableMapper
         return 'name';
     }
 
-    // will be performing validation here. for now, assume validation has been performed
-    public function create(string $name, string $username, string $password, array $roleIds, bool $active)
+    /** any validation should be done prior */
+    public function create(string $name, string $username, string $passwordClear, array $roleIds, bool $active): int
     {
         // insert administrator then administrator_roles in a transaction
-        $q = new QueryBuilder("BEGIN");
-        $q->execute();
+        pg_query("BEGIN");
 
         try {
-            $administratorId = $this->insert($name, $username, $password, $active);
+            $administratorId = $this->insert($name, $username, $passwordClear, $active);
         } catch (\Exception $e) {
             $q = new QueryBuilder("ROLLBACK");
             $q->execute();
@@ -78,16 +77,17 @@ final class AdministratorsMapper extends MultiTableMapper
             throw $e;
         }
 
-        $q = new QueryBuilder("COMMIT");
-        $q->execute();
+        pg_query("COMMIT");
         return $administratorId;
     }
 
-    private function insertAdministratorRoles(int $administratorId, array $roleIds)
+    private function insertAdministratorRoles(int $administratorId, array $roleIds): array
     {
+        $administratorRoleIds = [];
         foreach ($roleIds as $roleId) {
-            $this->insertAdministratorRole($administratorId, (int) $roleId);
+            $administratorRoleIds[] = $this->insertAdministratorRole($administratorId, (int) $roleId);
         }
+        return $administratorRoleIds;
     }
 
     private function insertAdministratorRole(int $administratorId, int $roleId)
@@ -102,10 +102,10 @@ final class AdministratorsMapper extends MultiTableMapper
         return password_hash($password, PASSWORD_DEFAULT);
     }
 
-    private function insert(string $name, string $username, string $password, bool $active)
+    private function insert(string $name, string $username, string $passwordClear, bool $active): int
     {
-        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash, active) VALUES($1, $2, $3, $4)", $name, $username, $this->getHashedPassword($password), Postgres::convertBoolToPostgresBool($active));
-        return $q->executeWithReturnField('id');
+        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash, active) VALUES($1, $2, $3, $4)", $name, $username, $this->getHashedPassword($passwordClear), Postgres::convertBoolToPostgresBool($active));
+        return (int) $q->executeWithReturnField('id');
     }
 
     // receives query results for administrators joined to roles and loads and returns model object or null if no results

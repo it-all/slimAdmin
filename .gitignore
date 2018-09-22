@@ -3,3 +3,4 @@
 .vscode/
 vendor/
 node_modules/
+docs/internal.md

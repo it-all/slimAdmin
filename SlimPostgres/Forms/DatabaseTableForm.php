@@ -283,6 +283,13 @@ class DatabaseTableForm extends Form
 
                     break;
 
+                case 'timestamp without time zone':
+                    $fieldInfo['tag'] = 'input';
+                    $fieldInfo['attributes']['type'] = 'date';
+                    
+                    $formField = new InputField($fieldInfo['label'], FormHelper::getInputFieldAttributes($fieldInfo['attributes']['name'], $fieldInfo['attributes']), FormHelper::getFieldError($fieldInfo['attributes']['name']));
+                    break;
+
                 default:
                     throw new \Exception('Undefined form field for postgres column type '.$column->getType());
             }

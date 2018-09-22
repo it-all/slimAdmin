@@ -242,4 +242,16 @@ final class RolesMapper extends TableMapper
     
         return $roleIds;
     }
+
+    /** override to ignore created column */
+    public function getColumns(): array
+    {
+        $columns = [];
+        foreach (parent::getColumns() as $column) {
+            if ($column->getName() != 'created') {
+                $columns[] = $column;
+            }
+        }
+        return $columns;
+    }
 }

@@ -16,14 +16,14 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
 --
 
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
@@ -34,20 +34,19 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: administrator_roles; Type: TABLE; Schema: public; Owner: slimpg
+-- Name: administrator_roles; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.administrator_roles (
     id integer NOT NULL,
     administrator_id bigint NOT NULL,
-    role_id integer NOT NULL
+    role_id integer NOT NULL,
+    created timestamp without time zone DEFAULT now() NOT NULL
 );
 
 
-ALTER TABLE public.administrator_roles OWNER TO slimpg;
-
 --
--- Name: administrator_roles_id_seq; Type: SEQUENCE; Schema: public; Owner: slimpg
+-- Name: administrator_roles_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.administrator_roles_id_seq
@@ -59,31 +58,29 @@ CREATE SEQUENCE public.administrator_roles_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.administrator_roles_id_seq OWNER TO slimpg;
-
 --
--- Name: administrator_roles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: slimpg
+-- Name: administrator_roles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.administrator_roles_id_seq OWNED BY public.administrator_roles.id;
 
 
 --
--- Name: administrators; Type: TABLE; Schema: public; Owner: slimpg
+-- Name: administrators; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.administrators (
     id integer NOT NULL,
-    name character varying(100) NOT NULL,
-    username character varying(20) NOT NULL,
-    password_hash character varying(255) NOT NULL
+    username character varying(200) NOT NULL,
+    password_hash character varying(255) NOT NULL,
+    active boolean NOT NULL,
+    name character varying(100),
+    created timestamp without time zone DEFAULT now() NOT NULL
 );
 
 
-ALTER TABLE public.administrators OWNER TO slimpg;
-
 --
--- Name: administrators_id_seq; Type: SEQUENCE; Schema: public; Owner: slimpg
+-- Name: administrators_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.administrators_id_seq
@@ -94,17 +91,15 @@ CREATE SEQUENCE public.administrators_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.administrators_id_seq OWNER TO slimpg;
-
 --
--- Name: administrators_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: slimpg
+-- Name: administrators_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.administrators_id_seq OWNED BY public.administrators.id;
 
 
 --
--- Name: system_event_types; Type: TABLE; Schema: public; Owner: slimpg
+-- Name: system_event_types; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.system_event_types (
@@ -115,10 +110,8 @@ CREATE TABLE public.system_event_types (
 );
 
 
-ALTER TABLE public.system_event_types OWNER TO slimpg;
-
 --
--- Name: log_types_id_seq; Type: SEQUENCE; Schema: public; Owner: slimpg
+-- Name: log_types_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.log_types_id_seq
@@ -129,17 +122,15 @@ CREATE SEQUENCE public.log_types_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.log_types_id_seq OWNER TO slimpg;
-
 --
--- Name: log_types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: slimpg
+-- Name: log_types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.log_types_id_seq OWNED BY public.system_event_types.id;
 
 
 --
--- Name: login_attempts; Type: TABLE; Schema: public; Owner: slimpg
+-- Name: login_attempts; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.login_attempts (
@@ -152,10 +143,8 @@ CREATE TABLE public.login_attempts (
 );
 
 
-ALTER TABLE public.login_attempts OWNER TO slimpg;
-
 --
--- Name: login_attempts_id_seq; Type: SEQUENCE; Schema: public; Owner: slimpg
+-- Name: login_attempts_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.login_attempts_id_seq
@@ -166,31 +155,28 @@ CREATE SEQUENCE public.login_attempts_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.login_attempts_id_seq OWNER TO slimpg;
-
 --
--- Name: login_attempts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: slimpg
+-- Name: login_attempts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.login_attempts_id_seq OWNED BY public.login_attempts.id;
 
 
 --
--- Name: roles; Type: TABLE; Schema: public; Owner: slimpg
+-- Name: roles; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.roles (
     id integer NOT NULL,
     role character varying(100) NOT NULL,
     level smallint NOT NULL,
+    created timestamp without time zone DEFAULT now() NOT NULL,
     CONSTRAINT positive_level CHECK (((level)::double precision > (0)::double precision))
 );
 
 
-ALTER TABLE public.roles OWNER TO slimpg;
-
 --
--- Name: roles_id_seq; Type: SEQUENCE; Schema: public; Owner: slimpg
+-- Name: roles_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.roles_id_seq
@@ -201,17 +187,15 @@ CREATE SEQUENCE public.roles_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.roles_id_seq OWNER TO slimpg;
-
 --
--- Name: roles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: slimpg
+-- Name: roles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.roles_id_seq OWNED BY public.roles.id;
 
 
 --
--- Name: system_events; Type: TABLE; Schema: public; Owner: slimpg
+-- Name: system_events; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.system_events (
@@ -227,10 +211,8 @@ CREATE TABLE public.system_events (
 );
 
 
-ALTER TABLE public.system_events OWNER TO slimpg;
-
 --
--- Name: system_events_id_seq; Type: SEQUENCE; Schema: public; Owner: slimpg
+-- Name: system_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.system_events_id_seq
@@ -241,59 +223,57 @@ CREATE SEQUENCE public.system_events_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.system_events_id_seq OWNER TO slimpg;
-
 --
--- Name: system_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: slimpg
+-- Name: system_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.system_events_id_seq OWNED BY public.system_events.id;
 
 
 --
--- Name: administrator_roles id; Type: DEFAULT; Schema: public; Owner: slimpg
+-- Name: administrator_roles id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.administrator_roles ALTER COLUMN id SET DEFAULT nextval('public.administrator_roles_id_seq'::regclass);
 
 
 --
--- Name: administrators id; Type: DEFAULT; Schema: public; Owner: slimpg
+-- Name: administrators id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.administrators ALTER COLUMN id SET DEFAULT nextval('public.administrators_id_seq'::regclass);
 
 
 --
--- Name: login_attempts id; Type: DEFAULT; Schema: public; Owner: slimpg
+-- Name: login_attempts id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.login_attempts ALTER COLUMN id SET DEFAULT nextval('public.login_attempts_id_seq'::regclass);
 
 
 --
--- Name: roles id; Type: DEFAULT; Schema: public; Owner: slimpg
+-- Name: roles id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.roles ALTER COLUMN id SET DEFAULT nextval('public.roles_id_seq'::regclass);
 
 
 --
--- Name: system_event_types id; Type: DEFAULT; Schema: public; Owner: slimpg
+-- Name: system_event_types id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.system_event_types ALTER COLUMN id SET DEFAULT nextval('public.log_types_id_seq'::regclass);
 
 
 --
--- Name: system_events id; Type: DEFAULT; Schema: public; Owner: slimpg
+-- Name: system_events id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.system_events ALTER COLUMN id SET DEFAULT nextval('public.system_events_id_seq'::regclass);
 
 
 --
--- Name: administrator_roles administrator_roles_pkey; Type: CONSTRAINT; Schema: public; Owner: slimpg
+-- Name: administrator_roles administrator_roles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.administrator_roles
@@ -301,7 +281,7 @@ ALTER TABLE ONLY public.administrator_roles
 
 
 --
--- Name: administrators administrators_pkey; Type: CONSTRAINT; Schema: public; Owner: slimpg
+-- Name: administrators administrators_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.administrators
@@ -309,7 +289,7 @@ ALTER TABLE ONLY public.administrators
 
 
 --
--- Name: administrators administrators_username_key; Type: CONSTRAINT; Schema: public; Owner: slimpg
+-- Name: administrators administrators_username_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.administrators
@@ -317,7 +297,7 @@ ALTER TABLE ONLY public.administrators
 
 
 --
--- Name: login_attempts login_attempts_pkey; Type: CONSTRAINT; Schema: public; Owner: slimpg
+-- Name: login_attempts login_attempts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.login_attempts
@@ -325,7 +305,7 @@ ALTER TABLE ONLY public.login_attempts
 
 
 --
--- Name: roles roles_pkey; Type: CONSTRAINT; Schema: public; Owner: slimpg
+-- Name: roles roles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.roles
@@ -333,7 +313,7 @@ ALTER TABLE ONLY public.roles
 
 
 --
--- Name: roles roles_role_key; Type: CONSTRAINT; Schema: public; Owner: slimpg
+-- Name: roles roles_role_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.roles
@@ -341,7 +321,7 @@ ALTER TABLE ONLY public.roles
 
 
 --
--- Name: system_event_types system_event_types_pkey; Type: CONSTRAINT; Schema: public; Owner: slimpg
+-- Name: system_event_types system_event_types_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.system_event_types
@@ -349,7 +329,7 @@ ALTER TABLE ONLY public.system_event_types
 
 
 --
--- Name: system_events system_events_pkey; Type: CONSTRAINT; Schema: public; Owner: slimpg
+-- Name: system_events system_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.system_events
@@ -357,14 +337,14 @@ ALTER TABLE ONLY public.system_events
 
 
 --
--- Name: system_events_title_idx; Type: INDEX; Schema: public; Owner: slimpg
+-- Name: system_events_title_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX system_events_title_idx ON public.system_events USING btree (title);
 
 
 --
--- Name: administrator_roles administrator_roles_administrator_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: slimpg
+-- Name: administrator_roles administrator_roles_administrator_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.administrator_roles
@@ -372,7 +352,7 @@ ALTER TABLE ONLY public.administrator_roles
 
 
 --
--- Name: administrator_roles administrator_roles_role_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: slimpg
+-- Name: administrator_roles administrator_roles_role_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.administrator_roles
@@ -380,7 +360,7 @@ ALTER TABLE ONLY public.administrator_roles
 
 
 --
--- Name: login_attempts administrators_fkey; Type: FK CONSTRAINT; Schema: public; Owner: slimpg
+-- Name: login_attempts administrators_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.login_attempts
@@ -388,7 +368,7 @@ ALTER TABLE ONLY public.login_attempts
 
 
 --
--- Name: system_events fk_admin_id; Type: FK CONSTRAINT; Schema: public; Owner: slimpg
+-- Name: system_events fk_admin_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.system_events
@@ -396,7 +376,7 @@ ALTER TABLE ONLY public.system_events
 
 
 --
--- Name: system_events system_events_event_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: slimpg
+-- Name: system_events system_events_event_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.system_events

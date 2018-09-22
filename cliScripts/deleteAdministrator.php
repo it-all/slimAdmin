@@ -10,7 +10,7 @@ require APPLICATION_ROOT_DIRECTORY . '/config/constants.php';
 new \SlimPostgres\App();
 
 // config
-$username = 'eddie';
+$username = 'bookkeeper';
 // end config
 
 $administratorsMapper =  \SlimPostgres\Administrators\AdministratorsMapper::getInstance();

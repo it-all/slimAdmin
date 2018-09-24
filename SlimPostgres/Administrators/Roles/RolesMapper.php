@@ -94,15 +94,15 @@ final class RolesMapper extends TableMapper
         throw new \Exception("Invalid role searched: $roleSearch");
     }
 
-    public function buildRole(int $id, string $role, int $level): Role 
+    public function buildRole(int $id, string $role, int $level, \DateTimeImmutable $created): Role 
     {
-        return new Role($id, $role, $level);
+        return new Role($id, $role, $level, $created);
     }
 
     public function getObject(int $primaryKey): ?Role 
     {
         if ($record = $this->selectForPrimaryKey($primaryKey)) {
-            return $this->buildRole((int) $record['id'], $record['role'], (int) $record['level']);
+            return $this->buildRole((int) $record['id'], $record['role'], (int) $record['level'], new \DateTimeImmutable($record['created']));
         }
 
         return null;
@@ -214,7 +214,7 @@ final class RolesMapper extends TableMapper
         if ($pgResults = $this->select("*", $whereColumnsInfo)) {
             if (pg_num_rows($pgResults) > 0) {
                 while ($record = pg_fetch_assoc($pgResults)) {
-                    $roles[] = $this->buildRole((int) $record['id'], $record['role'], (int) $record['level']);
+                    $roles[] = $this->buildRole((int) $record['id'], $record['role'], (int) $record['level'], new \DateTimeImmutable($record['created']));
                 }
             }
         }

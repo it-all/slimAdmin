@@ -11,12 +11,14 @@ class Role implements ListViewModels
     private $id;
     private $roleName;
     private $level;
+    private $created;
 
-    public function __construct(int $id, string $roleName, int $level)
+    public function __construct(int $id, string $roleName, int $level, \DateTimeImmutable $created)
     {
         $this->id = $id;
         $this->roleName = $roleName;
         $this->level = $level;
+        $this->created = $created;
     }
 
     public function getId(): int 
@@ -34,6 +36,11 @@ class Role implements ListViewModels
         return $this->level;
     }
 
+    public function getCreated(): \DateTimeImmutable 
+    {
+        return $this->created;
+    }
+
     /** returns array of list view fields [fieldName => fieldValue] */
     public function getListViewFields(): array
     {
@@ -41,6 +48,7 @@ class Role implements ListViewModels
             'id' => $this->id,
             'role' => $this->roleName,
             'level' => $this->level,
+            'created' => $this->created->format('Y-m-d'),
         ];
     }
 

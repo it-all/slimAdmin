@@ -71,6 +71,10 @@ return [
             ROUTE_ADMINISTRATORS_ROLES_INSERT => 'director',
             ROUTE_ADMINISTRATORS_ROLES_UPDATE => 'director',
             ROUTE_ADMINISTRATORS_ROLES_DELETE => 'director',
+            ROUTE_ADMINISTRATORS_PERMISSIONS => 'director',
+            ROUTE_ADMINISTRATORS_PERMISSIONS_INSERT => 'director',
+            ROUTE_ADMINISTRATORS_PERMISSIONS_UPDATE => 'director',
+            ROUTE_ADMINISTRATORS_PERMISSIONS_DELETE => 'director',
             NAV_ADMIN_SYSTEM => 'bookkeeper',
         ],
 

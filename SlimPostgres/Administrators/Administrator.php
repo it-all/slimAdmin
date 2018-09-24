@@ -34,11 +34,14 @@ class Administrator implements ListViewModels
     /** bool */
     private $active;
 
+    /** DateTimeImmutable */
+    private $created;
+
     /** only used for certain functions. set in constructor or setAuth() */
     private $authentication;
     private $authorization;
 
-    public function __construct(int $id, string $name, string $username, string $passwordHash, array $roles, bool $active, ?AuthenticationService $authentication = null, ?AuthorizationService $authorization = null)
+    public function __construct(int $id, string $name, string $username, string $passwordHash, array $roles, bool $active, \DateTimeImmutable $created, ?AuthenticationService $authentication = null, ?AuthorizationService $authorization = null)
     {
         $this->id = $id;
         $this->name = $name;
@@ -46,6 +49,7 @@ class Administrator implements ListViewModels
         $this->passwordHash = $passwordHash;
         $this->roles = $roles;
         $this->active = $active;
+        $this->created = $created;
 
         $this->authentication = $authentication;
         $this->authorization = $authorization;
@@ -82,6 +86,11 @@ class Administrator implements ListViewModels
     public function getActive(): bool
     {
         return $this->active;
+    }
+
+    public function getCreated(): \DateTimeImmutable
+    {
+        return $this->created;
     }
 
     public function getRoleIds(): array 
@@ -201,6 +210,7 @@ class Administrator implements ListViewModels
             'username' => $this->username,
             'roles' => implode(", ", $this->roles),
             'active' => Postgres::convertBoolToPostgresBool($this->active), // send 't' / 'f'
+            'created' => $this->created->format('Y-m-d'),
         ];
     }
 

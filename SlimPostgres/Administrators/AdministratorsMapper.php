@@ -33,7 +33,8 @@ final class AdministratorsMapper extends MultiTableMapper
         'passwordHash' => self::TABLE_NAME . '.password_hash',
         'roles' => self::ROLES_TABLE_NAME . '.role',
         'level' => self::ROLES_TABLE_NAME . '.level',
-        'active' => self::TABLE_NAME . '.active'
+        'active' => self::TABLE_NAME . '.active',
+        'created' => self::TABLE_NAME . '.created',
     ];
 
     public static function getInstance()
@@ -126,9 +127,10 @@ final class AdministratorsMapper extends MultiTableMapper
                     App::SESSION_ADMINISTRATOR_KEY_ROLES_LEVEL => $row['role_level']
                 ];
                 $active = $row['active'];
+                $created = $row['created'];
             }
 
-            return new Administrator((int) $id, $name, $username, $passwordHash, $roles, Postgres::convertPostgresBoolToBool($active));
+            return new Administrator((int) $id, $name, $username, $passwordHash, $roles, Postgres::convertPostgresBoolToBool($active), new \DateTimeImmutable($created));
 
         } else {
             return null;
@@ -241,6 +243,7 @@ final class AdministratorsMapper extends MultiTableMapper
             'passwordHash' => $record['password_hash'],
             'roles' => [$record['role']],
             'active' => Postgres::convertPostgresBoolToBool($record['active']),
+            'created' => new \DateTimeImmutable($record['created']),
         ];
 
         $results[] = $newRecord;
@@ -293,7 +296,7 @@ final class AdministratorsMapper extends MultiTableMapper
     {
         $administrators = [];
         foreach ($this->selectArray(null, $whereColumnsInfo, $orderBy) as $administratorArray) {
-            $administrators[] = new Administrator($administratorArray['id'], $administratorArray['name'], $administratorArray['username'], $administratorArray['passwordHash'], $administratorArray['roles'], $administratorArray['active'], $authentication, $authorization);
+            $administrators[] = new Administrator($administratorArray['id'], $administratorArray['name'], $administratorArray['username'], $administratorArray['passwordHash'], $administratorArray['roles'], $administratorArray['active'], $administratorArray['created'], $authentication, $authorization);
         }
 
         return $administrators;

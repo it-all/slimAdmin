@@ -31,6 +31,8 @@ final class SystemEventsMapper extends MultiTableMapper
         'resource' => self::PRIMARY_TABLE_NAME . '.resource'
     ];
 
+    const ORDER_BY_COLUMN_NAME = 'created';
+
     public static function getInstance()
     {
         static $instance = null;
@@ -45,7 +47,7 @@ final class SystemEventsMapper extends MultiTableMapper
         $this->setEventTypes();
 
         // note time_stamp is the alias for created used in view query
-        parent::__construct(new TableMapper(self::PRIMARY_TABLE_NAME, '*', 'created', false), self::SELECT_COLUMNS);
+        parent::__construct(new TableMapper(self::PRIMARY_TABLE_NAME, '*', self::ORDER_BY_COLUMN_NAME, false), self::SELECT_COLUMNS, self::ORDER_BY_COLUMN_NAME);
     }
 
     public function setEventTypes()

@@ -31,7 +31,7 @@ final class RolesMapper extends TableMapper
     private function __construct()
     {
         // note that the roles select must be ordered by level (ascending) for getBaseLevel() to work
-        parent::__construct(self::TABLE_NAME, 'id, role, level', 'level');
+        parent::__construct(self::TABLE_NAME, 'id, role, level, created', 'level');
         $this->addColumnNameConstraint('level', 'positive');
         $this->setRoles();
     }

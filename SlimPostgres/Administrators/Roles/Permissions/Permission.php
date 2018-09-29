@@ -6,22 +6,35 @@ namespace SlimPostgres\Administrators\Roles\Permissions;
 use SlimPostgres\ListViewModels;
 use SlimPostgres\Database\Postgres;
 
-// model 
+/** model */ 
 class Permission implements ListViewModels
 {
-    private $id; /** int */
-    private $permissionName; /** string */
-    private $description; /** string|null */
-    private $active; /** bool */
-    private $created; /** DateTime */
+    /** @var int */
+    private $id;
 
-    public function __construct(int $id, string $permissionName, ?string $description, bool $active, \DateTimeImmutable $created)
+     /** @var string */
+    private $permissionName;
+
+    /** @var string|null */
+    private $description; 
+    
+    /** @var bool */
+    private $active; 
+
+    /** @var \DateTimeImmutable */
+    private $created; 
+
+    /** @var \SlimPostgres\Administrators\Roles[] an array of assigned role objects */
+    private $roles; 
+
+    public function __construct(int $id, string $permissionName, ?string $description, bool $active, \DateTimeImmutable $created, ?array $roles = null)
     {
         $this->id = $id;
         $this->permissionName = $permissionName;
         $this->description = $description;
         $this->active = $active;
         $this->created = $created;
+        $this->roles = $roles;
     }
 
     public function getId(): int 

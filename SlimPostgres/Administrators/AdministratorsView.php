@@ -30,11 +30,13 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
 
     protected $routePrefix;
 
+    const FILTER_FIELDS_PREFIX = 'administrators';
+
     public function __construct(Container $container)
     {
         $this->routePrefix = ROUTEPREFIX_ADMINISTRATORS;
 
-        parent::__construct($container, 'administrators', ROUTE_ADMINISTRATORS, AdministratorsMapper::getInstance(), ROUTE_ADMINISTRATORS_RESET, 'admin/lists/objectsList.php');
+        parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS, AdministratorsMapper::getInstance(), ROUTE_ADMINISTRATORS_RESET, 'admin/lists/objectsList.php');
 
         $insertLinkInfo = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? [
             'text' => 'Insert '.$this->mapper->getFormalTableName(false), 

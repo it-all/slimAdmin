@@ -89,13 +89,13 @@ abstract class AdministratorForm
 
     private function getNameField()
     {
-        $nameField = DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName('name'), null, $this->nameValue);
+        $nameField = DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName(self::NAME_FIELD_NAME), null, $this->nameValue);
         return $nameField;
     }
 
     private function getUsernameField()
     {
-        return DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName('username'), null, $this->usernameValue);
+        return DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName(self::USERNAME_FIELD_NAME), null, $this->usernameValue);
     }
 
     private function setPasswordFields(array &$nodes)
@@ -123,7 +123,7 @@ abstract class AdministratorForm
                 'type' => 'checkbox',
                 'name' => self::ROLES_FIELDSET_NAME . '[]',
                 'value' => $roleId,
-                'id' => 'roles' . $roleData['role'],
+                'id' => self::ROLES_FIELDSET_NAME . $roleData['role'],
                 'class' => 'inlineFormField'
             ];
             // checked?
@@ -142,15 +142,12 @@ abstract class AdministratorForm
 
     private function getActiveField()
     {
-        return DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName('active'), null, Postgres::convertBoolToPostgresBool($this->activeValue));
+        return DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName(self::ACTIVE_FIELD_NAME), null, Postgres::convertBoolToPostgresBool($this->activeValue));
     }
 
     protected function getNodes(): array 
     {
         $nodes = [];
-        if ($this->formMethod == 'put') {
-            $nodes[] = FormHelper::getPutMethodField();
-        }
         $nodes[] = $this->getActiveField();
         $nodes[] = $this->getNameField();
         $nodes[] = $this->getUsernameField();

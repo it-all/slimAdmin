@@ -9,7 +9,6 @@ use SlimPostgres\Administrators\Forms\AdministratorForm;
 use SlimPostgres\App;
 use SlimPostgres\ResponseUtilities;
 use SlimPostgres\BaseController;
-use SlimPostgres\DatabaseTableController;
 use SlimPostgres\Forms\FormHelper;
 use SlimPostgres\Exceptions;
 use SlimPostgres\Utilities\Functions;

@@ -6,7 +6,6 @@ namespace SlimPostgres\Administrators\Forms;
 use Slim\Container;
 use SlimPostgres\Administrators\Administrator;
 use SlimPostgres\Administrators\Forms\AdministratorForm;
-use SlimPostgres\Forms\FormHelper;
 
 class AdministratorUpdateForm extends AdministratorForm
 {

@@ -9,11 +9,13 @@ abstract class MultiTableMapper implements TableMappers
 {
     protected $primaryTableMapper;
     protected $selectColumns;
+    protected $orderByColumnName;
 
-    protected function __construct(TableMapper $primaryTableMapper, array $selectColumns)
+    protected function __construct(TableMapper $primaryTableMapper, array $selectColumns, string $orderByColumnName)
     {
         $this->primaryTableMapper = $primaryTableMapper;
         $this->selectColumns = $selectColumns;
+        $this->orderByColumnName = $orderByColumnName;
     }
 
     abstract public function select(string $columns = "*", array $filterColumnsInfo = null);
@@ -35,6 +37,11 @@ abstract class MultiTableMapper implements TableMappers
                 throw new \Exception("Invalid where column $columnNameSql");
             }
         }
+    }
+    
+    protected function getSelectClause(): string 
+    {
+        return "SELECT " . $this->getSelectColumnsString();
     }
 
     public function getPrimaryTableMapper(): TableMapper
@@ -62,9 +69,16 @@ abstract class MultiTableMapper implements TableMappers
         return $this->primaryTableMapper->getPrimaryKeyColumnName();
     }
 
-    public function getOrderByColumnName(): ?string
+    /** returns only column name */
+    public function getOrderByColumnName(): string
     {
-        return $this->primaryTableMapper->getOrderByColumnName();
+        return $this->orderByColumnName;
+    }
+
+    /** returns table.colum */
+    protected function getOrderBy(): string 
+    {
+        return $this->selectColumns[$this->orderByColumnName];
     }
 
     public function getOrderByAsc(): bool

@@ -5,6 +5,7 @@ namespace SlimPostgres\Administrators\Roles;
 
 use SlimPostgres\App;
 use SlimPostgres\ObjectsListViews;
+use SlimPostgres\InsertUpdateViews;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\DatabaseTableView;
 use SlimPostgres\Forms\FormHelper;
@@ -12,7 +13,7 @@ use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class RolesView extends DatabaseTableView implements ObjectsListViews
+class RolesView extends DatabaseTableView implements ObjectsListViews, InsertUpdateViews
 {
     public function __construct(Container $container)
     {

@@ -24,9 +24,9 @@ abstract class MultiTableMapper implements TableMappers
     {
         $selectColumnsString = "";
         foreach (static::SELECT_COLUMNS as $name => $columnSql) {
-            $selectColumnsString .= "$columnSql,";
+            $selectColumnsString .= "$columnSql, ";
         }
-        return Functions::removeLastCharFromString($selectColumnsString);
+        return Functions::removeLastCharsFromString($selectColumnsString, 2);
     }
 
     // make sure each columnNameSql in columns

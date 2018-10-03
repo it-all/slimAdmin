@@ -7,9 +7,13 @@ namespace SlimPostgres\Utilities;
 // A place to store php helper functions, not App-related functions
 class Functions
 {
-    public static function removeLastCharFromString(string $in): string 
+    /** string length must be >= numChars */
+    public static function removeLastCharsFromString(string $input, int $numChars = 1): string 
     {
-        return substr($in, 0, strlen($in) - 1);
+        if ($numChars > strlen($input)) {
+            throw new \InvalidArgumentException("Cannot remove $numChars from $input");
+        }
+        return substr($input, 0, strlen($input) - $numChars);
     }
 
     /**

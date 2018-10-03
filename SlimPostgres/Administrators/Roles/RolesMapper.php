@@ -99,7 +99,7 @@ final class RolesMapper extends TableMapper
         return new Role($id, $role, $level, $created);
     }
 
-    public function getObject(int $primaryKey): ?Role 
+    public function getObjectById(int $primaryKey): ?Role 
     {
         if ($record = $this->selectForPrimaryKey($primaryKey)) {
             return $this->buildRole((int) $record['id'], $record['role'], (int) $record['level'], new \DateTimeImmutable($record['created']));

@@ -115,20 +115,13 @@ final class AdministratorsMapper extends MultiTableMapper
             // there will be 1 record for each role
             $roles = [];
             while ($row = pg_fetch_assoc($results)) {
-                // repopulate id, name, passwordHash on each loop. it's either that or do a rowcount and populate them once but this is simpler and probably faster.
-                $id = $row['id'];
-                $name = $row['name'];
-                $username = $row['username'];
-                $passwordHash = $row['password_hash'];
                 $roles[$row['role_id']] = [
                     App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME => $row['role'],
                     App::SESSION_ADMINISTRATOR_KEY_ROLES_LEVEL => $row['role_level']
                 ];
-                $active = $row['active'];
-                $created = $row['created'];
             }
 
-            return new Administrator((int) $id, $name, $username, $passwordHash, $roles, Postgres::convertPostgresBoolToBool($active), new \DateTimeImmutable($created));
+            return new Administrator((int) $row['id'], $row['name'], $row['username'], $row['password_hash'], $roles, Postgres::convertPostgresBoolToBool($row['active']), new \DateTimeImmutable($row['created']));
 
         } else {
             return null;

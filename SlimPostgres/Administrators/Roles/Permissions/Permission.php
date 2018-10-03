@@ -5,6 +5,7 @@ namespace SlimPostgres\Administrators\Roles\Permissions;
 
 use SlimPostgres\ListViewModels;
 use SlimPostgres\Database\Postgres;
+use SlimPostgres\Utilities\Functions;
 
 /** model */ 
 class Permission implements ListViewModels
@@ -71,7 +72,20 @@ class Permission implements ListViewModels
             'description' => $this->description,
             'active' => Postgres::convertBoolToPostgresBool($this->active), // send 't' / 'f'
             'created' => $this->created->format('Y-m-d'),
+            'roles' => $this->getRolesString(),
         ];
+    }
+
+    public function getRolesString() 
+    {
+        $rolesString = "";
+        if ($this->roles !== null) {
+            foreach ($this->roles as $role) {
+                $rolesString .= $role->getRoleName().", ";
+            }
+            $rolesString = Functions::removeLastCharsFromString($rolesString, 2);
+        }
+        return $rolesString;
     }
 
     /** whether model is allowed to be updated */

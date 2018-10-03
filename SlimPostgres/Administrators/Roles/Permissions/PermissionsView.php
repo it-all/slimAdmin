@@ -8,8 +8,10 @@ use SlimPostgres\ObjectsListViews;
 use SlimPostgres\AdminListView;
 use SlimPostgres\InsertUpdateViews;
 use SlimPostgres\ResponseUtilities;
+use SlimPostgres\Administrators\Roles\Permissions\PermissionsMapper;
 use SlimPostgres\Administrators\Roles\Permissions\Forms\PermissionInsertForm;
 use SlimPostgres\Administrators\Roles\Permissions\Forms\PermissionUpdateForm;
+use SlimPostgres\Exceptions\QueryFailureException;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -118,7 +120,7 @@ class PermissionsView extends AdminListView implements ObjectsListViews, InsertU
 
         try {
             $permissions = $this->mapper->getObjects($this->getFilterColumnsInfo());
-        } catch (\Exception $e) {
+        } catch (QueryFailureException $e) {
             $permissions = [];
             // warning system event is inserted when query fails
             App::setAdminNotice('Query Failed', 'failure');

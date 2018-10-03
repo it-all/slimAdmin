@@ -30,6 +30,12 @@ class Permission implements ListViewModels
 
     public function __construct(int $id, string $permissionName, ?string $description, bool $active, \DateTimeImmutable $created, ?array $roles = null)
     {
+        // validate roles array is array of role objects
+        foreach ($roles as $role) {
+            if (get_class($role) != 'SlimPostgres\Administrators\Roles\Role') {
+                throw new \InvalidArgumentException("Invalid role in roles");
+            }
+        }
         $this->id = $id;
         $this->permissionName = $permissionName;
         $this->description = $description;

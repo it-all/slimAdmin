@@ -5,6 +5,7 @@ namespace SlimPostgres\Administrators;
 
 use It_All\FormFormer\Fields\InputFields\CheckboxRadioInputField;
 use It_All\FormFormer\Fieldset;
+use SlimPostgres\Exceptions\QueryFailureException;
 use SlimPostgres\Administrators\Administrator;
 use SlimPostgres\Administrators\Forms\AdministratorInsertForm;
 use SlimPostgres\Administrators\Forms\AdministratorUpdateForm;
@@ -20,6 +21,7 @@ use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\AdminListView;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Forms\FormHelper;
+
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -71,7 +73,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
 
         try {
             $administrators = $this->mapper->getObjects($this->getFilterColumnsInfo(), null, $this->authentication, $this->authorization);
-        } catch (\Exception $e) {
+        } catch (QueryFailureException $e) {
             $administrators = [];
             // warning system event is inserted when query fails
             App::setAdminNotice('Query Failed', 'failure');

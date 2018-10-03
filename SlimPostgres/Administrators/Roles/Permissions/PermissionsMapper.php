@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Administrators\Roles\Permissions;
 
+use SlimPostgres\Administrators\Roles\Permissions\Permission;
 use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\Database\DataMappers\MultiTableMapper;
 use SlimPostgres\Database\DataMappers\TableMapper;
@@ -13,9 +14,6 @@ use SlimPostgres\Database\Postgres;
 // Singleton
 final class PermissionsMapper extends MultiTableMapper
 {
-    /** array id => [permission] */
-    private $permissions;
-
     const TABLE_NAME = 'permissions';
     const ROLES_TABLE_NAME = 'roles';
     const ROLES_JOIN_TABLE_NAME = 'roles_permissions';
@@ -45,28 +43,6 @@ final class PermissionsMapper extends MultiTableMapper
         parent::__construct(new TableMapper(self::TABLE_NAME, '*', self::ORDER_BY_COLUMN_NAME), self::SELECT_COLUMNS, self::ORDER_BY_COLUMN_NAME);
     }
 
-    private function addRecordToArray(array &$results, array $record) 
-    {
-        $rolesMapper = RolesMapper::getInstance();
-        $newRecord = [
-            'id' => (int) $record['id'],
-            'permission' => $record['permission'],
-            'description' => $record['description'],
-            'roles' => [$rolesMapper->getObjectById((int) $record['role_id'])],
-            'active' => Postgres::convertPostgresBoolToBool($record['active']),
-            'created' => new \DateTimeImmutable($record['created']),
-        ];
-
-        $results[] = $newRecord;
-    }
-
-    // adds new role to permission results array for results key
-    private function addRoleToPermissionRoles(array &$permissionsArray, int $key, int $roleId) 
-    {
-        $rolesMapper = RolesMapper::getInstance();
-        array_push($permissionsArray[$key]['roles'], $rolesMapper->getObjectById($roleId));
-    }
-
     // returns key of results array for matching 'id' key, null if not found
     // note, careful when checking return value as 0 can be returned (evaluates to false)
     private function getPermissionsArrayKeyForId(array $permissionsArray, int $id): ?int 
@@ -80,7 +56,7 @@ final class PermissionsMapper extends MultiTableMapper
         return null;
     }
 
-    // returns array of results instead of recordset
+    /** returns array of results instead of recordset */
     private function selectArray(?string $selectColumns = null, array $whereColumnsInfo = null, string $orderBy = null): array
     {
         if ($selectColumns == null) {
@@ -91,12 +67,20 @@ final class PermissionsMapper extends MultiTableMapper
 
         $pgResults = $this->select($selectColumns, $whereColumnsInfo, $orderBy);
         if (pg_num_rows($pgResults) > 0) {
+            $rolesMapper = RolesMapper::getInstance();
             while ($record = pg_fetch_assoc($pgResults)) {
                 // either add new permission or just new role based on whether permission already exists
-                if (null !== $key = $this->getPermissionsArrayKeyForId($permissionsArray, (int) $record['id'])) {
-                    $this->addRoleToPermissionRoles($permissionsArray, $key, (int) $record['role_id']);
+                if (null === $key = $this->getPermissionsArrayKeyForId($permissionsArray, (int) $record['id'])) {
+                    $permissionsArray[] = [
+                        'id' => (int) $record['id'],
+                        'permission' => $record['permission'],
+                        'description' => $record['description'],
+                        'roles' => [$rolesMapper->getObjectById((int) $record['role_id'])],
+                        'active' => Postgres::convertPostgresBoolToBool($record['active']),
+                        'created' => new \DateTimeImmutable($record['created']),
+                    ];
                 } else {
-                    $this->addRecordToArray($permissionsArray, $record);
+                    array_push($permissionsArray[$key]['roles'], $rolesMapper->getObjectById((int) $record['role_id']));
                 }
             }
         }
@@ -118,34 +102,33 @@ final class PermissionsMapper extends MultiTableMapper
         return $q->execute();
     }
 
+    /** permissions joined with role_permissions. note that every permission must have at least 1 role assigned */
     private function getFromClause(): string 
     {
         return "FROM ".self::TABLE_NAME." JOIN ".self::ROLES_JOIN_TABLE_NAME." ON ".self::TABLE_NAME.".id = ".self::ROLES_JOIN_TABLE_NAME.".permission_id";
     }
 
-    // receives query results for permissions joined to roles_permissions and loads and returns model object or null if no results
-    // note this only works for single permission results (ie select by id)
-    private function getObjectForResults($results): ?Permission 
+    private function getObject(array $whereColumnsInfo): ?Permission
     {
-        if (pg_numrows($results) > 0) {
+        $q = new SelectBuilder($this->getSelectClause(), $this->getFromClause(), $whereColumnsInfo, $this->getOrderBy());
+        $pgResults = $q->execute();
+        if (pg_numrows($pgResults) > 0) {
             // there will be 1 record for each role
             $roles = [];
             $rolesMapper = RolesMapper::getInstance();
             while ($row = pg_fetch_assoc($results)) {
                 $roles[] = $rolesMapper->getObjectById((int) $row['role_id']);
             }
-
-            return new Permission((int) $row['id'], $row['permission'], $row['description'], Postgres::convertPostgresBoolToBool($row['active']), new \DateTimeImmutable($row['created']), $roles);
-
+            return $this->buildPermission((int) $row['id'], $row['permission'], $row['description'], Postgres::convertPostgresBoolToBool($row['active']), new \DateTimeImmutable($row['created']), $roles);
         } else {
             return null;
         }
     }
 
-    private function getObject(array $whereColumnsInfo): ?Permission
+    /** note roles array is validated in Permission constructor */
+    public function buildPermission(int $id, string $permission, ?string $description, bool $active, \DateTimeImmutable $created, array $roles): Permission 
     {
-        $q = new SelectBuilder($this->getSelectClause(), $this->getFromClause(), $whereColumnsInfo, $this->getOrderBy());
-        return $this->getObjectForResults($q->execute());
+        return new Permission($id, $permission, $description, $active, $created, $roles);
     }
 
     public function getObjectById(int $id): ?Permission 
@@ -157,17 +140,6 @@ final class PermissionsMapper extends MultiTableMapper
             ]
         ];
         return $this->getObject($whereColumnsInfo);
-    }
-
-    private function buildPermissionFromRecord(array $record): Permission 
-    {
-        foreach ($this->primaryTableMapper->getColumns() as $column) {
-            $columnName = $column->getName();
-            if (!array_key_exists($columnName, $record)) {
-                throw new \InvalidArgumentException("$columnName must exist in record");
-            }
-        }
-        return new Permission((int) $record['id'], $record['permission'], $record['description'], Postgres::convertPostgresBoolToBool($record['active']), new \DateTimeImmutable($record['created']));
     }
 
     public function getPermissions(): array
@@ -190,7 +162,7 @@ final class PermissionsMapper extends MultiTableMapper
     {
         $permissions = [];
         foreach ($this->selectArray(null, $whereColumnsInfo, $orderBy) as $permissionArray) {
-            $permissions[] = new Permission($permissionArray['id'], $permissionArray['permission'], $permissionArray['description'], $permissionArray['active'], $permissionArray['created'], $permissionArray['roles']);
+            $permissions[] = $this->buildPermission($permissionArray['id'], $permissionArray['permission'], $permissionArray['description'], $permissionArray['active'], $permissionArray['created'], $permissionArray['roles']);
         }
 
         return $permissions;

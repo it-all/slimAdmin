@@ -13,7 +13,7 @@ use SlimPostgres\Exceptions;
 // note that level 1 is the greatest permission
 final class RolesMapper extends TableMapper
 {
-    /** array role_id => [role, level] */
+    /** @var array role_id => [role, level]. instead of querying the database whenever a role is needed. all roles are loaded on construction and are then easily retrievable. note that if in the future any role records were to change via javascript this array would require updating through the setRoles method in order to stay in sync. */
     private $roles;
 
     const TABLE_NAME = 'roles';

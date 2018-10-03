@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres\Administrators\Roles;
 
 use SlimPostgres\App;
+use SlimPostgres\Exceptions\QueryFailureException;
 use SlimPostgres\ObjectsListViews;
 use SlimPostgres\InsertUpdateViews;
 use SlimPostgres\Database\Queries\QueryBuilder;
@@ -42,7 +43,7 @@ class RolesView extends DatabaseTableView implements ObjectsListViews, InsertUpd
 
         try {
             $roles = $this->mapper->getObjects($this->getFilterColumnsInfo());
-        } catch (\Exception $e) {
+        } catch (QueryFailureException $e) {
             $roles = [];
             // warning is inserted when query fails
             App::setAdminNotice('Query Failed', 'failure');

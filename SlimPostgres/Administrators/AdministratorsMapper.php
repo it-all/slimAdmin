@@ -217,29 +217,9 @@ final class AdministratorsMapper extends MultiTableMapper
         return $q->execute();
     }
 
-    private function addRecordToArray(array &$results, array $record) 
-    {
-        $newRecord = [
-            'id' => (int) $record['id'],
-            'name' => $record['name'],
-            'username' => $record['username'],
-            'passwordHash' => $record['password_hash'],
-            'roles' => [$record['role']],
-            'active' => Postgres::convertPostgresBoolToBool($record['active']),
-            'created' => new \DateTimeImmutable($record['created']),
-        ];
-
-        $results[] = $newRecord;
-    }
-
-    // adds new role to administrator results array for results key
-    private function addRoleToAdministratorRoles(array &$administratorsArray, int $key, string $role) 
-    {
-        array_push($administratorsArray[$key]['roles'], $role);
-    }
-
-    // returns key of results array for matching 'id' key, null if not found
-    // note, careful when checking return value as 0 can be returned (evaluates to false)
+    /* returns key of results array for matching 'id' key, null if not found
+     * note, careful when checking return value as 0 can be returned (evaluates to false)
+     */
     private function getAdministratorsArrayKeyForId(array $administratorsArray, int $id): ?int 
     {
         foreach ($administratorsArray as $key => $administrator) {
@@ -251,7 +231,7 @@ final class AdministratorsMapper extends MultiTableMapper
         return null;
     }
 
-    // returns array of results instead of recordset
+    /** returns array of results instead of recordset */
     private function selectArray(?string $selectColumns = null, array $whereColumnsInfo = null, string $orderBy = null): array
     {
         if ($selectColumns == null) {
@@ -264,10 +244,18 @@ final class AdministratorsMapper extends MultiTableMapper
         if (pg_num_rows($pgResults) > 0) {
             while ($record = pg_fetch_assoc($pgResults)) {
                 // either add new administrator or just new role based on whether administrator already exists
-                if (null !== $key = $this->getAdministratorsArrayKeyForId($administratorsArray, (int) $record['id'])) {
-                    $this->addRoleToAdministratorRoles($administratorsArray, $key, $record['role']);
+                if (null === $key = $this->getAdministratorsArrayKeyForId($administratorsArray, (int) $record['id'])) {
+                    $administratorsArray[] = [
+                        'id' => (int) $record['id'],
+                        'name' => $record['name'],
+                        'username' => $record['username'],
+                        'passwordHash' => $record['password_hash'],
+                        'roles' => [$record['role']],
+                        'active' => Postgres::convertPostgresBoolToBool($record['active']),
+                        'created' => new \DateTimeImmutable($record['created']),
+                    ];
                 } else {
-                    $this->addRecordToArray($administratorsArray, $record);
+                    array_push($administratorsArray[$key]['roles'], $record['role']);
                 }
             }
         }

@@ -12,6 +12,7 @@ use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\ListViewModels;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\Postgres;
+use SlimPostgres\Exceptions\UnallowedActionException;
 
 // the model of an Administrator stored in the database, which includes the record from administrators, plus an array of assigned roles.
 class Administrator implements ListViewModels
@@ -273,7 +274,7 @@ class Administrator implements ListViewModels
         
         try {
             (AdministratorsMapper::getInstance())->validateDelete($this);
-        } catch (\Exception $e) {
+        } catch (UnallowedActionException $e) {
             return false;
         }
 

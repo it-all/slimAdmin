@@ -107,29 +107,6 @@ final class AdministratorsMapper extends MultiTableMapper
         return (int) $q->executeWithReturnField('id');
     }
 
-    // receives query results for administrators joined to roles and loads and returns model object or null if no results
-    // note this only works for single administrator results (ie select by id)
-    private function getObjectForResults($results): ?Administrator 
-    {
-        if (pg_numrows($results) > 0) {
-            // there will be 1 record for each role
-            $roles = [];
-            while ($row = pg_fetch_assoc($results)) {
-                /** save last row for use below (most fields will be constant in all rows) */
-                $standardRow = $row;
-                $roles[$row['role_id']] = [
-                    App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME => $row['role'],
-                    App::SESSION_ADMINISTRATOR_KEY_ROLES_LEVEL => $row['role_level']
-                ];
-            }
-
-            return new Administrator((int) $standardRow['id'], $standardRow['name'], $standardRow['username'], $standardRow['password_hash'], $roles, Postgres::convertPostgresBoolToBool($standardRow['active']), new \DateTimeImmutable($standardRow['created']));
-
-        } else {
-            return null;
-        }
-    }
-
     private function getFromClause(): string 
     {
         return "FROM ".self::TABLE_NAME." JOIN ".self::ADM_ROLES_TABLE_NAME." ON ".self::TABLE_NAME.".id = ".self::ADM_ROLES_TABLE_NAME.".administrator_id JOIN ".self::ROLES_TABLE_NAME." ON ".self::ADM_ROLES_TABLE_NAME.".role_id = ".self::ROLES_TABLE_NAME.".id";
@@ -138,7 +115,29 @@ final class AdministratorsMapper extends MultiTableMapper
     private function getObject(array $whereColumnsInfo): ?Administrator
     {
         $q = new SelectBuilder($this->getSelectClause(), $this->getFromClause(), $whereColumnsInfo, $this->getOrderBy());
-        return $this->getObjectForResults($q->execute());
+
+        $pgResults = $q->execute();
+        if (pg_numrows($pgResults) > 0) {
+            // there will be 1 record for each role
+            $roles = [];
+            while ($row = pg_fetch_assoc($pgResults)) {
+                /** save last row for use below (most fields will be constant in all rows) */
+                $lastRow = $row;
+                $roles[$row['role_id']] = [
+                    App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME => $row['role'],
+                    App::SESSION_ADMINISTRATOR_KEY_ROLES_LEVEL => $row['role_level']
+                ];
+            }
+
+            return $this->buildAdministrator((int) $lastRow['id'], $lastRow['name'], $lastRow['username'], $lastRow['password_hash'], $roles, Postgres::convertPostgresBoolToBool($lastRow['active']), new \DateTimeImmutable($lastRow['created']));
+        } else {
+            return null;
+        }
+    }
+
+    public function buildAdministrator(int $id, string $name, string $username, string $passwordHash, bool $active, \DateTimeImmutable $created, array $roles, ?AuthenticationService $authentication = null, ?AuthorizationService $authorization = null) 
+    {
+        return new Administrator($id, $name, $username, $passwordHash, $roles, $active, $created, $authentication, $authorization);
     }
 
     public function getObjectById(int $id): ?Administrator 
@@ -269,7 +268,7 @@ final class AdministratorsMapper extends MultiTableMapper
     {
         $administrators = [];
         foreach ($this->selectArray(null, $whereColumnsInfo, $orderBy) as $administratorArray) {
-            $administrators[] = new Administrator($administratorArray['id'], $administratorArray['name'], $administratorArray['username'], $administratorArray['passwordHash'], $administratorArray['roles'], $administratorArray['active'], $administratorArray['created'], $authentication, $authorization);
+            $administrators[] = $this->buildAdministrator($administratorArray['id'], $administratorArray['name'], $administratorArray['username'], $administratorArray['passwordHash'], $administratorArray['active'], $administratorArray['created'], $administratorArray['roles'], $authentication, $authorization);
         }
 
         return $administrators;

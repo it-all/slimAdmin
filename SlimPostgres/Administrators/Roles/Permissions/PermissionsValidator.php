@@ -24,7 +24,7 @@ class PermissionsValidator extends ValitronValidatorExtension
 
         // bool - either inserting or !inserting (updating)
         $inserting = count($changedFieldValues) == 0;
-        
+
         // define unique column rule to be used in certain situations below
         $this->addUniqueRule();
 
@@ -39,6 +39,5 @@ class PermissionsValidator extends ValitronValidatorExtension
         $this->rule('array', 'roles');
         $rolesMapper = RolesMapper::getInstance();
         $this->rule('in', 'roles.*', array_keys($rolesMapper->getRoles())); // role ids
-
     }
 }

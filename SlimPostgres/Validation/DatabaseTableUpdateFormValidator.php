@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres;
+namespace SlimPostgres\Validation;
 
 use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Forms\FormHelper;

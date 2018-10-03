@@ -11,10 +11,10 @@ class RolesValidator extends DatabaseTableFormValidator
     public function __construct(array $inputData, string $databaseAction = 'insert', array $record = null)
     {
         if ($databaseAction != 'insert' && $databaseAction != 'update') {
-            throw new \Exception("databaseAction must be insert or update: $databaseAction");
+            throw new \InvalidArgumentException("databaseAction must be insert or update: $databaseAction");
         }
         if ($databaseAction == 'insert' && $record !== null) {
-            throw new \Exception("insert action must not have record");
+            throw new \InvalidArgumentException("insert action must not have record");
         }
 
         parent::__construct($inputData, RolesMapper::getInstance());

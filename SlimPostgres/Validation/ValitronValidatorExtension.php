@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Utilities;
+namespace SlimPostgres\Validation;
 
 use Valitron\Validator;
 
@@ -47,5 +47,15 @@ class ValitronValidatorExtension extends Validator
                 $newMessage = str_replace($messageFieldName . ' ', '', $errorMessage);
         }
         return $newMessage;
+    }
+
+    protected function addUniqueRule() 
+    {
+        self::addRule('unique', function($field, $value, array $params = [], array $fields = []) {
+            if (!$params[1]->errors($field)) {
+                return !$params[0]->recordExistsForValue($value);
+            }
+            return true; // skip validation if there is already an error for the field
+        }, 'Already exists');
     }
 }

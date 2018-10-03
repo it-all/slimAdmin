@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace SlimPostgres\Administrators;
 
 use SlimPostgres\Database\DatabaseTableValidation;
-use SlimPostgres\Utilities\ValitronValidatorExtension;
+use SlimPostgres\Validation\ValitronValidatorExtension;
 use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\Security\Authorization\AuthorizationService;
 
@@ -26,12 +26,7 @@ class AdministratorsValidator extends ValitronValidatorExtension
         $inserting = count($changedFieldValues) == 0;
 
         // define unique column rule to be used in certain situations below
-        self::addRule('unique', function($field, $value, array $params = [], array $fields = []) {
-            if (!$params[1]->errors($field)) {
-                return !$params[0]->recordExistsForValue($value);
-            }
-            return true; // skip validation if there is already an error for the field
-        }, 'Already exists');
+        $this->addUniqueRule();
 
         $this->rule('required', ['name', 'username', 'roles']);
         $this->rule('regex', 'name', '%^[a-zA-Z\s\'-]+$%')->message('only letters, apostrophes, hyphens, and spaces allowed');

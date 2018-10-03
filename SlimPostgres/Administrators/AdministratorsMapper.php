@@ -115,13 +115,15 @@ final class AdministratorsMapper extends MultiTableMapper
             // there will be 1 record for each role
             $roles = [];
             while ($row = pg_fetch_assoc($results)) {
+                /** save last row for use below (most fields will be constant in all rows) */
+                $standardRow = $row;
                 $roles[$row['role_id']] = [
                     App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME => $row['role'],
                     App::SESSION_ADMINISTRATOR_KEY_ROLES_LEVEL => $row['role_level']
                 ];
             }
 
-            return new Administrator((int) $row['id'], $row['name'], $row['username'], $row['password_hash'], $roles, Postgres::convertPostgresBoolToBool($row['active']), new \DateTimeImmutable($row['created']));
+            return new Administrator((int) $standardRow['id'], $standardRow['name'], $standardRow['username'], $standardRow['password_hash'], $roles, Postgres::convertPostgresBoolToBool($standardRow['active']), new \DateTimeImmutable($standardRow['created']));
 
         } else {
             return null;

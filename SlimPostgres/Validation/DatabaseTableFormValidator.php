@@ -1,12 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres;
+namespace SlimPostgres\Validation;
 
 use SlimPostgres\Database\DataMappers\TableMapper;
-use SlimPostgres\Utilities\ValitronValidatorExtension;
 use SlimPostgres\Forms\FormHelper;
-use SlimPostgres\Database\DatabaseTableValidation;
 
 // sets validation rules for database table based on table's columns
 abstract class DatabaseTableFormValidator extends ValitronValidatorExtension
@@ -31,12 +29,7 @@ abstract class DatabaseTableFormValidator extends ValitronValidatorExtension
         $uniqueColumns = $this->mapper->getUniqueColumns();
 
         if (count($uniqueColumns) > 0) {
-            self::addRule('unique', function($field, $value, array $params = [], array $fields = []) {
-                if (!$params[1]->errors($field)) {
-                    return !$params[0]->recordExistsForValue($value);
-                }
-                return true; // skip validation if there is already an error for the field
-            }, 'already exists');
+            $this->addUniqueRule();
 
             foreach ($uniqueColumns as $databaseColumnMapper) {
                 $field = $databaseColumnMapper->getName();

@@ -12,7 +12,7 @@ use It_All\FormFormer\Fields\TextareaField;
 use It_All\FormFormer\Form;
 use SlimPostgres\Database\DataMappers\ColumnMapper;
 use SlimPostgres\Database\DataMappers\TableMapper;
-use SlimPostgres\Database\DatabaseTableValidation;
+use SlimPostgres\Validation\DatabaseTableValidation;
 use SlimPostgres\Database\Postgres;
 
 class DatabaseTableForm extends Form

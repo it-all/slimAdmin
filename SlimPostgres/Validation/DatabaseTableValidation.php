@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Database;
+namespace SlimPostgres\Validation;
 
+use SlimPostgres\Database\Postgres;
 use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Database\DataMappers\ColumnMapper;
 

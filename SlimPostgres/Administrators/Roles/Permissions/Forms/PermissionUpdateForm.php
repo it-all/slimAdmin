@@ -4,10 +4,8 @@ declare(strict_types=1);
 namespace SlimPostgres\Administrators\Forms;
 
 use Slim\Container;
-use SlimPostgres\Administrators\Administrator;
-use SlimPostgres\Administrators\Forms\AdministratorForm;
 
-class AdministratorUpdateForm extends AdministratorForm
+class PermissionUpdateForm extends PermissionForm
 {
     public function __construct(string $formAction, Container $container, array $fieldValues = [])
     {

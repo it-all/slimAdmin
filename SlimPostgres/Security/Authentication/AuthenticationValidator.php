@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Security\Authentication;
 
-use SlimPostgres\Utilities\ValitronValidatorExtension;
+use SlimPostgres\Validation\ValitronValidatorExtension;
 
 // sets validation rules for login form
 class AuthenticationValidator extends ValitronValidatorExtension

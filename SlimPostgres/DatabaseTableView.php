@@ -28,15 +28,9 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
 
         parent::__construct($container, $routePrefix, App::getRouteName(true, $routePrefix, 'index'), $this->mapper, App::getRouteName(true, $routePrefix, 'index.reset'), $listViewTemplate);
 
-        $insertLinkInfo = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? ['text' => 'Insert '.$this->mapper->getFormalTableName(false), 'route' => App::getRouteName(true, $this->routePrefix, 'insert')] : false;
-        $this->setInsert($insertLinkInfo);
-
-        $allowUpdate = $this->authorization->isAuthorized($this->getPermissions('update')) && $this->mapper->getPrimaryKeyColumnName() !== null;
-
-        $this->setUpdate($allowUpdate, $this->mapper->getPrimaryKeyColumnName(), App::getRouteName(true, $this->routePrefix, 'update', 'put'));
-
-        $this->setDelete($this->container->authorization->isAuthorized($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
-
+        $this->setInsert();
+        $this->setUpdate();
+        $this->setDelete();
     }
 
     public function routeGetInsert(Request $request, Response $response, $args)

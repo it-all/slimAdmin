@@ -312,6 +312,11 @@ class TableMapper implements TableMappers
         return $this->primaryKeyColumnName;
     }
 
+    public function getUpdateColumnName(): ?string
+    {
+        return $this->getPrimaryKeyColumnName();
+    }
+
     public function getOrderByColumnName(): ?string
     {
         return $this->orderByColumnName;

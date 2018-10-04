@@ -10,6 +10,7 @@ class SystemEventsView extends AdminListView
 {
     public function __construct(Container $container)
     {
+        $this->routePrefix = ROUTEPREFIX_SYSTEM_EVENTS;
         // systemEvents mapper already in container as a service
         parent::__construct($container, 'systemEvents', ROUTE_SYSTEM_EVENTS, $container->systemEvents, ROUTE_SYSTEM_EVENTS_RESET);
     }

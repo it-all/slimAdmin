@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 // route prefixes
 define('ROUTEPREFIX_ADMIN', 'admin');
+define('ROUTEPREFIX_SYSTEM_EVENTS', 'systemEvents');
 define('ROUTEPREFIX_ADMINISTRATORS', 'administrators');
 define('ROUTEPREFIX_ROLES', 'roles');
 define('ROUTEPREFIX_PERMISSIONS', 'permissions');
+
 
 // GLOBAL ROUTE NAME CONSTANTS
 define('ROUTE_HOME', 'home');
@@ -20,8 +22,8 @@ define('ROUTE_LOGOUT', ROUTEPREFIX_ADMIN . 'authentication.logout');
 define('ROUTE_LOGIN_ATTEMPTS', ROUTEPREFIX_ADMIN . '.logins.index');
 define('ROUTE_LOGIN_ATTEMPTS_RESET', ROUTEPREFIX_ADMIN . '.logins.index.reset');
 // system events
-define('ROUTE_SYSTEM_EVENTS', ROUTEPREFIX_ADMIN . '.systemEvents.index');
-define('ROUTE_SYSTEM_EVENTS_RESET', ROUTEPREFIX_ADMIN . '.systemEvents.index.reset');
+define('ROUTE_SYSTEM_EVENTS', ROUTEPREFIX_ADMIN . '.'.ROUTEPREFIX_SYSTEM_EVENTS.'.index');
+define('ROUTE_SYSTEM_EVENTS_RESET', ROUTEPREFIX_ADMIN . '.' . ROUTEPREFIX_SYSTEM_EVENTS . '.index.reset');
 // administrators
 define('ROUTE_ADMINISTRATORS', ROUTEPREFIX_ADMIN . '.'.ROUTEPREFIX_ADMINISTRATORS.'.index');
 define('ROUTE_ADMINISTRATORS_RESET', ROUTEPREFIX_ADMIN . '.'.ROUTEPREFIX_ADMINISTRATORS.'.index.reset');

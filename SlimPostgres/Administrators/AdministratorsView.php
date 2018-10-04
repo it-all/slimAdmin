@@ -21,7 +21,6 @@ use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\AdminListView;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Forms\FormHelper;
-
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -40,15 +39,9 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
 
         parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS, AdministratorsMapper::getInstance(), ROUTE_ADMINISTRATORS_RESET, 'admin/lists/objectsList.php');
 
-        $insertLinkInfo = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? [
-            'text' => 'Insert '.$this->mapper->getFormalTableName(false), 
-            'route' => App::getRouteName(true, $this->routePrefix, 'insert')
-        ] : null;
-        $this->setInsert($insertLinkInfo);
-
-        $this->setUpdate($this->authorization->isAuthorized($this->getPermissions('update')), $this->mapper->getUpdateColumnName(), App::getRouteName(true, $this->routePrefix, 'update'));
-
-        $this->setDelete($this->container->authorization->isAuthorized($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
+        $this->setInsert();
+        $this->setUpdate();
+        $this->setDelete();
     }
 
     /** overrides in order to get administrator objects and send to indexView */

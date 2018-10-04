@@ -20,7 +20,7 @@ class PermissionsView extends AdminListView implements ObjectsListViews, InsertU
 {
     use ResponseUtilities;
 
-    const FILTER_FIELDS_PREFIX = 'administrators';
+    const FILTER_FIELDS_PREFIX = 'permissions';
 
     public function __construct(Container $container)
     {
@@ -28,15 +28,9 @@ class PermissionsView extends AdminListView implements ObjectsListViews, InsertU
 
         parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS_PERMISSIONS, PermissionsMapper::getInstance(), ROUTE_ADMINISTRATORS_PERMISSIONS_RESET, 'admin/lists/objectsList.php');
 
-        $insertLinkInfo = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? [
-            'text' => 'Insert '.$this->mapper->getFormalTableName(false), 
-            'route' => App::getRouteName(true, $this->routePrefix, 'insert')
-        ] : null;
-        $this->setInsert($insertLinkInfo);
-
-        $this->setUpdate($this->authorization->isAuthorized($this->getPermissions('update')), $this->mapper->getUpdateColumnName(), App::getRouteName(true, $this->routePrefix, 'update'));
-
-        $this->setDelete($this->container->authorization->isAuthorized($this->getPermissions('delete')), App::getRouteName(true, $this->routePrefix, 'delete'));
+        $this->setInsert();
+        $this->setUpdate();
+        $this->setDelete();
     }
 
     /** overrides in order to get objects and send to indexView */

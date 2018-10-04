@@ -129,7 +129,7 @@ final class AdministratorsMapper extends MultiTableMapper
                 ];
             }
 
-            return $this->buildAdministrator((int) $lastRow['id'], $lastRow['name'], $lastRow['username'], $lastRow['password_hash'], $roles, Postgres::convertPostgresBoolToBool($lastRow['active']), new \DateTimeImmutable($lastRow['created']));
+            return $this->buildAdministrator((int) $lastRow['id'], $lastRow['name'], $lastRow['username'], $lastRow['password_hash'], Postgres::convertPostgresBoolToBool($lastRow['active']), new \DateTimeImmutable($lastRow['created']), $roles);
         } else {
             return null;
         }

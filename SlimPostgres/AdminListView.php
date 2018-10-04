@@ -40,6 +40,7 @@ abstract class AdminListView extends AdminView
 
     public function __construct(Container $container, string $filterFieldsPrefix, string $indexRoute, TableMappers $mapper, string $filterResetRoute, string $template = 'admin/lists/resultsList.php')
     {
+        parent::__construct($container);
         $this->sessionFilterFieldKey = $filterFieldsPrefix . 'Filter';
         $this->filterKey = $filterFieldsPrefix;
 
@@ -47,13 +48,15 @@ abstract class AdminListView extends AdminView
         $this->mapper = $mapper;
         $this->template = $template;
         $this->filterResetRoute = $filterResetRoute;
-        $this->updatesPermitted = false; // initialize
-        $this->updateColumn = null; // initialize
-        $this->updateRoute = null; // initialize
-        $this->deletesPermitted = false; // initialize
-        $this->deleteRoute = null; // initialize
-        $this->insertLinkInfo = null; // initialize
-        parent::__construct($container);
+
+        /** initialize insert, update, delete properties to disallow. children can override by calling setInsert, setUpdate, setDelete methods */
+        $this->insertLinkInfo = null; 
+        $this->updatesPermitted = false; 
+        $this->updateColumn = null; 
+        $this->updateRoute = null; 
+        $this->deletesPermitted = false; 
+        $this->deleteRoute = null; 
+        
     }
 
     public function getFilterKey(): string 
@@ -61,25 +64,28 @@ abstract class AdminListView extends AdminView
         return $this->filterKey;
     }
 
-    protected function setInsert(?array $insertLinkInfo)
+    protected function setInsert()
     {
-        $this->insertLinkInfo = $insertLinkInfo;
+        $this->insertLinkInfo = ($this->authorization->isAuthorized($this->getPermissions('insert'))) ? [
+            'text' => 'Insert '.$this->mapper->getFormalTableName(false), 
+            'route' => App::getRouteName(true, $this->routePrefix, 'insert')
+        ] : null;
     }
 
-    protected function setUpdate(bool $updatesPermitted, ?string $updateColumn, ?string $updateRoute)
+    protected function setUpdate()
     {
-        $this->updatesPermitted = $updatesPermitted; // initialize
-        $this->updateColumn = $updateColumn; // initialize
-        $this->updateRoute = $updateRoute; // initialize
+        $this->updateColumn = $this->mapper->getUpdateColumnName();
+
+        $this->updatesPermitted = $this->authorization->isAuthorized($this->getPermissions('update')) && $this->updateColumn !== null;
+
+        $this->updateRoute = App::getRouteName(true, $this->routePrefix, 'update');
     }
 
-    protected function setDelete(bool $deletesPermitted, ?string $deleteRoute)
+    protected function setDelete()
     {
-        if ($deletesPermitted && $deleteRoute == null) {
-            throw new \Exception("delete route must be defined");
-        }
-        $this->deletesPermitted = $deletesPermitted;
-        $this->deleteRoute = $deleteRoute;
+        $this->deletesPermitted = $this->container->authorization->isAuthorized($this->getPermissions('delete'));
+
+        $this->deleteRoute = App::getRouteName(true, $this->routePrefix, 'delete');
     }
 
     public function routeIndex(Request $request, Response $response, $args)

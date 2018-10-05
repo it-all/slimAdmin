@@ -89,7 +89,7 @@ class AdministratorsController extends BaseController
 
         // check for changes made
         // only check the password if it has been supplied (entered in the form)
-        $changedFields = $administrator->getChangedFieldValues($input['name'], $input['username'], $input['roles'], FormHelper::getBoolForCheckboxField($input['active']), mb_strlen($input['password']) > 0, $input['password']);
+        $changedFields = $this->getChangedFieldValues($administrator, $input['name'], $input['username'], $input['roles'], FormHelper::getBoolForCheckboxField($input['active']), mb_strlen($input['password']) > 0, $input['password']);
 
         // if no changes made, display error message
         if (count($changedFields) == 0) {
@@ -117,7 +117,7 @@ class AdministratorsController extends BaseController
             }
         }
 
-        $this->systemEvents->insertInfo("Updated Administrator", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$administrator->getChangedFieldsString($changedFields, $administrator));
+        $this->systemEvents->insertInfo("Updated Administrator", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$this->getChangedFieldsString($administrator, $changedFields));
         App::setAdminNotice("Updated administrator $primaryKey");
         
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
@@ -151,4 +151,104 @@ class AdministratorsController extends BaseController
 
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
+
+    private function getChangedFieldValues(Administrator $administrator, string $name, string $username, ?array $roles, bool $active, bool $includePassword = true, ?string $password = null): array 
+    {
+        $changedFieldValues = [];
+
+        if ($administrator->getName() != $name) {
+            $changedFieldValues['name'] = $name;
+        }
+        if ($administrator->getUsername() != $username) {
+            $changedFieldValues['username'] = $username;
+        }
+
+        if ($includePassword && !password_verify($password, $administrator->getPasswordHash())) {
+            $changedFieldValues['passwordHash'] = $password;
+        }
+
+        if ($administrator->getActive() !== $active) {
+            $changedFieldValues['active'] = $active;
+        }
+
+        // roles - only add to main array if changed
+        if ($roles === null) {
+            $roles = [];
+        }
+        $addRoles = []; // populate with ids of new roles
+        $removeRoles = []; // populate with ids of former roles
+        
+        $currentRoles = $administrator->getRoles();
+
+        // search roles to add
+        foreach ($roles as $newRoleId) {
+            if (!array_key_exists($newRoleId, $currentRoles)) {
+                $addRoles[] = $newRoleId;
+            }
+        }
+
+        // search roles to remove
+        foreach ($currentRoles as $currentRoleId => $currentRoleInfo) {
+            if (!in_array($currentRoleId, $roles)) {
+                $removeRoles[] = $currentRoleId;
+            }
+        }
+
+        if (count($addRoles) > 0) {
+            $changedFieldValues['roles']['add'] = $addRoles;
+        }
+
+        if (count($removeRoles) > 0) {
+            $changedFieldValues['roles']['remove'] = $removeRoles;
+        }
+
+        return $changedFieldValues;
+    }
+
+    private function getChangedFieldsString(Administrator $administrator, array $changedFields): string 
+    {
+        $allowedChangedFieldsKeys = array_merge(['roles'], (AdministratorsMapper::getInstance()::ADMINISTRATORS_UPDATE_FIELDS));
+
+        $changedString = "";
+
+        foreach ($changedFields as $fieldName => $newValue) {
+
+            // make sure only correct fields have been input
+            if (!in_array($fieldName, $allowedChangedFieldsKeys)) {
+                throw new \InvalidArgumentException("$fieldName not allowed in changedFields");
+            }
+
+            $oldValue = $administrator->{"get".ucfirst($fieldName)}();
+            
+            if ($fieldName == 'roles') {
+
+                $rolesMapper = RolesMapper::getInstance();
+
+                $addRoleIds = (isset($newValue['add'])) ? $newValue['add'] : [];
+                $removeRoleIds = (isset($newValue['remove'])) ? $newValue['remove'] : [];
+
+                // update values based on add/remove and old roles
+                $updatedNewValue = "";
+                $updatedOldValue = "";
+                foreach ($oldValue as $roleId => $roleInfo) {
+                    $updatedOldValue .= $roleInfo['roleName']." ";
+                    // don't put the roles being removed into the new value
+                    if (!in_array($roleId, $removeRoleIds)) {
+                        $updatedNewValue .= $roleInfo['roleName']." ";
+                    }
+                }
+                foreach ($addRoleIds as $roleId) {
+                    $updatedNewValue .= $rolesMapper->getRoleForRoleId((int) $roleId) . " ";
+                }
+                $newValue = $updatedNewValue;
+                $oldValue = $updatedOldValue;
+            }
+
+            $changedString .= " $fieldName: $oldValue => $newValue, ";
+        }
+
+        return substr($changedString, 0, strlen($changedString)-2);
+    }
+
+
 }

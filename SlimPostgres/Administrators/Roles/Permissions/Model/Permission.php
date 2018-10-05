@@ -28,8 +28,14 @@ class Permission implements ListViewModels
     /** @var \SlimPostgres\Administrators\Roles[] an array of assigned role objects */
     private $roles; 
 
-    public function __construct(int $id, string $permissionName, ?string $description, bool $active, \DateTimeImmutable $created, ?array $roles = null)
+    /** @var int[] an array of assigned role ids */
+    private $roleIds;
+
+    public function __construct(int $id, string $permissionName, ?string $description, bool $active, \DateTimeImmutable $created, array $roles)
     {
+        if (count($roles) == 0) {
+            throw new \InvalidArgumentException("Roles cannot be empty for permission (id $id)");
+        }
         // validate roles array is array of role objects
         foreach ($roles as $role) {
             if (get_class($role) != 'SlimPostgres\Administrators\Roles\Role') {
@@ -42,6 +48,7 @@ class Permission implements ListViewModels
         $this->active = $active;
         $this->created = $created;
         $this->roles = $roles;
+        $this->setRoleIds();
     }
 
     public function getId(): int 
@@ -82,15 +89,37 @@ class Permission implements ListViewModels
         ];
     }
 
-    public function getRolesString() 
+    public function getRoles(): array 
+    {
+        return $this->roles;
+    }
+
+    public function getRoleIds(): array 
+    {
+        return $this->roleIds;
+    }
+
+    private function setRoleIds() 
+    {
+        $roleIds = [];
+        foreach ($this->roles as $role) {
+            $roleIds[] = $role->getid();
+        }
+        $this->roleIds = $roleIds;
+    }
+
+    public function hasRole(int $roleId): bool 
+    {
+        return in_array($roleId, $this->roleIds);
+    }
+    
+    public function getRolesString(): string
     {
         $rolesString = "";
-        if ($this->roles !== null) {
-            foreach ($this->roles as $role) {
-                $rolesString .= $role->getRoleName().", ";
-            }
-            $rolesString = Functions::removeLastCharsFromString($rolesString, 2);
+        foreach ($this->roles as $role) {
+            $rolesString .= $role->getRoleName().", ";
         }
+        $rolesString = Functions::removeLastCharsFromString($rolesString, 2);
         return $rolesString;
     }
 

@@ -84,12 +84,12 @@ final class AdministratorsMapper extends MultiTableMapper
     {
         $administratorRoleIds = [];
         foreach ($roleIds as $roleId) {
-            $administratorRoleIds[] = $this->insertAdministratorRole($administratorId, (int) $roleId);
+            $administratorRoleIds[] = $this->doInsertAdministratorRole($administratorId, (int) $roleId);
         }
         return $administratorRoleIds;
     }
 
-    private function insertAdministratorRole(int $administratorId, int $roleId)
+    private function doInsertAdministratorRole(int $administratorId, int $roleId)
     {
         $q = new QueryBuilder("INSERT INTO ".self::ADM_ROLES_TABLE_NAME." (administrator_id, role_id) VALUES($1, $2)", $administratorId, $roleId);
         return $q->executeWithReturnField('id');
@@ -378,10 +378,9 @@ final class AdministratorsMapper extends MultiTableMapper
     
     private function getChangedAdministratorFields(array $changedFields): array 
     {
-        $searchFields = self::ADMINISTRATORS_UPDATE_FIELDS;
         $changedAdministratorFields = [];
 
-        foreach ($searchFields as $searchField) {
+        foreach (self::ADMINISTRATORS_UPDATE_FIELDS as $searchField) {
             if (array_key_exists($searchField, $changedFields)) {
                 if ($searchField == 'password') {
                     $changedAdministratorFields['password_hash'] = $this->getHashedPassword($changedFields['password']);
@@ -408,7 +407,7 @@ final class AdministratorsMapper extends MultiTableMapper
         }
         if (isset($changedFields['roles']['add'])) {
             foreach ($changedFields['roles']['add'] as $addRoleId) {
-                $this->insertAdministratorRole($administratorId, (int) $addRoleId);
+                $this->doInsertAdministratorRole($administratorId, (int) $addRoleId);
             }
         }
         if (isset($changedFields['roles']['remove'])) {

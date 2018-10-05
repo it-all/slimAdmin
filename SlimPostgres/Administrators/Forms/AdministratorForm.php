@@ -84,7 +84,12 @@ abstract class AdministratorForm
 
         $this->rolesValue = (isset($fieldValues[self::ROLES_FIELDSET_NAME])) ? $fieldValues[self::ROLES_FIELDSET_NAME] : [];
 
-        $this->activeValue = (isset($fieldValues[self::ACTIVE_FIELD_NAME])) ? $fieldValues[self::ACTIVE_FIELD_NAME] : self::DEFAULT_ACTIVE_VALUE;
+        /** this must be set to a bool. it may come in as "on" or may not be set. set to default if not set, or false if already false otherwise true */
+        if (!isset($fieldValues[self::ACTIVE_FIELD_NAME])) {
+            $this->activeValue = self::DEFAULT_ACTIVE_VALUE;
+        } else {
+            $this->activeValue = ($fieldValues[self::ACTIVE_FIELD_NAME] === false) ? false : true;
+        }
     }
 
     private function getNameField()

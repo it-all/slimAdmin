@@ -39,6 +39,14 @@ class AdminNavigation
                                 'subSections' => [
                                     'Insert' => [
                                         'route' => ROUTE_ADMINISTRATORS_ROLES_INSERT,
+                                    ],
+                                    'Permissions' => [
+                                        'route' => ROUTE_ADMINISTRATORS_PERMISSIONS,
+                                        'subSections' => [
+                                            'Insert' => [
+                                                'route' => ROUTE_ADMINISTRATORS_PERMISSIONS_INSERT,
+                                            ],
+                                        ]
                                     ]
                                 ],
                             ],

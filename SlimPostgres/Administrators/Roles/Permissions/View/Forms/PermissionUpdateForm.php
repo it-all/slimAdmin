@@ -1,8 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Administrators\View\Forms;
+namespace SlimPostgres\Administrators\Roles\Permissions\View\Forms;
 
+use SlimPostgres\Administrators\Roles\Permissions\Model\Permission;
+use \SlimPostgres\Forms\FormHelper;
 use Slim\Container;
 
 class PermissionUpdateForm extends PermissionForm
@@ -10,21 +12,17 @@ class PermissionUpdateForm extends PermissionForm
     public function __construct(string $formAction, Container $container, array $fieldValues = [])
     {
         $this->formMethod = 'put';
-        $this->arePasswordFieldsRequired = false; // allow to leave blank to keep existing ps
         parent::__construct($formAction, $container, $fieldValues);
-        parent::setPasswordLabel('[leave blank to keep existing password]');
     }
 
     /** note could subclass here for initial get form but simpler to just add this fn */
-    public function setFieldValuesToAdministrator(Administrator $administrator)
+    public function setFieldValuesToPermission(Permission $permission)
     {
         parent::setFieldValues([
-            parent::NAME_FIELD_NAME => $administrator->getName(),
-            parent::USERNAME_FIELD_NAME => $administrator->getUsername(),
-            parent::PASSWORD_FIELD_NAME => '',
-            parent::PASSWORDCONFIRM_FIELD_NAME => '',
-            parent::ROLES_FIELDSET_NAME => $administrator->getRoleIds(),
-            parent::ACTIVE_FIELD_NAME => $administrator->getActive(),
+            parent::PERMISSION_FIELD_NAME => $permission->getPermissionName(),
+            parent::DESCRIPTION_FIELD_NAME => $permission->getDescription(),
+            parent::ROLES_FIELDSET_NAME => $permission->getRoleIds(),
+            parent::ACTIVE_FIELD_NAME => $permission->getActive(),
         ]);
     }
 

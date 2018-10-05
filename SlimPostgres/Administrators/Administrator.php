@@ -104,103 +104,103 @@ class Administrator implements ListViewModels
         return $this->authorization;
     }
 
-    public function getChangedFieldValues(string $name, string $username, ?array $roles, bool $active, bool $includePassword = true, ?string $password = null): array 
-    {
-        $changedFieldValues = [];
+    // public function getChangedFieldValues(string $name, string $username, ?array $roles, bool $active, bool $includePassword = true, ?string $password = null): array 
+    // {
+    //     $changedFieldValues = [];
 
-        if ($this->getName() != $name) {
-            $changedFieldValues['name'] = $name;
-        }
-        if ($this->getUsername() != $username) {
-            $changedFieldValues['username'] = $username;
-        }
+    //     if ($this->getName() != $name) {
+    //         $changedFieldValues['name'] = $name;
+    //     }
+    //     if ($this->getUsername() != $username) {
+    //         $changedFieldValues['username'] = $username;
+    //     }
 
-        if ($includePassword && !password_verify($password, $this->getPasswordHash())) {
-            $changedFieldValues['passwordHash'] = $password;
-        }
+    //     if ($includePassword && !password_verify($password, $this->getPasswordHash())) {
+    //         $changedFieldValues['passwordHash'] = $password;
+    //     }
 
-        if ($this->active !== $active) {
-            $changedFieldValues['active'] = $active;
-        }
+    //     if ($this->active !== $active) {
+    //         $changedFieldValues['active'] = $active;
+    //     }
 
-        // roles - only add to main array if changed
-        if ($roles === null) {
-            $roles = [];
-        }
-        $addRoles = []; // populate with ids of new roles
-        $removeRoles = []; // populate with ids of former roles
+    //     // roles - only add to main array if changed
+    //     if ($roles === null) {
+    //         $roles = [];
+    //     }
+    //     $addRoles = []; // populate with ids of new roles
+    //     $removeRoles = []; // populate with ids of former roles
         
-        $currentRoles = $this->getRoles();
+    //     $currentRoles = $this->getRoles();
 
-        // search roles to add
-        foreach ($roles as $newRoleId) {
-            if (!array_key_exists($newRoleId, $currentRoles)) {
-                $addRoles[] = $newRoleId;
-            }
-        }
+    //     // search roles to add
+    //     foreach ($roles as $newRoleId) {
+    //         if (!array_key_exists($newRoleId, $currentRoles)) {
+    //             $addRoles[] = $newRoleId;
+    //         }
+    //     }
 
-        // search roles to remove
-        foreach ($currentRoles as $currentRoleId => $currentRoleInfo) {
-            if (!in_array($currentRoleId, $roles)) {
-                $removeRoles[] = $currentRoleId;
-            }
-        }
+    //     // search roles to remove
+    //     foreach ($currentRoles as $currentRoleId => $currentRoleInfo) {
+    //         if (!in_array($currentRoleId, $roles)) {
+    //             $removeRoles[] = $currentRoleId;
+    //         }
+    //     }
 
-        if (count($addRoles) > 0) {
-            $changedFieldValues['roles']['add'] = $addRoles;
-        }
+    //     if (count($addRoles) > 0) {
+    //         $changedFieldValues['roles']['add'] = $addRoles;
+    //     }
 
-        if (count($removeRoles) > 0) {
-            $changedFieldValues['roles']['remove'] = $removeRoles;
-        }
+    //     if (count($removeRoles) > 0) {
+    //         $changedFieldValues['roles']['remove'] = $removeRoles;
+    //     }
 
-        return $changedFieldValues;
-    }
+    //     return $changedFieldValues;
+    // }
 
-    public function getChangedFieldsString(array $changedFields): string 
-    {
-        $allowedChangedFieldsKeys = ['name', 'username', 'roles', 'password', 'active'];
+    // public function getChangedFieldsString(array $changedFields): string 
+    // {
+    //     $allowedChangedFieldsKeys = ['name', 'username', 'roles', 'password', 'active'];
 
-        $changedString = "";
+    //     $changedString = "";
 
-        foreach ($changedFields as $fieldName => $newValue) {
+    //     foreach ($changedFields as $fieldName => $newValue) {
 
-            // make sure only correct fields have been input
-            if (!in_array($fieldName, $allowedChangedFieldsKeys)) {
-                throw new \InvalidArgumentException("$fieldName not allowed in changedFields");
-            }
+    //         // make sure only correct fields have been input
+    //         if (!in_array($fieldName, $allowedChangedFieldsKeys)) {
+    //             throw new \InvalidArgumentException("$fieldName not allowed in changedFields");
+    //         }
 
-            $oldValue = $this->{"get".ucfirst($fieldName)}();
+    //         $oldValue = $this->{"get".ucfirst($fieldName)}();
             
-            if ($fieldName == 'roles') {
+    //         if ($fieldName == 'roles') {
 
-                $rolesMapper = RolesMapper::getInstance();
+    //             $rolesMapper = RolesMapper::getInstance();
 
-                $addRoleIds = (isset($newValue['add'])) ? $newValue['add'] : [];
-                $removeRoleIds = (isset($newValue['remove'])) ? $newValue['remove'] : [];
+    //             $addRoleIds = (isset($newValue['add'])) ? $newValue['add'] : [];
+    //             $removeRoleIds = (isset($newValue['remove'])) ? $newValue['remove'] : [];
 
-                // update values based on add/remove and old roles
-                $updatedNewValue = "";
-                $updatedOldValue = "";
-                foreach ($oldValue as $roleId => $roleInfo) {
-                    $updatedOldValue .= $roleInfo['roleName']." ";
-                    // don't put the roles being removed into the new value
-                    if (!in_array($roleId, $removeRoleIds)) {
-                        $updatedNewValue .= $roleInfo['roleName']." ";
-                    }
-                }
-                foreach ($addRoleIds as $roleId) {
-                    $updatedNewValue .= $rolesMapper->getRoleForRoleId((int) $roleId) . " ";
-                }
-                $newValue = $updatedNewValue;
-                $oldValue = $updatedOldValue;
-            }
+    //             // update values based on add/remove and old roles
+    //             $updatedNewValue = "";
+    //             $updatedOldValue = "";
+    //             foreach ($oldValue as $roleId => $roleInfo) {
+    //                 $updatedOldValue .= $roleInfo['roleName']." ";
+    //                 // don't put the roles being removed into the new value
+    //                 if (!in_array($roleId, $removeRoleIds)) {
+    //                     $updatedNewValue .= $roleInfo['roleName']." ";
+    //                 }
+    //             }
+    //             foreach ($addRoleIds as $roleId) {
+    //                 $updatedNewValue .= $rolesMapper->getRoleForRoleId((int) $roleId) . " ";
+    //             }
+    //             $newValue = $updatedNewValue;
+    //             $oldValue = $updatedOldValue;
+    //         }
 
-            $changedString .= " $fieldName: $oldValue => $newValue, ";
-        }
+    //         $changedString .= " $fieldName: $oldValue => $newValue, ";
+    //     }
 
-        return substr($changedString, 0, strlen($changedString)-2);
-    }
+    //     return substr($changedString, 0, strlen($changedString)-2);
+    // }
 
     /** returns array of list view fields [fieldName => fieldValue] */
     public function getListViewFields(): array

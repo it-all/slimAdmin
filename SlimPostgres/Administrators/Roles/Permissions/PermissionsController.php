@@ -5,6 +5,8 @@ namespace SlimPostgres\Administrators\Roles\Permissions;
 
 use SlimPostgres\App;
 use SlimPostgres\BaseController;
+use SlimPostgres\Administrators\Roles\RolesMapper;
+use SlimPostgres\Administrators\Roles\Permissions\Model\Permission;
 use SlimPostgres\Administrators\Roles\Permissions\Model\PermissionsMapper;
 use SlimPostgres\Administrators\Roles\Permissions\Model\PermissionsValidator;
 use SlimPostgres\Administrators\Roles\Permissions\View\PermissionsViews;
@@ -67,6 +69,51 @@ class PermissionsController extends BaseController
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS_PERMISSIONS));
     }
 
+    public function routePutUpdate(Request $request, Response $response, $args)
+    {
+        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'update'))) {
+            throw new \Exception('No permission.');
+        }
+
+        $primaryKey = $args['primaryKey'];
+
+        // if all roles have been unchecked it won't be included in the post will be set null
+        $this->setRequestInput($request, PermissionForm::getFields());
+        $input = $this->requestInput;
+
+        $redirectRoute = App::getRouteName(true, $this->routePrefix,'index');
+
+        // make sure there is a permission for the primary key
+        if (null === $permission = $this->permissionsMapper->getObjectById((int) $primaryKey)) {
+            return $this->databaseRecordNotFound($response, $primaryKey, $this->permissionsMapper->getPrimaryTableMapper(), 'update');
+        }
+
+        // check for changes made
+        // only check the password if it has been supplied (entered in the form)
+        $changedFields = $this->getChangedFieldValues($permission, $input['permission'], $input['description'], FormHelper::getBoolForCheckboxField($input['active']), $input['roles']);
+
+        // if no changes made, display error message
+        if (count($changedFields) == 0) {
+            App::setAdminNotice("No changes made", 'failure');
+            return $this->view->updateView($request, $response, $args);
+        }
+
+        $validator = new PermissionsValidator($input, $changedFields);
+        if (!$validator->validate()) {
+            // redisplay the form with input values and error(s)
+            FormHelper::setFieldErrors($validator->getFirstErrors());
+            $args[App::USER_INPUT_KEY] = $input;
+            return $this->view->updateView($request, $response, $args);
+        }
+        
+        $this->permissionsMapper->update((int) $primaryKey, $changedFields);
+
+        $this->systemEvents->insertInfo("Updated Permission", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$this->getChangedFieldsString($permission, $changedFields));
+        App::setAdminNotice("Updated permission $primaryKey");
+        
+        return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
+    }
+
     public function routeGetDelete(Request $request, Response $response, $args)
     {
         if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'delete'))) {
@@ -94,5 +141,98 @@ class PermissionsController extends BaseController
         App::setAdminNotice("Deleted permission $primaryKey($permission)");
 
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
+    }
+
+    private function getChangedFieldValues(Permission $permission, string $permissionName, ?string $description, bool $active, ?array $roleIds): array 
+    {
+        $changedFieldValues = [];
+
+        if ($permission->getPermissionName() != $permissionName) {
+            $changedFieldValues['permissionName'] = $permissionName;
+        }
+        if ($permission->getDescription() != $description) {
+            $changedFieldValues['description'] = $description;
+        }
+
+        if ($permission->getActive() !== $active) {
+            $changedFieldValues['active'] = $active;
+        }
+
+        /** if all roles are unchecked the $rolesId parameter will be null */
+        if ($roleIds === null) {
+            $roleIds = [];
+        }
+
+        // search roles to add
+        $addRoles = [];
+        foreach ($roleIds as $newRoleId) {
+            if (!$permission->hasRole((int) $newRoleId)) {
+                $addRoles[] = $newRoleId;
+            }
+        }
+
+        // search roles to remove
+        $removeRoles = [];
+        foreach ($permission->getRoleIds() as $currentRoleId) {
+            if (!in_array($currentRoleId, $roleIds)) {
+                $removeRoles[] = $currentRoleId;
+            }
+        }
+
+        if (count($addRoles) > 0) {
+            $changedFieldValues['roles']['add'] = $addRoles;
+        }
+
+        if (count($removeRoles) > 0) {
+            $changedFieldValues['roles']['remove'] = $removeRoles;
+        }
+
+        return $changedFieldValues;
+    }
+
+    private function getChangedFieldsString(Permission $permission, array $changedFields): string 
+    {
+        $allowedChangedFieldsKeys = array_merge(['roles'], (PermissionsMapper::getInstance()::PERMISSIONS_UPDATE_FIELDS));
+
+        $changedString = "";
+
+        foreach ($changedFields as $fieldName => $newValue) {
+
+            // make sure only correct fields have been input
+            if (!in_array($fieldName, $allowedChangedFieldsKeys)) {
+                throw new \InvalidArgumentException("$fieldName not allowed in changedFields");
+            }
+
+            $oldValue = $permission->{"get".ucfirst($fieldName)}();
+            
+            if ($fieldName == 'roles') {
+
+                $rolesMapper = RolesMapper::getInstance();
+
+                $addRoleIds = (isset($newValue['add'])) ? $newValue['add'] : [];
+                $removeRoleIds = (isset($newValue['remove'])) ? $newValue['remove'] : [];
+
+                // update values based on add/remove and old roles
+                $updatedNewValue = "";
+                $updatedOldValue = "";
+                foreach ($oldValue as $role) {
+                    // foreach ($oldValue as $roleId => $roleInfo) {
+                    $updatedOldValue .= $role->getRoleName()." ";
+                    // don't put the roles being removed into the new value
+                    if (!in_array($role->getId(), $removeRoleIds)) {
+                        $updatedNewValue .= $role->getRoleName()." ";
+                    }
+                }
+                foreach ($addRoleIds as $roleId) {
+                    $updatedNewValue .= $rolesMapper->getRoleForRoleId((int) $roleId) . " ";
+                }
+                $newValue = $updatedNewValue;
+                $oldValue = $updatedOldValue;
+            }
+
+            $changedString .= " $fieldName: $oldValue => $newValue, ";
+        }
+
+        return substr($changedString, 0, strlen($changedString)-2);
     }
 }

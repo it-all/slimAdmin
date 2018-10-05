@@ -26,5 +26,4 @@ trait ResponseUtilities
         
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
-
 }

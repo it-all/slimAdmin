@@ -15,7 +15,9 @@ use SlimPostgres\Database\Postgres;
 final class PermissionsMapper extends MultiTableMapper
 {
     const TABLE_NAME = 'permissions';
+    const ROLES_TABLE_NAME = 'roles';
     const ROLES_JOIN_TABLE_NAME = 'roles_permissions';
+    const PERMISSIONS_UPDATE_FIELDS = ['permission', 'description', 'active'];
 
     const SELECT_COLUMNS = [
         'id' => self::TABLE_NAME . '.id',
@@ -26,6 +28,7 @@ final class PermissionsMapper extends MultiTableMapper
         'created' => self::TABLE_NAME . '.created',
     ];
 
+    /** must be key of SELECT_COLUMNS array */
     const ORDER_BY_COLUMN_NAME = 'created';
 
     public static function getInstance()
@@ -68,19 +71,19 @@ final class PermissionsMapper extends MultiTableMapper
         return $permissionId;
     }
 
-    private function insertPermissionRole(int $permissionId, int $roleId)
-    {
-        $q = new QueryBuilder("INSERT INTO ".self::ROLES_JOIN_TABLE_NAME." (permission_id, role_id) VALUES($1, $2)", $permissionId, $roleId);
-        return $q->executeWithReturnField('id');
-    }
-
     private function insertPermissionRoles(int $permissionId, array $roleIds): array
     {
         $permissionRoleIds = [];
         foreach ($roleIds as $roleId) {
-            $permissionRoleIds[] = $this->insertPermissionRole($permissionId, (int) $roleId);
+            $permissionRoleIds[] = $this->doInsertPermissionRole($permissionId, (int) $roleId);
         }
         return $permissionRoleIds;
+    }
+
+    private function doInsertPermissionRole(int $permissionId, int $roleId)
+    {
+        $q = new QueryBuilder("INSERT INTO ".self::ROLES_JOIN_TABLE_NAME." (permission_id, role_id) VALUES($1, $2)", $permissionId, $roleId);
+        return $q->executeWithReturnField('id');
     }
 
     private function insert(string $permission, ?string $description = null, bool $active = true): int
@@ -154,7 +157,12 @@ final class PermissionsMapper extends MultiTableMapper
     /** permissions joined with role_permissions. note that every permission must have at least 1 role assigned */
     private function getFromClause(): string 
     {
-        return "FROM ".self::TABLE_NAME." JOIN ".self::ROLES_JOIN_TABLE_NAME." ON ".self::TABLE_NAME.".id = ".self::ROLES_JOIN_TABLE_NAME.".permission_id";
+        return "FROM ".self::TABLE_NAME." JOIN ".self::ROLES_JOIN_TABLE_NAME." ON ".self::TABLE_NAME.".id = ".self::ROLES_JOIN_TABLE_NAME.".permission_id JOIN ".self::ROLES_TABLE_NAME." ON ".self::ROLES_JOIN_TABLE_NAME.".role_id=".self::ROLES_TABLE_NAME.".id";
+    }
+
+    protected function getOrderBy(): string 
+    {
+        return self::ROLES_TABLE_NAME.".role";
     }
 
     private function getObject(array $whereColumnsInfo): ?Permission
@@ -213,6 +221,50 @@ final class PermissionsMapper extends MultiTableMapper
         return $permissions;
     }
 
+    private function getChangedPermissionFields(array $changedFields): array 
+    {
+        $changedPermissionFields = [];
+
+        foreach (self::PERMISSIONS_UPDATE_FIELDS as $searchField) {
+            if (array_key_exists($searchField, $changedFields)) {
+                if ($searchField == 'active') {
+                    $changedPermissionFields['active'] = Postgres::convertBoolToPostgresBool($changedFields['active']);
+                } else {
+                    $changedPermissionFields[$searchField] = $changedFields[$searchField];
+                }
+            }
+
+        }
+        return $changedPermissionFields;
+    }
+
+    public function update(int $permissionId, array $changedFields) 
+    {
+        $changedPermissionFields = $this->getChangedPermissionFields($changedFields);
+
+        $q = new QueryBuilder("BEGIN");
+        $q->execute();
+
+        if (count($changedPermissionFields) > 0) {
+            $this->getPrimaryTableMapper()->updateByPrimaryKey($changedFields, $permissionId, false);
+        }
+        if (isset($changedFields['roles']['add'])) {
+            foreach ($changedFields['roles']['add'] as $addRoleId) {
+                $this->doInsertPermissionRole($permissionId, (int) $addRoleId);
+            }
+        }
+        if (isset($changedFields['roles']['remove'])) {
+            foreach ($changedFields['roles']['remove'] as $deleteRoleId) {
+                if ($this->doDeletePermissionRole($permissionId, (int) $deleteRoleId) === null) {
+                    throw new Exception("Role not found for permission during delete attempt");
+                }
+            }
+        }
+        $q = new QueryBuilder("END");
+        $sql = $q->getSql();
+        $q->execute();
+    }
+
     /** returns deleted permissionName */
     public function delete(int $id): string
     {
@@ -256,9 +308,9 @@ final class PermissionsMapper extends MultiTableMapper
 
     /** deletes a record in the join table and returns the id */
     /** returns null if not found */
-    private function doDeletePermissioRole(int $administratorId, int $roleId): ?int
+    private function doDeletePermissionRole(int $permissionId, int $roleId): ?int
     {
-        $q = new QueryBuilder("DELETE FROM ".self::ADM_ROLES_TABLE_NAME." WHERE administrator_id = $1 AND role_id = $2", $administratorId, $roleId);
+        $q = new QueryBuilder("DELETE FROM ".self::ROLES_JOIN_TABLE_NAME." WHERE permission_id = $1 AND role_id = $2", $permissionId, $roleId);
         try {
             $deletedId = $q->executeWithReturnField('id');
         } catch (QueryResultsNotFoundException $e) {

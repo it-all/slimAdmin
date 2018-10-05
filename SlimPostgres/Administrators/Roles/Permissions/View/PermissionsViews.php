@@ -1,22 +1,22 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Administrators\Roles\Permissions;
+namespace SlimPostgres\Administrators\Roles\Permissions\View;
 
 use SlimPostgres\App;
 use SlimPostgres\ObjectsListViews;
 use SlimPostgres\AdminListView;
 use SlimPostgres\InsertUpdateViews;
 use SlimPostgres\ResponseUtilities;
-use SlimPostgres\Administrators\Roles\Permissions\PermissionsMapper;
-use SlimPostgres\Administrators\Roles\Permissions\Forms\PermissionInsertForm;
-use SlimPostgres\Administrators\Roles\Permissions\Forms\PermissionUpdateForm;
+use SlimPostgres\Administrators\Roles\Permissions\Model\PermissionsMapper;
+use SlimPostgres\Administrators\Roles\Permissions\View\Forms\PermissionInsertForm;
+use SlimPostgres\Administrators\Roles\Permissions\View\Forms\PermissionUpdateForm;
 use SlimPostgres\Exceptions\QueryFailureException;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class PermissionsView extends AdminListView implements ObjectsListViews, InsertUpdateViews
+class PermissionsViews extends AdminListView implements ObjectsListViews, InsertUpdateViews
 {
     use ResponseUtilities;
 

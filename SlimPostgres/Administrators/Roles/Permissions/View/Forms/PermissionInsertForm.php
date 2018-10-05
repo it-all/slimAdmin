@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Administrators\Roles\Permissions\Forms;
+namespace SlimPostgres\Administrators\Roles\Permissions\View\Forms;
 
 use Slim\Container;
-use SlimPostgres\Administrators\Roles\Permissions\Forms\PermissionForm;
+use SlimPostgres\Administrators\Roles\Permissions\View\Forms\PermissionForm;
 
 class PermissionInsertForm extends PermissionForm
 {

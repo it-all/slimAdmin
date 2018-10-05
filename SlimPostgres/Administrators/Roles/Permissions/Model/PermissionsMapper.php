@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Administrators\Roles\Permissions;
+namespace SlimPostgres\Administrators\Roles\Permissions\Model;
 
-use SlimPostgres\Administrators\Roles\Permissions\Permission;
+use SlimPostgres\Administrators\Roles\Permissions\Model\Permission;
 use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\Database\DataMappers\MultiTableMapper;
 use SlimPostgres\Database\DataMappers\TableMapper;
@@ -211,5 +211,59 @@ final class PermissionsMapper extends MultiTableMapper
         }
 
         return $permissions;
+    }
+
+    /** returns deleted permissionName */
+    public function delete(int $id): string
+    {
+        // make sure there is a permission for the primary key
+        if (null === $permission = $this->getObjectById($id)) {
+            throw new Exceptions\QueryResultsNotFoundException();
+        }
+
+        $this->doDeleteTransaction($id);
+
+        $permissionName = $permission->getPermissionName();
+        unset($permission);
+
+        return $permissionName;
+    }
+
+    /** any necessary validation should be performed prior to calling */
+    private function doDeleteTransaction(int $permissionId)
+    {
+        $q = new QueryBuilder("BEGIN");
+        $q->execute();
+        $this->doDeletePermissionRoles($permissionId);
+        $this->doDeletePermission($permissionId);
+        $q = new QueryBuilder("END");
+        $q->execute();
+    }
+
+    /** deletes the record(s) in the join table */
+    private function doDeletePermission(int $permissionId)
+    {
+        $q = new QueryBuilder("DELETE FROM ".self::TABLE_NAME." WHERE id = $1", $permissionId);
+        $q->execute();
+    }
+
+    /** deletes the record(s) in the join table */
+    private function doDeletePermissionRoles(int $permissionId)
+    {
+        $q = new QueryBuilder("DELETE FROM ".self::ROLES_JOIN_TABLE_NAME." WHERE permission_id = $1", $permissionId);
+        $q->execute();
+    }
+
+    /** deletes a record in the join table and returns the id */
+    /** returns null if not found */
+    private function doDeletePermissioRole(int $administratorId, int $roleId): ?int
+    {
+        $q = new QueryBuilder("DELETE FROM ".self::ADM_ROLES_TABLE_NAME." WHERE administrator_id = $1 AND role_id = $2", $administratorId, $roleId);
+        try {
+            $deletedId = $q->executeWithReturnField('id');
+        } catch (QueryResultsNotFoundException $e) {
+            return null;
+        }
+        return (int) $deletedId;
     }
 }

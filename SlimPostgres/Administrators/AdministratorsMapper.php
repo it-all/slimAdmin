@@ -326,7 +326,7 @@ final class AdministratorsMapper extends MultiTableMapper
         /** will throw exception if not valid */
         $this->validateDelete($administrator);
 
-        $this->doDelete($id);
+        $this->doDeleteTransaction($id);
 
         $username = $administrator->getUsername();
         unset($administrator);
@@ -335,18 +335,18 @@ final class AdministratorsMapper extends MultiTableMapper
     }
 
     // any necessary validation should be performed prior to calling
-    private function doDelete(int $administratorId)
+    private function doDeleteTransaction(int $administratorId)
     {
         $q = new QueryBuilder("BEGIN");
         $q->execute();
-        $this->deleteAdministratorRoles($administratorId);
-        $this->deleteAdministrator($administratorId);
+        $this->doDeleteAdministratorRoles($administratorId);
+        $this->doDeleteAdministrator($administratorId);
         $q = new QueryBuilder("END");
         $q->execute();
     }
 
     /** deletes the record(s) in the join table */
-    private function deleteAdministratorRoles(int $administratorId)
+    private function doDeleteAdministratorRoles(int $administratorId)
     {
         $q = new QueryBuilder("DELETE FROM ".self::ADM_ROLES_TABLE_NAME." WHERE administrator_id = $1", $administratorId);
         $q->execute();
@@ -354,7 +354,7 @@ final class AdministratorsMapper extends MultiTableMapper
 
     /** deletes a record in the join table and returns the id */
     /** returns null if not found */
-    private function deleteAdministratorRole(int $administratorId, int $roleId): ?int
+    private function doDeleteAdministratorRole(int $administratorId, int $roleId): ?int
     {
         $q = new QueryBuilder("DELETE FROM ".self::ADM_ROLES_TABLE_NAME." WHERE administrator_id = $1 AND role_id = $2", $administratorId, $roleId);
         try {
@@ -366,7 +366,7 @@ final class AdministratorsMapper extends MultiTableMapper
     }
 
     /** deletes the administrators record */
-    private function deleteAdministrator(int $administratorId): ?string
+    private function doDeleteAdministrator(int $administratorId): ?string
     {
         $q = new QueryBuilder("DELETE FROM ".self::TABLE_NAME." WHERE id = $1", $administratorId);
         if ($username = $q->executeWithReturnField('username')) {
@@ -413,7 +413,7 @@ final class AdministratorsMapper extends MultiTableMapper
         }
         if (isset($changedFields['roles']['remove'])) {
             foreach ($changedFields['roles']['remove'] as $deleteRoleId) {
-                if ($this->deleteAdministratorRole($administratorId, (int) $deleteRoleId) === null) {
+                if ($this->doDeleteAdministratorRole($administratorId, (int) $deleteRoleId) === null) {
                     throw new Exception("Role not found for administrator during delete attempt");
                 }
             }

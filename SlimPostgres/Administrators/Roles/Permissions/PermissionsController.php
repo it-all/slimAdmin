@@ -5,9 +5,10 @@ namespace SlimPostgres\Administrators\Roles\Permissions;
 
 use SlimPostgres\App;
 use SlimPostgres\BaseController;
-use SlimPostgres\Administrators\Roles\Permissions\PermissionsMapper;
-use SlimPostgres\Administrators\Roles\Permissions\PermissionsView;
-use SlimPostgres\Administrators\Roles\Permissions\Forms\PermissionForm;
+use SlimPostgres\Administrators\Roles\Permissions\Model\PermissionsMapper;
+use SlimPostgres\Administrators\Roles\Permissions\Model\PermissionsValidator;
+use SlimPostgres\Administrators\Roles\Permissions\View\PermissionsViews;
+use SlimPostgres\Administrators\Roles\Permissions\View\Forms\PermissionForm;
 use SlimPostgres\ResponseUtilities;
 use SlimPostgres\Forms\FormHelper;
 use Slim\Container;
@@ -26,7 +27,7 @@ class PermissionsController extends BaseController
     public function __construct(Container $container)
     {
         $this->permissionsMapper = PermissionsMapper::getInstance();
-        $this->view = new PermissionsView($container);
+        $this->view = new PermissionsViews($container);
         $this->routePrefix = ROUTEPREFIX_PERMISSIONS;
         parent::__construct($container);
     }
@@ -66,4 +67,32 @@ class PermissionsController extends BaseController
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS_PERMISSIONS));
     }
 
+    public function routeGetDelete(Request $request, Response $response, $args)
+    {
+        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'delete'))) {
+            throw new \Exception('No permission.');
+        }
+
+        $primaryKey = (int) $args['primaryKey'];
+
+        try {
+            $permission = $this->permissionsMapper->delete($primaryKey);
+        } catch (Exceptions\QueryResultsNotFoundException $e) {
+            return $this->databaseRecordNotFound($response, $primaryKey, $this->permissionsMapper->getPrimaryTableMapper(), 'delete', 'Permission');
+        } catch (Exceptions\UnallowedActionException $e) {
+            $this->systemEvents->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
+            App::setAdminNotice($e->getMessage(), 'failure');
+            return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
+        } catch (\Exception $e) {
+            $this->systemEvents->insertError('Permission Deletion Failure', (int) $this->authentication->getAdministratorId(), $e->getMessage());
+            App::setAdminNotice('Delete Failed', 'failure');
+            return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
+        }
+
+        $eventNote = $this->permissionsMapper->getPrimaryTableMapper()->getPrimaryKeyColumnName() . ":$primaryKey|username: $username";
+        $this->systemEvents->insertInfo("Deleted Permission", (int) $this->authentication->getAdministratorId(), $eventNote);
+        App::setAdminNotice("Deleted permission $primaryKey($permission)");
+
+        return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
+    }
 }

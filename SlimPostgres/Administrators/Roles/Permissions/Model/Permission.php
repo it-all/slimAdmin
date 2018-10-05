@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Administrators\Roles\Permissions;
+namespace SlimPostgres\Administrators\Roles\Permissions\Model;
 
 use SlimPostgres\ListViewModels;
 use SlimPostgres\Database\Postgres;

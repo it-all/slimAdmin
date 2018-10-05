@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace SlimPostgres\Administrators\Roles\Permissions\Forms;
+namespace SlimPostgres\Administrators\Roles\Permissions\View\Forms;
 
 use Slim\Http\Request;
 use Slim\Container;
 use SlimPostgres\App;
-use SlimPostgres\Administrators\Roles\Permissions\PermissionsMapper;
+use SlimPostgres\Administrators\Roles\Permissions\Model\PermissionsMapper;
 use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Forms\FormHelper;

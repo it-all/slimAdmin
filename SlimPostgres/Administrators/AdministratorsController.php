@@ -123,7 +123,6 @@ class AdministratorsController extends BaseController
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
     }
 
-    // override for custom validation and return column
     public function routeGetDelete(Request $request, Response $response, $args)
     {
         if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'delete'))) {

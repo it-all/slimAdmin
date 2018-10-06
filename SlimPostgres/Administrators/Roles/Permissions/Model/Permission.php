@@ -83,9 +83,9 @@ class Permission implements ListViewModels
             'id' => $this->id,
             'permission' => $this->permissionName,
             'description' => $this->description,
+            'roles' => $this->getRolesString(),
             'active' => Postgres::convertBoolToPostgresBool($this->active), // send 't' / 'f'
             'created' => $this->created->format('Y-m-d'),
-            'roles' => $this->getRolesString(),
         ];
     }
 

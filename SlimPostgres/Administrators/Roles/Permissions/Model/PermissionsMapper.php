@@ -146,22 +146,8 @@ final class PermissionsMapper extends MultiTableMapper
         return $permissionsArray;
     }
 
-    public function select(?string $columns = null, ?array $whereColumnsInfo = null, ?string $orderBy = null)
-    {
-        if ($whereColumnsInfo != null) {
-            $this->validateWhere($whereColumnsInfo);
-        }
-        
-        $selectColumnsString = ($columns === null) ? $this->getSelectColumnsString() : $columns;
-        $selectClause = "SELECT " . $selectColumnsString;
-        $orderBy = ($orderBy == null) ? $this->getOrderBy() : $orderBy;
-        
-        $q = new SelectBuilder($selectClause, $this->getFromClause(), $whereColumnsInfo, $orderBy);
-        return $q->execute();
-    }
-
     /** permissions joined with role_permissions. note that every permission must have at least 1 role assigned */
-    private function getFromClause(): string 
+    protected function getFromClause(): string 
     {
         return "FROM ".self::TABLE_NAME." JOIN ".self::ROLES_JOIN_TABLE_NAME." ON ".self::TABLE_NAME.".id = ".self::ROLES_JOIN_TABLE_NAME.".permission_id JOIN ".self::ROLES_TABLE_NAME." ON ".self::ROLES_JOIN_TABLE_NAME.".role_id=".self::ROLES_TABLE_NAME.".id";
     }

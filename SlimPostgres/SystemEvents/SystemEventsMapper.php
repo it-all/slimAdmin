@@ -153,15 +153,14 @@ final class SystemEventsMapper extends MultiTableMapper
         return null;
     }
 
-    public function select(string $columns = '*', array $filterColumnsInfo = null)
+    protected function getFromClause(): string 
     {
-        $selectClause = "SELECT $columns";
-        $fromClause = "FROM ".self::PRIMARY_TABLE_NAME." JOIN ".self::TYPES_TABLE_NAME." ON ".self::PRIMARY_TABLE_NAME.".event_type = ".self::TYPES_TABLE_NAME.".id LEFT OUTER JOIN ".self::ADMINISTRATORS_TABLE_NAME." ON ".self::PRIMARY_TABLE_NAME.".administrator_id = ".self::ADMINISTRATORS_TABLE_NAME.".id";
+        return "FROM ".self::PRIMARY_TABLE_NAME." JOIN ".self::TYPES_TABLE_NAME." ON ".self::PRIMARY_TABLE_NAME.".event_type = ".self::TYPES_TABLE_NAME.".id LEFT OUTER JOIN ".self::ADMINISTRATORS_TABLE_NAME." ON ".self::PRIMARY_TABLE_NAME.".administrator_id = ".self::ADMINISTRATORS_TABLE_NAME.".id";
+    }
 
-        $orderBy = self::PRIMARY_TABLE_NAME.".created DESC";
-
-        $q = new SelectBuilder($selectClause, $fromClause, $filterColumnsInfo, $orderBy);
-        return $q->execute();
+    protected function getOrderBy(): string 
+    {
+        return self::PRIMARY_TABLE_NAME.".created DESC";
     }
 
     public function existForAdministrator(int $administratorId): bool

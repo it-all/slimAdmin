@@ -107,7 +107,7 @@ final class AdministratorsMapper extends MultiTableMapper
         return (int) $q->executeWithReturnField('id');
     }
 
-    private function getFromClause(): string 
+    protected function getFromClause(): string 
     {
         return "FROM ".self::TABLE_NAME." JOIN ".self::ADM_ROLES_TABLE_NAME." ON ".self::TABLE_NAME.".id = ".self::ADM_ROLES_TABLE_NAME.".administrator_id JOIN ".self::ROLES_TABLE_NAME." ON ".self::ADM_ROLES_TABLE_NAME.".role_id = ".self::ROLES_TABLE_NAME.".id";
     }
@@ -196,25 +196,6 @@ final class AdministratorsMapper extends MultiTableMapper
         }
         $q->add(")");
 
-        return $q->execute();
-    }
-
-    public function select(?string $columns = null, ?array $whereColumnsInfo = null, ?string $orderBy = null)
-    {
-        if ($whereColumnsInfo != null) {
-            $this->validateWhere($whereColumnsInfo);
-        }
-        
-        /** simply adding to the where clause below with the roles field will yield incomplete results, as not all roles for an administrator will be selected, so the subquery fn is called */
-        if (is_array($whereColumnsInfo) && array_key_exists('roles.role', $whereColumnsInfo)) {
-            return $this->selectWithRoleSubquery($columns, $whereColumnsInfo, $orderBy);
-        }
-        
-        $selectColumnsString = ($columns === null) ? $this->getSelectColumnsString() : $columns;
-        $selectClause = "SELECT " . $selectColumnsString;
-        $orderBy = ($orderBy == null) ? $this->getOrderBy() : $orderBy;
-        
-        $q = new SelectBuilder($selectClause, $this->getFromClause(), $whereColumnsInfo, $orderBy);
         return $q->execute();
     }
 

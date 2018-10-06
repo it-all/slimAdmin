@@ -61,7 +61,7 @@ final class AdministratorsMapper extends MultiTableMapper
         pg_query("BEGIN");
 
         try {
-            $administratorId = $this->insert($name, $username, $passwordClear, $active);
+            $administratorId = $this->doInsert($name, $username, $passwordClear, $active);
         } catch (\Exception $e) {
             $q = new QueryBuilder("ROLLBACK");
             $q->execute();
@@ -101,7 +101,7 @@ final class AdministratorsMapper extends MultiTableMapper
         return password_hash($password, PASSWORD_DEFAULT);
     }
 
-    private function insert(string $name, string $username, string $passwordClear, bool $active): int
+    private function doInsert(string $name, string $username, string $passwordClear, bool $active): int
     {
         $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash, active) VALUES($1, $2, $3, $4)", $name, $username, $this->getHashedPassword($passwordClear), Postgres::convertBoolToPostgresBool($active));
         return (int) $q->executeWithReturnField('id');

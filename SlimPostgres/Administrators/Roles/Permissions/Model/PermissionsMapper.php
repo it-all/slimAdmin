@@ -5,6 +5,7 @@ namespace SlimPostgres\Administrators\Roles\Permissions\Model;
 
 use SlimPostgres\Administrators\Roles\Permissions\Model\Permission;
 use SlimPostgres\Administrators\Roles\RolesMapper;
+use SlimPostgres\Administrators\Roles\Role;
 use SlimPostgres\Database\DataMappers\MultiTableMapper;
 use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Database\Queries\QueryBuilder;
@@ -46,13 +47,18 @@ final class PermissionsMapper extends MultiTableMapper
     }
 
     /** any validation should be done prior */
-    public function create(string $permission, ?string $description, array $roleIds, bool $active): int
+    public function create(string $permission, ?string $description, ?array $roleIds, bool $active): int
     {
+        // add top role if not already there, as it is assigned to all permissions
+        if ($roleIds === null || !in_array(Role::TOP_ROLE, $roleIds)) {
+            $roleIds[] = (RolesMapper::getInstance())->getTopRoleId();
+        }
+
         // insert administrator then administrator_roles in a transaction
         pg_query("BEGIN");
 
         try {
-            $permissionId = $this->insert($permission, $description, $active);
+            $permissionId = $this->doInsert($permission, $description, $active);
         } catch (\Exception $e) {
             $q = new QueryBuilder("ROLLBACK");
             $q->execute();
@@ -86,7 +92,7 @@ final class PermissionsMapper extends MultiTableMapper
         return $q->executeWithReturnField('id');
     }
 
-    private function insert(string $permission, ?string $description = null, bool $active = true): int
+    private function doInsert(string $permission, ?string $description = null, bool $active = true): int
     {
         if (strlen($description) == 0) {
             $description = null;
@@ -255,8 +261,12 @@ final class PermissionsMapper extends MultiTableMapper
         }
         if (isset($changedFields['roles']['remove'])) {
             foreach ($changedFields['roles']['remove'] as $deleteRoleId) {
-                if ($this->doDeletePermissionRole($permissionId, (int) $deleteRoleId) === null) {
-                    throw new Exception("Role not found for permission during delete attempt");
+                /** never remove top role from a permission */
+                $deleteRole = (RolesMapper::getInstance())->getObjectById($deleteRoleId);
+                if (!$deleteRole->isTop()) {
+                    if ($this->doDeletePermissionRole($permissionId, (int) $deleteRoleId) === null) {
+                        throw new Exception("Role not found for permission during delete attempt");
+                    }    
                 }
             }
         }

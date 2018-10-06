@@ -8,6 +8,7 @@ use Slim\Container;
 use SlimPostgres\App;
 use SlimPostgres\Administrators\Roles\Permissions\Model\PermissionsMapper;
 use SlimPostgres\Administrators\Roles\RolesMapper;
+use SlimPostgres\Administrators\Roles\Role;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Forms\FormHelper;
 use It_All\FormFormer\Form;
@@ -100,9 +101,12 @@ abstract class PermissionForm
                 'id' => 'roles' . $roleData['role'],
                 'class' => 'inlineFormField'
             ];
-            // checked?
-            if (isset($this->rolesValue) && in_array($roleId, $this->rolesValue)) {
+            // checked? owner is always
+            if ($roleData['role'] == Role::TOP_ROLE || (isset($this->rolesValue) && in_array($roleId, $this->rolesValue))) {
                 $rolesCheckboxAttributes['checked'] = 'checked';
+                if ($roleData['role'] == 'owner') {
+                    $rolesCheckboxAttributes['disabled'] = 'disabled';
+                }
             }
             $rolesCheckboxes[] = new CheckboxRadioInputField($roleData['role'], $rolesCheckboxAttributes);
         }

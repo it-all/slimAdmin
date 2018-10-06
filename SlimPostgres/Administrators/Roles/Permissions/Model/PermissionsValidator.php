@@ -28,7 +28,7 @@ class PermissionsValidator extends ValitronValidatorExtension
         // define unique column rule to be used in certain situations below
         $this->addUniqueRule();
 
-        $this->rule('required', ['permission', 'roles']);
+        $this->rule('required', ['permission']);
 
         // unique column rule for permission if it has changed
         if ($inserting || array_key_exists('permission', $changedFieldValues)) {

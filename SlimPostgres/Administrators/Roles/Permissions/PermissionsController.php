@@ -171,10 +171,10 @@ class PermissionsController extends BaseController
             }
         }
 
-        // search roles to remove
+        // search roles to remove (ignore top role)
         $removeRoles = [];
         foreach ($permission->getRoleIds() as $currentRoleId) {
-            if (!in_array($currentRoleId, $roleIds)) {
+            if ($currentRoleId != (RolesMapper::getInstance())->getTopRoleId() && !in_array($currentRoleId, $roleIds)) {
                 $removeRoles[] = $currentRoleId;
             }
         }

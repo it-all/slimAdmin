@@ -12,6 +12,7 @@ class Role implements ListViewModels
     private $roleName;
     private $level;
     private $created;
+    const TOP_ROLE = 'owner';
 
     public function __construct(int $id, string $roleName, int $level, \DateTimeImmutable $created)
     {
@@ -69,5 +70,10 @@ class Role implements ListViewModels
     public function getUniqueId(): ?string
     {
         return (string) $this->id;
+    }
+
+    public function isTop(): bool 
+    {
+        return $this->getRoleName() == self::TOP_ROLE;
     }
 }

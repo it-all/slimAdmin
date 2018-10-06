@@ -180,10 +180,9 @@ final class RolesMapper extends TableMapper
         return true;
     }
 
-    // true if not being used
-    public function isDeletable(int $roleId): bool 
+    public function isDeletable(): bool 
     {
-        return !$this->hasAdministrator($roleId) && !$this->hasPermissionAssigned($roleId);
+        return true;
     }
 
     // override for validation

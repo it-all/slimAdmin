@@ -134,7 +134,7 @@ class Permission implements ListViewModels
      */
     public function isDeletable(): bool
     {
-        return (PermissionsMapper::getInstance())->isDeletable($this->id);
+        return (PermissionsMapper::getInstance())->isDeletable();
     }
 
     public function getUniqueId(): ?string

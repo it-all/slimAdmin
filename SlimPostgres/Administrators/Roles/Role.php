@@ -56,7 +56,7 @@ class Role implements ListViewModels
     /** whether model is allowed to be updated */
     public function isUpdatable(): bool
     {
-        return (RolesMapper::getInstance())->isUpdatable($this->id);
+        return (RolesMapper::getInstance())->isUpdatable();
     }
 
     /** whether this model is allowed to be deleted 
@@ -64,7 +64,8 @@ class Role implements ListViewModels
      */
     public function isDeletable(): bool
     {
-        return (RolesMapper::getInstance())->isDeletable($this->id);
+        $rolesMapper = RolesMapper::getInstance();
+        return !$rolesMapper->hasAdministrator($roleId) && !$rolesMapper->hasPermissionAssigned($roleId);
     }
 
     public function getUniqueId(): ?string

@@ -197,7 +197,7 @@ final class PermissionsMapper extends MultiTableMapper
         return true;
     }
 
-    public function isDeletable(int $id): bool 
+    public function isDeletable(): bool 
     {
         return true;
     }

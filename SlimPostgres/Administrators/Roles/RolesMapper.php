@@ -18,6 +18,7 @@ final class RolesMapper extends TableMapper
 
     const TABLE_NAME = 'roles';
     const ADMINISTRATORS_JOIN_TABLE_NAME = 'administrator_roles';
+    const PERMISSIONS_JOIN_TABLE_NAME = 'roles_permissions';
 
     public static function getInstance()
     {
@@ -141,6 +142,12 @@ final class RolesMapper extends TableMapper
         return (bool) $q->getOne();
     }
 
+    public function hasPermissionAssigned(int $roleId): bool
+    {
+        $q = new QueryBuilder("SELECT COUNT(id) FROM ".self::PERMISSIONS_JOIN_TABLE_NAME." WHERE role_id = $1", $roleId);
+        return (bool) $q->getOne();
+    }
+
     public function getIdSelectField(array $fieldAttributes, string $fieldLabel = 'Role', ?int $selectedOption, ?string $fieldError)
     {
         // validate a provided selectedOption by verifying it is a valid role
@@ -174,9 +181,9 @@ final class RolesMapper extends TableMapper
     }
 
     // true if not being used
-    public function isDeletable(int $id): bool 
+    public function isDeletable(int $roleId): bool 
     {
-        return !$this->hasAdministrator($id);
+        return !$this->hasAdministrator($roleId) && !$this->hasPermissionAssigned($roleId);
     }
 
     // override for validation

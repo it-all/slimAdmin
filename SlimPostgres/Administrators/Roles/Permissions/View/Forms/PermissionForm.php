@@ -9,6 +9,8 @@ use SlimPostgres\App;
 use SlimPostgres\Administrators\Roles\Permissions\Model\PermissionsMapper;
 use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\Administrators\Roles\Role;
+use SlimPostgres\BaseMVC\View\Forms;
+use SlimPostgres\BaseMVC\View\Form as BaseForm;
 use SlimPostgres\Forms\DatabaseTableForm;
 use SlimPostgres\Forms\FormHelper;
 use It_All\FormFormer\Form;
@@ -17,14 +19,14 @@ use It_All\FormFormer\Fields\InputField;
 use It_All\FormFormer\Fields\InputFields\CheckboxRadioInputField;
 use SlimPostgres\Database\Postgres;
 
-abstract class PermissionForm
+abstract class PermissionForm extends BaseForm implements Forms
 {
-    private $formAction;
+    protected $formAction;
 
     /** @var string 'put' or 'post'
      *  if 'put' the hidden put method field is inserted at the beginning of the form
      */
-    protected $formMethod;
+    private $formMethod;
     private $csrf;
     private $mapper;
     private $permissionValue;
@@ -36,35 +38,35 @@ abstract class PermissionForm
     /** @var bool */
     private $activeValue; 
 
-    const PERMISSION_FIELD_NAME = 'permission';
+    const TITLE_FIELD_NAME = 'title';
     const DESCRIPTION_FIELD_NAME = 'description';
     const ROLES_FIELDSET_NAME = 'roles';
     const ACTIVE_FIELD_NAME = 'active';
 
     /** bool, controls whether insert checkbox defaults to checked (true) or unchecked (false) */
-    const DEFAULT_ACTIVE_VALUE = false;
+    const DEFAULT_ACTIVE_VALUE = true;
 
-    public static function getFields(): array
+    public static function getFieldNames(): array
     {
         return [
-            self::PERMISSION_FIELD_NAME,
+            self::TITLE_FIELD_NAME,
             self::DESCRIPTION_FIELD_NAME,
             self::ROLES_FIELDSET_NAME,
             self::ACTIVE_FIELD_NAME,
         ];
     }
     
-    public function __construct(string $formAction, Container $container, array $fieldValues = [])
+    public function __construct(string $formAction, Container $container, bool $isPutMethod = false, array $fieldValues = [])
     {
-        $this->formAction = $formAction;
-        $this->csrf = $container->csrf;
+        parent::__construct($formAction, $container, $isPutMethod);
+        $this->authorization = $container->authorization;
         $this->mapper = PermissionsMapper::getInstance();
         $this->setFieldValues($fieldValues);
     }
 
     protected function setFieldValues(array $fieldValues = [])
     {
-        $this->permissionValue = (isset($fieldValues[self::PERMISSION_FIELD_NAME])) ? $fieldValues[self::PERMISSION_FIELD_NAME] : '';
+        $this->permissionValue = (isset($fieldValues[self::TITLE_FIELD_NAME])) ? $fieldValues[self::TITLE_FIELD_NAME] : '';
 
         $this->descriptionValue = (isset($fieldValues[self::DESCRIPTION_FIELD_NAME])) ? $fieldValues[self::DESCRIPTION_FIELD_NAME] : '';
 
@@ -78,9 +80,9 @@ abstract class PermissionForm
         }
     }
 
-    private function getPermissionField()
+    private function getTitleField()
     {
-        return DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName(self::PERMISSION_FIELD_NAME), null, $this->permissionValue);
+        return DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName(self::TITLE_FIELD_NAME), null, $this->permissionValue);
     }
 
     private function getDescriptionField()
@@ -122,23 +124,13 @@ abstract class PermissionForm
     protected function getNodes(): array 
     {
         $nodes = [];
+        
         $nodes[] = $this->getActiveField();
-        $nodes[] = $this->getPermissionField();
+        $nodes[] = $this->getTitleField();
         $nodes[] = $this->getDescriptionField();
         $nodes[] = $this->getRolesFieldset();
 
-        // CSRF Fields
-        $nodes[] = FormHelper::getCsrfNameField($this->csrf->getTokenNameKey(), $this->csrf->getTokenName());
-        $nodes[] = FormHelper::getCsrfValueField($this->csrf->getTokenValueKey(), $this->csrf->getTokenValue());
-
-        // Submit Field
-        $nodes[] = FormHelper::getSubmitField();
-
+        $nodes = array_merge($nodes, $this->getCommonNodes());
         return $nodes;
-    }
-
-    public function getForm()
-    {
-        return new Form($this->getNodes(), ['method' => 'post', 'action' => $this->formAction], FormHelper::getGeneralError());
     }
 }

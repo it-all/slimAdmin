@@ -18,18 +18,17 @@ final class PermissionsMapper extends MultiTableMapper
     const TABLE_NAME = 'permissions';
     const ROLES_TABLE_NAME = 'roles';
     const ROLES_JOIN_TABLE_NAME = 'roles_permissions';
-    const PERMISSIONS_UPDATE_FIELDS = ['permission', 'description', 'active'];
+    const PERMISSIONS_UPDATE_FIELDS = ['title', 'description', 'active'];
 
     const SELECT_COLUMNS = [
         'id' => self::TABLE_NAME . '.id',
-        'permission' => self::TABLE_NAME . '.permission',
+        'title' => self::TABLE_NAME . '.title',
         'description' => self::TABLE_NAME . '.description',
-        'rolesId' => self::ROLES_JOIN_TABLE_NAME . '.role_id',
+        'roles' => self::ROLES_JOIN_TABLE_NAME . '.role_id',
         'active' => self::TABLE_NAME . '.active',
         'created' => self::TABLE_NAME . '.created',
     ];
 
-    /** must be key of SELECT_COLUMNS array */
     const ORDER_BY_COLUMN_NAME = 'created';
 
     public static function getInstance()
@@ -47,7 +46,7 @@ final class PermissionsMapper extends MultiTableMapper
     }
 
     /** any validation should be done prior */
-    public function create(string $permission, ?string $description, ?array $roleIds, bool $active): int
+    public function create(string $title, ?string $description, ?array $roleIds, bool $active): int
     {
         // add top role if not already there, as it is assigned to all permissions
         if ($roleIds === null || !in_array(Role::TOP_ROLE, $roleIds)) {
@@ -58,18 +57,16 @@ final class PermissionsMapper extends MultiTableMapper
         pg_query("BEGIN");
 
         try {
-            $permissionId = $this->doInsert($permission, $description, $active);
+            $permissionId = $this->doInsert($title, $description, $active);
         } catch (\Exception $e) {
-            $q = new QueryBuilder("ROLLBACK");
-            $q->execute();
+            pg_query("ROLLBACK");
             throw $e;
         }
 
         try {
             $this->insertPermissionRoles((int) $permissionId, $roleIds);
         } catch (\Exception $e) {
-            $q = new QueryBuilder("ROLLBACK");
-            $q->execute();
+            pg_query("ROLLBACK");
             throw $e;
         }
 
@@ -92,12 +89,12 @@ final class PermissionsMapper extends MultiTableMapper
         return $q->executeWithReturnField('id');
     }
 
-    private function doInsert(string $permission, ?string $description = null, bool $active = true): int
+    private function doInsert(string $title, ?string $description = null, bool $active = true): int
     {
         if (strlen($description) == 0) {
             $description = null;
         }
-        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (permission, description, active) VALUES($1, $2, $3)", $permission, $description, Postgres::convertBoolToPostgresBool($active));
+        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (title, description, active) VALUES($1, $2, $3)", $title, $description, Postgres::convertBoolToPostgresBool($active));
         return (int) $q->executeWithReturnField('id');
     }
 
@@ -131,7 +128,7 @@ final class PermissionsMapper extends MultiTableMapper
                 if (null === $key = $this->getPermissionsArrayKeyForId($permissionsArray, (int) $record['id'])) {
                     $permissionsArray[] = [
                         'id' => (int) $record['id'],
-                        'permission' => $record['permission'],
+                        'title' => $record['title'],
                         'description' => $record['description'],
                         'roles' => [$rolesMapper->getObjectById((int) $record['role_id'])],
                         'active' => Postgres::convertPostgresBoolToBool($record['active']),
@@ -169,16 +166,16 @@ final class PermissionsMapper extends MultiTableMapper
                 $roles[] = $rolesMapper->getObjectById((int) $row['role_id']);
                 $lastRow = $row;
             }
-            return $this->buildPermission((int) $lastRow['id'], $lastRow['permission'], $lastRow['description'], Postgres::convertPostgresBoolToBool($lastRow['active']), new \DateTimeImmutable($lastRow['created']), $roles);
+            return $this->buildPermission((int) $lastRow['id'], $lastRow['title'], $lastRow['description'], Postgres::convertPostgresBoolToBool($lastRow['active']), new \DateTimeImmutable($lastRow['created']), $roles);
         } else {
             return null;
         }
     }
 
     /** note roles array is validated in Permission constructor */
-    public function buildPermission(int $id, string $permission, ?string $description, bool $active, \DateTimeImmutable $created, array $roles): Permission 
+    public function buildPermission(int $id, string $title, ?string $description, bool $active, \DateTimeImmutable $created, array $roles): Permission 
     {
-        return new Permission($id, $permission, $description, $active, $created, $roles);
+        return new Permission($id, $title, $description, $active, $created, $roles);
     }
 
     public function getObjectById(int $id): ?Permission 
@@ -187,6 +184,17 @@ final class PermissionsMapper extends MultiTableMapper
             'permissions.id' => [
                 'operators' => ["="],
                 'values' => [$id]
+            ]
+        ];
+        return $this->getObject($whereColumnsInfo);
+    }
+
+    public function getObjectByTitle(string $title): ?Permission 
+    {
+        $whereColumnsInfo = [
+            'permissions.title' => [
+                'operators' => ["="],
+                'values' => [$title]
             ]
         ];
         return $this->getObject($whereColumnsInfo);
@@ -207,7 +215,7 @@ final class PermissionsMapper extends MultiTableMapper
     {
         $permissions = [];
         foreach ($this->selectArray(null, $whereColumnsInfo, $orderBy) as $permissionArray) {
-            $permissions[] = $this->buildPermission($permissionArray['id'], $permissionArray['permission'], $permissionArray['description'], $permissionArray['active'], $permissionArray['created'], $permissionArray['roles']);
+            $permissions[] = $this->buildPermission($permissionArray['id'], $permissionArray['title'], $permissionArray['description'], $permissionArray['active'], $permissionArray['created'], $permissionArray['roles']);
         }
 
         return $permissions;
@@ -230,19 +238,36 @@ final class PermissionsMapper extends MultiTableMapper
         return $changedPermissionFields;
     }
 
-    public function update(int $permissionId, array $changedFields) 
+    public function doUpdate(int $permissionId, array $changedFields) 
     {
+        /** validate changedFields to ensure keys match */
+        $updateFields = ['title', 'description', 'roles', 'active'];
+
+        foreach ($changedFields as $fieldName => $fieldInfo) {
+            if (!in_array($fieldName, $updateFields)) {
+                throw new \InvalidArgumentException("Invalid field $fieldName in changedFields");
+            }
+        }
+
         $changedPermissionFields = $this->getChangedPermissionFields($changedFields);
 
-        $q = new QueryBuilder("BEGIN");
-        $q->execute();
-
+        pg_query("BEGIN");
         if (count($changedPermissionFields) > 0) {
-            $this->getPrimaryTableMapper()->updateByPrimaryKey($changedFields, $permissionId, false);
+            try {
+                $this->getPrimaryTableMapper()->updateByPrimaryKey($changedPermissionFields, $permissionId, false);
+            } catch (\Exception $e) {
+                pg_query("ROLLBACK");
+                throw $e;
+            }
         }
         if (isset($changedFields['roles']['add'])) {
             foreach ($changedFields['roles']['add'] as $addRoleId) {
-                $this->doInsertPermissionRole($permissionId, (int) $addRoleId);
+                try {
+                    $this->doInsertPermissionRole($permissionId, (int) $addRoleId);
+                } catch (\Exception $e) {
+                    pg_query("ROLLBACK");
+                    throw $e;
+                }
             }
         }
         if (isset($changedFields['roles']['remove'])) {
@@ -250,18 +275,23 @@ final class PermissionsMapper extends MultiTableMapper
                 /** never remove top role from a permission */
                 $deleteRole = (RolesMapper::getInstance())->getObjectById($deleteRoleId);
                 if (!$deleteRole->isTop()) {
-                    if ($this->doDeletePermissionRole($permissionId, (int) $deleteRoleId) === null) {
-                        throw new Exception("Role not found for permission during delete attempt");
-                    }    
+                    try {
+                        $roleDeleteResult = $this->doDeletePermissionRole($permissionId, (int) $deleteRoleId);
+                    } catch (\Exception $e) {
+                        pg_query("ROLLBACK");
+                        throw $e;
+                    }
+                    if ($roleDeleteResult === null) {
+                        pg_query("ROLLBACK");
+                        throw new \Exception("Role not found for permission during delete attempt");
+                    }
                 }
             }
         }
-        $q = new QueryBuilder("END");
-        $sql = $q->getSql();
-        $q->execute();
+        pg_query("COMMIT");
     }
 
-    /** returns deleted permissionName */
+    /** returns deleted title */
     public function delete(int $id): string
     {
         // make sure there is a permission for the primary key
@@ -271,21 +301,19 @@ final class PermissionsMapper extends MultiTableMapper
 
         $this->doDeleteTransaction($id);
 
-        $permissionName = $permission->getPermissionName();
+        $title = $permission->getTitle();
         unset($permission);
 
-        return $permissionName;
+        return $title;
     }
 
     /** any necessary validation should be performed prior to calling */
     private function doDeleteTransaction(int $permissionId)
     {
-        $q = new QueryBuilder("BEGIN");
-        $q->execute();
+        pg_query("BEGIN");
         $this->doDeletePermissionRoles($permissionId);
         $this->doDeletePermission($permissionId);
-        $q = new QueryBuilder("END");
-        $q->execute();
+        pg_query("COMMIT");
     }
 
     /** deletes the record(s) in the join table */

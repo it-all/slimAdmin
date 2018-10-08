@@ -14,7 +14,7 @@ class Permission implements ListViewModels
     private $id;
 
      /** @var string */
-    private $permissionName;
+    private $title;
 
     /** @var string|null */
     private $description; 
@@ -31,19 +31,19 @@ class Permission implements ListViewModels
     /** @var int[] an array of assigned role ids */
     private $roleIds;
 
-    public function __construct(int $id, string $permissionName, ?string $description, bool $active, \DateTimeImmutable $created, array $roles)
+    public function __construct(int $id, string $title, ?string $description, bool $active, \DateTimeImmutable $created, array $roles)
     {
+        // validate roles array is array of role objects
         if (count($roles) == 0) {
             throw new \InvalidArgumentException("Roles cannot be empty for permission (id $id)");
         }
-        // validate roles array is array of role objects
         foreach ($roles as $role) {
             if (get_class($role) != 'SlimPostgres\Administrators\Roles\Role') {
                 throw new \InvalidArgumentException("Invalid role in roles");
             }
         }
         $this->id = $id;
-        $this->permissionName = $permissionName;
+        $this->title = $title;
         $this->description = $description;
         $this->active = $active;
         $this->created = $created;
@@ -56,9 +56,9 @@ class Permission implements ListViewModels
         return $this->id;
     }
 
-    public function getPermissionName(): string 
+    public function getTitle(): string 
     {
-        return $this->permissionName;
+        return $this->title;
     }
 
     public function getdescription(): ?string 
@@ -81,7 +81,7 @@ class Permission implements ListViewModels
     {
         return [
             'id' => $this->id,
-            'permission' => $this->permissionName,
+            'title' => $this->title,
             'description' => $this->description,
             'roles' => $this->getRolesString(),
             'active' => Postgres::convertBoolToPostgresBool($this->active), // send 't' / 'f'

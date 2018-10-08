@@ -9,6 +9,8 @@ use SlimPostgres\App;
 use SlimPostgres\Administrators\AdministratorsMapper;
 use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\Forms\DatabaseTableForm;
+use SlimPostgres\BaseMVC\View\Forms;
+use SlimPostgres\BaseMVC\View\Form as BaseForm;
 use SlimPostgres\Forms\FormHelper;
 use It_All\FormFormer\Form;
 use It_All\FormFormer\Fieldset;
@@ -16,15 +18,15 @@ use It_All\FormFormer\Fields\InputField;
 use It_All\FormFormer\Fields\InputFields\CheckboxRadioInputField;
 use SlimPostgres\Database\Postgres;
 
-abstract class AdministratorForm
+abstract class AdministratorForm extends BaseForm implements Forms
 {
-    private $formAction;
+    protected $formAction;
 
     /** @var string 'put' or 'post'
      *  if 'put' the hidden put method field is inserted at the beginning of the form
      */
     protected $formMethod;
-    private $csrf;
+    protected $csrf;
     private $authorization;
     private $mapper;
     private $nameValue;
@@ -44,9 +46,9 @@ abstract class AdministratorForm
     const ACTIVE_FIELD_NAME = 'active';
 
     /** bool, controls whether insert checkbox defaults to checked (true) or unchecked (false) */
-    const DEFAULT_ACTIVE_VALUE = false;
+    const DEFAULT_ACTIVE_VALUE = true;
 
-    public static function getFields(): array
+    public static function getFieldNames(): array
     {
         return [
             self::NAME_FIELD_NAME,
@@ -58,10 +60,9 @@ abstract class AdministratorForm
         ];
     }
     
-    public function __construct(string $formAction, Container $container, array $fieldValues = [])
+    public function __construct(string $formAction, Container $container, bool $isPutMethod = false, array $fieldValues = [])
     {
-        $this->formAction = $formAction;
-        $this->csrf = $container->csrf;
+        parent::__construct($formAction, $container, $isPutMethod);
         $this->authorization = $container->authorization;
         $this->mapper = AdministratorsMapper::getInstance();
         $this->setFieldValues($fieldValues);
@@ -153,25 +154,14 @@ abstract class AdministratorForm
     protected function getNodes(): array 
     {
         $nodes = [];
+        
         $nodes[] = $this->getActiveField();
         $nodes[] = $this->getNameField();
         $nodes[] = $this->getUsernameField();
         $this->setPasswordFields($nodes);
         $nodes[] = $this->getRolesFieldset();
 
-        // CSRF Fields
-        $nodes[] = FormHelper::getCsrfNameField($this->csrf->getTokenNameKey(), $this->csrf->getTokenName());
-        $nodes[] = FormHelper::getCsrfValueField($this->csrf->getTokenValueKey(), $this->csrf->getTokenValue());
-
-        // Submit Field
-        $nodes[] = FormHelper::getSubmitField();
-
+        $nodes = array_merge($nodes, $this->getCommonNodes());
         return $nodes;
     }
-
-    public function getForm()
-    {
-        return new Form($this->getNodes(), ['method' => 'post', 'action' => $this->formAction], FormHelper::getGeneralError());
-    }
-
 }

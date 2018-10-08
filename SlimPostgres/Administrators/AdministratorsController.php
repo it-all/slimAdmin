@@ -45,7 +45,7 @@ class AdministratorsController extends BaseController
             throw new \Exception('No permission.');
         }
 
-        $this->setRequestInput($request, AdministratorForm::getFields());
+        $this->setRequestInput($request, AdministratorForm::getFieldNames());
         $input = $this->requestInput;
 
         $validator = new AdministratorsValidator($input, $this->authorization);
@@ -77,7 +77,7 @@ class AdministratorsController extends BaseController
         $primaryKey = $args['primaryKey'];
 
         // if all roles have been unchecked it won't be included in the post will be set null
-        $this->setRequestInput($request, AdministratorForm::getFields());
+        $this->setRequestInput($request, AdministratorForm::getFieldNames());
         $input = $this->requestInput;
 
         $redirectRoute = App::getRouteName(true, $this->routePrefix,'index');
@@ -105,7 +105,7 @@ class AdministratorsController extends BaseController
             return $this->view->updateView($request, $response, $args);
         }
         
-        $this->administratorsMapper->update((int) $primaryKey, $changedFields);
+        $this->administratorsMapper->doUpdate((int) $primaryKey, $changedFields);
 
         // if the administrator changed her/his own info, refresh administrator then update the session
         if ((int) $primaryKey === $this->authentication->getAdministratorId()) {
@@ -152,54 +152,54 @@ class AdministratorsController extends BaseController
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
 
-    private function getChangedFieldValues(Administrator $administrator, string $name, string $username, ?array $roles, bool $active, bool $includePassword = true, ?string $password = null): array 
+    private function getChangedFieldValues(Administrator $administrator, string $name, string $username, ?array $roleIds, bool $active, bool $includePassword = true, ?string $password = null): array 
     {
         $changedFieldValues = [];
 
         if ($administrator->getName() != $name) {
-            $changedFieldValues['name'] = $name;
+            $changedFieldValues[AdministratorForm::NAME_FIELD_NAME] = $name;
         }
         if ($administrator->getUsername() != $username) {
-            $changedFieldValues['username'] = $username;
+            $changedFieldValues[AdministratorForm::USERNAME_FIELD_NAME] = $username;
         }
 
         if ($includePassword && !password_verify($password, $administrator->getPasswordHash())) {
-            $changedFieldValues['passwordHash'] = $password;
+            $changedFieldValues[AdministratorForm::PASSWORD_FIELD_NAME] = $password;
         }
 
         if ($administrator->getActive() !== $active) {
-            $changedFieldValues['active'] = $active;
+            $changedFieldValues[AdministratorForm::ACTIVE_FIELD_NAME] = $active;
         }
 
-        // roles - only add to main array if changed
-        if ($roles === null) {
-            $roles = [];
+        // roleIds - only add to main array if changed
+        if ($roleIds === null) {
+            $roleIds = [];
         }
         $addRoles = []; // populate with ids of new roles
         $removeRoles = []; // populate with ids of former roles
         
-        $currentRoles = $administrator->getRoles();
-
         // search roles to add
-        foreach ($roles as $newRoleId) {
-            if (!array_key_exists($newRoleId, $currentRoles)) {
+        $addRoles = [];
+        foreach ($roleIds as $newRoleId) {
+            if (!$administrator->hasRole((int) $newRoleId)) {
                 $addRoles[] = $newRoleId;
             }
         }
 
         // search roles to remove
-        foreach ($currentRoles as $currentRoleId => $currentRoleInfo) {
-            if (!in_array($currentRoleId, $roles)) {
+        $removeRoles = [];
+        foreach ($administrator->getRoleIds() as $currentRoleId) {
+            if (!in_array($currentRoleId, $roleIds)) {
                 $removeRoles[] = $currentRoleId;
             }
         }
-
+        
         if (count($addRoles) > 0) {
-            $changedFieldValues['roles']['add'] = $addRoles;
+            $changedFieldValues[AdministratorForm::ROLES_FIELDSET_NAME]['add'] = $addRoles;
         }
 
         if (count($removeRoles) > 0) {
-            $changedFieldValues['roles']['remove'] = $removeRoles;
+            $changedFieldValues[AdministratorForm::ROLES_FIELDSET_NAME]['remove'] = $removeRoles;
         }
 
         return $changedFieldValues;
@@ -207,7 +207,7 @@ class AdministratorsController extends BaseController
 
     private function getChangedFieldsString(Administrator $administrator, array $changedFields): string 
     {
-        $allowedChangedFieldsKeys = array_merge(['roles'], (AdministratorsMapper::getInstance()::ADMINISTRATORS_UPDATE_FIELDS));
+        $allowedChangedFieldsKeys = array_merge([AdministratorForm::ROLES_FIELDSET_NAME], (AdministratorsMapper::getInstance()::ADMINISTRATORS_UPDATE_FIELDS));
 
         $changedString = "";
 
@@ -220,7 +220,7 @@ class AdministratorsController extends BaseController
 
             $oldValue = $administrator->{"get".ucfirst($fieldName)}();
             
-            if ($fieldName == 'roles') {
+            if ($fieldName == AdministratorForm::ROLES_FIELDSET_NAME) {
 
                 $rolesMapper = RolesMapper::getInstance();
 
@@ -230,11 +230,11 @@ class AdministratorsController extends BaseController
                 // update values based on add/remove and old roles
                 $updatedNewValue = "";
                 $updatedOldValue = "";
-                foreach ($oldValue as $roleId => $roleInfo) {
-                    $updatedOldValue .= $roleInfo['roleName']." ";
+                foreach ($oldValue as $role) {
+                    $updatedOldValue .= $role->getRoleName()." ";
                     // don't put the roles being removed into the new value
-                    if (!in_array($roleId, $removeRoleIds)) {
-                        $updatedNewValue .= $roleInfo['roleName']." ";
+                    if (!in_array($role->getId(), $removeRoleIds)) {
+                        $updatedNewValue .= $role->getRoleName()." ";
                     }
                 }
                 foreach ($addRoleIds as $roleId) {

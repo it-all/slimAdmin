@@ -46,7 +46,7 @@ class PermissionsController extends BaseController
             throw new \Exception('No permission.');
         }
 
-        $this->setRequestInput($request, PermissionForm::getFields());
+        $this->setRequestInput($request, PermissionForm::getFieldNames());
         $input = $this->requestInput;
 
         $validator = new PermissionsValidator($input);
@@ -58,7 +58,7 @@ class PermissionsController extends BaseController
         }
 
         try {
-            $permissionId = $this->permissionsMapper->create($input['permission'], $input['description'], $input['roles'], FormHelper::getBoolForCheckboxField($input['active']));
+            $permissionId = $this->permissionsMapper->create($input[PermissionForm::TITLE_FIELD_NAME], $input[PermissionForm::DESCRIPTION_FIELD_NAME], $input[PermissionForm::ROLES_FIELDSET_NAME], FormHelper::getBoolForCheckboxField($input[PermissionForm::ACTIVE_FIELD_NAME]));
         } catch (\Exception $e) {
             throw new \Exception("Permission create failure. ".$e->getMessage());
         }
@@ -78,7 +78,7 @@ class PermissionsController extends BaseController
         $primaryKey = $args['primaryKey'];
 
         // if all roles have been unchecked it won't be included in the post will be set null
-        $this->setRequestInput($request, PermissionForm::getFields());
+        $this->setRequestInput($request, PermissionForm::getFieldNames());
         $input = $this->requestInput;
 
         $redirectRoute = App::getRouteName(true, $this->routePrefix,'index');
@@ -90,7 +90,7 @@ class PermissionsController extends BaseController
 
         // check for changes made
         // only check the password if it has been supplied (entered in the form)
-        $changedFields = $this->getChangedFieldValues($permission, $input['permission'], $input['description'], FormHelper::getBoolForCheckboxField($input['active']), $input['roles']);
+        $changedFields = $this->getChangedFieldValues($permission, $input['title'], $input['description'], FormHelper::getBoolForCheckboxField($input['active']), $input['roles']);
 
         // if no changes made, display error message
         if (count($changedFields) == 0) {
@@ -106,7 +106,7 @@ class PermissionsController extends BaseController
             return $this->view->updateView($request, $response, $args);
         }
         
-        $this->permissionsMapper->update((int) $primaryKey, $changedFields);
+        $this->permissionsMapper->doUpdate((int) $primaryKey, $changedFields);
 
         $this->systemEvents->insertInfo("Updated Permission", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$this->getChangedFieldsString($permission, $changedFields));
         App::setAdminNotice("Updated permission $primaryKey");
@@ -143,19 +143,19 @@ class PermissionsController extends BaseController
         return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix, 'index')));
     }
 
-    private function getChangedFieldValues(Permission $permission, string $permissionName, ?string $description, bool $active, ?array $roleIds): array 
+    private function getChangedFieldValues(Permission $permission, string $title, ?string $description, bool $active, ?array $roleIds): array 
     {
         $changedFieldValues = [];
 
-        if ($permission->getPermissionName() != $permissionName) {
-            $changedFieldValues['permissionName'] = $permissionName;
+        if ($permission->getTitle() != $title) {
+            $changedFieldValues[PermissionForm::TITLE_FIELD_NAME] = $title;
         }
         if ($permission->getDescription() != $description) {
-            $changedFieldValues['description'] = $description;
+            $changedFieldValues[PermissionForm::DESCRIPTION_FIELD_NAME] = $description;
         }
 
         if ($permission->getActive() !== $active) {
-            $changedFieldValues['active'] = $active;
+            $changedFieldValues[PermissionForm::ACTIVE_FIELD_NAME] = $active;
         }
 
         /** if all roles are unchecked the $rolesId parameter will be null */
@@ -180,11 +180,11 @@ class PermissionsController extends BaseController
         }
 
         if (count($addRoles) > 0) {
-            $changedFieldValues['roles']['add'] = $addRoles;
+            $changedFieldValues[PermissionForm::ROLES_FIELDSET_NAME]['add'] = $addRoles;
         }
 
         if (count($removeRoles) > 0) {
-            $changedFieldValues['roles']['remove'] = $removeRoles;
+            $changedFieldValues[PermissionForm::ROLES_FIELDSET_NAME]['remove'] = $removeRoles;
         }
 
         return $changedFieldValues;
@@ -192,7 +192,7 @@ class PermissionsController extends BaseController
 
     private function getChangedFieldsString(Permission $permission, array $changedFields): string 
     {
-        $allowedChangedFieldsKeys = array_merge(['roles'], (PermissionsMapper::getInstance()::PERMISSIONS_UPDATE_FIELDS));
+        $allowedChangedFieldsKeys = array_merge([PermissionForm::ROLES_FIELDSET_NAME], (PermissionsMapper::getInstance()::PERMISSIONS_UPDATE_FIELDS));
 
         $changedString = "";
 
@@ -205,7 +205,7 @@ class PermissionsController extends BaseController
 
             $oldValue = $permission->{"get".ucfirst($fieldName)}();
             
-            if ($fieldName == 'roles') {
+            if ($fieldName == PermissionForm::ROLES_FIELDSET_NAME) {
 
                 $rolesMapper = RolesMapper::getInstance();
 
@@ -216,7 +216,6 @@ class PermissionsController extends BaseController
                 $updatedNewValue = "";
                 $updatedOldValue = "";
                 foreach ($oldValue as $role) {
-                    // foreach ($oldValue as $roleId => $roleInfo) {
                     $updatedOldValue .= $role->getRoleName()." ";
                     // don't put the roles being removed into the new value
                     if (!in_array($role->getId(), $removeRoleIds)) {

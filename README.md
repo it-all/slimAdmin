@@ -4,10 +4,10 @@ WORK IN PROGRESS
 slim-postgres is a PHP 7.1+, PostgreSQL RESTful web platform with built-in administration and other features, based on <a target="_blank" href="https://www.slimframework.com/">Slim Framework</a>.  
 
 FEATURES  
-Built on <a target="_blank" href="https://slimframework.com">Slim framework</a>, a front-controller micro-framework for PHP 
+Built on <a target="_blank" href="https://slimframework.com">Slim framework</a>, a front-controller micro-framework for PHP  
 <a target="_blank" href="https://postgresql.org">PostgreSQL Database</a> Integration  
 <a href="#authe">Authentication</a> (Log In/Out)  
-<a href="#autho">Authorization</a> (Permissions for Resource and Functionality Access)   
+<a href="#autho">Authorization</a> (Role Based Permissions for Resource and Functionality Access)   
 <a target="_blank" href="#admin">Administrative User Interface and Navigation</a>  
 <a href="#se">Built-in Database Logging/Reporting of system events, login attempts, and errors</a>  
 <a href="#eh">Error Handling</a>  
@@ -53,24 +53,24 @@ Certain events such as logging in, logging out, inserting, updating, and deletin
 
 <a name="eh">Error Handling</a>  
 
-Slim's built in error handling has been disabled, and custom error handling implemented, in order to handle any errors encountered prior to running the Slim application, as well as to be able to email an administrator that an error occured, and to log the error to the system_events database table, viewable in list form in the administrative interface.  
+Slim's built in error handling has been disabled, and custom error handling implemented, in order to handle any errors encountered prior to running the Slim application, as well as to be able to email an administrator that an error occured, and to log the error to the system_events database table, which is viewable in list form in the administrative interface.  
 
 Reporting Methods:
 
-1. Database Log
+1. Database Log  
     If the database and system events services have been set as properties in the ErrorHandler class, all errors are logged to the SystemEvents table. The stack trace is not provided, instead, a reference is made to view the log file for complete details.
     
-2. File Log
+2. File Log  
     All error details are logged to $config['storage']['logs']['pathPhpErrors'].
 
-3. Echo
+3. Echo  
     Live Sites*
     Error details are never echoed, rather, a generic error message is echoed. For fatal errors, this message is set in $config['errors']['fatalMessage'].
 
     Dev Sites*
     Error details are echoed unless the environmental variable ERRORS_ECHO_DEV is set to 0.  
     
-4. Email
+4. Email  
     For security, error details are never emailed.
 
     Live Sites*

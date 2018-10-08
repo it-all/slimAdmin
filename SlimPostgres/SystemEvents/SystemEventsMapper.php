@@ -7,6 +7,7 @@ use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\Queries\SelectBuilder;
 use SlimPostgres\Database\DataMappers\MultiTableMapper;
+use SlimPostgres\Database\Postgres;
 
 // Singleton
 final class SystemEventsMapper extends MultiTableMapper
@@ -131,7 +132,7 @@ final class SystemEventsMapper extends MultiTableMapper
         // query can fail if event_type or administrator_id fk not present.
 
         $q = new QueryBuilder("INSERT INTO ".self::PRIMARY_TABLE_NAME." (event_type, title, notes, administrator_id, ip_address, resource, request_method) VALUES($1, $2, $3, $4, $5, $6, $7)", $eventType, $title, $notes, $adminId, $_SERVER['REMOTE_ADDR'], $_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
-
+        
         try {
             $res = $q->execute();
         } catch (\Exception $e) {

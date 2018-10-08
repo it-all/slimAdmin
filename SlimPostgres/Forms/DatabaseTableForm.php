@@ -90,7 +90,7 @@ class DatabaseTableForm extends Form
     {
         $this->validateDatabaseActionString($databaseAction);
 
-        $fields = [];
+        $nodes = [];
 
         foreach (self::$fieldColumns as $fieldColumn) {
             // value
@@ -100,19 +100,19 @@ class DatabaseTableForm extends Form
                 $columnValue = null;
             }
 
-            $fields[] = $this->getFieldFromDatabaseColumn($fieldColumn, null, $columnValue);
+            $nodes[] = $this->getFieldFromDatabaseColumn($fieldColumn, null, $columnValue);
         }
 
         if ($databaseAction == 'update') {
             // override post method
-            $fields[] = FormHelper::getPutMethodField();
+            $nodes[] = FormHelper::getPutMethodField();
         }
 
-        $fields[] = FormHelper::getCsrfNameField($csrfNameKey, $csrfNameValue);
-        $fields[] = FormHelper::getCsrfValueField($csrfValueKey, $csrfValueValue);
-        $fields[] = FormHelper::getSubmitField();
+        $nodes[] = FormHelper::getCsrfNameField($csrfNameKey, $csrfNameValue);
+        $nodes[] = FormHelper::getCsrfValueField($csrfValueKey, $csrfValueValue);
+        $nodes[] = FormHelper::getSubmitField();
 
-        return $fields;
+        return $nodes;
     }
     protected function validateDatabaseActionString(string $databaseAction)
     {

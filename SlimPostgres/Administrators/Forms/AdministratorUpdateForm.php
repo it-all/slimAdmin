@@ -13,9 +13,8 @@ class AdministratorUpdateForm extends AdministratorForm
     
     public function __construct(string $formAction, Container $container, array $fieldValues = [])
     {
-        $this->formMethod = 'put';
         $this->arePasswordFieldsRequired = false; // allow to leave blank to keep existing ps
-        parent::__construct($formAction, $container, $fieldValues);
+        parent::__construct($formAction, $container, true, $fieldValues);
         parent::setPasswordLabel('[leave blank to keep existing password]');
     }
 

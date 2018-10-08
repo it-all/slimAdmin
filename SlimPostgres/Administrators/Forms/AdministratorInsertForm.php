@@ -10,9 +10,8 @@ class AdministratorInsertForm extends AdministratorForm
 {
     public function __construct(string $formAction, Container $container, array $fieldValues = [])
     {
-        $this->formMethod = 'post';
         $this->arePasswordFieldsRequired = true;
-        parent::__construct($formAction, $container, $fieldValues);
+        parent::__construct($formAction, $container, false, $fieldValues);
         parent::setPasswordLabel();
     }
 }

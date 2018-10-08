@@ -63,16 +63,14 @@ final class AdministratorsMapper extends MultiTableMapper
         try {
             $administratorId = $this->doInsert($name, $username, $passwordClear, $active);
         } catch (\Exception $e) {
-            $q = new QueryBuilder("ROLLBACK");
-            $q->execute();
+            pg_query("ROLLBACK");
             throw $e;
         }
 
         try {
             $this->insertAdministratorRoles((int) $administratorId, $roleIds);
         } catch (\Exception $e) {
-            $q = new QueryBuilder("ROLLBACK");
-            $q->execute();
+            pg_query("ROLLBACK");
             throw $e;
         }
 
@@ -120,15 +118,12 @@ final class AdministratorsMapper extends MultiTableMapper
         if (pg_numrows($pgResults) > 0) {
             // there will be 1 record for each role
             $roles = [];
+            $rolesMapper = RolesMapper::getInstance();
             while ($row = pg_fetch_assoc($pgResults)) {
-                /** save last row for use below (most fields will be constant in all rows) */
+                $roles[] = $rolesMapper->getObjectById((int) $row['role_id']);
                 $lastRow = $row;
-                $roles[$row['role_id']] = [
-                    App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME => $row['role'],
-                    App::SESSION_ADMINISTRATOR_KEY_ROLES_LEVEL => $row['role_level']
-                ];
             }
-
+            
             return $this->buildAdministrator((int) $lastRow['id'], $lastRow['name'], $lastRow['username'], $lastRow['password_hash'], Postgres::convertPostgresBoolToBool($lastRow['active']), new \DateTimeImmutable($lastRow['created']), $roles);
         } else {
             return null;
@@ -224,6 +219,7 @@ final class AdministratorsMapper extends MultiTableMapper
 
         $pgResults = $this->select($selectColumns, $whereColumnsInfo, $orderBy);
         if (pg_num_rows($pgResults) > 0) {
+            $rolesMapper = RolesMapper::getInstance();
             while ($record = pg_fetch_assoc($pgResults)) {
                 // either add new administrator or just new role based on whether administrator already exists
                 if (null === $key = $this->getAdministratorsArrayKeyForId($administratorsArray, (int) $record['id'])) {
@@ -232,12 +228,12 @@ final class AdministratorsMapper extends MultiTableMapper
                         'name' => $record['name'],
                         'username' => $record['username'],
                         'passwordHash' => $record['password_hash'],
-                        'roles' => [$record['role']],
+                        'roles' => [$rolesMapper->getObjectById((int) $record['role_id'])],
                         'active' => Postgres::convertPostgresBoolToBool($record['active']),
                         'created' => new \DateTimeImmutable($record['created']),
                     ];
                 } else {
-                    array_push($administratorsArray[$key]['roles'], $record['role']);
+                    array_push($administratorsArray[$key]['roles'], $rolesMapper->getObjectById((int) $record['role_id']));
                 }
             }
         }
@@ -318,12 +314,10 @@ final class AdministratorsMapper extends MultiTableMapper
     // any necessary validation should be performed prior to calling
     private function doDeleteTransaction(int $administratorId)
     {
-        $q = new QueryBuilder("BEGIN");
-        $q->execute();
+        pg_query("BEGIN");
         $this->doDeleteAdministratorRoles($administratorId);
         $this->doDeleteAdministrator($administratorId);
-        $q = new QueryBuilder("END");
-        $q->execute();
+        pg_query("COMMIT");
     }
 
     /** deletes the record(s) in the join table */
@@ -340,7 +334,7 @@ final class AdministratorsMapper extends MultiTableMapper
         $q = new QueryBuilder("DELETE FROM ".self::ADM_ROLES_TABLE_NAME." WHERE administrator_id = $1 AND role_id = $2", $administratorId, $roleId);
         try {
             $deletedId = $q->executeWithReturnField('id');
-        } catch (QueryResultsNotFoundException $e) {
+        } catch (Exceptions\QueryResultsNotFoundException $e) {
             return null;
         }
         return (int) $deletedId;
@@ -376,30 +370,43 @@ final class AdministratorsMapper extends MultiTableMapper
         return $changedAdministratorFields;
     }
 
-    public function update(int $administratorId, array $changedFields) 
+    public function doUpdate(int $administratorId, array $changedFields) 
     {
         $changedAdministratorFields = $this->getChangedAdministratorFields($changedFields);
 
-        $q = new QueryBuilder("BEGIN");
-        $q->execute();
-
+        pg_query("BEGIN");
         if (count($changedAdministratorFields) > 0) {
-            $this->getPrimaryTableMapper()->updateByPrimaryKey($changedAdministratorFields, $administratorId, false);
+            try {
+                $this->getPrimaryTableMapper()->updateByPrimaryKey($changedAdministratorFields, $administratorId, false);
+            } catch (\Exception $e) {
+                pg_query("ROLLBACK");
+                throw $e;
+            }
         }
         if (isset($changedFields['roles']['add'])) {
             foreach ($changedFields['roles']['add'] as $addRoleId) {
-                $this->doInsertAdministratorRole($administratorId, (int) $addRoleId);
+                try {
+                    $this->doInsertAdministratorRole($administratorId, (int) $addRoleId);
+                } catch (\Exception $e) {
+                    pg_query("ROLLBACK");
+                    throw $e;
+                }
             }
         }
         if (isset($changedFields['roles']['remove'])) {
             foreach ($changedFields['roles']['remove'] as $deleteRoleId) {
-                if ($this->doDeleteAdministratorRole($administratorId, (int) $deleteRoleId) === null) {
-                    throw new Exception("Role not found for administrator during delete attempt");
+                try {
+                    $roleDeleteResult = $this->doDeleteAdministratorRole($administratorId, (int) $deleteRoleId);
+                } catch (\Exception $e) {
+                    pg_query("ROLLBACK");
+                    throw $e;
+                }
+                if ($roleDeleteResult === null) {
+                    pg_query("ROLLBACK");
+                    throw new \Exception("Role not found for administrator during delete attempt");
                 }
             }
         }
-        $q = new QueryBuilder("END");
-        $sql = $q->getSql();
-        $q->execute();
+        pg_query("COMMIT");
     }
 }

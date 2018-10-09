@@ -81,11 +81,11 @@ class AuthenticationService
 
         // by role
         // note highest role comes first
-        foreach ($this->getAdministratorRoles() as $roleId => $roleInfo) {
-            if (isset($this->administratorHomeRoutes['roles'][$roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME]])) {
-                return $this->administratorHomeRoutes['roles'][$roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME]];
-            }
-        }
+        // foreach ($this->getAdministratorRoles() as $roleId => $roleInfo) {
+        //     if (isset($this->administratorHomeRoutes['roles'][$roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME]])) {
+        //         return $this->administratorHomeRoutes['roles'][$roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME]];
+        //     }
+        // }
         
         // default
         return ROUTE_ADMIN_HOME_DEFAULT;

@@ -28,6 +28,7 @@ class AdminNavigation
                 'subSections' => [
                     'Administrators' => [
                         'route' => ROUTE_ADMINISTRATORS,
+                        'authorization' => ADMINISTRATORS_VIEW_RESOURCE,
                         'subSections' => [
 
                             'Insert' => [
@@ -100,11 +101,11 @@ class AdminNavigation
     private function getSectionForUserRecurs(array $section, string $sectionName): array
     {
         // if there are section permissions and they are not met, do not put section in user's nav
-        if ($permissions = $this->getSectionPermissions($section, $sectionName)) {
-            if (!$this->container->authorization->isAuthorized($permissions)) {
-                return [];
-            }
-        }
+        // if ($permissions = $this->getSectionPermissions($section, $sectionName)) {
+        //     if (!$this->container->authorization->isAuthorized($permissions)) {
+        //         return [];
+        //     }
+        // }
 
         // rebuild based on permissions
         $updatedSection = [];

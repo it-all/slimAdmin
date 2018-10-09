@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Security\Authorization;
 
+use SlimPostgres\Administrators\AdministratorsMapper;
 use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\Administrators\Roles\Permissions\Model\PermissionsMapper;
 use SlimPostgres\Exceptions;
@@ -13,18 +14,50 @@ use SlimPostgres\App;
 class AuthorizationService
 {
     private $topRole;
-    private $functionalityPermissions;
     private $rolesMapper;
 
-    public function __construct(string $topRole, array $functionalityPermissions)
+    public function __construct(string $topRole)
     {
         $this->topRole = $topRole;
-        $this->functionalityPermissions = $functionalityPermissions;
         $this->rolesMapper = RolesMapper::getInstance();
         if (!$this->validateRole($topRole)) {
             throw new \Exception("Invalid top role: $topRole");
         }
     }
+
+    /** $resource matches permission.title */
+    public function isAuthorized(string $resource): bool
+    {
+        // get permission model object
+        if (null === $permission = (PermissionsMapper::getInstance())->getObjectByTitle($resource)) {
+            throw new Exceptions\QueryResultsNotFoundException("Permission not found for: $resource");
+        }
+
+        // get administrator model object
+        if (null === $administrator = (AdministratorsMapper::getInstance())->getObjectById($_SESSION[App::SESSION_KEY_ADMINISTRATOR_ID])) {
+            throw new \Exception("Invalid administrator id in session");
+        }
+
+        // authorized if administrator has at least one role assigned to permission 
+        return $administrator->hasOneRoleByObject($permission->getRoles());
+    }
+
+    // public function isAuthorized($permissions): bool
+    // {
+    //     if (is_string($permissions)) { // a role
+    //         return $this->checkMinimum($this->rolesMapper->getLeveForRole($permissions));
+    //     } elseif (is_array($permissions)) { // an array of roles
+    //         return $this->checkRoleSet($permissions);
+    //     } else {
+    //         throw new \Exception("Invalid permissions: $permissions");
+    //     }
+    // }
+
+    // // note, returns false if the minimum permission for $functionality is not defined
+    // public function isFunctionalityAuthorized(string $functionality): bool
+    // {
+    //     return $this->isAuthorized($this->getPermissions($functionality));
+    // }
 
     public function getTopRole(): string
     {
@@ -39,29 +72,6 @@ class AuthorizationService
     public function hasTopRole(): bool
     {
         return $this->hasRole($this->topRole);
-    }
-
-    // $functionality like 'marketing' or 'marketing.index'
-    // the return value can either be a string or an array, based on configuration. See comment at the top of class for info.
-    // if not found as an exact match or category match, the base (least permission) role is returned
-    public function getPermissions(?string $functionality)
-    {
-        if ($functionality === null) {
-            return $this->rolesMapper->getBaseRole();
-        }
-
-        if (!isset($this->functionalityPermissions[$functionality])) {
-            // no exact match, so see if there are multiple terms and first term matches
-            $fParts = explode('.', $functionality);
-            if (count($fParts) > 1 && isset($this->functionalityPermissions[App::getRouteName(true, $fParts[0])])) {
-                return $this->functionalityPermissions[App::getRouteName(true, $fParts[0])];
-            }
-
-            // no matches
-            return $this->rolesMapper->getBaseRole();
-        }
-
-        return $this->functionalityPermissions[$functionality];
     }
 
     public function getAdministratorRoles(): array
@@ -136,38 +146,5 @@ class AuthorizationService
         }
 
         return false;
-    }
-
-    public function isAuthorizedNew(string $permissionTitle): bool
-    {
-        // get permission model object
-        if (null === $permission = (PermissionsMapper::getInstance())->getObjectByTitle($permissionTitle)) {
-            throw new Exceptions\QueryResultsNotFoundException("Permission not found for: $permissionTitle");
-        }
-
-        // get administrator model object
-        if (null === $administrator = (AdministratorsMapper::getInstance())->getObjectById($_SESSION[App::SESSION_KEY_ADMINISTRATOR])) {
-            throw new \Exception("Invalid administrator id in session");
-        }
-
-        // authorized if administrator has at least one role assigned to permission 
-        return $administrator->hasOneRoleByObject($permission->getRoles());
-    }
-
-    public function isAuthorized($permissions): bool
-    {
-        if (is_string($permissions)) { // a role
-            return $this->checkMinimum($this->rolesMapper->getLeveForRole($permissions));
-        } elseif (is_array($permissions)) { // an array of roles
-            return $this->checkRoleSet($permissions);
-        } else {
-            throw new \Exception("Invalid permissions: $permissions");
-        }
-    }
-
-    // note, returns false if the minimum permission for $functionality is not defined
-    public function isFunctionalityAuthorized(string $functionality): bool
-    {
-        return $this->isAuthorized($this->getPermissions($functionality));
     }
 }

@@ -45,15 +45,15 @@ class App
     const SESSION_KEY_ADMIN_LIST_VIEW_FILTER = 'adminListViewFilter';
 
     /** info concerning logged on administrator */
-    const SESSION_KEY_ADMINISTRATOR = 'administrator';
+    const SESSION_KEY_ADMINISTRATOR_ID = 'administratorId';
 
     /** administrator sub-keys */
-    const SESSION_ADMINISTRATOR_KEY_ID = 'id';
-    const SESSION_ADMINISTRATOR_KEY_NAME = 'name';
-    const SESSION_ADMINISTRATOR_KEY_USERNAME = 'username';
-    const SESSION_ADMINISTRATOR_KEY_ROLES = 'roles';
-    const SESSION_ADMINISTRATOR_KEY_ROLES_NAME = 'roleName';
-    const SESSION_ADMINISTRATOR_KEY_ROLES_LEVEL = 'roleLevel';
+    // const SESSION_ADMINISTRATOR_KEY_ID = 'id';
+    // const SESSION_ADMINISTRATOR_KEY_NAME = 'name';
+    // const SESSION_ADMINISTRATOR_KEY_USERNAME = 'username';
+    // const SESSION_ADMINISTRATOR_KEY_ROLES = 'roles';
+    // const SESSION_ADMINISTRATOR_KEY_ROLES_NAME = 'roleName';
+    // const SESSION_ADMINISTRATOR_KEY_ROLES_LEVEL = 'roleLevel';
 
     /** frontend notice statuses (can be used as css classes) */
     const STATUS_NOTICE_SUCCESS = 'noticeSuccess';
@@ -283,7 +283,7 @@ class App
         /** Authorization */
         $container['authorization'] = function($container) {
             $settings = $container->get('settings');
-            return new AuthorizationService($settings['authorization']['topRole'], $settings['authorization']['administratorPermissions']);
+            return new AuthorizationService($settings['authorization']['topRole']);
         };
 
         /** System Events (Database Log) */

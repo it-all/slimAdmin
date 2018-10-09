@@ -33,6 +33,23 @@ class PermissionsViews extends AdminListView implements ObjectsListViews, Insert
         $this->setDelete();
     }
 
+    protected function getPermission(string $which): string 
+    {
+        switch ($which) {
+            case 'insert':
+                return PERMISSIONS_INSERT_RESOURCE;
+                break;
+            case 'update':
+                return PERMISSIONS_UPDATE_RESOURCE;
+                break;
+            case 'delete':
+                return PERMISSIONS_DELETE_RESOURCE;
+                break;
+            default:
+                throw new \InvalidArgumentException("Undefined resource $which");
+        }
+    }
+    
     /** overrides in order to get objects and send to indexView */
     public function routeIndex($request, Response $response, $args)
     {

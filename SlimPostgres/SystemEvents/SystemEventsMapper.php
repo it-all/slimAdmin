@@ -65,56 +65,56 @@ final class SystemEventsMapper extends MultiTableMapper
         }
     }
 
-    public function insertDebug(string $title, int $adminId = null, string $notes = null)
+    public function insertDebug(string $title, int $administratorId = null, string $notes = null)
     {
-        $this->insertEvent($title, 'debug', $adminId, $notes);
+        $this->insertEvent($title, 'debug', $administratorId, $notes);
     }
 
-    public function insertInfo(string $title, int $adminId = null, string $notes = null)
+    public function insertInfo(string $title, ?int $administratorId = null, string $notes = null)
     {
-        $this->insertEvent($title, 'info', $adminId, $notes);
+        $this->insertEvent($title, 'info', $administratorId, $notes);
     }
 
-    public function insertNotice(string $title, int $adminId = null, string $notes = null)
+    public function insertNotice(string $title, int $administratorId = null, string $notes = null)
     {
-        $this->insertEvent($title, 'notice', $adminId, $notes);
+        $this->insertEvent($title, 'notice', $administratorId, $notes);
     }
 
-    public function insertWarning(string $title, int $adminId = null, string $notes = null)
+    public function insertWarning(string $title, int $administratorId = null, string $notes = null)
     {
-        $this->insertEvent($title, 'warning', $adminId, $notes);
+        $this->insertEvent($title, 'warning', $administratorId, $notes);
     }
 
-    public function insertError(string $title, int $adminId = null, string $notes = null)
+    public function insertError(string $title, int $administratorId = null, string $notes = null)
     {
-        $this->insertEvent($title, 'error', $adminId, $notes);
+        $this->insertEvent($title, 'error', $administratorId, $notes);
     }
 
-    public function insertCritical(string $title, int $adminId = null, string $notes = null)
+    public function insertCritical(string $title, int $administratorId = null, string $notes = null)
     {
-        $this->insertEvent($title, 'critical', $adminId, $notes);
+        $this->insertEvent($title, 'critical', $administratorId, $notes);
     }
 
-    public function insertAlert(string $title, int $adminId = null, string $notes = null)
+    public function insertAlert(string $title, int $administratorId = null, string $notes = null)
     {
-        $this->insertEvent($title, 'alert', $adminId, $notes);
+        $this->insertEvent($title, 'alert', $administratorId, $notes);
     }
 
-    public function insertEmergency(string $title, int $adminId = null, string $notes = null)
+    public function insertEmergency(string $title, int $administratorId = null, string $notes = null)
     {
-        $this->insertEvent($title, 'emergency', $adminId, $notes);
+        $this->insertEvent($title, 'emergency', $administratorId, $notes);
     }
 
-    public function insertEvent(string $title, string $eventType = 'info', int $adminId = null, string $notes = null)
+    public function insertEvent(string $title, string $eventType = 'info', ?int $administratorId = null, string $notes = null)
     {
         if (null === $eventTypeId = $this->getEventTypeId($eventType)) {
             throw new \Exception("Invalid eventType: $eventType");
         }
 
-        $this->insert($title, (int) $eventTypeId, $notes, $adminId);
+        $this->insert($title, (int) $eventTypeId, $notes, $administratorId);
     }
 
-    private function insert(string $title, int $eventType = 2, string $notes = null, int $adminId = null)
+    private function insert(string $title, int $eventType = 2, string $notes = null, ?int $administratorId = null)
     {
         if (mb_strlen(trim($title)) == 0) {
             throw new \Exception("Title cannot be blank");
@@ -125,13 +125,13 @@ final class SystemEventsMapper extends MultiTableMapper
         }
 
         // allow 0 to be passed in instead of null, convert to null so query won't fail
-        if ($adminId == 0) {
-            $adminId = null;
+        if ($administratorId == 0) {
+            $administratorId = null;
         }
 
         // query can fail if event_type or administrator_id fk not present.
 
-        $q = new QueryBuilder("INSERT INTO ".self::PRIMARY_TABLE_NAME." (event_type, title, notes, administrator_id, ip_address, resource, request_method) VALUES($1, $2, $3, $4, $5, $6, $7)", $eventType, $title, $notes, $adminId, $_SERVER['REMOTE_ADDR'], $_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
+        $q = new QueryBuilder("INSERT INTO ".self::PRIMARY_TABLE_NAME." (event_type, title, notes, administrator_id, ip_address, resource, request_method) VALUES($1, $2, $3, $4, $5, $6, $7)", $eventType, $title, $notes, $administratorId, $_SERVER['REMOTE_ADDR'], $_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
         
         try {
             $res = $q->execute();

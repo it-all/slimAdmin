@@ -9,7 +9,7 @@ class AdminHomeView extends AdminView
 {
     public function routeIndex($request, $response, $args)
     {
-        $respnseStatus = (array_key_exists('status', $args)) ? $args['status'] : 200;
+        $responseStatus = (array_key_exists('status', $args)) ? $args['status'] : 200;
         return $this->view->render(
             $response,
             'admin/home.php',
@@ -17,6 +17,6 @@ class AdminHomeView extends AdminView
                 'title' => 'Admin',
                 'navigationItems' => $this->navigationItems,
             ]
-        )->withStatus($respnseStatus);
+        )->withStatus($responseStatus);
     }
 }

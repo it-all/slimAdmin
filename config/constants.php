@@ -8,6 +8,31 @@ define('ROUTEPREFIX_ADMINISTRATORS', 'administrators');
 define('ROUTEPREFIX_ROLES', 'roles');
 define('ROUTEPREFIX_PERMISSIONS', 'permissions');
 
+// authorization resources/permissions, must match permission db records
+define('SYSTEM_EVENTS_VIEW_RESOURCE', 'View System Events');
+
+define('LOGIN_ATTEMPTS_VIEW_RESOURCE', 'View Login Attempts');
+
+define('ADMINISTRATORS_VIEW_RESOURCE', 'View Administrators');
+define('ADMINISTRATORS_INSERT_RESOURCE', 'Insert Administrators');
+define('ADMINISTRATORS_UPDATE_RESOURCE', 'Update Administrators');
+define('ADMINISTRATORS_DELETE_RESOURCE', 'Delete Administrators');
+
+define('ROLES_VIEW_RESOURCE', 'View Roles');
+define('ROLES_INSERT_RESOURCE', 'Insert Roles');
+define('ROLES_UPDATE_RESOURCE', 'Update Roles');
+define('ROLES_DELETE_RESOURCE', 'Delete Roles');
+
+
+// define('PERMISSIONS_VIEW_RESOURCE', 'View Permissions');
+// define('PERMISSIONS_INSERT_RESOURCE', 'Insert Permissions');
+// define('PERMISSIONS_UPDATE_RESOURCE', 'Update Permissions');
+// define('PERMISSIONS_DELETE_RESOURCE', 'Delete Permissions');
+define('PERMISSIONS_VIEW_RESOURCE', 'Insert Administrators');
+define('PERMISSIONS_INSERT_RESOURCE', 'Insert Administrators');
+define('PERMISSIONS_UPDATE_RESOURCE', 'Insert Administrators');
+define('PERMISSIONS_DELETE_RESOURCE', 'Insert Administrators');
+
 
 // GLOBAL ROUTE NAME CONSTANTS
 define('ROUTE_HOME', 'home');

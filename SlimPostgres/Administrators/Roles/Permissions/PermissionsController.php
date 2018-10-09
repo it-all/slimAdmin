@@ -42,7 +42,7 @@ class PermissionsController extends BaseController
 
     public function routePostInsert(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'insert'))) {
+        if (!$this->authorization->isAuthorized(PERMISSIONS_INSERT_RESOURCE)) {
             throw new \Exception('No permission.');
         }
 
@@ -71,7 +71,7 @@ class PermissionsController extends BaseController
 
     public function routePutUpdate(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'update'))) {
+        if (!$this->authorization->isAuthorized(PERMISSIONS_UPDATE_RESOURCE)) {
             throw new \Exception('No permission.');
         }
 
@@ -116,7 +116,7 @@ class PermissionsController extends BaseController
 
     public function routeGetDelete(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'delete'))) {
+        if (!$this->authorization->isAuthorized(PERMISSIONS_DELETE_RESOURCE)) {
             throw new \Exception('No permission.');
         }
 

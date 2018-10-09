@@ -16,6 +16,9 @@ class AuthenticationService
     private $maxFailedLogins;
     private $administratorHomeRoutes;
 
+    /** @var \SlimPostgres\Administrators\Administrator|null the logged in administrator model or null */
+    private $administrator;
+
     const USERNAME_FIELD = 'username';
     const PASSWORD_FIELD = 'password_hash';
 
@@ -23,72 +26,26 @@ class AuthenticationService
     {
         $this->maxFailedLogins = $maxFailedLogins;
         $this->administratorHomeRoutes = $administratorHomeRoutes;
+        /** set administrator property to administrator id found in session or null */
+        $this->administrator = (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR_ID])) ? (AdministratorsMapper::getInstance()->getObjectById($_SESSION[App::SESSION_KEY_ADMINISTRATOR_ID])) : null;
     }
 
-    /** returns session info for logged in administrator */
-    public function getAdministrator(): ?array
-    {
-        if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR])) {
-            return $_SESSION[App::SESSION_KEY_ADMINISTRATOR];
-        }
-        return null;
-    }
-
+    /** check that the administrator session is set and that the administrator is still active */
     public function isAuthenticated(): bool
     {
-        return isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR]);
-    }
-
-    public function getAdministratorId(): ?int
-    {
-        if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID])) {
-            return (int) $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ID];
+        if ($this->administrator !== null) {
+            return $this->isAdministratorActive();
         }
-        return null;
-    }
-
-    public function getAdministratorName(): ?string
-    {
-        if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_NAME])) {
-            return $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_NAME];
-        }
-        return null;
-    }
-
-    public function getAdministratorUsername(): ?string
-    {
-        if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_USERNAME])) {
-            return $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_USERNAME];
-        }
-        return null;
-    }
-
-    public function getAdministratorRoles(): array
-    {
-        if (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES])) {
-            return $_SESSION[App::SESSION_KEY_ADMINISTRATOR][App::SESSION_ADMINISTRATOR_KEY_ROLES];
-        }
-        return null;
+        return false;
     }
     
-    // determine home route: either by username, by role, or default
-    public function getAdminHomeRouteForAdministrator(): string
+    private function loginSucceeded(string $username, Administrator $administrator)
     {
-        // by username
-        if (isset($this->administratorHomeRoutes['usernames'][$this->getAdministratorUsername()])) {
-            return $this->administratorHomeRoutes['usernames'][$this->getAdministratorUsername()];
-        }
-
-        // by role
-        // note highest role comes first
-        // foreach ($this->getAdministratorRoles() as $roleId => $roleInfo) {
-        //     if (isset($this->administratorHomeRoutes['roles'][$roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME]])) {
-        //         return $this->administratorHomeRoutes['roles'][$roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME]];
-        //     }
-        // }
-        
-        // default
-        return ROUTE_ADMIN_HOME_DEFAULT;
+        $_SESSION[App::SESSION_KEY_ADMINISTRATOR_ID] = $administrator->getId();
+        unset($_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS]);
+        $this->administrator = $administrator;
+		App::setAdminNotice("Logged in");
+        (LoginAttemptsMapper::getInstance())->insertSuccessfulLogin($administrator);
     }
 
     public function attemptLogin(string $username, string $password): bool
@@ -114,35 +71,6 @@ class AuthenticationService
             $this->loginFailed($username, $administrator);
             return false;
         }
-    }
-
-    private function setAdministratorSession(Administrator $administrator)
-    {
-        $_SESSION[App::SESSION_KEY_ADMINISTRATOR] = [
-            App::SESSION_ADMINISTRATOR_KEY_ID => $administrator->getId(),
-            App::SESSION_ADMINISTRATOR_KEY_NAME => $administrator->getName(),
-            App::SESSION_ADMINISTRATOR_KEY_USERNAME => $administrator->getUsername(),
-            App::SESSION_ADMINISTRATOR_KEY_ROLES => $administrator->getRoles()
-        ];
-    }
-
-    /** this should only be called when the logged in administrator updates her/his own info */
-    public function updateAdministratorSession(Administrator $administrator)
-    {
-        // be sure the current id matches the new one
-        if ($this->getAdministratorId() != $administrator->getId()) {
-            throw new \InvalidArgumentException("Administrator id to update must match current administrator id");
-        }
-        
-        $this->setAdministratorSession($administrator);
-    }
-
-    private function loginSucceeded(string $username, Administrator $administrator)
-    {
-        $this->setAdministratorSession($administrator);
-        unset($_SESSION[App::SESSION_KEY_NUM_FAILED_LOGINS]);
-		App::setAdminNotice("Logged in");
-        (LoginAttemptsMapper::getInstance())->insertSuccessfulLogin($administrator);
     }
 
     private function incrementNumFailedLogins()
@@ -219,6 +147,56 @@ class AuthenticationService
         return new Form($fields, ['method' => 'post', 'action' => $action, 'novalidate' => 'novalidate'], FormHelper::getGeneralError());
     }
 
+    /** returns logged in administrator model object */
+    public function getAdministrator(): ?Administrator
+    {
+        return $this->administrator;
+    }
+
+    public function getAdministratorId(): ?int 
+    {
+        if ($this->administrator !== null) {
+            return $this->administrator->getId();
+        }
+        return null;
+    }
+
+    public function getAdministratorName(): ?string 
+    {
+        if ($this->administrator !== null) {
+            return $this->administrator->getName();
+        }
+        return null;
+    }
+
+    public function isAdministratorActive(): bool 
+    {
+        if ($this->administrator !== null) {
+            return $this->administrator->getActive();
+        }
+        return false;
+    }
+
+    // determine home route: either by username, by role, or default
+    public function getAdminHomeRouteForAdministrator(): string
+    {
+        // by username
+        if (isset($this->administratorHomeRoutes['usernames'][$this->getAdministratorUsername()])) {
+            return $this->administratorHomeRoutes['usernames'][$this->getAdministratorUsername()];
+        }
+
+        // by role
+        // note highest role comes first
+        // foreach ($this->getAdministratorRoles() as $roleId => $roleInfo) {
+        //     if (isset($this->administratorHomeRoutes['roles'][$roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME]])) {
+        //         return $this->administratorHomeRoutes['roles'][$roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME]];
+        //     }
+        // }
+        
+        // default
+        return ROUTE_ADMIN_HOME_DEFAULT;
+    }
+    
     public function getUsernameFieldName(): string 
     {
         return self::USERNAME_FIELD;

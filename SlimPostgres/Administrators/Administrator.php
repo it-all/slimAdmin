@@ -8,6 +8,7 @@ use SlimPostgres\Administrators\LoginAttempts\LoginAttemptsMapper;
 use SlimPostgres\SystemEvents\SystemEventsMapper;
 use SlimPostgres\Security\Authentication\AuthenticationService;
 use SlimPostgres\Security\Authorization\AuthorizationService;
+use SlimPostgres\Administrators\Roles\Role;
 use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\ListViewModels;
 use SlimPostgres\Database\Queries\QueryBuilder;

@@ -65,7 +65,7 @@ class Role implements ListViewModels
     public function isDeletable(): bool
     {
         $rolesMapper = RolesMapper::getInstance();
-        return !$rolesMapper->hasAdministrator($roleId) && !$rolesMapper->hasPermissionAssigned($roleId);
+        return !$rolesMapper->hasAdministrator($this->id) && !$rolesMapper->hasPermissionAssigned($this->id);
     }
 
     public function getUniqueId(): ?string

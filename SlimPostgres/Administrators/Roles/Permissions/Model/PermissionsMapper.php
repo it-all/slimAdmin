@@ -29,7 +29,7 @@ final class PermissionsMapper extends MultiTableMapper
         'created' => self::TABLE_NAME . '.created',
     ];
 
-    const ORDER_BY_COLUMN_NAME = 'created';
+    const ORDER_BY_COLUMN_NAME = 'title';
 
     public static function getInstance()
     {
@@ -120,6 +120,10 @@ final class PermissionsMapper extends MultiTableMapper
 
         $permissionsArray = []; // populate with 1 entry per permission with an array of role objects
 
+        if ($orderBy === null) {
+            $orderBy = self::ORDER_BY_COLUMN_NAME;
+        }
+        
         $pgResults = $this->select($selectColumns, $whereColumnsInfo, $orderBy);
         if (pg_num_rows($pgResults) > 0) {
             $rolesMapper = RolesMapper::getInstance();
@@ -189,7 +193,7 @@ final class PermissionsMapper extends MultiTableMapper
         return $this->getObject($whereColumnsInfo);
     }
 
-    public function getObjectByTitle(string $title): ?Permission 
+    public function getObjectByTitle(string $title, ?bool $active = null): ?Permission 
     {
         $whereColumnsInfo = [
             'permissions.title' => [
@@ -197,6 +201,12 @@ final class PermissionsMapper extends MultiTableMapper
                 'values' => [$title]
             ]
         ];
+        if ($active !== null) {
+            $whereColumnsInfo['permissions.active'] = [
+                'operators' => ["="],
+                'values' => [Postgres::convertBoolToPostgresBool($active)]
+            ];
+        }
         return $this->getObject($whereColumnsInfo);
     }
 

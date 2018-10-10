@@ -44,6 +44,23 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
         $this->setDelete();
     }
 
+    protected function getResource(string $which): string 
+    {
+        switch ($which) {
+            case 'insert':
+                return ADMINISTRATORS_INSERT_RESOURCE;
+                break;
+            case 'update':
+                return ADMINISTRATORS_UPDATE_RESOURCE;
+                break;
+            case 'delete':
+                return ADMINISTRATORS_DELETE_RESOURCE;
+                break;
+            default:
+                throw new \InvalidArgumentException("Undefined resource $which");
+        }
+    }
+
     /** overrides in order to get administrator objects and send to indexView */
     public function routeIndex($request, Response $response, $args)
     {

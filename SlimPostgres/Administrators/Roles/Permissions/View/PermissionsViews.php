@@ -33,7 +33,7 @@ class PermissionsViews extends AdminListView implements ObjectsListViews, Insert
         $this->setDelete();
     }
 
-    protected function getPermission(string $which): string 
+    protected function getResource(string $which): string 
     {
         switch ($which) {
             case 'insert':

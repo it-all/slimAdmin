@@ -55,7 +55,7 @@ class DatabaseTableController extends BaseController
 
     public function routePostInsert(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'insert'))) {
+        if (!$this->authorization->isAuthorized(constant(strtoupper($this->routePrefix)."_INSERT_RESOURCE"))) {
             throw new \Exception('No permission.');
         }
 
@@ -105,7 +105,7 @@ class DatabaseTableController extends BaseController
     /** the table must have a primary key column defined */
     public function routePutUpdate(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'update'))) {
+        if (!$this->authorization->isAuthorized(constant(strtoupper($this->routePrefix)."_UPDATE_RESOURCE"))) {
             throw new \Exception('No permission.');
         }
 
@@ -154,7 +154,7 @@ class DatabaseTableController extends BaseController
 
     public function routeGetDelete(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'delete'))) {
+        if (!$this->authorization->isAuthorized(constant(strtoupper($this->routePrefix)."_DELETE_RESOURCE"))) {
             throw new \Exception('No permission.');
         }
 

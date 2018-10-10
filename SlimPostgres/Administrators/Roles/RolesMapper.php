@@ -136,18 +136,6 @@ final class RolesMapper extends TableMapper
         return end($this->roles)['level'];
     }
 
-    public function hasAdministrator(int $roleId): bool
-    {
-        $q = new QueryBuilder("SELECT COUNT(id) FROM ".self::ADMINISTRATORS_JOIN_TABLE_NAME." WHERE role_id = $1", $roleId);
-        return (bool) $q->getOne();
-    }
-
-    public function hasPermissionAssigned(int $roleId): bool
-    {
-        $q = new QueryBuilder("SELECT COUNT(id) FROM ".self::PERMISSIONS_JOIN_TABLE_NAME." WHERE role_id = $1", $roleId);
-        return (bool) $q->getOne();
-    }
-
     public function getIdSelectField(array $fieldAttributes, string $fieldLabel = 'Role', ?int $selectedOption, ?string $fieldError)
     {
         // validate a provided selectedOption by verifying it is a valid role
@@ -185,6 +173,18 @@ final class RolesMapper extends TableMapper
         return true;
     }
 
+    public function hasAdministrator(int $roleId): bool
+    {
+        $q = new QueryBuilder("SELECT COUNT(id) FROM ".self::ADMINISTRATORS_JOIN_TABLE_NAME." WHERE role_id = $1", $roleId);
+        return (bool) $q->getOne();
+    }
+
+    public function hasPermissionAssigned(int $roleId): bool
+    {
+        $q = new QueryBuilder("SELECT COUNT(id) FROM ".self::PERMISSIONS_JOIN_TABLE_NAME." WHERE role_id = $1", $roleId);
+        return (bool) $q->getOne();
+    }
+
     // override for validation
     // return query result
     public function deleteByPrimaryKey($primaryKeyValue, string $returning = null) 
@@ -196,20 +196,16 @@ final class RolesMapper extends TableMapper
             }
         }
 
-        /** this is currently the only reason it wouldn't be deletable.
-         *  if more reasons are discovered then exception message would have to change.
-         */
-        if (!$this->isDeletable((int) $primaryKeyValue)) {
-            throw new Exceptions\UnallowedActionException("Role in use: id $primaryKeyValue");
-        }
-
-        try {
-            $dbResult = parent::deleteByPrimaryKey($primaryKeyValue, $returning);
-        } catch (Exceptions\QueryResultsNotFoundException $e) {
+        // make sure role exists and is deletable
+        if (null === $role = $this->getObjectById((int) $primaryKeyValue)) {
             throw new Exceptions\QueryResultsNotFoundException("Role not found: id $primaryKeyValue");
         }
 
-        return $dbResult;
+        if (!$role->isDeletable((int) $primaryKeyValue)) {
+            throw new Exceptions\UnallowedActionException("Role in use: id $primaryKeyValue");
+        }
+
+        return parent::deleteByPrimaryKey($primaryKeyValue, $returning);
     }
 
     /** selects roles and converts recordset to array of objects and return */

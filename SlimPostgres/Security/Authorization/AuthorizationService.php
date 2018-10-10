@@ -29,7 +29,7 @@ class AuthorizationService
     public function isAuthorized(string $resource): bool
     {
         // get permission model object
-        if (null === $permission = (PermissionsMapper::getInstance())->getObjectByTitle($resource)) {
+        if (null === $permission = (PermissionsMapper::getInstance())->getObjectByTitle($resource, true)) {
             throw new Exceptions\QueryResultsNotFoundException("Permission not found for: $resource");
         }
 

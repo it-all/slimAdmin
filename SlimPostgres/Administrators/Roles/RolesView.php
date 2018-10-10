@@ -21,6 +21,23 @@ class RolesView extends DatabaseTableView implements ObjectsListViews, InsertUpd
         parent::__construct($container, RolesMapper::getInstance(), ROUTEPREFIX_ROLES, true, 'admin/lists/objectsList.php');
     }
 
+    protected function getResource(string $which): string 
+    {
+        switch ($which) {
+            case 'insert':
+                return ROLES_INSERT_RESOURCE;
+                break;
+            case 'update':
+                return ROLES_UPDATE_RESOURCE;
+                break;
+            case 'delete':
+                return ROLES_DELETE_RESOURCE;
+                break;
+            default:
+                throw new \InvalidArgumentException("Undefined resource $which");
+        }
+    }
+
     /** overrides in order to get objects and send to indexView */
     public function routeIndex($request, Response $response, $args)
     {

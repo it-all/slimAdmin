@@ -41,7 +41,7 @@ class AdministratorsController extends BaseController
 
     public function routePostInsert(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'insert'))) {
+        if (!$this->authorization->isAuthorized(ADMINISTRATORS_INSERT_RESOURCE)) {
             throw new \Exception('No permission.');
         }
 
@@ -70,7 +70,7 @@ class AdministratorsController extends BaseController
 
     public function routePutUpdate(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'update'))) {
+        if (!$this->authorization->isAuthorized(ADMINISTRATORS_UPDATE_RESOURCE)) {
             throw new \Exception('No permission.');
         }
 
@@ -125,7 +125,7 @@ class AdministratorsController extends BaseController
 
     public function routeGetDelete(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'delete'))) {
+        if (!$this->authorization->isAuthorized(ADMINISTRATORS_DELETE_RESOURCE)) {
             throw new \Exception('No permission.');
         }
 

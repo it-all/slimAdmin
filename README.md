@@ -37,14 +37,17 @@ Add and configure your new route to the system by:
 Administrative resources can require authentication (login) to access. See config/routes.php admin home for adding Authentication Middleware to a route.  
 
 <a name="autho">Authorization</a>  
-Administrative resources and functionality can be protected against unauthorized use based on administrative permissions. Resource and functionality access is defined in config.php in the 'administratorPermissions' array key based on the role and is set in routes.php on resources as necessary, in AdminNavigation to determine whether or not to display navigation options, and in views and controllers as necessary to grant or limit functionality access. Authorization failures result in alerts being written to the SystemEvents table and the user redirected to the admin homepage with a red alert message displayed. Authorization can be set as a minimum role level, where all roles with an equal or better level will be authorized, or as a set of authorized roles.
-
+Administrative resources and functionality can be protected against unauthorized use based on role based administrative permissions. Permissions to access system resources/functionality can be inserted through the administrative interface, then assigned to one or more roles. Administrators are also assigned roles, which then grants them the permissions assigned to those roles. Authorization checks are done by a simple AuthorizationService::isAuthorized(string $resource): bool call, where the $resource string must match the permission title that has been inserted. Checks are also performed in AdminNavigation to determine whether or not to display navigation options. Authorization failures result in alerts being written to the SystemEvents table and the user redirected to the admin homepage with a red alert message displayed. Authorization can be set as a minimum role level, where all roles with an equal or better level will be authorized, or as a set of authorized roles.  
+  
 <a name="admin">Administrative Interface and Navigation</a>  
-Upon browsing to the administrative directory set in $config['adminPath'] authenticating, the appropriate resource is loaded based on $config['slim']['authentication']['administratorHomeRoutes']. The following administrative functionalities are already coded:  
+Upon browsing to the administrative directory set in $config['adminPath'] authenticating, the appropriate resource is loaded based on $config['slim']['authentication']['administratorHomeRoutes'], if found for the administrator, otherwise from ROUTE_ADMIN_HOME_DEFAULT in constants.php.  
+  
+The following administrative functionalities are already coded:  
 - View System Events
 - View Login Attempts
-- View, Create, Edit, Delete Administrators (various permissions/rules apply)
-- View, Create, Edit, Delete Roles (various permissions/rules apply)
+- View, Create, Edit, Delete Administrators (with role assignment)  
+- View, Create, Edit, Delete Roles  
+- View, Create, Edit, Delete Permissions (with role assignment)  
 - Logout  
 These options are found in the navigation menu at top left. Once other options are coded, they can be added to the menu by uncommenting/adding to $config['slim']['adminNav'].  
 

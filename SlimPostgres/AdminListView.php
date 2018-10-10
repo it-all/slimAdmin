@@ -66,7 +66,7 @@ abstract class AdminListView extends AdminView
 
     protected function setInsert()
     {
-        $this->insertLinkInfo = ($this->authorization->isAuthorized($this->getPermission('insert'))) ? [
+        $this->insertLinkInfo = ($this->authorization->isAuthorized($this->getResource('insert'))) ? [
             'text' => 'Insert '.$this->mapper->getFormalTableName(false), 
             'route' => App::getRouteName(true, $this->routePrefix, 'insert')
         ] : null;
@@ -76,14 +76,14 @@ abstract class AdminListView extends AdminView
     {
         $this->updateColumn = $this->mapper->getUpdateColumnName();
 
-        $this->updatesPermitted = $this->authorization->isAuthorized($this->getPermission('update')) && $this->updateColumn !== null;
+        $this->updatesPermitted = $this->authorization->isAuthorized($this->getResource('update')) && $this->updateColumn !== null;
 
         $this->updateRoute = App::getRouteName(true, $this->routePrefix, 'update');
     }
 
     protected function setDelete()
     {
-        $this->deletesPermitted = $this->container->authorization->isAuthorized($this->getPermission('delete'));
+        $this->deletesPermitted = $this->container->authorization->isAuthorized($this->getResource('delete'));
 
         $this->deleteRoute = App::getRouteName(true, $this->routePrefix, 'delete');
     }

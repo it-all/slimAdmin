@@ -161,6 +161,14 @@ class AuthenticationService
         return null;
     }
 
+    public function getAdministratorUsername(): ?string 
+    {
+        if ($this->administrator !== null) {
+            return $this->administrator->getUsername();
+        }
+        return null;
+    }
+
     public function getAdministratorName(): ?string 
     {
         if ($this->administrator !== null) {
@@ -180,18 +188,9 @@ class AuthenticationService
     // determine home route: either by username, by role, or default
     public function getAdminHomeRouteForAdministrator(): string
     {
-        // by username
-        if (isset($this->administratorHomeRoutes['usernames'][$this->getAdministratorUsername()])) {
-            return $this->administratorHomeRoutes['usernames'][$this->getAdministratorUsername()];
+        if (array_key_exists($this->getAdministratorUsername(), $this->administratorHomeRoutes)) {
+            return $this->administratorHomeRoutes[$this->getAdministratorUsername()];
         }
-
-        // by role
-        // note highest role comes first
-        // foreach ($this->getAdministratorRoles() as $roleId => $roleInfo) {
-        //     if (isset($this->administratorHomeRoutes['roles'][$roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME]])) {
-        //         return $this->administratorHomeRoutes['roles'][$roleInfo[App::SESSION_ADMINISTRATOR_KEY_ROLES_NAME]];
-        //     }
-        // }
         
         // default
         return ROUTE_ADMIN_HOME_DEFAULT;

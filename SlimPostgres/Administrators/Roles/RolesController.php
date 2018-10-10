@@ -28,7 +28,7 @@ class RolesController extends DatabaseTableController
     // override to check exceptions
     public function routeGetDelete(Request $request, Response $response, $args)
     {
-        if (!$this->authorization->isFunctionalityAuthorized(App::getRouteName(true, $this->routePrefix, 'delete'))) {
+        if (!$this->authorization->isAuthorized(ROLES_DELETE_RESOURCE)) {
             throw new \Exception('No permission.');
         }
 

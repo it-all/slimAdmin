@@ -1,10 +1,10 @@
 # slim-postgres  
-V1.0 is on the horizon. Next step is <a href="https://github.com/it-all/slim-postgres/issues/38">Issue 38</a>.  
-WORK IN PROGRESS  
-  
-slim-postgres is a PHP Framework Based on <a target="_blank" href="https://www.slimframework.com/">Slim Micro-Framework</a> and PostgreSQL  
+slim-postgres is a PHP Framework Based on <a target="_blank" href="https://www.slimframework.com/">Slim Micro-Framework</a> and <a href="https://www.postgresql.org/">PostgreSQL</a>.  
   
 slim-postgres has a built-in administrative interface and other tools to allow rapid web app development.  
+
+V1.0 is on the horizon. Next step is <a href="https://github.com/it-all/slim-postgres/issues/38">Issue 38</a>.  
+  
   
 FEATURES  
 Built on <a target="_blank" href="https://slimframework.com">Slim framework</a>, a front-controller micro-framework for PHP  

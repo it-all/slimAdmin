@@ -17,7 +17,7 @@ use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class PermissionsController extends BaseController
+class PermissionsControllers extends BaseController
 {
     use ResponseUtilities;
 
@@ -130,7 +130,7 @@ class PermissionsController extends BaseController
             $this->systemEvents->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             App::setAdminNotice($e->getMessage(), 'failure');
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
-        } catch (\Exception $e) {
+        } catch (Exceptions\QueryFailureException $e) {
             $this->systemEvents->insertError('Permission Deletion Failure', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             App::setAdminNotice('Delete Failed', 'failure');
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));

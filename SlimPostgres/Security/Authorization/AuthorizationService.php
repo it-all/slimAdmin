@@ -5,7 +5,6 @@ namespace SlimPostgres\Security\Authorization;
 
 use SlimPostgres\Administrators\Administrator;
 use SlimPostgres\Administrators\AdministratorsMapper;
-use SlimPostgres\Administrators\Roles\RolesMapper;
 use SlimPostgres\Administrators\Roles\Permissions\Model\PermissionsMapper;
 use SlimPostgres\Exceptions;
 

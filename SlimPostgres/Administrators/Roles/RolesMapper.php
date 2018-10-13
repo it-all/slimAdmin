@@ -10,10 +10,9 @@ use It_All\FormFormer\Fields\SelectOption;
 use SlimPostgres\Exceptions;
 
 // Singleton
-// note that level 1 is the greatest permission
 final class RolesMapper extends TableMapper
 {
-    /** @var array role_id => [role, level]. instead of querying the database whenever a role is needed. all roles are loaded on construction and are then easily retrievable. note that if in the future any role records were to change via javascript this array would require updating through the setRoles method in order to stay in sync. */
+    /** @var array role_id => role. instead of querying the database whenever a role is needed. all roles are loaded on construction and are then easily retrievable. note that if in the future any role records were to change via javascript this array would require updating through the setRoles method in order to stay in sync. */
     private $roles;
 
     const TABLE_NAME = 'roles';
@@ -31,9 +30,7 @@ final class RolesMapper extends TableMapper
 
     private function __construct()
     {
-        // note that the roles select must be ordered by level (ascending) for getBaseLevel() to work
-        parent::__construct(self::TABLE_NAME, 'id, role, level, created', 'level');
-        $this->addColumnNameConstraint('level', 'positive');
+        parent::__construct(self::TABLE_NAME, 'id, role, created', 'role');
         $this->setRoles();
     }
 
@@ -43,67 +40,35 @@ final class RolesMapper extends TableMapper
         $this->roles = [];
         $rs = $this->select();
         while ($row = pg_fetch_array($rs)) {
-            $this->roles[(int) $row['id']] = [
-                'role' => $row['role'],
-                'level' => (int) $row['level']
-            ];
+            $this->roles[(int) $row['id']] = $row['role'];
         }
     }
 
-    public function getRoleIdForRole(string $roleSearch): int
+    public function getRoleIdForRole(string $roleSearch): ?int
     {
-        foreach ($this->roles as $roleId => $roleData) {
-            if ($roleSearch == $roleData['role']) {
-                return $roleId;
-            }
+        if (!$roleId = array_search($roleSearch, $this->roles)) {
+            return null;
         }
-
-        throw new \Exception("Invalid role searched: $roleSearch");
+        return $roleId;
     }
 
     public function getRoleForRoleId(int $roleIdSearch): string
     {
-        foreach ($this->roles as $roleId => $roleData) {
-            if ($roleIdSearch == $roleId) {
-                return $roleData['role'];
-            }
+        if (!array_key_exists($roleId, $this->roles)) {
+            throw new \InvalidArgumentException("Invalid role id searched: $roleIdSearch");
         }
-
-        throw new \Exception("Invalid role id searched: $roleIdSearch");
-
+        return $this->roles[$roleIdSearch];
     }
 
-    public function getLeveForRoleId(int $roleIdSearch): int
+    public function buildRole(int $id, string $role, \DateTimeImmutable $created): Role 
     {
-        foreach ($this->roles as $roleId => $roleData) {
-            if ($roleIdSearch == $roleId) {
-                return $roleData['level'];
-            }
-        }
-
-        throw new \Exception("Invalid role searched: $roleIdSearch");
-    }
-
-    public function getLeveForRole(string $roleSearch): int
-    {
-        foreach ($this->roles as $roleId => $roleData) {
-            if ($roleSearch == $roleData['role']) {
-                return $roleData['level'];
-            }
-        }
-
-        throw new \Exception("Invalid role searched: $roleSearch");
-    }
-
-    public function buildRole(int $id, string $role, int $level, \DateTimeImmutable $created): Role 
-    {
-        return new Role($id, $role, $level, $created);
+        return new Role($id, $role, $created);
     }
 
     public function getObjectById(int $primaryKey): ?Role 
     {
         if ($record = $this->selectForPrimaryKey($primaryKey)) {
-            return $this->buildRole((int) $record['id'], $record['role'], (int) $record['level'], new \DateTimeImmutable($record['created']));
+            return $this->buildRole((int) $record['id'], $record['role'], new \DateTimeImmutable($record['created']));
         }
 
         return null;
@@ -116,24 +81,7 @@ final class RolesMapper extends TableMapper
 
     public function getRoleNames(): array
     {
-        $roleNames = [];
-        foreach ($this->roles as $roleId => $roleData) {
-            $roleNames[] = $roleData['role'];
-        }
-        return $roleNames;
-    }
-
-    // the last role is the base role since setRoles orders by level
-    // note that there can be multiple roles at the same level
-    public function getBaseRole(): int
-    {
-        return (int) end($this->roles)['role'];
-    }
-
-    // the last level is the base level since setRoles orders by level
-    public function getBaseLevel(): int
-    {
-        return end($this->roles)['level'];
+        return array_values($this->roles);
     }
 
     public function getIdSelectField(array $fieldAttributes, string $fieldLabel = 'Role', ?int $selectedOption, ?string $fieldError)
@@ -216,7 +164,7 @@ final class RolesMapper extends TableMapper
         if ($pgResults = $this->select("*", $whereColumnsInfo)) {
             if (pg_num_rows($pgResults) > 0) {
                 while ($record = pg_fetch_assoc($pgResults)) {
-                    $roles[] = $this->buildRole((int) $record['id'], $record['role'], (int) $record['level'], new \DateTimeImmutable($record['created']));
+                    $roles[] = $this->buildRole((int) $record['id'], $record['role'], new \DateTimeImmutable($record['created']));
                 }
             }
         }
@@ -229,17 +177,19 @@ final class RolesMapper extends TableMapper
         $q->execute();
     }
 
+    /** all roles must exist or exception thrown */
     public function getRoleIdsForRoles(array $roles): array 
     {
         if (count($roles) == 0) {
-            throw new \Exception("Roles array must be populated.");
+            throw new \InvalidArgumentException("Roles array must be populated.");
         }
     
         $roleIds = [];
 
         foreach ($roles as $role) {
-            /** note exception will be thrown if doesn't exist */
-            $roleIds[] = $this->getRoleIdForRole($role);
+            if (null === $roleIds[] = $this->getRoleIdForRole($role)) {
+                throw new \InvalidArgumentException("Role $role does not exist");
+            }
         }
     
         return $roleIds;

@@ -8,6 +8,7 @@ use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\Queries\SelectBuilder;
 use SlimPostgres\Database\DataMappers\MultiTableMapper;
 use SlimPostgres\Database\Postgres;
+use SlimPostgres\Utilities\Functions;
 
 // Singleton
 final class SystemEventsMapper extends MultiTableMapper
@@ -25,7 +26,7 @@ final class SystemEventsMapper extends MultiTableMapper
         'created' => self::PRIMARY_TABLE_NAME . '.created',
         'event_type' => self::TYPES_TABLE_NAME . '.event_type',
         'event' => self::PRIMARY_TABLE_NAME . '.title',
-        'name' => self::ADMINISTRATORS_TABLE_NAME . '.name',
+        'name' => self::ADMINISTRATORS_TABLE_NAME . '.name AS administrator',
         'notes' => self::PRIMARY_TABLE_NAME . '.notes',
         'ip_address' => self::PRIMARY_TABLE_NAME . '.ip_address',
         'request_method' => self::PRIMARY_TABLE_NAME . '.request_method',

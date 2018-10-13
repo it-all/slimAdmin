@@ -87,7 +87,8 @@ class QueryBuilder
 
         $postgresConnection = (Postgres::getInstance())->getConnection();
 
-        if (!$result = pg_query_params($postgresConnection, $this->sql, $this->args)) {
+        /** query failures within transactions without suppressing errors for pg_query_params caused two errors, only 1 of which was inserted to the database log */
+        if (!$result = @pg_query_params($postgresConnection, $this->sql, $this->args)) {
             /** note pg_last_error seems to often not return anything, but pg_query_params call will result in php warning */
             $msg = pg_last_error($postgresConnection) . " " . $this->sql;
             if (count($this->args) > 0) {

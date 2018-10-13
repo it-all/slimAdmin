@@ -43,7 +43,7 @@ class AdministratorsValidator extends ValitronValidatorExtension
             $this->rule('unique', 'username', $administratorsMapper->getColumnByName('username'), $this);
         }
 
-        // all selected roles must be in roles table
+        // all roles must be in roles table
         $this->rule('array', 'roles');
         $rolesMapper = RolesMapper::getInstance();
         $this->rule('in', 'roles.*', array_keys($rolesMapper->getRoles())); // role ids

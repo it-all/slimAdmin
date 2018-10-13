@@ -21,8 +21,13 @@ Data Validation with <a target="_blank" href="https://github.com/vlucas/valitron
 <a href="#errLog">PHP Error Logging with Stack Trace</a> for debugging  
   
 INSTALLATION  
-coming soon  
-  
+*work in progress*  
+Clone project  
+Create PostgreSQL database and restore pg_schema.sql and pg_data.sql  
+Copy .env.example to .env then edit .env  
+Edit then run cliScripts/insertAdministrator.php  
+Navigate to site-name/private (settings['adminPath']) and login!  
+
 CODING NEW FUNCTIONALITY  
 *work in progress*  
 Create a new directory under domain and create a Model/View/Controller (or whatever code structure you desire) as necessary. You can model these files after existing functionality such as SlimPostgres/Administrators/Roles (single database table model) or SlimPostgres/Administrators (joined database tables).  
@@ -30,14 +35,14 @@ Add and configure your new route to the system by:
 - Adding a new route name constant in config/constants.php  
 - Adding the new route in config/routes.php  
 - For new administrative resources, add AuthenticationMiddleware to the route (see existing examples in the routes file)  
-- For new administrative resources, if authorization is required at a resource or functionality level, add them to the 'administratorPermissions' key in config/settings.php, then add AuthorizationMiddleware to the route (see existing examples in the routes file)   
+- For new administrative resources, if authorization is required at a resource or functionality level, add them to the resources / permissions section in config/constants.php, then add AuthorizationMiddleware to the route (see existing examples in the routes file)   
 - For new administrative resources, you can add a link in the administrative navigation menu by editing SlimPostgres/AdminNavigation.php, or config/settings.php ['adminNav']. 
 
 <a name="authe">Authentication</a>  
 Administrative resources can require authentication (login) to access. See config/routes.php admin home for adding Authentication Middleware to a route.  
 
 <a name="autho">Authorization</a>  
-Administrative resources and functionality can be protected against unauthorized use based on role based administrative permissions. Permissions to access system resources/functionality can be inserted through the administrative interface, then assigned to one or more roles. Administrators are also assigned roles, which then grants them the permissions assigned to those roles. Authorization checks are done by a simple AuthorizationService::isAuthorized(string $resource): bool call, where the $resource string must match the permission title that has been inserted. Checks are also performed in AdminNavigation to determine whether or not to display navigation options. Authorization failures result in alerts being written to the SystemEvents table and the user redirected to the admin homepage with a red alert message displayed. Authorization can be set as a minimum role level, where all roles with an equal or better level will be authorized, or as a set of authorized roles.  
+Administrative resources and functionality can be protected against unauthorized use based on role based administrative permissions. Permissions to access system resources/functionality can be inserted through the administrative interface, then assigned to one or more roles. Administrators are also assigned roles, which then grants them the permissions assigned to those roles. Authorization checks are done by a simple AuthorizationService::isAuthorized(string $resource): bool call, where the $resource string must match the permission title that has been inserted. Checks are also performed in AdminNavigation to determine whether or not to display navigation options. Authorization failures result in alerts being written to the SystemEvents table and the user redirected to the admin homepage with a red alert message displayed. 
   
 <a name="admin">Administrative Interface and Navigation</a>  
 Upon browsing to the administrative directory set in $config['adminPath'] authenticating, the appropriate resource is loaded based on $config['slim']['authentication']['administratorHomeRoutes'], if found for the administrator, otherwise from ROUTE_ADMIN_HOME_DEFAULT in constants.php.  

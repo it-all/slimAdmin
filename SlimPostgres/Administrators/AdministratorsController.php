@@ -139,7 +139,7 @@ class AdministratorsController extends BaseController
             $this->systemEvents->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             App::setAdminNotice($e->getMessage(), 'failure');
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));
-        } catch (\Exception $e) {
+        } catch (Exceptions\QueryFailureException $e) {
             $this->systemEvents->insertError('Administrator Deletion Failure', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             App::setAdminNotice('Delete Failed', 'failure');
             return $response->withRedirect($this->router->pathFor(App::getRouteName(true, $this->routePrefix,'index')));

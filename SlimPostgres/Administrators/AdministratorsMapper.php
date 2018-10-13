@@ -33,7 +33,6 @@ final class AdministratorsMapper extends MultiTableMapper
         'passwordHash' => self::TABLE_NAME . '.password_hash',
         'roleId' => self::ROLES_TABLE_NAME . '.id AS role_id',
         'roles' => self::ROLES_TABLE_NAME . '.role',
-        'level' => self::ROLES_TABLE_NAME . '.level AS role_level',
         'active' => self::TABLE_NAME . '.active',
         'created' => self::TABLE_NAME . '.created',
     ];
@@ -62,14 +61,14 @@ final class AdministratorsMapper extends MultiTableMapper
 
         try {
             $administratorId = $this->doInsert($name, $username, $passwordClear, $active);
-        } catch (\Exception $e) {
+        } catch (Exceptions\QueryFailureException $e) {
             pg_query("ROLLBACK");
             throw $e;
         }
 
         try {
             $this->insertAdministratorRoles((int) $administratorId, $roleIds);
-        } catch (\Exception $e) {
+        } catch (Exceptions\QueryFailureException $e) {
             pg_query("ROLLBACK");
             throw $e;
         }
@@ -315,8 +314,18 @@ final class AdministratorsMapper extends MultiTableMapper
     private function doDeleteTransaction(int $administratorId)
     {
         pg_query("BEGIN");
-        $this->doDeleteAdministratorRoles($administratorId);
-        $this->doDeleteAdministrator($administratorId);
+        try {
+            $this->doDeleteAdministratorRoles($administratorId);
+        } catch (Exceptions\QueryFailureException $e) {
+            pg_query("ROLLBACK");
+            throw $e;
+        } 
+        try {
+            $this->doDeleteAdministrator($administratorId);
+        } catch (Exceptions\QueryFailureException $e) {
+            pg_query("ROLLBACK");
+            throw $e;
+        } 
         pg_query("COMMIT");
     }
 
@@ -378,7 +387,7 @@ final class AdministratorsMapper extends MultiTableMapper
         if (count($changedAdministratorFields) > 0) {
             try {
                 $this->getPrimaryTableMapper()->updateByPrimaryKey($changedAdministratorFields, $administratorId, false);
-            } catch (\Exception $e) {
+            } catch (Exceptions\QueryFailureException $e) {
                 pg_query("ROLLBACK");
                 throw $e;
             }
@@ -387,7 +396,7 @@ final class AdministratorsMapper extends MultiTableMapper
             foreach ($changedFields['roles']['add'] as $addRoleId) {
                 try {
                     $this->doInsertAdministratorRole($administratorId, (int) $addRoleId);
-                } catch (\Exception $e) {
+                } catch (Exceptions\QueryFailureException $e) {
                     pg_query("ROLLBACK");
                     throw $e;
                 }
@@ -397,7 +406,7 @@ final class AdministratorsMapper extends MultiTableMapper
             foreach ($changedFields['roles']['remove'] as $deleteRoleId) {
                 try {
                     $roleDeleteResult = $this->doDeleteAdministratorRole($administratorId, (int) $deleteRoleId);
-                } catch (\Exception $e) {
+                } catch (Exceptions\QueryFailureException $e) {
                     pg_query("ROLLBACK");
                     throw $e;
                 }

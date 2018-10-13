@@ -11,6 +11,7 @@ use SlimPostgres\Database\DataMappers\TableMapper;
 use SlimPostgres\Database\Queries\QueryBuilder;
 use SlimPostgres\Database\Queries\SelectBuilder;
 use SlimPostgres\Database\Postgres;
+use SlimPostgres\Exceptions;
 
 // Singleton
 final class PermissionsMapper extends MultiTableMapper
@@ -49,7 +50,7 @@ final class PermissionsMapper extends MultiTableMapper
     public function create(string $title, ?string $description, ?array $roleIds, bool $active): int
     {
         // add top role if not already there, as it is assigned to all permissions
-        if ($roleIds === null || !in_array(Role::TOP_ROLE, $roleIds)) {
+        if ($roleIds === null || !in_array(TOP_ROLE, $roleIds)) {
             $roleIds[] = (RolesMapper::getInstance())->getTopRoleId();
         }
 
@@ -58,14 +59,14 @@ final class PermissionsMapper extends MultiTableMapper
 
         try {
             $permissionId = $this->doInsert($title, $description, $active);
-        } catch (\Exception $e) {
+        } catch (Exceptions\QueryFailureException $e) {
             pg_query("ROLLBACK");
             throw $e;
         }
 
         try {
             $this->insertPermissionRoles((int) $permissionId, $roleIds);
-        } catch (\Exception $e) {
+        } catch (Exceptions\QueryFailureException $e) {
             pg_query("ROLLBACK");
             throw $e;
         }
@@ -265,7 +266,7 @@ final class PermissionsMapper extends MultiTableMapper
         if (count($changedPermissionFields) > 0) {
             try {
                 $this->getPrimaryTableMapper()->updateByPrimaryKey($changedPermissionFields, $permissionId, false);
-            } catch (\Exception $e) {
+            } catch (Exceptions\QueryFailureException $e) {
                 pg_query("ROLLBACK");
                 throw $e;
             }
@@ -274,7 +275,7 @@ final class PermissionsMapper extends MultiTableMapper
             foreach ($changedFields['roles']['add'] as $addRoleId) {
                 try {
                     $this->doInsertPermissionRole($permissionId, (int) $addRoleId);
-                } catch (\Exception $e) {
+                } catch (Exceptions\QueryFailureException $e) {
                     pg_query("ROLLBACK");
                     throw $e;
                 }
@@ -287,7 +288,7 @@ final class PermissionsMapper extends MultiTableMapper
                 if (!$deleteRole->isTop()) {
                     try {
                         $roleDeleteResult = $this->doDeletePermissionRole($permissionId, (int) $deleteRoleId);
-                    } catch (\Exception $e) {
+                    } catch (Exceptions\QueryFailureException $e) {
                         pg_query("ROLLBACK");
                         throw $e;
                     }

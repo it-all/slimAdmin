@@ -182,6 +182,7 @@ class TableMapper implements TableMappers
         return $columnValues;
     }
 
+    /** returns primary key if set, otherwise returns pg result */
     public function insert(array $columnValues)
     {
         $columnValues = $this->addBooleanColumnValues($columnValues);

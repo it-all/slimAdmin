@@ -45,10 +45,6 @@ return [
         ],
     ],
 
-    'authorization' => [
-        'topRole' => TOP_ROLE, // must match a database role
-    ],
-
     // if true removes leading and trailing blank space on all inputs
     'trimAllUserInput' => true,
 

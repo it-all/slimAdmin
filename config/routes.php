@@ -17,7 +17,7 @@ use SlimPostgres\Administrators\AdministratorsController;
 use SlimPostgres\Administrators\Roles\RolesView;
 use SlimPostgres\Administrators\Roles\RolesController;
 use SlimPostgres\Administrators\Roles\Permissions\View\PermissionsViews;
-use SlimPostgres\Administrators\Roles\Permissions\PermissionsController;
+use SlimPostgres\Administrators\Roles\Permissions\PermissionsControllers;
 
 /////////////////////////////////////////
 // Routes that anyone can access
@@ -180,7 +180,7 @@ $slim->get('/' . $config['adminPath'] . '/permissions', PermissionsViews::class 
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_PERMISSIONS);
 
-$slim->post('/' . $config['adminPath'] . '/permissions', PermissionsController::class . ':routePostIndexFilter')
+$slim->post('/' . $config['adminPath'] . '/permissions', PermissionsControllers::class . ':routePostIndexFilter')
     ->add(new AuthorizationMiddleware($slimContainer, PERMISSIONS_VIEW_RESOURCE))
     ->add(new AuthenticationMiddleware($slimContainer));
 
@@ -194,7 +194,7 @@ $slim->get('/' . $config['adminPath'] . '/permissions/insert', PermissionsViews:
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_PERMISSIONS_INSERT);
 
-$slim->post('/' . $config['adminPath'] . '/permissions/insert', PermissionsController::class . ':routePostInsert')
+$slim->post('/' . $config['adminPath'] . '/permissions/insert', PermissionsControllers::class . ':routePostInsert')
     ->add(new AuthorizationMiddleware($slimContainer, PERMISSIONS_INSERT_RESOURCE))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_PERMISSIONS_INSERT_POST);
@@ -204,12 +204,12 @@ $slim->get('/' . $config['adminPath'] . '/permissions/{primaryKey}', Permissions
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_PERMISSIONS_UPDATE);
 
-$slim->put('/' . $config['adminPath'] . '/permissions/{primaryKey}', PermissionsController::class . ':routePutUpdate')
+$slim->put('/' . $config['adminPath'] . '/permissions/{primaryKey}', PermissionsControllers::class . ':routePutUpdate')
     ->add(new AuthorizationMiddleware($slimContainer, PERMISSIONS_UPDATE_RESOURCE))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_PERMISSIONS_UPDATE_PUT);
 
-$slim->get('/' . $config['adminPath'] . '/permissions/delete/{primaryKey}', PermissionsController::class . ':routeGetDelete')
+$slim->get('/' . $config['adminPath'] . '/permissions/delete/{primaryKey}', PermissionsControllers::class . ':routeGetDelete')
     ->add(new AuthorizationMiddleware($slimContainer, PERMISSIONS_DELETE_RESOURCE))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_PERMISSIONS_DELETE);

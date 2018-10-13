@@ -129,9 +129,7 @@ class Permission implements ListViewModels
         return (PermissionsMapper::getInstance())->isUpdatable($this->id);
     }
 
-    /** whether this model is allowed to be deleted 
-     *  do not allow roles in use (assigned to administrators) to be deleted
-     */
+    /** whether this model is allowed to be deleted */
     public function isDeletable(): bool
     {
         return (PermissionsMapper::getInstance())->isDeletable();

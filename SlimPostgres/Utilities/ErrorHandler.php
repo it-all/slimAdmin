@@ -87,15 +87,18 @@ class ErrorHandler
 
             $administratorId = (isset($_SESSION[App::SESSION_KEY_ADMINISTRATOR_ID])) ? (int) $_SESSION[App::SESSION_KEY_ADMINISTRATOR_ID] : null;
 
+            echo " INSERTING EVENT ";
+            
             @$this->systemEventsMapper->insertEvent('PHP Error', $systemEventType, $administratorId, $databaseErrorMessage);
         }
 
-        // log
+        // log to file
         @error_log($errorMessage, 3, $this->logPath);
 
         // echo
         if ($this->echoErrors) {
             echo (Utilities\Functions::isRunningFromCommandLine()) ? $errorMessage : nl2br($errorMessage, false);
+
             if ($die) {
                 die();
             }

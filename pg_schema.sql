@@ -39,7 +39,7 @@ SET default_with_oids = false;
 
 CREATE TABLE public.administrator_roles (
     id integer NOT NULL,
-    administrator_id bigint NOT NULL,
+    administrator_id integer NOT NULL,
     role_id integer NOT NULL,
     created timestamp without time zone DEFAULT now() NOT NULL
 );
@@ -75,7 +75,8 @@ CREATE TABLE public.administrators (
     password_hash character varying(255) NOT NULL,
     active boolean NOT NULL,
     name character varying(100),
-    created timestamp without time zone DEFAULT now() NOT NULL
+    created timestamp without time zone DEFAULT now() NOT NULL,
+    CONSTRAINT username_length CHECK ((char_length((username)::text) >= 4))
 );
 
 
@@ -135,7 +136,7 @@ ALTER SEQUENCE public.log_types_id_seq OWNED BY public.system_event_types.id;
 
 CREATE TABLE public.login_attempts (
     id bigint NOT NULL,
-    administrator_id bigint,
+    administrator_id integer,
     username character varying(20),
     ip character varying(100) NOT NULL,
     created timestamp without time zone NOT NULL,
@@ -163,15 +164,46 @@ ALTER SEQUENCE public.login_attempts_id_seq OWNED BY public.login_attempts.id;
 
 
 --
+-- Name: permissions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.permissions (
+    id integer NOT NULL,
+    title character varying(255) NOT NULL,
+    active boolean DEFAULT true NOT NULL,
+    created timestamp without time zone DEFAULT now() NOT NULL,
+    description text
+);
+
+
+--
+-- Name: permsissions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.permsissions_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: permsissions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.permsissions_id_seq OWNED BY public.permissions.id;
+
+
+--
 -- Name: roles; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.roles (
     id integer NOT NULL,
     role character varying(100) NOT NULL,
-    level smallint NOT NULL,
-    created timestamp without time zone DEFAULT now() NOT NULL,
-    CONSTRAINT positive_level CHECK (((level)::double precision > (0)::double precision))
+    created timestamp without time zone DEFAULT now() NOT NULL
 );
 
 
@@ -195,6 +227,38 @@ ALTER SEQUENCE public.roles_id_seq OWNED BY public.roles.id;
 
 
 --
+-- Name: roles_permissions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.roles_permissions (
+    id integer NOT NULL,
+    role_id integer NOT NULL,
+    permission_id integer NOT NULL,
+    created timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: roles_permissions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.roles_permissions_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: roles_permissions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.roles_permissions_id_seq OWNED BY public.roles_permissions.id;
+
+
+--
 -- Name: system_events; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -204,7 +268,7 @@ CREATE TABLE public.system_events (
     title character varying(255) NOT NULL,
     notes text,
     created timestamp without time zone DEFAULT now() NOT NULL,
-    administrator_id bigint,
+    administrator_id integer,
     ip_address character varying(50),
     resource character varying(100),
     request_method character varying(20)
@@ -252,10 +316,24 @@ ALTER TABLE ONLY public.login_attempts ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
+-- Name: permissions id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.permissions ALTER COLUMN id SET DEFAULT nextval('public.permsissions_id_seq'::regclass);
+
+
+--
 -- Name: roles id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.roles ALTER COLUMN id SET DEFAULT nextval('public.roles_id_seq'::regclass);
+
+
+--
+-- Name: roles_permissions id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roles_permissions ALTER COLUMN id SET DEFAULT nextval('public.roles_permissions_id_seq'::regclass);
 
 
 --
@@ -302,6 +380,30 @@ ALTER TABLE ONLY public.administrators
 
 ALTER TABLE ONLY public.login_attempts
     ADD CONSTRAINT login_attempts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: permissions permission_idx; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.permissions
+    ADD CONSTRAINT permission_idx UNIQUE (title);
+
+
+--
+-- Name: permissions permsissions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.permissions
+    ADD CONSTRAINT permsissions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: roles_permissions roles_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roles_permissions
+    ADD CONSTRAINT roles_permissions_pkey PRIMARY KEY (id);
 
 
 --
@@ -373,6 +475,22 @@ ALTER TABLE ONLY public.login_attempts
 
 ALTER TABLE ONLY public.system_events
     ADD CONSTRAINT fk_admin_id FOREIGN KEY (administrator_id) REFERENCES public.administrators(id);
+
+
+--
+-- Name: roles_permissions roles_permissions_permission_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roles_permissions
+    ADD CONSTRAINT roles_permissions_permission_id_fkey FOREIGN KEY (permission_id) REFERENCES public.permissions(id);
+
+
+--
+-- Name: roles_permissions roles_permissions_role_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roles_permissions
+    ADD CONSTRAINT roles_permissions_role_id_fkey FOREIGN KEY (role_id) REFERENCES public.roles(id);
 
 
 --

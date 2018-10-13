@@ -28,8 +28,6 @@ class RolesValidator extends DatabaseTableFormValidator
 
         parent::setRules($skipUniqueForUnchanged, $record);
 
-        // add any custom rules below ie to level (not necessary because already picked up by column type and constraint):
-        // $this->rule('integer', 'level');
-        // $this->rule('min', 'level', 0);
+        // add any custom rules below 
     }
 }

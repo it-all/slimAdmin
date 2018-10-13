@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+define('DOMAIN_NAME', 'example.com');
+
+define('TOP_ROLE', 'owner'); // must match db role
+
 // route prefixes
 define('ROUTEPREFIX_ADMIN', 'admin');
 define('ROUTEPREFIX_SYSTEM_EVENTS', 'systemEvents');

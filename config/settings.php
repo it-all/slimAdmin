@@ -3,18 +3,16 @@ declare(strict_types=1);
 
 // application configuration
 
-$domainName = 'example.com';
-
 return [
 
     'businessName' => 'example.com, LLC',
 
     'businessDba' => 'Example Company',
 
-    'domainName' => $domainName,
+    'domainName' => DOMAIN_NAME,
 
     'errors' => [
-        'emailTo' => ['owner'], // emails must be set in 'emails' section
+        'emailTo' => [TOP_ROLE], // emails must be set in 'emails' section
         'fatalMessage' => 'Apologies, there has been an error on our site. We have been alerted and will correct it as soon as possible.',
         'logToDatabase' => true,
         'phpErrorLogPath' => APPLICATION_ROOT_DIRECTORY . '/storage/logs/phpErrors.log',
@@ -31,24 +29,24 @@ return [
 
     /** these can be overridden in .env for dev testing */
     'emails' => [
-        'owner' => "owner@".$domainName,
-        'programmer' => "programmer@".$domainName,
-        'service' => "service@".$domainName
+        TOP_ROLE => "owner@".DOMAIN_NAME,
+        'programmer' => "programmer@".DOMAIN_NAME,
+        'service' => "service@".DOMAIN_NAME
     ],
 
-    'pageNotFoundText' => 'Page not found. Please check the URL. If correct, please email service@'.$domainName.' for assistance.',
+    'pageNotFoundText' => 'Page not found. Please check the URL. If correct, please email service@'.DOMAIN_NAME.' for assistance.',
 
     'mbInternalEncoding' => 'UTF-8',
 
     'authentication' => [
         'maxFailedLogins' => 5, // If met or exceeded in a session, will insert a system event and disallow further login attempts by redirecting to the homepage
         'administratorHomeRoutes' => [
-            'owner' => ROUTE_SYSTEM_EVENTS,
+            TOP_ROLE => ROUTE_SYSTEM_EVENTS,
         ],
     ],
 
     'authorization' => [
-        'topRole' => 'owner', // must match a database role
+        'topRole' => TOP_ROLE, // must match a database role
     ],
 
     // if true removes leading and trailing blank space on all inputs

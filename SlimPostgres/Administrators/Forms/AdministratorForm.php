@@ -137,7 +137,7 @@ abstract class AdministratorForm extends BaseForm implements Forms
                 $rolesCheckboxAttributes['checked'] = 'checked';
             }
             // disabled? - if current administrator is non-top-dog disable top-dog role checkbox
-            if (!$this->authorization->hasTopRole() && $roleData['role'] == $this->authorization->getTopRole()) {
+            if (!$this->authorization->hasTopRole() && $roleData['role'] == TOP_ROLE) {
                 $rolesCheckboxAttributes['disabled'] = 'disabled';
             }
             $rolesCheckboxes[] = new CheckboxRadioInputField($roleData['role'], $rolesCheckboxAttributes);

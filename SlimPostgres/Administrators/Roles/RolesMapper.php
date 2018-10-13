@@ -260,7 +260,7 @@ final class RolesMapper extends TableMapper
     public function getTopRoleId(): int 
     {
         foreach ($this->roles as $roleId => $roleInfo) {
-            if ($roleInfo['role'] == Role::TOP_ROLE) {
+            if ($roleInfo['role'] == TOP_ROLE) {
                 return $roleId;
             }
         }

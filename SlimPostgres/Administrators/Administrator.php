@@ -112,11 +112,7 @@ class Administrator implements ListViewModels
     // returns true if this administrator has top role in roles array.
     public function hasTopRole(): bool 
     {
-        if (is_null($this->authorization)) {
-            throw new \Exception("Authorization must be set");
-        }
-
-        return $this->hasRoleName($this->authorization->getTopRole());
+        return $this->hasRoleName(TOP_ROLE);
     }
 
     public function hasRoleName(string $roleName): bool 

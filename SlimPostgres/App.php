@@ -283,7 +283,7 @@ class App
         /** Authorization */
         $container['authorization'] = function($container) {
             $settings = $container->get('settings');
-            return new AuthorizationService($settings['authorization']['topRole']);
+            return new AuthorizationService();
         };
 
         /** System Events (Database Log) */

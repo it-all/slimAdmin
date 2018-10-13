@@ -104,9 +104,9 @@ abstract class PermissionForm extends BaseForm implements Forms
                 'class' => 'inlineFormField'
             ];
             // checked? owner is always
-            if ($roleData['role'] == Role::TOP_ROLE || (isset($this->rolesValue) && in_array($roleId, $this->rolesValue))) {
+            if ($roleData['role'] == TOP_ROLE || (isset($this->rolesValue) && in_array($roleId, $this->rolesValue))) {
                 $rolesCheckboxAttributes['checked'] = 'checked';
-                if ($roleData['role'] == 'owner') {
+                if ($roleData['role'] == TOP_ROLE) {
                     $rolesCheckboxAttributes['disabled'] = 'disabled';
                 }
             }

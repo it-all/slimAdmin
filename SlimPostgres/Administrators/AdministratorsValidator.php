@@ -52,13 +52,13 @@ class AdministratorsValidator extends ValitronValidatorExtension
         // and cannot unassign top role
         if (!$authorization->hasTopRole()) {
 
-            $topRoleId = $authorization->getTopRoleId();
+            $topRoleId = $rolesMapper->getTopRoleId();
 
-            $this->rule('notIn', 'roles.*', [$topRoleId])->message('No permission to set '.$authorization->getTopRole());
+            $this->rule('notIn', 'roles.*', [$topRoleId])->message('No permission to set '.TOP_ROLE);
 
             if (!$inserting) {
                 if (isset($changedFieldValues['roles']['remove']) && in_array($topRoleId, $changedFieldValues['roles']['remove'])) {
-                    $this->rule('in', 'roles.*', [$topRoleId])->message('No permission to unset '.$authorization->getTopRole());
+                    $this->rule('in', 'roles.*', [$topRoleId])->message('No permission to unset '.TOP_ROLE);
                 }
             }
         }

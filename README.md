@@ -1,13 +1,16 @@
 # slim-postgres  
+V1.0 is on the horizon. Next step is <a href="https://github.com/it-all/slim-postgres/issues/38">Issue 38</a>.  
 WORK IN PROGRESS  
   
-slim-postgres is a PHP 7.1+, PostgreSQL RESTful web platform with built-in administration and other features, based on <a target="_blank" href="https://www.slimframework.com/">Slim Framework</a>.  
-
+slim-postgres is a PHP Framework Based on <a target="_blank" href="https://www.slimframework.com/">Slim Micro-Framework</a> and PostgreSQL  
+  
+slim-postgres has a built-in administrative interface and other tools to allow rapid web app development.  
+  
 FEATURES  
 Built on <a target="_blank" href="https://slimframework.com">Slim framework</a>, a front-controller micro-framework for PHP  
 <a target="_blank" href="https://postgresql.org">PostgreSQL Database</a> Integration  
 <a href="#authe">Authentication</a> (Log In/Out)  
-<a href="#autho">Authorization</a> (Role Based Permissions for Resource and Functionality Access)   
+<a href="#autho">Authorization</a> (Role Based Access Control for Resource and Functionality Access)   
 <a target="_blank" href="#admin">Administrative User Interface and Navigation</a>  
 <a href="#se">Built-in Database Logging/Reporting of system events, login attempts, and errors</a>  
 <a href="#eh">Error Handling</a>  

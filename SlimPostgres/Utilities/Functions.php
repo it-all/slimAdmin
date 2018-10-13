@@ -7,6 +7,22 @@ namespace SlimPostgres\Utilities;
 // A place to store php helper functions, not App-related functions
 class Functions
 {
+    public static function destroySession() 
+    {
+        /** Unset all of the session variables */
+        $_SESSION = [];
+
+        /** Destroy the session */
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
+            );
+        }
+        session_destroy();
+    }
+    
     /** string length must be >= numChars */
     public static function removeLastCharsFromString(string $input, int $numChars = 1): string 
     {

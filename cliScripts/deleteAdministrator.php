@@ -10,7 +10,7 @@ require APPLICATION_ROOT_DIRECTORY . '/config/constants.php';
 new \SlimPostgres\App();
 
 // config
-$username = 'bookkeeper';
+$username = ''; // must exist or exception will occur
 // end config
 
 $administratorsMapper =  \SlimPostgres\Administrators\AdministratorsMapper::getInstance();
@@ -18,10 +18,12 @@ if (null === $administratorId = $administratorsMapper->getAdministratorIdByUsern
     throw new \Exception("Administrator not found for username $username");
 }
 
+pg_query("BEGIN");
 deleteAdministratorRoles($administratorId);
 deleteLoginAttempts($administratorId);
 deleteSystemEvents($administratorId);
 deleteAdministrator($administratorId);
+pg_query("COMMIT");
 
 function deleteAdministratorRoles(int $administratorId)
 {

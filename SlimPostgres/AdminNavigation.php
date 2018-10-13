@@ -85,62 +85,6 @@ class AdminNavigation
         }
     }
 
-    // precedence:
-    // 1. directly set by minimumPermissions key in the section
-    // 2. by section link
-    // 3. by section name
-    private function getSectionPermissions(array $section, string $sectionName)
-    {
-        if (isset($section['permissions'])) {
-            return $section['permissions'];
-        }
-
-        if (isset($section['route'])) {
-            return $this->container->authorization->getPermissions($section['route']);
-        }
-
-        // by nav section - ie NAV_ADMIN_SYSTEM
-        // note if nav section not defined constant evaluates to null, which results in base role permission (the default)
-        return $this->container->authorization->getPermissions(constant('NAV_ADMIN_'.strtoupper(str_replace(" ", "_", $sectionName))));
-    }
-
-    /** add nav components as necessary based on user role */
-    private function getSectionForUserRecurs(array $section, string $sectionName): array
-    {
-        // if there are section permissions and they are not met, do not put section in user's nav
-        // if ($permissions = $this->getSectionPermissions($section, $sectionName)) {
-        //     if (!$this->container->authorization->isAuthorized($permissions)) {
-        //         return [];
-        //     }
-        // }
-
-        // rebuild based on permissions
-        $updatedSection = [];
-        foreach ($section as $key => $value) {
-            if ($key != 'subSections') {
-                $updatedSection[$key] = $value;
-            }
-        }
-
-        $updatedSubSections = [];
-        if (isset($section['subSections'])) {
-            foreach ($section['subSections'] as $subSectionName => $subSection) {
-
-                $updatedSubSection = $this->getSectionForUserRecurs($subSection, $subSectionName);
-                if (count($updatedSubSection) > 0) {
-                    $updatedSubSections[$subSectionName] = $updatedSubSection;
-                }
-            }
-        }
-
-        if (count($updatedSubSections) > 0) {
-            $updatedSection['subSections'] = $updatedSubSections;
-        }
-
-        return $updatedSection;
-
-    }
-
     /** add nav components as necessary based on logged in administrator role */
     private function getSectionForAdministrator(array $section, string $sectionName): array
     {

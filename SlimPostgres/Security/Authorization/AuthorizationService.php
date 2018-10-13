@@ -32,7 +32,8 @@ class AuthorizationService
         }
 
         if (null === $administrator = (AdministratorsMapper::getInstance())->getObjectById($_SESSION[App::SESSION_KEY_ADMINISTRATOR_ID])) {
-            throw new \Exception("Invalid administrator id in session");
+            unset($_SESSION[App::SESSION_KEY_ADMINISTRATOR_ID]); /** remove for security */
+            throw new \Exception("Invalid administrator id ".$_SESSION[App::SESSION_KEY_ADMINISTRATOR_ID]." in session");
         }
 
         return $administrator;

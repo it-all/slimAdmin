@@ -11,11 +11,11 @@ require APPLICATION_ROOT_DIRECTORY . '/config/constants.php';
 new \SlimPostgres\App();
 
 // config
-$name = 'Ro';
-$username = 'Botto'; // must be unique and at least 4 characters or query will fail
+$name = '';
+$username = ''; // must be unique and at least 4 characters or query will fail
 $passwordClear = ''; // make it a good one https://www.schneier.com/blog/archives/2014/03/choosing_secure_1.html
 $active = true; // bool
-$roles = ['owner','newrole']; // if not found in roles table, new role will be inserted
+$roles = ['owner']; // if not found in roles table, new role will be inserted. for initial installation, this should probably match the TOP_ROLE defined in config/constants.php
 // end config
 
 pg_query("BEGIN");

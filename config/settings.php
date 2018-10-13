@@ -52,9 +52,11 @@ return [
 //        'adminNav' => [
 //            'Test' => [
 //                'route' => ROUTE_TEST,
+//                'authorization' => TEST_VIEW_RESOURCE,
 //                'subSections' => [
 //                    'Insert' => [
 //                        'route' => ROUTE_TEST_INSERT,
+//                        'authorization' => TEST_INSERT_RESOURCE,
 //                    ]
 //                ],
 //            ]

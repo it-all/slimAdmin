@@ -1,5 +1,5 @@
 # slim-postgres  
-slim-postgres is a PHP Framework Based on <a target="_blank" href="https://www.slimframework.com/">Slim Micro-Framework</a> and <a href="https://www.postgresql.org/">PostgreSQL</a>.  
+slim-postgres is a <a target="_blank" href="https://www.php.net">PHP</a> Framework Based on <a target="_blank" href="https://www.slimframework.com/">Slim Micro-Framework</a> and <a target="_blank" href="https://www.postgresql.org/">PostgreSQL</a>.  
   
 slim-postgres has a built-in administrative interface and other tools to allow rapid web app development.  
 
@@ -7,11 +7,12 @@ V1.0 is on the horizon. Next step is <a href="https://github.com/it-all/slim-pos
   
   
 FEATURES  
+<a target="_blank" href="https://www.php.net">PHP</a> 7.1+  
 Built on <a target="_blank" href="https://slimframework.com">Slim framework</a>, a front-controller micro-framework for PHP  
 <a target="_blank" href="https://postgresql.org">PostgreSQL Database</a> Integration  
+<a target="_blank" href="#admin">Administrative User Interface and Navigation</a>  
 <a href="#authe">Authentication</a> (Log In/Out)  
 <a href="#autho">Authorization</a> (Role Based Access Control for Resource and Functionality Access)   
-<a target="_blank" href="#admin">Administrative User Interface and Navigation</a>  
 <a href="#se">Built-in Database Logging/Reporting of system events, login attempts, and errors</a>  
 <a href="#eh">Error Handling</a>  
 <a href="emailing">Emailing</a> with <a target="_blank" href="https://github.com/PHPMailer/PHPMailer">PHPMailer</a>    
@@ -41,12 +42,6 @@ Add and configure your new route to the system by:
 - For new administrative resources, if authorization is required at a resource or functionality level, add them to the resources / permissions section in config/constants.php, then add AuthorizationMiddleware to the route (see existing examples in the routes file)   
 - For new administrative resources, you can add a link in the administrative navigation menu by editing SlimPostgres/AdminNavigation.php, or config/settings.php ['adminNav']. 
 
-<a name="authe">Authentication</a>  
-Administrative resources can require authentication (login) to access. See config/routes.php admin home for adding Authentication Middleware to a route.  
-
-<a name="autho">Authorization</a>  
-Administrative resources and functionality can be protected against unauthorized use based on role based administrative permissions. Permissions to access system resources/functionality can be inserted through the administrative interface, then assigned to one or more roles. Administrators are also assigned roles, which then grants them the permissions assigned to those roles. Authorization checks are done by a simple AuthorizationService::isAuthorized(string $resource): bool call, where the $resource string must match the permission title that has been inserted. Checks are also performed in AdminNavigation to determine whether or not to display navigation options. Authorization failures result in alerts being written to the SystemEvents table and the user redirected to the admin homepage with a red alert message displayed. 
-  
 <a name="admin">Administrative Interface and Navigation</a>  
 Upon browsing to the administrative directory set in $config['adminPath'] authenticating, the appropriate resource is loaded based on $config['slim']['authentication']['administratorHomeRoutes'], if found for the administrator, otherwise from ROUTE_ADMIN_HOME_DEFAULT in constants.php.  
   
@@ -59,6 +54,12 @@ The following administrative functionalities are already coded:
 - Logout  
 These options are found in the navigation menu at top left. Once other options are coded, they can be added to the menu by uncommenting/adding to $config['slim']['adminNav'].  
 
+<a name="authe">Authentication</a>  
+Administrative resources can require authentication (login) to access. See config/routes.php admin home for adding Authentication Middleware to a route.  
+
+<a name="autho">Authorization</a>  
+Administrative resources and functionality can be protected against unauthorized use based on role based administrative permissions. Permissions to access system resources/functionality can be inserted through the administrative interface, then assigned to one or more roles. Administrators are also assigned roles, which then grants them the permissions assigned to those roles. Authorization checks are done by a simple AuthorizationService::isAuthorized(string $resource): bool call, where the $resource string must match the permission title that has been inserted. Checks are also performed in AdminNavigation to determine whether or not to display navigation options. Authorization failures result in alerts being written to the SystemEvents table and the user redirected to the admin homepage with a red alert message displayed. 
+  
 <a name="se">System Event Database Logging</a>  
 Certain events such as logging in, logging out, inserting, updating, and deleting database records are automatically logged into the SystemEvents table. You can choose other events to insert as you write your application. For usage examples and help, search "systemEvents->insert" and see SystemEventsMapper.php. Note that PHP errors are also logged to the SystemEvents table by default (this can be turned off in $config['errors']['logToDatabase']).  
 
@@ -105,22 +106,10 @@ if ($this->mailer !== null) {
 The <a href="https://github.com/slimphp/Slim-Csrf" target="_blank">Slim Framework CSRF</a> protection middleware is used to check CSRF form fields. The CSRF key/value generators are added to the container for form field creation. They are also made available to Twig. A failure is logged to SystemEvents as an error, the user's session is unset, and the user is redirected to the (frontend) homepage with an error message.  
   
 <a name="xss">XSS Prevention</a>  
-THIS SECTION NEEDS UPDATING. TWIG IS NO LONGER BEING USED, THEREFORE ANY DISPLAYED USER DATA MUST BE ESCAPED USING htmlspecialchars().  
-  
-The appropriate <a target="_blank" href="https://twig.sensiolabs.org/doc/2.x/filters/escape.html" target="_blank">Twig escape filter</a> are used for any user-input data* that is output through Twig. Note that Twig defaults to autoescape 'html' in the autoescape environment variable: https://twig.sensiolabs.org/api/2.x/Twig_Environment.html  
-  
-protectXSS() or arrayProtectRecursive() should be called for any user-input data* that is output into HTML independent of Twig (currently there is none).
-  
-*Note this includes database data that has been input by any user, including through the admin  
+<a href="http://us2.php.net/htmlentities" target="_blank">htmlentities()</a> is used to escape output.  
   
 <a name="errLog">PHP Error Log</a>  
 PHP Errors with stack trace are logged to the file set in config['storage']['errors']['phpErrorLogPath']  
-  
-Miscellaneous Instructions  
+   
 
-To print debugging info in admin pages:  
-Send a 'debug' variable to twig ie:   
-return $this->view->render($response, 'admin/lists/administratorsList.twig',['debug' => arrayWalkToStringRecursive($_SESSION)]);  
-This is because the html main page content is set to 100% height, and simply doing a var_dump or echo can cause an unreadable display of the content.  
-
-===========================================================Thank you.
+===========================================================>Thank you.

@@ -47,14 +47,6 @@ class App
     /** info concerning logged on administrator */
     const SESSION_KEY_ADMINISTRATOR_ID = 'administratorId';
 
-    /** administrator sub-keys */
-    // const SESSION_ADMINISTRATOR_KEY_ID = 'id';
-    // const SESSION_ADMINISTRATOR_KEY_NAME = 'name';
-    // const SESSION_ADMINISTRATOR_KEY_USERNAME = 'username';
-    // const SESSION_ADMINISTRATOR_KEY_ROLES = 'roles';
-    // const SESSION_ADMINISTRATOR_KEY_ROLES_NAME = 'roleName';
-    // const SESSION_ADMINISTRATOR_KEY_ROLES_LEVEL = 'roleLevel';
-
     /** frontend notice statuses (can be used as css classes) */
     const STATUS_NOTICE_SUCCESS = 'noticeSuccess';
     const STATUS_NOTICE_FAILURE = 'noticeFailure';

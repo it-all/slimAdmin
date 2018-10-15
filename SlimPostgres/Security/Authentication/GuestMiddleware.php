@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Security\Authentication;
 
-use SlimPostgres\BaseMiddleware;
+use SlimPostgres\Middleware;
 
-class GuestMiddleware extends BaseMiddleware
+class GuestMiddleware extends Middleware
 {
     public function __invoke($request, $response, $next)
     {

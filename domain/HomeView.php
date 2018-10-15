@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Domain;
 
-use SlimPostgres\BaseView;
+use SlimPostgres\BaseMVC\View\BaseView;
 use Slim\Http\Request;
 use Slim\Http\Response;
 

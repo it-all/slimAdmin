@@ -24,12 +24,7 @@ abstract class MultiTableMapper implements TableMappers
         if ($whereColumnsInfo != null) {
             $this->validateWhere($whereColumnsInfo);
         }
-        
-        /** simply adding to the where clause below with the roles field will yield incomplete results, as not all roles for an administrator will be selected, so the subquery fn is called */
-        if (is_array($whereColumnsInfo) && array_key_exists('roles.role', $whereColumnsInfo)) {
-            return $this->selectWithRoleSubquery($columns, $whereColumnsInfo, $orderBy);
-        }
-        
+                
         $selectColumnsString = ($columns === null) ? $this->getSelectColumnsString() : $columns;
         $selectClause = "SELECT " . $selectColumnsString;
         $orderBy = ($orderBy == null) ? $this->getOrderBy() : $orderBy;
@@ -95,7 +90,7 @@ abstract class MultiTableMapper implements TableMappers
         return $this->orderByColumnName;
     }
 
-    /** returns table.colum */
+    /** returns table.colum. can be overridden to return any string */
     protected function getOrderBy(): string 
     {
         return $this->selectColumns[$this->orderByColumnName];

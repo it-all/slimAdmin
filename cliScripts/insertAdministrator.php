@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-use \SlimPostgres\Administrators\AdministratorsMapper;
-use \SlimPostgres\Administrators\Roles\RolesMapper;
+use \SlimPostgres\Entities\Administrators\Model\AdministratorsMapper;
+use \SlimPostgres\Entities\Roles\Model\RolesMapper;
 
 define('APPLICATION_ROOT_DIRECTORY', realpath(__DIR__.'/..'));
 require APPLICATION_ROOT_DIRECTORY . '/vendor/autoload.php';

@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace SlimPostgres\Security\Authentication;
 
 use It_All\FormFormer\Form;
-use SlimPostgres\Administrators\Administrator;
-use SlimPostgres\Administrators\AdministratorsMapper;
-use SlimPostgres\Administrators\LoginAttempts\LoginAttemptsMapper;
+use SlimPostgres\Entities\Administrators\Model\Administrator;
+use SlimPostgres\Entities\Administrators\Model\AdministratorsMapper;
+use SlimPostgres\Entities\LoginAttempts\LoginAttemptsMapper;
 use SlimPostgres\App;
-use SlimPostgres\Forms\DatabaseTableForm;
-use SlimPostgres\Forms\FormHelper;
+use SlimPostgres\BaseMVC\View\Forms\DatabaseTableForm;
+use SlimPostgres\BaseMVC\View\Forms\FormHelper;
 
 class AuthenticationService
 {

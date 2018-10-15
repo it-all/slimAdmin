@@ -4,11 +4,11 @@ declare(strict_types=1);
 namespace SlimPostgres\Security\Authentication;
 
 use SlimPostgres\App;
-use SlimPostgres\BaseMiddleware;
+use SlimPostgres\Middleware;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class AuthenticationMiddleware extends BaseMiddleware
+class AuthenticationMiddleware extends Middleware
 {
 	public function __invoke(Request $request, Response $response, $next)
 	{

@@ -5,13 +5,13 @@ namespace SlimPostgres\Security\Authorization;
 
 use Domain\AdminHomeView;
 use SlimPostgres\App;
-use SlimPostgres\BaseMiddleware;
+use SlimPostgres\Middleware;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 /* The permissions to check is either the minimum allowable role for the resource or an array of allowable roles */
-class AuthorizationMiddleware extends BaseMiddleware
+class AuthorizationMiddleware extends Middleware
 {
     private $resource;
 

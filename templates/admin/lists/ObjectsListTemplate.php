@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Templates\Admin\Lists;
 
-use SlimPostgres\ListViewModels;
+use SlimPostgres\BaseMVC\Model\ListViewModels;
 use Slim\Router;
 
 class ObjectsListTemplate extends ListTemplate

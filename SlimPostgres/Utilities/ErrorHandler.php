@@ -5,7 +5,7 @@ namespace SlimPostgres\Utilities;
 
 use SlimPostgres\App;
 use SlimPostgres\Utilities;
-use SlimPostgres\SystemEvents\SystemEventsMapper;
+use SlimPostgres\Entities\SystemEvents\SystemEventsMapper;
 
 class ErrorHandler
 {

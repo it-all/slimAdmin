@@ -8,16 +8,16 @@ use SlimPostgres\Security\Authentication\GuestMiddleware;
 use SlimPostgres\Security\Authorization\AuthorizationMiddleware;
 use SlimPostgres\Security\Authentication\AuthenticationMiddleware;
 use Domain\AdminHomeView;
-use SlimPostgres\SystemEvents\SystemEventsView;
-use SlimPostgres\SystemEvents\SystemEventsController;
-use SlimPostgres\Administrators\LoginAttempts\LoginAttemptsView;
-use SlimPostgres\Administrators\LoginAttempts\LoginAttemptsController;
-use SlimPostgres\Administrators\AdministratorsView;
-use SlimPostgres\Administrators\AdministratorsController;
-use SlimPostgres\Administrators\Roles\RolesView;
-use SlimPostgres\Administrators\Roles\RolesController;
-use SlimPostgres\Administrators\Roles\Permissions\View\PermissionsViews;
-use SlimPostgres\Administrators\Roles\Permissions\PermissionsControllers;
+use SlimPostgres\Entities\SystemEvents\SystemEventsView;
+use SlimPostgres\Entities\SystemEvents\SystemEventsController;
+use SlimPostgres\Entities\LoginAttempts\LoginAttemptsView;
+use SlimPostgres\Entities\LoginAttempts\LoginAttemptsController;
+use SlimPostgres\Entities\Administrators\View\AdministratorsView;
+use SlimPostgres\Entities\Administrators\AdministratorsController;
+use SlimPostgres\Entities\Roles\RolesView;
+use SlimPostgres\Entities\Roles\RolesController;
+use SlimPostgres\Entities\Permissions\View\PermissionsViews;
+use SlimPostgres\Entities\Permissions\PermissionsControllers;
 
 /////////////////////////////////////////
 // Routes that anyone can access

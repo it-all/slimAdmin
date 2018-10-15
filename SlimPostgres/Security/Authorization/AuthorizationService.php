@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace SlimPostgres\Security\Authorization;
 
-use SlimPostgres\Administrators\Administrator;
-use SlimPostgres\Administrators\AdministratorsMapper;
-use SlimPostgres\Administrators\Roles\Permissions\Model\PermissionsMapper;
+use SlimPostgres\Entities\Administrators\Model\Administrator;
+use SlimPostgres\Entities\Administrators\Model\AdministratorsMapper;
+use SlimPostgres\Entities\Permissions\Model\PermissionsMapper;
 use SlimPostgres\Exceptions;
 
 use SlimPostgres\App;

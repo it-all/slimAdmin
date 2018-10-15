@@ -10,7 +10,7 @@ use SlimPostgres\Database\Postgres;
 use SlimPostgres\Security\Authentication\AuthenticationService;
 use SlimPostgres\Security\Authorization\AuthorizationService;
 use SlimPostgres\Security\CsrfMiddleware;
-use SlimPostgres\SystemEvents\SystemEventsMapper;
+use SlimPostgres\Entities\SystemEvents\SystemEventsMapper;
 use SlimPostgres\Utilities;
 
 class App

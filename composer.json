@@ -1,12 +1,12 @@
 {
     "name": "it-all/slim-postgres",
-    "description": "PHP web application platform with administrative interface built with Slim framework and PostgreSQL",
+    "description": "PHP Framework Based on Slim Micro-Framework and PostgreSQL",
     "type": "project",
     "license": "MIT",
     "authors": [
         {
-            "name": "DBCL",
-            "email": "software@it-all.com"
+            "name": "Greg Catalano",
+            "email": "greg@it-all.com"
         }
     ],
     "minimum-stability": "stable",

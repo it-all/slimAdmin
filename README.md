@@ -1,10 +1,10 @@
 # slim-postgres  
 slim-postgres is a <a target="_blank" href="https://www.php.net">PHP</a> Framework Based on <a target="_blank" href="https://www.slimframework.com/">Slim Micro-Framework</a> and <a target="_blank" href="https://www.postgresql.org/">PostgreSQL</a>.  
   
-slim-postgres has a built-in administrative interface and other tools to allow rapid web app development.  
-
-V1.0 is on the horizon. Next step is <a href="https://github.com/it-all/slim-postgres/issues/38">Issue 38</a>.  
+slim-postgres has a built-in administrative interface and other tools to allow rapid web app development.    
   
+INSTALLATION  
+See <a href="https://github.com/it-all/slim-postgres-skeleton">slim-postgres-skeleton</a>  
   
 FEATURES  
 <a target="_blank" href="https://www.php.net">PHP</a> 7.1+  
@@ -24,14 +24,6 @@ Data Validation with <a target="_blank" href="https://github.com/vlucas/valitron
 <a href="https://github.com/vlucas/phpdotenv">PHP dotenv</a> for configuring server environments  
 <a href="#errLog">PHP Error Logging with Stack Trace</a> for debugging  
   
-INSTALLATION  
-*work in progress*  
-Clone project  
-Create PostgreSQL database and restore pg_schema.sql and pg_data.sql  
-Copy .env.example to .env then edit .env  
-Edit then run cliScripts/insertAdministrator.php  
-Navigate to site-name/private (settings['adminPath']) and login!  
-
 CODING NEW FUNCTIONALITY  
 *work in progress*  
 Create a new directory under domain and create a Model/View/Controller (or whatever code structure you desire) as necessary. You can model these files after existing functionality such as SlimPostgres/Administrators/Roles (single database table model) or SlimPostgres/Administrators (joined database tables).  

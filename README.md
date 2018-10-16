@@ -1,10 +1,17 @@
 # slim-postgres  
-slim-postgres is a <a target="_blank" href="https://www.php.net">PHP</a> Framework Based on <a target="_blank" href="https://www.slimframework.com/">Slim Micro-Framework</a> and <a target="_blank" href="https://www.postgresql.org/">PostgreSQL</a>.  
+slim-postgres is a <a target="_blank" href="https://www.php.net">PHP</a> skeleton framework based on <a target="_blank" href="https://www.slimframework.com/">Slim Micro-Framework</a> and <a target="_blank" href="https://www.postgresql.org/">PostgreSQL</a>.  
   
-slim-postgres has a built-in administrative interface and other tools to allow rapid web app development.    
+slim-postgres has a built-in administrative interface and other tools to allow rapid web app development.  
   
 INSTALLATION  
-See <a href="https://github.com/it-all/slim-postgres-skeleton">slim-postgres-skeleton</a>  
+composer create-project it-all/slim-postgres  
+Create your PostgreSQL database and restore pg_schema.sql and pg_data.sql to it  
+Copy/rename .env.example to .env then edit .env  
+Edit then run cliScripts/insertAdministrator.php  
+Create a website with /public as the home directory  
+Navigate to your site to see the default homepage  
+Navigate to your site /private (the admin directory defined in settings['adminPath']) and login!  
+You may need to set write permissions on /storage  
   
 FEATURES  
 <a target="_blank" href="https://www.php.net">PHP</a> 7.1+  

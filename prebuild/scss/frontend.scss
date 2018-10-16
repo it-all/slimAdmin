@@ -1,0 +1,27 @@
+$main-padding: 1em;
+
+@import 'foundation';
+
+h1, h2 {
+  margin: .5em;
+}
+
+.noticeSuccess {
+  color: green;
+  font-weight: bold;
+}
+
+.noticeFailure {
+  color: red;
+  font-weight: bold;
+}
+
+.noticeCaution {
+  color: yellow;
+  font-weight: bold;
+}
+
+.noticeMuted {
+  color: gray;
+  font-weight: bold;
+}

@@ -1,0 +1,86 @@
+$formLabelColor: #A7D45B;
+
+form {
+  margin: 1em;
+}
+
+fieldset {
+  padding-top: 1em;
+  margin-bottom: 1em;
+}
+
+legend {
+  //font-weight: bold;
+  color: $formLabelColor;
+}
+
+input, select, textarea, button, meter, progress, output {
+  display: block;
+  background-color: #dcd4c2;
+  border: .1em solid #000000;
+  color: black;
+  font-size: 1em;
+  padding: .2em;
+  margin-bottom: 1em;
+  // margin: .1em .5em 1em .1em;
+}
+
+.inlineFormField {
+  display: inline-block;
+  //vertical-align: top;
+  //float: left;
+  //clear: none;
+}
+
+.afterLabel {
+  display: inline-block;
+  //margin: 0 0 1em 1.5em;
+  margin-left: .2em;
+  margin-right: 2em;
+  //vertical-align: middle;
+}
+
+input[type="checkbox"] {
+  /* Larger Checkboxes */
+  -ms-transform: scale(1.6); /* IE */
+  -moz-transform: scale(1.6); /* FF */
+  -webkit-transform: scale(1.6); /* Safari and Chrome */
+  -o-transform: scale(1.6); /* Opera */
+  //vertical-align: top;
+  // margin: .4em 1em 1.1em .6em;
+  // padding: 10px;
+  margin-left: .3em;
+}
+
+input[type="submit"] {
+  font-size: 1.2em;
+  padding: .3em;
+  border: .2em solid #11213a;
+  border-radius: .4em;
+}
+
+label {
+  color: $formLabelColor;
+  font-size: 1em;
+  margin: 0 .3em 0 0;
+}
+
+.fieldRequired {
+  display: inline;
+  font-size: .8em;
+  color: #cccccc;
+}
+
+.generalFormError {
+  color: red;
+  font-size: 1.2em;
+  margin-bottom: 1em;
+}
+
+.ffErrorMsg {
+  color: red;
+}
+
+.formFieldError {
+  border: .1em solid red;
+}

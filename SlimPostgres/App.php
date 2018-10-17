@@ -15,7 +15,7 @@ use SlimPostgres\Utilities;
 
 class App
 {
-    private static $config;
+    private $config;
 
     /** @var array config settings that get added to slim so framework can access through container */
     private $commonConfigSettingsKeys;
@@ -80,36 +80,36 @@ class App
             $dotenv->required('PHPMAILER_SMTP_PORT')->isInteger();
         }
 
-        self::$config = require APPLICATION_ROOT_DIRECTORY . '/config/settings.php';
+        $this->config = require APPLICATION_ROOT_DIRECTORY . '/config/settings.php';
 
-        if (isset(self::$config['emails'])) {
-            foreach (self::$config['emails'] as $emailRole => $email) {
+        if (isset($this->config['emails'])) {
+            foreach ($this->config['emails'] as $emailRole => $email) {
                 if (isset($this->environmentalVariables['EMAILS_'.strtoupper($emailRole)])) {
-                    self::$config['emails'][$emailRole] = $this->environmentalVariables['EMAILS_'.strtoupper($emailRole)];
+                    $this->config['emails'][$emailRole] = $this->environmentalVariables['EMAILS_'.strtoupper($emailRole)];
                 }
             }
         }
 
-        mb_internal_encoding(self::$config['mbInternalEncoding']); // so no need to set encoding for mb_strlen()
+        mb_internal_encoding($this->config['mbInternalEncoding']); // so no need to set encoding for mb_strlen()
 
         /** add some .env to config */
         // assume this is a live server unless IS_LIVE env var set false
-        self::$config['isLive'] = !(array_key_exists('IS_LIVE', $this->environmentalVariables) && $this->environmentalVariables['IS_LIVE'] === "0");
+        $this->config['isLive'] = !(array_key_exists('IS_LIVE', $this->environmentalVariables) && $this->environmentalVariables['IS_LIVE'] === "0");
 
         // echo errors on dev sites unless env var ERRORS_ECHO_DEV set false
-        self::$config['errors']['echoDev'] = !(array_key_exists('ERRORS_ECHO_DEV', $this->environmentalVariables) && $this->environmentalVariables['ERRORS_ECHO_DEV'] === "0");
+        $this->config['errors']['echoDev'] = !(array_key_exists('ERRORS_ECHO_DEV', $this->environmentalVariables) && $this->environmentalVariables['ERRORS_ECHO_DEV'] === "0");
 
         // do not email error notifications on dev sites unless env var ERRORS_EMAIL_DEV set true
-        self::$config['errors']['emailDev'] = array_key_exists('ERRORS_EMAIL_DEV', $this->environmentalVariables) && $this->environmentalVariables['ERRORS_EMAIL_DEV'] === "1";
+        $this->config['errors']['emailDev'] = array_key_exists('ERRORS_EMAIL_DEV', $this->environmentalVariables) && $this->environmentalVariables['ERRORS_EMAIL_DEV'] === "1";
 
         /** set up emailer, which is used in error handler and container */
         $phpMailerSmtpHost = (array_key_exists('PHPMAILER_SMTP_HOST', $this->environmentalVariables)) ? $this->environmentalVariables['PHPMAILER_SMTP_HOST'] : null;
         $phpMailerSmtpPort = (array_key_exists('PHPMAILER_SMTP_PORT', $this->environmentalVariables)) ? (int) $this->environmentalVariables['PHPMAILER_SMTP_PORT'] : null;
-        $disableMailerSend = !self::$config['isLive'] && !self::$config['errors']['emailDev'];
+        $disableMailerSend = !$this->config['isLive'] && !$this->config['errors']['emailDev'];
         $this->mailer = new Utilities\PhpMailerService(
-            self::$config['errors']['phpErrorLogPath'],
-            self::$config['emails']['service'],
-            self::$config['businessName'],
+            $this->config['errors']['phpErrorLogPath'],
+            $this->config['emails']['service'],
+            $this->config['businessName'],
             $phpMailerProtocol,
             $phpMailerSmtpHost,
             $phpMailerSmtpPort,
@@ -119,18 +119,18 @@ class App
         /** error handling */
 
         /** only echo on dev sites */
-        $echoErrors = !self::$config['isLive'] && self::$config['errors']['echoDev'];
+        $echoErrors = !$this->config['isLive'] && $this->config['errors']['echoDev'];
 
-        $emailErrors = self::$config['isLive'] || self::$config['errors']['emailDev'];
+        $emailErrors = $this->config['isLive'] || $this->config['errors']['emailDev'];
         $emailErrorsTo = [];
-        if (array_key_exists('emailTo', self::$config['errors'])) {
-            foreach (self::$config['errors']['emailTo'] as $roleEmail) {
-                $emailErrorsTo[] = self::$config['emails'][$roleEmail];
+        if (array_key_exists('emailTo', $this->config['errors'])) {
+            foreach ($this->config['errors']['emailTo'] as $roleEmail) {
+                $emailErrorsTo[] = $this->config['emails'][$roleEmail];
             }
         }
 
         $errorHandler = new Utilities\ErrorHandler(
-            self::$config['errors']['phpErrorLogPath'],
+            $this->config['errors']['phpErrorLogPath'],
             $this->getRedirect(),
             $echoErrors,
             $emailErrors,
@@ -154,7 +154,7 @@ class App
          * any errors prior to this point will not be logged
          * even though the error handler logs errors, this ensures errors in the error handler itself or in this file after this point will be logged. note, if using slim error handling, this will log all php errors
          */
-        ini_set('error_log', self::$config['errors']['phpErrorLogPath']);
+        ini_set('error_log', $this->config['errors']['phpErrorLogPath']);
 
         /** 
          * set up and connect to postgres, which is used in error handler and container
@@ -167,7 +167,7 @@ class App
         /** used in error handler and container */
         $this->systemEventsMapper = SystemEventsMapper::getInstance();
 
-        if (self::$config['errors']['logToDatabase']) {
+        if ($this->config['errors']['logToDatabase']) {
             $errorHandler->setSystemEventsMapper($this->systemEventsMapper);
         }
 
@@ -178,19 +178,19 @@ class App
              * note this practice is ok:
              * http://security.stackexchange.com/questions/49645/actually-isnt-it-bad-to-redirect-http-to-https
              */
-            if (!$this->isHttps() || (self::$config['domainUseWww'] && !$this->isWww()) || (!self::$config['domainUseWww'] && $this->isWww())) {
+            if (!$this->isHttps() || ($this->config['domainUseWww'] && !$this->isWww()) || (!$this->config['domainUseWww'] && $this->isWww())) {
                 $this->redirect();
             }
 
             /** SESSION */
-            $sessionTTLseconds = self::$config['session']['ttlHours'] * 60 * 60;
+            $sessionTTLseconds = $this->config['session']['ttlHours'] * 60 * 60;
             ini_set('session.gc_maxlifetime', (string) $sessionTTLseconds);
             ini_set('session.cookie_lifetime', (string) $sessionTTLseconds);
             if (!$this->isSessionIdValid(session_id())) {
                 session_regenerate_id(true);
             }
-            if (isset(self::$config['session']['savePath']) && mb_strlen(self::$config['session']['savePath']) > 0) {
-                session_save_path(self::$config['session']['savePath']);
+            if (isset($this->config['session']['savePath']) && mb_strlen($this->config['session']['savePath']) > 0) {
+                session_save_path($this->config['session']['savePath']);
             }
             session_start();
 
@@ -218,12 +218,12 @@ class App
 
     private function getSlimSettings(): array
     {
-        $slimSettings['settings'] = self::$config['slim'];
+        $slimSettings['settings'] = $this->config['slim'];
 
         /** add common config settings */
         foreach ($this->commonConfigSettingsKeys as $key) {
-            if (isset(self::$config[$key])) {
-                $slimSettings['settings'][$key] = self::$config[$key];
+            if (isset($this->config[$key])) {
+                $slimSettings['settings'][$key] = $this->config[$key];
             }
         }
 
@@ -234,7 +234,7 @@ class App
                 /** log error */
                 $this->systemEventsMapper->insertEvent('404 Page Not Found', 'notice', $container->authentication->getAdministratorId());
 
-                $_SESSION[App::SESSION_KEY_NOTICE] = [self::$config['pageNotFoundText'], App::STATUS_NOTICE_FAILURE];
+                $_SESSION[App::SESSION_KEY_NOTICE] = [$this->config['pageNotFoundText'], App::STATUS_NOTICE_FAILURE];
                 return $container->view->render(
                     $response,
                     'frontend/home.php',
@@ -326,7 +326,7 @@ class App
     private function registerSlimRoutes(\Slim\App $slim, $slimContainer)
     {
         /** make available to routes file */
-        $config = self::$config; 
+        $config = $this->config; 
         require APPLICATION_ROOT_DIRECTORY . '/config/routes.php';
     }
 
@@ -456,10 +456,5 @@ class App
         }
 
         $_SESSION[self::SESSION_KEY_ADMIN_NOTICE] = ["$text", 'adminNotice'.ucfirst($status)];
-    }
-
-    public static function getConfig()
-    {
-        return self::$config;
     }
 }

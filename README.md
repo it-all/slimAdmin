@@ -4,13 +4,14 @@ slim-postgres is a <a target="_blank" href="https://www.php.net">PHP</a> skeleto
 slim-postgres has a built-in administrative interface and other tools to allow rapid web app development.  
   
 INSTALLATION  
-composer create-project it-all/slim-postgres  
+composer create-project it-all/slim-postgres 1.0.*
 Create your PostgreSQL database and restore pg_schema.sql and pg_data.sql to it  
 Copy/rename .env.example to .env then edit .env  
 Edit then run cliScripts/insertAdministrator.php  
 Create a website with /public as the home directory  
 Navigate to your site to see the default homepage  
 Navigate to your site /private (the admin directory defined in settings['adminPath']) and login!  
+You may need to composer dump-autoload -o  
 You may need to set write permissions on /storage  
   
 FEATURES  

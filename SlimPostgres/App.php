@@ -178,7 +178,7 @@ class App
              * note this practice is ok:
              * http://security.stackexchange.com/questions/49645/actually-isnt-it-bad-to-redirect-http-to-https
              */
-            if (!$this->isHttps() || ($this->config['domainUseWww'] && !$this->isWww()) || (!$this->config['domainUseWww'] && $this->isWww())) {
+            if ( ($this->environmentalVariables['REDIRECT_TO_HTTPS'] !== "0" && !$this->isHttps()) || ($this->config['domainUseWww'] && !$this->isWww()) || (!$this->config['domainUseWww'] && $this->isWww())) {
                 $this->redirect();
             }
 
@@ -364,9 +364,15 @@ class App
         return $uri;
     }
 
+    /** if on http and env set to not redirect stay on http otherwise use https */
+    private function getProtocol() 
+    {
+        return (!$this->isHttps() && $this->environmentalVariables['REDIRECT_TO_HTTPS'] === "0") ? "http://" : "https://";
+    }
+
     private function getBaseUrl()
     {
-        $baseUrl = "https://";
+        $baseUrl = $this->getProtocol();
         if ($this->config['domainUseWww']) {
             $baseUrl .= "www.";
         }

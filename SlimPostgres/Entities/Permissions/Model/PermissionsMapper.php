@@ -85,7 +85,7 @@ final class PermissionsMapper extends MultiTableMapper
         return $permissionRoleIds;
     }
 
-    private function doInsertPermissionRole(int $permissionId, int $roleId)
+    public function doInsertPermissionRole(int $permissionId, int $roleId)
     {
         $q = new QueryBuilder("INSERT INTO ".self::ROLES_JOIN_TABLE_NAME." (permission_id, role_id) VALUES($1, $2)", $permissionId, $roleId);
         return $q->executeWithReturnField('id');

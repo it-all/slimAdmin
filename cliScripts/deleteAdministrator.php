@@ -1,7 +1,14 @@
 <?php
 declare(strict_types=1);
 
-/** CAUTION, this deletes the administrator, associated administrator_roles, login_attempts, and system events. Deleting login_attempts and system_events is like deleting log entries. It is not allowed from the AdministratorsMapper. This script should only be used for test administrators. */
+/** CAUTION, this deletes the administrator, associated administrator_roles, login_attempts, and system events. Deleting login_attempts and system_events is like deleting log entries. It is not allowed from the AdministratorsMapper. This script should only be used for test administrators or when all traces of an administrator's activity is to be removed. */
+
+/** begin config */
+$username = ''; // must exist or exception will occur
+/** end config */
+
+use SlimPostgres\Entities\Administrators\Model\AdministratorsMapper;
+use SlimPostgres\Database\Queries\QueryBuilder;
 
 define('APPLICATION_ROOT_DIRECTORY', realpath(__DIR__.'/..'));
 require APPLICATION_ROOT_DIRECTORY . '/vendor/autoload.php';
@@ -9,11 +16,7 @@ require APPLICATION_ROOT_DIRECTORY . '/config/constants.php';
 
 new \SlimPostgres\App();
 
-// config
-$username = ''; // must exist or exception will occur
-// end config
-
-$administratorsMapper =  \SlimPostgres\Administrators\AdministratorsMapper::getInstance();
+$administratorsMapper =  AdministratorsMapper::getInstance();
 if (null === $administratorId = $administratorsMapper->getAdministratorIdByUsername($username)) {
     throw new \Exception("Administrator not found for username $username");
 }
@@ -27,7 +30,7 @@ pg_query("COMMIT");
 
 function deleteAdministratorRoles(int $administratorId)
 {
-    $q = new \SlimPostgres\Database\Queries\QueryBuilder("DELETE FROM administrator_roles WHERE administrator_id = $administratorId");
+    $q = new QueryBuilder("DELETE FROM administrator_roles WHERE administrator_id = $administratorId");
 
     try {
         $q->execute();
@@ -39,7 +42,7 @@ function deleteAdministratorRoles(int $administratorId)
 
 function deleteLoginAttempts(int $administratorId)
 {
-    $q = new \SlimPostgres\Database\Queries\QueryBuilder("DELETE FROM login_attempts WHERE administrator_id = $administratorId");
+    $q = new QueryBuilder("DELETE FROM login_attempts WHERE administrator_id = $administratorId");
 
     try {
         $q->execute();
@@ -51,7 +54,7 @@ function deleteLoginAttempts(int $administratorId)
 
 function deleteSystemEvents(int $administratorId)
 {
-    $q = new \SlimPostgres\Database\Queries\QueryBuilder("DELETE FROM system_events WHERE administrator_id = $administratorId");
+    $q = new QueryBuilder("DELETE FROM system_events WHERE administrator_id = $administratorId");
 
     try {
         $q->execute();
@@ -63,7 +66,7 @@ function deleteSystemEvents(int $administratorId)
 
 function deleteAdministrator(int $administratorId)
 {
-    $q = new \SlimPostgres\Database\Queries\QueryBuilder("DELETE FROM administrators WHERE id = $administratorId");
+    $q = new QueryBuilder("DELETE FROM administrators WHERE id = $administratorId");
 
     try {
         $q->execute();
@@ -72,5 +75,3 @@ function deleteAdministrator(int $administratorId)
         echo $e->getMessage() . "\n\n";
     }
 }
-
-

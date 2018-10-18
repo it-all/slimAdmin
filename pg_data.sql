@@ -20,20 +20,20 @@ SET row_security = off;
 --
 
 COPY public.permissions (id, title, active, created, description) FROM stdin;
-35	Permissions Insert	t	2018-10-09 19:18:03.821344	\N
-36	Permissions Update	t	2018-10-09 19:18:11.99996	\N
-37	Permissions View	t	2018-10-09 19:18:31.570101	\N
-38	Permissions Delete	t	2018-10-09 19:18:38.332485	\N
-39	System Events View	t	2018-10-09 19:21:53.471802	\N
-40	Login Attempts View	t	2018-10-09 19:22:10.596893	\N
-41	Administrators View	t	2018-10-09 19:22:27.806212	\N
-42	Administrators Insert	t	2018-10-09 19:22:38.758744	\N
-43	Administrators Update	t	2018-10-09 19:22:52.92146	\N
-44	Administrators Delete	t	2018-10-09 19:23:10.012963	\N
-45	Roles View	t	2018-10-09 19:23:38.085565	\N
-46	Roles Insert	t	2018-10-09 19:23:47.34572	\N
-47	Roles Update	t	2018-10-09 19:23:57.519934	\N
-48	Roles Delete	t	2018-10-09 19:24:07.431625	\N
+1	Permissions Insert	t	2018-10-09 19:18:03.821344	\N
+2	Permissions Update	t	2018-10-09 19:18:11.99996	\N
+3	Permissions View	t	2018-10-09 19:18:31.570101	\N
+34	Permissions Delete	t	2018-10-09 19:18:38.332485	\N
+5	System Events View	t	2018-10-09 19:21:53.471802	\N
+6	Login Attempts View	t	2018-10-09 19:22:10.596893	\N
+7	Administrators View	t	2018-10-09 19:22:27.806212	\N
+8	Administrators Insert	t	2018-10-09 19:22:38.758744	\N
+9	Administrators Update	t	2018-10-09 19:22:52.92146	\N
+10	Administrators Delete	t	2018-10-09 19:23:10.012963	\N
+11	Roles View	t	2018-10-09 19:23:38.085565	\N
+12	Roles Insert	t	2018-10-09 19:23:47.34572	\N
+13	Roles Update	t	2018-10-09 19:23:57.519934	\N
+14	Roles Delete	t	2018-10-09 19:24:07.431625	\N
 \.
 
 
@@ -54,10 +54,10 @@ COPY public.system_event_types (id, event_type, created, description) FROM stdin
 
 
 --
--- Name: log_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: system_event_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.log_types_id_seq', 9, true);
+SELECT pg_catalog.setval('public.system_event_types_id_seq', 10, true);
 
 
 --

@@ -112,10 +112,10 @@ CREATE TABLE public.system_event_types (
 
 
 --
--- Name: log_types_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: system_event_types_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.log_types_id_seq
+CREATE SEQUENCE public.system_event_types_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -124,10 +124,10 @@ CREATE SEQUENCE public.log_types_id_seq
 
 
 --
--- Name: log_types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: system_event_types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.log_types_id_seq OWNED BY public.system_event_types.id;
+ALTER SEQUENCE public.system_event_types_id_seq OWNED BY public.system_event_types.id;
 
 
 --
@@ -340,7 +340,7 @@ ALTER TABLE ONLY public.roles_permissions ALTER COLUMN id SET DEFAULT nextval('p
 -- Name: system_event_types id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.system_event_types ALTER COLUMN id SET DEFAULT nextval('public.log_types_id_seq'::regclass);
+ALTER TABLE ONLY public.system_event_types ALTER COLUMN id SET DEFAULT nextval('public.system_event_types_id_seq'::regclass);
 
 
 --

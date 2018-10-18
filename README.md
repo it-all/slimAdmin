@@ -5,7 +5,7 @@ slim-postgres has a built-in administrative interface and other tools to allow r
   
 INSTALLATION  
 composer create-project it-all/slim-postgres 1.*
-Create your PostgreSQL database and restore pg_schema.sql and pg_data.sql to it  
+<a href="#createDb">Create your PostgreSQL database</a> and <a href="#restoreDb">restore pg_schema.sql and pg_data.sql to it</a>  
 Copy/rename .env.example to .env then edit .env  
 Edit then run cliScripts/insertAdministrator.php  
 Create a website with /public as the home directory  
@@ -111,5 +111,15 @@ The <a href="https://github.com/slimphp/Slim-Csrf" target="_blank">Slim Framewor
 <a name="errLog">PHP Error Log</a>  
 PHP Errors with stack trace are logged to the file set in config['storage']['errors']['phpErrorLogPath']  
    
-
+<a name="createDb">Create PostgreSQL Database (One Method)</a>  
+* $ psql -U postgres (note you may have to edit your pg_hba.conf file to allow local md5 or trust login https://stackoverflow.com/questions/45632463/peer-authentication-failed-for-user-in-postgresql)  
+* postgres=# create role mydbname with login; (creating the role with the same name as the database name allows easy psql access)  
+* postgres=# alter role mydbname with encrypted password 'mypassword';  
+* postgres=# alter role mydbname superuser; // probably not necessary but allows the "CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;" to complete without error  
+* postgres=# create database mydbname with owner mydbname;  
+  
+<a name="restoreDb">Import pg_schema.sql and pg_data.sql</a>
+* $ psql -U mydbname < /path/to/pg_schema.postgres.sql  
+* $ psql -U mydbname < /path/to/pg_data.postgres.sql  
+  
 ===========================================================>Thank you.

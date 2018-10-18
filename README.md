@@ -4,7 +4,7 @@ slim-postgres is a <a target="_blank" href="https://www.php.net">PHP</a> skeleto
 slim-postgres has a built-in administrative interface and other tools to allow rapid web app development.  
   
 INSTALLATION  
-composer create-project it-all/slim-postgres 1.*
+composer create-project it-all/slim-postgres 1.*  
 <a href="#createDb">Create your PostgreSQL database</a> and <a href="#restoreDb">restore pg_schema.sql and pg_data.sql to it</a>  
 Copy/rename .env.example to .env then edit .env  
 Edit then run cliScripts/insertAdministrator.php  
@@ -113,13 +113,12 @@ PHP Errors with stack trace are logged to the file set in config['storage']['err
    
 <a name="createDb">Create PostgreSQL Database (One Method)</a>  
 * $ psql -U postgres (note you may have to edit your pg_hba.conf file to allow local md5 or trust login https://stackoverflow.com/questions/45632463/peer-authentication-failed-for-user-in-postgresql)  
-* postgres=# create role mydbname with login; (creating the role with the same name as the database name allows easy psql access)  
-* postgres=# alter role mydbname with encrypted password 'mypassword';  
-* postgres=# alter role mydbname superuser; // probably not necessary but allows the "CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;" to complete without error  
-* postgres=# create database mydbname with owner mydbname;  
+* postgres=# create role myrolename with login; (creating the role with the same name as the database name allows easy psql access)  
+* postgres=# alter role myrolename with encrypted password 'mypassword';  
+* postgres=# create database mydbname with owner myrolename;  
   
 <a name="restoreDb">Import pg_schema.sql and pg_data.sql</a>
-* $ psql -U mydbname < /path/to/pg_schema.postgres.sql  
-* $ psql -U mydbname < /path/to/pg_data.postgres.sql  
+* pg_restore -U myrolename -O -c --if-exists -n public -d mydbname pg_schema.dump
+* pg_restore -U myrolename -O -n public -d mydbname pg_data.dump
   
 ===========================================================>Thank you.

@@ -48,7 +48,7 @@ final class AdministratorsMapper extends MultiTableMapper
         return $instance;
     }
 
-    private function __construct()
+    protected function __construct()
     {
         parent::__construct(new TableMapper(self::TABLE_NAME, '*', self::ORDER_BY_COLUMN_NAME), self::SELECT_COLUMNS, self::ORDER_BY_COLUMN_NAME);
     }

@@ -44,7 +44,7 @@ final class SystemEventsMapper extends MultiTableMapper
         return $instance;
     }
 
-    private function __construct()
+    protected function __construct()
     {
         $this->setEventTypes();
 

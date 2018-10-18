@@ -111,16 +111,6 @@ class AdministratorsController extends BaseController
         
         $this->administratorsMapper->doUpdate((int) $primaryKey, $changedFields);
 
-        // if the administrator changed her/his own info, refresh administrator then update the session
-        if ((int) $primaryKey === $this->authentication->getAdministratorId()) {
-            // refreshes $administrator to updated db values
-            if (null !== $administrator = $this->administratorsMapper->getObjectById((int) $primaryKey)) {
-                $this->authentication->updateAdministratorSession($administrator);
-            } else {
-                throw new \Exception("Get administrator object failed");
-            }
-        }
-
         $this->systemEvents->insertInfo("Updated Administrator", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$this->getChangedFieldsString($administrator, $changedFields));
         App::setAdminNotice("Updated administrator $primaryKey");
         

@@ -366,9 +366,8 @@ class App
 
     private function getBaseUrl()
     {
-        global $config;
         $baseUrl = "https://";
-        if ($config['domainUseWww']) {
+        if ($this->config['domainUseWww']) {
             $baseUrl .= "www.";
         }
         $baseUrl .= $this->getHostWithoutWww();

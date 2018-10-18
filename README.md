@@ -5,6 +5,7 @@ slim-postgres has a built-in administrative interface and other tools to allow r
   
 INSTALLATION  
 composer create-project it-all/slim-postgres 1.*  
+Set write permissions on /storage ie chmod -R 777 storage/  
 <a href="#createDb">Create your PostgreSQL database</a> and <a href="#restoreDb">restore pg_schema.sql and pg_data.sql to it</a>  
 Create a website with /public as the home directory  
 Copy/rename .env.example to .env then edit .env  
@@ -12,7 +13,6 @@ Navigate to your site to see the default homepage. If there are no errors then y
 Edit then run cliScripts/insertTopAdministrator.php  
 Navigate to your site /private (the admin directory defined in settings['adminPath']) and login!  
 You may need to composer dump-autoload -o  
-You may need to set write permissions on /storage  
   
 FEATURES  
 <a target="_blank" href="https://www.php.net">PHP</a> 7.1+  

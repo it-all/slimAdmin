@@ -1,14 +1,13 @@
 <?php
 declare(strict_types=1);
 
-/** This script will insert an administrator with the TOP_ROLE as defined in config/constants.php, with all permissions assigned to the role */
+/** This script will insert an administrator with TOP_ROLE permissions. Note that TOP role is defined in config/constants.php, and defaults to owner. */
 
 /** begin config */
 $name = '';
 $username = ''; // must be unique and at least 4 characters or query will fail
 $passwordClear = ''; // make it a good one https://www.schneier.com/blog/archives/2014/03/choosing_secure_1.html
 /** end config */
-
 
 use SlimPostgres\Entities\Administrators\Model\AdministratorsMapper;
 use SlimPostgres\Entities\Roles\Model\RolesMapper;
@@ -31,7 +30,7 @@ $administratorActive = true;
 
 $administratorId = (AdministratorsMapper::getInstance())->create($name, $username, $passwordClear, [$topRoleId], $administratorActive);
 
-/** assign all permissions to role */
+/** assign all permissions to role. note, by default these are already installed for owner, but if a new TOP_ROLE is being defined then they will be inserted */
 $permissionsMapper = PermissionsMapper::getInstance();
 
 foreach ($permissionsMapper->getObjects() as $permission) {

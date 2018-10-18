@@ -364,15 +364,15 @@ class App
         return $uri;
     }
 
-    /** if on http and env set to not redirect stay on http otherwise use https */
+    /** if on http and env var set to not redirect, stay on http, otherwise use https */
     private function getProtocol() 
     {
-        return (!$this->isHttps() && $this->environmentalVariables['REDIRECT_TO_HTTPS'] === "0") ? "http://" : "https://";
+        return (!$this->isHttps() && $this->environmentalVariables['REDIRECT_TO_HTTPS'] === "0") ? "http" : "https";
     }
 
     private function getBaseUrl()
     {
-        $baseUrl = $this->getProtocol();
+        $baseUrl = $this->getProtocol()."://";
         if ($this->config['domainUseWww']) {
             $baseUrl .= "www.";
         }

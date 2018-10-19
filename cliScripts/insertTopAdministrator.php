@@ -9,9 +9,9 @@ $username = ''; // must be unique and at least 4 characters or query will fail
 $passwordClear = ''; // make it a good one https://www.schneier.com/blog/archives/2014/03/choosing_secure_1.html
 /** end config */
 
-use SlimPostgres\Entities\Administrators\Model\AdministratorsMapper;
-use SlimPostgres\Entities\Roles\Model\RolesMapper;
-use SlimPostgres\Entities\Permissions\Model\PermissionsMapper;
+use Entities\Administrators\Model\AdministratorsMapper;
+use Entities\Roles\Model\RolesMapper;
+use Entities\Permissions\Model\PermissionsMapper;
 
 define('APPLICATION_ROOT_DIRECTORY', realpath(__DIR__.'/..'));
 require APPLICATION_ROOT_DIRECTORY . '/vendor/autoload.php';

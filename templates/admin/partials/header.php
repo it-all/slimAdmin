@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+use Infrastructure\SlimPostgres;
+
 $header = '<header id="adminPageHeader">'; 
 if ($authentication->isAuthenticated()) {
     require 'nav.php';
@@ -28,9 +30,9 @@ $header .= '</div>';
 
 if ($authentication->isAuthenticated()) {
     $header .= '<div id="adminPageHeaderNotice">';
-    if (isset($_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE])) {
-        $header .= '<span class="'.$_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE][1].'">&raquo; '.$_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE][0].' &laquo;</span>';
-        unset($_SESSION[\SlimPostgres\App::SESSION_KEY_ADMIN_NOTICE]);
+    if (isset($_SESSION[SlimPostgres::SESSION_KEY_ADMIN_NOTICE])) {
+        $header .= '<span class="'.$_SESSION[SlimPostgres::SESSION_KEY_ADMIN_NOTICE][1].'">&raquo; '.$_SESSION[SlimPostgres::SESSION_KEY_ADMIN_NOTICE][0].' &laquo;</span>';
+        unset($_SESSION[SlimPostgres::SESSION_KEY_ADMIN_NOTICE]);
     }
     $header .= '</div>';
     $header .= '<div id="adminPageHeaderGreeting">

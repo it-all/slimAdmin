@@ -2,22 +2,22 @@
 declare(strict_types=1);
 
 use Domain\HomeView;
-use SlimPostgres\Security\Authentication\AuthenticationView;
-use SlimPostgres\Security\Authentication\AuthenticationController;
-use SlimPostgres\Security\Authentication\GuestMiddleware;
-use SlimPostgres\Security\Authorization\AuthorizationMiddleware;
-use SlimPostgres\Security\Authentication\AuthenticationMiddleware;
+use Infrastructure\Security\Authentication\AuthenticationView;
+use Infrastructure\Security\Authentication\AuthenticationController;
+use Infrastructure\Security\Authentication\GuestMiddleware;
+use Infrastructure\Security\Authorization\AuthorizationMiddleware;
+use Infrastructure\Security\Authentication\AuthenticationMiddleware;
 use Domain\AdminHomeView;
-use SlimPostgres\Entities\SystemEvents\SystemEventsView;
-use SlimPostgres\Entities\SystemEvents\SystemEventsController;
-use SlimPostgres\Entities\LoginAttempts\LoginAttemptsView;
-use SlimPostgres\Entities\LoginAttempts\LoginAttemptsController;
-use SlimPostgres\Entities\Administrators\View\AdministratorsView;
-use SlimPostgres\Entities\Administrators\AdministratorsController;
-use SlimPostgres\Entities\Roles\RolesView;
-use SlimPostgres\Entities\Roles\RolesController;
-use SlimPostgres\Entities\Permissions\View\PermissionsViews;
-use SlimPostgres\Entities\Permissions\PermissionsControllers;
+use Entities\SystemEvents\SystemEventsView;
+use Entities\SystemEvents\SystemEventsController;
+use Entities\LoginAttempts\LoginAttemptsView;
+use Entities\LoginAttempts\LoginAttemptsController;
+use Entities\Administrators\View\AdministratorsView;
+use Entities\Administrators\AdministratorsController;
+use Entities\Roles\RolesView;
+use Entities\Roles\RolesController;
+use Entities\Permissions\View\PermissionsViews;
+use Entities\Permissions\PermissionsControllers;
 
 /////////////////////////////////////////
 // Routes that anyone can access

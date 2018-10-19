@@ -22,8 +22,10 @@
     },
     "autoload": {
         "psr-4": {
-            "SlimPostgres\\": "SlimPostgres",
             "Domain\\": "domain",
+            "Entities\\": "Entities",
+            "Exceptions\\": "Exceptions",
+            "Infrastructure\\": "Infrastructure",
             "Templates\\": "templates"
         }
     }

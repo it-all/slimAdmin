@@ -7,8 +7,8 @@ declare(strict_types=1);
 $username = ''; // must exist or exception will occur
 /** end config */
 
-use SlimPostgres\Entities\Administrators\Model\AdministratorsMapper;
-use SlimPostgres\Database\Queries\QueryBuilder;
+use Entities\Administrators\Model\AdministratorsMapper;
+use Infrastructure\Database\Queries\QueryBuilder;
 
 define('APPLICATION_ROOT_DIRECTORY', realpath(__DIR__.'/..'));
 require APPLICATION_ROOT_DIRECTORY . '/vendor/autoload.php';

@@ -22,11 +22,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Domain\\": "domain",
             "Entities\\": "Entities",
-            "Exceptions\\": "Exceptions",
-            "Infrastructure\\": "Infrastructure",
-            "Templates\\": "templates"
+            "Infrastructure\\": "Infrastructure"
         }
     }
 }

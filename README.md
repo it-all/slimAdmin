@@ -11,8 +11,8 @@ Create a website with /public as the home directory
 Copy/rename .env.example to .env then edit .env  
 Navigate to your site to see the default homepage. If there are no errors then you've succesfully connected to the database.  
 Edit then run cliScripts/insertTopAdministrator.php  
+Preempt object not found error: composer dump-autoload -o  
 Navigate to your site /private (the admin directory defined in settings['adminPath']) and login!  
-You may need to composer dump-autoload -o  
   
 FEATURES  
 <a target="_blank" href="https://www.php.net">PHP</a> 7.1+  

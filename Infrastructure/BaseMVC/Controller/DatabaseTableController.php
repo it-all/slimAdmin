@@ -71,7 +71,8 @@ class DatabaseTableController extends BaseController
         }
 
         try {
-            $insertResult = $this->mapper->insert($this->requestInput);
+            /** the last true bool means that boolean columns that don't exist in $changedColumnsValues get inserted as false */
+            $insertResult = $this->mapper->insert($this->requestInput, true);
         } catch (\Exception $e) {
             throw new \Exception("Insert failure. ".$e->getMessage());
         }
@@ -137,7 +138,8 @@ class DatabaseTableController extends BaseController
         }
 
         try {
-            $this->mapper->updateByPrimaryKey($changedColumnsValues, $primaryKeyValue);
+            /** the last true bool means that boolean columns that don't exist in $changedColumnsValues get inserted as false */
+            $this->mapper->updateByPrimaryKey($changedColumnsValues, $primaryKeyValue, true, [], true);
         } catch (\Exception $e) {
             throw new \Exception("Update failure. ".$e->getMessage());
         }

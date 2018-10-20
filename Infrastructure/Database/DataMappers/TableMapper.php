@@ -183,9 +183,11 @@ class TableMapper implements TableMappers
     }
 
     /** returns primary key if set, otherwise returns pg result */
-    public function insert(array $columnValues)
+    public function insert(array $columnValues, bool $addBooleanColumnValues = false)
     {
-        $columnValues = $this->addBooleanColumnValues($columnValues);
+        if ($addBooleanColumnValues) {
+            $columnValues = $this->addBooleanColumnValues($columnValues);
+        }
         $ib = new InsertBuilder($this->tableName);
         if ($this->getPrimaryKeyColumnName() !== null) {
             $ib->setPrimaryKeyName($this->getPrimaryKeyColumnName());
@@ -211,12 +213,14 @@ class TableMapper implements TableMappers
      * @param $primaryKeyValue
      * @param bool $getChangedValues :: default true. if true calls getChangedColumnsValues in order to send only changed to update builder, otherwise all $input is sent to update builder. set false if input only includes changed values in order to not duplicate checking for changes.
      * @param array $record :: best to include if $getChangedValues is true in order to not duplicate select query
+     * @param bool $addBooleanColumnValues if true calls method which adds in boolean columns that don't exist in the input
      * @return \SlimPostgres\Database\Queries\recordset
-     * @throws \Exception
      */
-    public function updateByPrimaryKey(array $input, $primaryKeyValue, bool $getChangedValues = true, array $record = [])
+    public function updateByPrimaryKey(array $input, $primaryKeyValue, bool $getChangedValues = true, array $record = [], bool $addBooleanColumnValues = false)
     {
-        $input = $this->addBooleanColumnValues($input);
+        if ($addBooleanColumnValues) {
+            $input = $this->addBooleanColumnValues($input);
+        }
 
         if ($getChangedValues) {
             if (count($record) == 0) {

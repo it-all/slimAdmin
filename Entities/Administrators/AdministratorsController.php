@@ -249,6 +249,4 @@ class AdministratorsController extends BaseController
 
         return Functions::removeLastCharsFromString($changedString, 2);
     }
-
-
 }

@@ -23,7 +23,7 @@ final class LoginAttemptsMapper extends TableMapper
         return $instance;
     }
 
-    private function __construct()
+    protected function __construct()
     {
         parent::__construct(self::TABLE_NAME, '*', 'created', false);
     }
@@ -46,8 +46,14 @@ final class LoginAttemptsMapper extends TableMapper
 
     private function insertLoginAttempt(bool $success, string $username, ?int $administratorId)
     {
-        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (administrator_id, username, ip, success, created) VALUES($1, $2, $3, $4, NOW())", $administratorId, $username, $_SERVER['REMOTE_ADDR'], Postgres::convertBoolToPostgresBool($success));
-        return $q->execute();
+        $columnValues = [
+            'administrator_id' => $administratorId,
+            'username' => $username,
+            'ip' => $_SERVER['REMOTE_ADDR'],
+            'success' => Postgres::convertBoolToPostgresBool($success),
+            'created' => 'NOW()',
+        ];
+        return parent::insert($columnValues);
     }
 
     public function getView()

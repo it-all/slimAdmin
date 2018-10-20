@@ -227,11 +227,6 @@ class TableMapper implements TableMappers
             $updateColumnValues = $input;
         }
 
-        return $this->doUpdate($updateColumnValues, $primaryKeyValue);
-    }
-
-    private function doUpdate(array $updateColumnValues, $primaryKeyValue) 
-    {
         $ub = new UpdateBuilder($this->tableName, $this->getPrimaryKeyColumnName(), $primaryKeyValue);
         $this->addColumnsToBuilder($ub, $updateColumnValues);
         return $ub->runExecute();

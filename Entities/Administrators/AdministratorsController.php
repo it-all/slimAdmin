@@ -212,7 +212,10 @@ class AdministratorsController extends BaseController
                 throw new \InvalidArgumentException("$fieldName not allowed in changedFields");
             }
 
-            $oldValue = $administrator->{"get".ucfirst($fieldName)}();
+            /** special case for password, do not show values */            
+            if ($fieldName != 'password') {
+                $oldValue =  $administrator->{"get".ucfirst($fieldName)}();
+            }
             
             if ($fieldName == AdministratorForm::ROLES_FIELDSET_NAME) {
 
@@ -238,10 +241,13 @@ class AdministratorsController extends BaseController
                 $oldValue = $updatedOldValue;
             }
 
-            $changedString .= " $fieldName: $oldValue => $newValue, ";
+            $changedString .= " $fieldName: ";
+            /** special case for password, do not show values */
+            $changedString .= ($fieldName == 'password') ? "updated" : "$oldValue => $newValue";
+            $changedString .= ", ";
         }
 
-        return substr($changedString, 0, strlen($changedString)-2);
+        return Functions::removeLastCharsFromString($changedString, 2);
     }
 
 

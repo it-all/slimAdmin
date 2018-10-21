@@ -117,7 +117,7 @@ class DatabaseTableController extends BaseController
         $redirectRoute = SlimPostgres::getRouteName(true, $this->routePrefix, 'index');
 
         // make sure there is a record for the primary key
-        if (!$record = $this->mapper->selectForPrimaryKey($primaryKeyValue)) {
+        if (null === $record = $this->mapper->selectForPrimaryKey($primaryKeyValue)) {
             return $this->databaseRecordNotFound($response, $primaryKeyValue, $this->mapper, 'update');
         }
 
@@ -137,12 +137,8 @@ class DatabaseTableController extends BaseController
             return $this->view->updateView($request, $response, $args);
         }
 
-        try {
-            /** the last true bool means that boolean columns that don't exist in $changedColumnsValues get inserted as false */
-            $this->mapper->updateByPrimaryKey($changedColumnsValues, $primaryKeyValue, true, [], true);
-        } catch (\Exception $e) {
-            throw new \Exception("Update failure. ".$e->getMessage());
-        }
+        /** the last true bool means that boolean columns that don't exist in $changedColumnsValues get inserted as false ('f') */
+        $this->mapper->updateByPrimaryKey($changedColumnsValues, $primaryKeyValue, true, [], true);
 
         $noteStart = "Updated " . $this->mapper->getFormalTableName(false);
         $adminNotification = "$noteStart $primaryKeyValue";
@@ -165,7 +161,7 @@ class DatabaseTableController extends BaseController
         $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
 
         try {
-            $dbResult = $this->mapper->deleteByPrimaryKey($primaryKey);
+            $this->mapper->deleteByPrimaryKey($primaryKey);
             $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName: $primaryKey");
             SlimPostgres::setAdminNotice("Deleted $tableName $primaryKey");
         } catch (Exceptions\QueryResultsNotFoundException $e) {

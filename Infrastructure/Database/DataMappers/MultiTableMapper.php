@@ -19,7 +19,8 @@ abstract class MultiTableMapper implements TableMappers
         $this->orderByColumnName = $orderByColumnName;
     }
 
-    public function select(?string $columns = null, ?array $whereColumnsInfo = null, ?string $orderBy = null)
+    /** returns array of records or null */
+    public function select(?string $columns = null, ?array $whereColumnsInfo = null, ?string $orderBy = null): ?array
     {
         if ($whereColumnsInfo != null) {
             $this->validateWhere($whereColumnsInfo);
@@ -30,7 +31,12 @@ abstract class MultiTableMapper implements TableMappers
         $orderBy = ($orderBy == null) ? $this->getOrderBy() : $orderBy;
         
         $q = new SelectBuilder($selectClause, $this->getFromClause(), $whereColumnsInfo, $orderBy);
-        return $q->execute();
+        $pgResult = $q->execute();
+        if (!$results = pg_fetch_all($pgResult)) {
+            $results = null;
+        }
+        pg_free_result($pgResult);
+        return $results;
     }
 
     abstract protected function getFromClause();

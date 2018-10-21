@@ -38,9 +38,9 @@ final class RolesMapper extends TableMapper
     public function setRoles()
     {
         $this->roles = [];
-        $rs = $this->select();
-        while ($row = pg_fetch_array($rs)) {
-            $this->roles[(int) $row['id']] = $row['role'];
+        $records = $this->select();
+        foreach ($records as $record) {
+            $this->roles[(int) $record['id']] = $record['role'];
         }
     }
 
@@ -67,7 +67,7 @@ final class RolesMapper extends TableMapper
 
     public function getObjectById(int $primaryKey): ?Role 
     {
-        if ($record = $this->selectForPrimaryKey($primaryKey)) {
+        if (null !== $record = $this->selectForPrimaryKey($primaryKey)) {
             return $this->buildRole((int) $record['id'], $record['role'], new \DateTimeImmutable($record['created']));
         }
 
@@ -134,16 +134,8 @@ final class RolesMapper extends TableMapper
     }
 
     // override for validation
-    // return query result
-    public function deleteByPrimaryKey($primaryKeyValue, string $returning = null) 
+    public function deleteByPrimaryKey($primaryKeyValue) 
     {
-        // make sure returning column exists
-        if ($returning !== null) {
-            if (null === $returnColumn = $this->getColumnByName($returning)) {
-                throw new \InvalidArgumentException("Invalid return column $returning");
-            }
-        }
-
         // make sure role exists and is deletable
         if (null === $role = $this->getObjectById((int) $primaryKeyValue)) {
             throw new Exceptions\QueryResultsNotFoundException("Role not found: id $primaryKeyValue");
@@ -153,7 +145,7 @@ final class RolesMapper extends TableMapper
             throw new Exceptions\UnallowedActionException("Role in use: id $primaryKeyValue");
         }
 
-        return parent::deleteByPrimaryKey($primaryKeyValue, $returning);
+        parent::deleteByPrimaryKey($primaryKeyValue);
     }
 
     /** selects roles and converts recordset to array of objects and return */
@@ -161,13 +153,12 @@ final class RolesMapper extends TableMapper
     {
         $roles = [];
 
-        if ($pgResults = $this->select("*", $whereColumnsInfo)) {
-            if (pg_num_rows($pgResults) > 0) {
-                while ($record = pg_fetch_assoc($pgResults)) {
-                    $roles[] = $this->buildRole((int) $record['id'], $record['role'], new \DateTimeImmutable($record['created']));
-                }
+        if(null !== $records = $this->select("*", $whereColumnsInfo)) {
+            foreach ($records as $record) {
+                $roles[] = $this->buildRole((int) $record['id'], $record['role'], new \DateTimeImmutable($record['created']));
             }
         }
+
         return $roles;
     }
 

@@ -60,11 +60,7 @@ class AdministratorsController extends BaseController
             return $this->view->insertView($request, $response, $args);
         }
 
-        try {
-            $administratorId = $this->administratorsMapper->create($input['name'], $input['username'], $input['password'], $input['roles'], FormHelper::getBoolForCheckboxField($input['active']));
-        } catch (\Exception $e) {
-            throw new \Exception("Administrator create failure. ".$e->getMessage());
-        }
+        $administratorId = $this->administratorsMapper->create($input['name'], $input['username'], $input['password'], $input['roles'], FormHelper::getBoolForCheckboxField($input['active']));
 
         $this->systemEvents->insertInfo("Inserted Administrator", (int) $this->authentication->getAdministratorId(), "id:$administratorId");
 

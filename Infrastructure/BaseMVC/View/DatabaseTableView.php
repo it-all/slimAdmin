@@ -66,14 +66,16 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
     /** this can be called for both the initial get and the posted form if errors exist (from controller) */
     public function updateView(Request $request, Response $response, $args)
     {
+        $primaryKeyValue = $args['primaryKey'];
+
         // make sure there is a record for the mapper
-        if (!$record = $this->mapper->selectForPrimaryKey($args['primaryKey'])) {
-            return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->mapper, 'update');
+        if (null === $record = $this->mapper->selectForPrimaryKey($primaryKeyValue)) {
+            return $this->databaseRecordNotFound($response, $primaryKeyValue, $this->mapper, 'update');
         }
 
         $formFieldData = ($request->isPut() && isset($args[SlimPostgres::USER_INPUT_KEY])) ? $args[SlimPostgres::USER_INPUT_KEY] : $record;
 
-        $form = new DatabaseTableForm($this->mapper, $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'update', $formFieldData);
+        $form = new DatabaseTableForm($this->mapper, $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $primaryKeyValue]), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'update', $formFieldData);
         
         FormHelper::unsetSessionFormErrors();
 
@@ -83,7 +85,7 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
             [
                 'title' => 'Update ' . $this->mapper->getFormalTableName(false),
                 'form' => $form,
-                'primaryKey' => $args['primaryKey'],
+                'primaryKey' => $primaryKeyValue,
                 'navigationItems' => $this->navigationItems,
                 'hideFocus' => true
             ]

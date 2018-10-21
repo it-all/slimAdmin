@@ -129,10 +129,17 @@ class TableMapper implements TableMappers
         return $this->defaultSelectColumnsString;
     }
 
-    public function select(string $columns = "*", array $where = null)
+    /** returns either array of rows or null */
+    public function select(string $columns = "*", ?array $where = null, ?string $orderBy = null): ?array
     {
-        $q = new SelectBuilder("SELECT $columns", "FROM $this->tableName", $where, $this->getOrderBy($this->orderByColumnName, $this->orderByAsc));
-        return $q->execute();
+        $orderBy = $orderBy ?? $this->getOrderBy($this->orderByColumnName, $this->orderByAsc);
+        $q = new SelectBuilder("SELECT $columns", "FROM $this->tableName", $where, $orderBy);
+        $pgResult = $q->execute();
+        if (!$results = pg_fetch_all($pgResult)) {
+            $results = null;
+        }
+        pg_free_result($pgResult);
+        return $results;
     }
 
     private function getOrderBy(string $orderByColumn = null, bool $orderByAsc = true): ?string
@@ -159,16 +166,19 @@ class TableMapper implements TableMappers
         return (bool) $q->getOne();
     }
 
-    public function selectForPrimaryKey($primaryKeyValue, string $columns = "*")
+    /** unlike select(), this returns only the array for a single record, or null */
+    public function selectForPrimaryKey($primaryKeyValue, string $columns = "*"): ?array
     {
-        $primaryKeyName = $this->getPrimaryKeyColumnName();
-
-        $q = new QueryBuilder("SELECT $columns FROM $this->tableName WHERE $primaryKeyName = $1", $primaryKeyValue);
-        if(!$res = $q->execute()) {
-            // this is for a query error not a not found condition
-            throw new \Exception("Invalid $primaryKeyName for $this->table: $primaryKeyValue");
+        $where = [
+            $this->getPrimaryKeyColumnName() => [
+                'operators' => ['='],
+                'values' => [$primaryKeyValue],
+            ],
+        ];
+        if (null !== $records = $this->select($columns, $where)) {
+            return $records[0];
         }
-        return pg_fetch_assoc($res); // returns false if no records are found
+        return null;
     }
 
     protected function addBooleanColumnValues(array $columnValues): array
@@ -209,49 +219,57 @@ class TableMapper implements TableMappers
     }
 
     /**
-     * @param array $input
+     * @param array $columnValues
      * @param $primaryKeyValue
-     * @param bool $getChangedValues :: default true. if true calls getChangedColumnsValues in order to send only changed to update builder, otherwise all $input is sent to update builder. set false if input only includes changed values in order to not duplicate checking for changes.
+     * @param bool $getChangedValues :: default true. if true calls getChangedColumnsValues in order to send only changed to update builder, otherwise all $columnValues is sent to update builder. set false if input only includes changed values in order to not duplicate checking for changes.
      * @param array $record :: best to include if $getChangedValues is true in order to not duplicate select query
-     * @param bool $addBooleanColumnValues if true calls method which adds in boolean columns that don't exist in the input
+     * @param bool $addBooleanColumnValues if true calls method which adds in boolean columns that don't exist in the input columnValues
      * @return \SlimPostgres\Database\Queries\recordset
      */
-    public function updateByPrimaryKey(array $input, $primaryKeyValue, bool $getChangedValues = true, array $record = [], bool $addBooleanColumnValues = false)
+    public function updateByPrimaryKey(array $columnValues, $primaryKeyValue, bool $getChangedValues = true, array $record = [], bool $addBooleanColumnValues = false)
     {
+        // what if columnValues is empty array, or updatecolumnValues is empty array
         if ($addBooleanColumnValues) {
-            $input = $this->addBooleanColumnValues($input);
+            $columnValues = $this->addBooleanColumnValues($columnValues);
         }
 
         if ($getChangedValues) {
             if (count($record) == 0) {
-                $record = $this->selectForPrimaryKey($primaryKeyValue);
+                if (null === $record = $this->selectForPrimaryKey($primaryKeyValue)) {
+                    throw new Exceptions\QueryResultsNotFoundException("No record for primary key $primaryKeyValue");
+                }
             }
-            $updateColumnValues = $this->getChangedColumnsValues($input, $record);
+            $updateColumnValues = $this->getChangedColumnsValues($columnValues, $record);
         } else {
-            $updateColumnValues = $input;
+            $updateColumnValues = $columnValues;
+        }
+
+        if (count($updateColumnValues) == 0) {
+            throw new \InvalidArgumentException("No changed columns");
         }
 
         $ub = new UpdateBuilder($this->tableName, $this->getPrimaryKeyColumnName(), $primaryKeyValue);
         $this->addColumnsToBuilder($ub, $updateColumnValues);
-        return $ub->runExecute();
+        $dbResult = $ub->runExecute();
+        
+        if (pg_affected_rows($dbResult) == 0) {
+            throw new Exceptions\QueryResultsNotFoundException();
+        }
     }
 
-    // returns query result
-    public function deleteByPrimaryKey($primaryKeyValue, string $returning = null)
+    /** 
+     * if row is not deleted (ie primary key value not found), an exception is thrown
+     * note that $primaryKeyValue argument is untyped as it can be string or int 
+    */
+    public function deleteByPrimaryKey($primaryKeyValue)
     {
         $query = "DELETE FROM $this->tableName WHERE ".$this->getPrimaryKeyColumnName()." = $1";
-        if ($returning !== null) {
-            $query .= " RETURNING $returning";
-        }
         $q = new QueryBuilder($query, $primaryKeyValue);
-
         $dbResult = $q->execute();
 
         if (pg_affected_rows($dbResult) == 0) {
             throw new Exceptions\QueryResultsNotFoundException();
         }
-
-        return $dbResult;
     }
 
     private function addColumnsToBuilder(InsertUpdateBuilder $builder, array $columnValues)

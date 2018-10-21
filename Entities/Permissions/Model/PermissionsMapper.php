@@ -113,7 +113,8 @@ final class PermissionsMapper extends MultiTableMapper
         return null;
     }
 
-    public function select(?string $columns = null, ?array $whereColumnsInfo = null, ?string $orderBy = null)
+    /** returns array of records or null */
+    public function select(?string $columns = null, ?array $whereColumnsInfo = null, ?string $orderBy = null): ?array
     {
         if ($whereColumnsInfo != null) {
             $this->validateWhere($whereColumnsInfo);
@@ -129,7 +130,12 @@ final class PermissionsMapper extends MultiTableMapper
         $orderBy = ($orderBy == null) ? $this->getOrderBy() : $orderBy;
         
         $q = new SelectBuilder($selectClause, $this->getFromClause(), $whereColumnsInfo, $orderBy);
-        return $q->execute();
+        $pgResult = $q->execute();
+        if (!$results = pg_fetch_all($pgResult)) {
+            $results = null;
+        }
+        pg_free_result($pgResult);
+        return $results;
     }
     
     /** to filter the permissions with certain roles and return all the roles the permissions have */
@@ -164,10 +170,9 @@ final class PermissionsMapper extends MultiTableMapper
 
         $permissionsArray = []; // populate with 1 entry per permission with an array of role objects
 
-        $pgResults = $this->select($selectColumns, $whereColumnsInfo, $orderBy);
-        if (pg_num_rows($pgResults) > 0) {
+        if(null !== $records = $this->select($selectColumns, $whereColumnsInfo, $orderBy)) {
             $rolesMapper = RolesMapper::getInstance();
-            while ($record = pg_fetch_assoc($pgResults)) {
+            foreach ($records as $record) {
                 // either add new permission or just new role based on whether permission already exists
                 if (null === $key = $this->getPermissionsArrayKeyForId($permissionsArray, (int) $record['id'])) {
                     $permissionsArray[] = [
@@ -305,7 +310,7 @@ final class PermissionsMapper extends MultiTableMapper
         if (count($changedPermissionFields) > 0) {
             try {
                 $this->getPrimaryTableMapper()->updateByPrimaryKey($changedPermissionFields, $permissionId, false);
-            } catch (Exceptions\QueryFailureException $e) {
+            } catch (\Exceptions $e) {
                 pg_query("ROLLBACK");
                 throw $e;
             }
@@ -314,7 +319,7 @@ final class PermissionsMapper extends MultiTableMapper
             foreach ($changedFields['roles']['add'] as $addRoleId) {
                 try {
                     $this->doInsertPermissionRole($permissionId, (int) $addRoleId);
-                } catch (Exceptions\QueryFailureException $e) {
+                } catch (\Exceptions $e) {
                     pg_query("ROLLBACK");
                     throw $e;
                 }
@@ -327,7 +332,7 @@ final class PermissionsMapper extends MultiTableMapper
                 if (!$deleteRole->isTop()) {
                     try {
                         $roleDeleteResult = $this->doDeletePermissionRole($permissionId, (int) $deleteRoleId);
-                    } catch (Exceptions\QueryFailureException $e) {
+                    } catch (\Exceptions $e) {
                         pg_query("ROLLBACK");
                         throw $e;
                     }

@@ -104,22 +104,13 @@ abstract class AdminListView extends AdminView
         /** squelch the sql warning in case of ill-formed filter field and catch the exception instead in order to alert the administrator of mistake. note, ideally any value that causes a query failure will be invalidated in the controller, but this is an extra measure of avoiding an unhandled exception while still logging/displaying the alert */
         if (null !== $filterColumnsInfo = $this->getFilterColumnsInfo()) {
             try {
-                $pgResults = @$this->mapper->select($this->mapper->getSelectColumnsString(), $filterColumnsInfo);
+                $displayItems = @$this->mapper->select($this->mapper->getSelectColumnsString(), $filterColumnsInfo);
             } catch (QueryFailureException $e) {
                 $this->systemEvents->insertAlert("List View Filter Query Failure", (int) $this->authentication->getAdministratorId(), $e->getMessage());
                 SlimPostgres::setAdminNotice('Query Failed', 'failure');
-                $displayItems = [];
             }
         } else {
-            $pgResults = $this->mapper->select($this->mapper->getSelectColumnsString());
-        }
-
-        if (isset($pgResults)) {
-            if (!$displayItems = pg_fetch_all($pgResults)) {
-                /** no results for query */
-                $displayItems = [];
-            }
-            pg_free_result($pgResults);
+            $displayItems = $this->mapper->select($this->mapper->getSelectColumnsString());
         }
 
         return $displayItems;

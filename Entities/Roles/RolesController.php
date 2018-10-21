@@ -38,7 +38,7 @@ class RolesController extends DatabaseTableController
         $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
 
         try {
-            $dbResult = $this->mapper->deleteByPrimaryKey($primaryKey);
+            $this->mapper->deleteByPrimaryKey($primaryKey);
             $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName: $primaryKey");
             SlimPostgres::setAdminNotice("Deleted $tableName $primaryKey");
         } catch (Exceptions\UnallowedActionException $e) {

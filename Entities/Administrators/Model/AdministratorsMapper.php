@@ -60,14 +60,14 @@ final class AdministratorsMapper extends MultiTableMapper
 
         try {
             $administratorId = $this->doInsert($name, $username, $passwordClear, $active);
-        } catch (Exceptions\QueryFailureException $e) {
+        } catch (\Exceptions $e) {
             pg_query("ROLLBACK");
             throw $e;
         }
 
         try {
             $this->insertAdministratorRoles((int) $administratorId, $roleIds);
-        } catch (Exceptions\QueryFailureException $e) {
+        } catch (\Exceptions $e) {
             pg_query("ROLLBACK");
             throw $e;
         }
@@ -174,7 +174,8 @@ final class AdministratorsMapper extends MultiTableMapper
         return null;
     }
 
-    public function select(?string $columns = null, ?array $whereColumnsInfo = null, ?string $orderBy = null)
+    /** return array of records or null */
+    public function select(?string $columns = null, ?array $whereColumnsInfo = null, ?string $orderBy = null): ?array
     {
         if ($whereColumnsInfo != null) {
             $this->validateWhere($whereColumnsInfo);
@@ -190,7 +191,12 @@ final class AdministratorsMapper extends MultiTableMapper
         $orderBy = ($orderBy == null) ? $this->getOrderBy() : $orderBy;
         
         $q = new SelectBuilder($selectClause, $this->getFromClause(), $whereColumnsInfo, $orderBy);
-        return $q->execute();
+        $pgResult = $q->execute();
+        if (!$results = pg_fetch_all($pgResult)) {
+            $results = null;
+        }
+        pg_free_result($pgResult);
+        return $results;
     }
 
     /** to filter the administrators with certain roles and return all the roles the administrators have */
@@ -239,10 +245,9 @@ final class AdministratorsMapper extends MultiTableMapper
 
         $administratorsArray = []; // populate with 1 entry per administrator with an array of roles
         
-        $pgResults = $this->select($selectColumns, $whereColumnsInfo, $orderBy);
-        if (pg_num_rows($pgResults) > 0) {
+        if(null !== $records = $this->select($selectColumns, $whereColumnsInfo, $orderBy)) {
             $rolesMapper = RolesMapper::getInstance();
-            while ($record = pg_fetch_assoc($pgResults)) {
+            foreach ($records as $record) {
                 // either add new administrator or just new role based on whether administrator already exists
                 if (null === $key = $this->getAdministratorsArrayKeyForId($administratorsArray, (int) $record['id'])) {
                     $administratorsArray[] = [
@@ -322,8 +327,9 @@ final class AdministratorsMapper extends MultiTableMapper
 
         $administrator->setAuth($authentication, $authorization);
 
-        /** will throw exception if not valid */
-        $this->validateDelete($administrator);
+        if (!$administrator->isDeletable()) {
+            throw new Exceptions\UnallowedActionException($administrator->getNotDeletableReason());
+        }
 
         $this->doDeleteTransaction($id);
 
@@ -339,13 +345,13 @@ final class AdministratorsMapper extends MultiTableMapper
         pg_query("BEGIN");
         try {
             $this->doDeleteAdministratorRoles($administratorId);
-        } catch (Exceptions\QueryFailureException $e) {
+        } catch (\Exceptions $e) {
             pg_query("ROLLBACK");
             throw $e;
         } 
         try {
             $this->doDeleteAdministrator($administratorId);
-        } catch (Exceptions\QueryFailureException $e) {
+        } catch (\Exceptions $e) {
             pg_query("ROLLBACK");
             throw $e;
         } 
@@ -410,7 +416,7 @@ final class AdministratorsMapper extends MultiTableMapper
         if (count($changedAdministratorFields) > 0) {
             try {
                 $this->getPrimaryTableMapper()->updateByPrimaryKey($changedAdministratorFields, $administratorId, false);
-            } catch (Exceptions\QueryFailureException $e) {
+            } catch (\Exceptions $e) {
                 pg_query("ROLLBACK");
                 throw $e;
             }
@@ -419,7 +425,7 @@ final class AdministratorsMapper extends MultiTableMapper
             foreach ($changedFields['roles']['add'] as $addRoleId) {
                 try {
                     $this->doInsertAdministratorRole($administratorId, (int) $addRoleId);
-                } catch (Exceptions\QueryFailureException $e) {
+                } catch (\Exceptions $e) {
                     pg_query("ROLLBACK");
                     throw $e;
                 }
@@ -429,7 +435,7 @@ final class AdministratorsMapper extends MultiTableMapper
             foreach ($changedFields['roles']['remove'] as $deleteRoleId) {
                 try {
                     $roleDeleteResult = $this->doDeleteAdministratorRole($administratorId, (int) $deleteRoleId);
-                } catch (Exceptions\QueryFailureException $e) {
+                } catch (\Exceptions $e) {
                     pg_query("ROLLBACK");
                     throw $e;
                 }

@@ -50,6 +50,8 @@ class Administrator implements ListViewModels
     private $authentication;
     private $authorization;
 
+    private $notDeletableReason;
+
     public function __construct(int $id, string $name, string $username, string $passwordHash, array $roles, bool $active, \DateTimeImmutable $created, ?AuthenticationService $authentication = null, ?AuthorizationService $authorization = null)
     {
         // validate roles array is array of role objects
@@ -246,9 +248,30 @@ class Administrator implements ListViewModels
             throw new \Exception("Authorization must be set");
         }
         
-        try {
-            (AdministratorsMapper::getInstance())->validateDelete($this);
-        } catch (UnallowedActionException $e) {
+        $id = $this->getId();
+
+        // make sure the current administrator is not deleting her/himself
+        if ($this->isLoggedIn()) {
+            $this->notDeletableReason = "Administrator cannot delete own account: id $id";
+            return false;
+        }
+
+        // non-top dogs cannot delete top dogs
+        if (!$this->getAuthorization()->hasTopRole() && $this->hasTopRole()) {
+            $this->notDeletableReason = "Not authorized to delete administrator: id $id";
+            return false;
+        }
+
+        // make sure there are no system events for administrator being deleted
+        if ((SystemEventsMapper::getInstance())->existForAdministrator($id)) {
+            $this->notDeletableReason = "System events exist for administrator: id $id";
+            return false;
+        }
+
+        // make sure there are no login attempts for administrator being deleted
+        $loginsMapper = LoginAttemptsMapper::getInstance();
+        if ($loginsMapper->hasAdministrator($id)) {
+            $this->notDeletableReason = "Login attempts exist for administrator: id $id";
             return false;
         }
 
@@ -277,5 +300,10 @@ class Administrator implements ListViewModels
     public function isActive(): bool 
     {
         return $this->getActive();
+    }
+
+    public function getNotDeletableReason(): ?string 
+    {
+        return $this->notDeletableReason;
     }
 }

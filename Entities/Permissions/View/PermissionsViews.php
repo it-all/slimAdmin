@@ -8,7 +8,7 @@ use Infrastructure\BaseMVC\View\ObjectsListViews;
 use Infrastructure\BaseMVC\View\AdminListView;
 use Infrastructure\BaseMVC\View\InsertUpdateViews;
 use Infrastructure\BaseMVC\View\ResponseUtilities;
-use Entities\Permissions\Model\PermissionsMapper;
+use Entities\Permissions\Model\PermissionsEntityMapper;
 use Entities\Permissions\View\Forms\PermissionInsertForm;
 use Entities\Permissions\View\Forms\PermissionUpdateForm;
 use Exceptions\QueryFailureException;
@@ -26,7 +26,7 @@ class PermissionsViews extends AdminListView implements ObjectsListViews, Insert
     {
         $this->routePrefix = ROUTEPREFIX_PERMISSIONS;
 
-        parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS_PERMISSIONS, PermissionsMapper::getInstance(), ROUTE_ADMINISTRATORS_PERMISSIONS_RESET, 'admin/lists/objectsList.php');
+        parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS_PERMISSIONS, PermissionsEntityMapper::getInstance(), ROUTE_ADMINISTRATORS_PERMISSIONS_RESET, 'admin/lists/objectsList.php');
 
         $this->setInsert();
         $this->setUpdate();

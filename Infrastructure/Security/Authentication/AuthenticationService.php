@@ -5,8 +5,9 @@ namespace Infrastructure\Security\Authentication;
 
 use It_All\FormFormer\Form;
 use Entities\Administrators\Model\Administrator;
-use Entities\Administrators\Model\AdministratorsMapper;
-use Entities\LoginAttempts\LoginAttemptsMapper;
+use Entities\Administrators\Model\AdministratorsEntityMapper;
+use Entities\Administrators\Model\AdministratorsTableMapper;
+use Entities\LoginAttempts\LoginAttemptsTableMapper;
 use Infrastructure\SlimPostgres;
 use Infrastructure\BaseMVC\View\Forms\DatabaseTableForm;
 use Infrastructure\BaseMVC\View\Forms\FormHelper;
@@ -27,7 +28,7 @@ class AuthenticationService
         $this->maxFailedLogins = $maxFailedLogins;
         $this->administratorHomeRoutes = $administratorHomeRoutes;
         /** set administrator property to administrator id found in session or null */
-        $this->administrator = (isset($_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID])) ? (AdministratorsMapper::getInstance()->getObjectById($_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID])) : null;
+        $this->administrator = (isset($_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID])) ? (AdministratorsEntityMapper::getInstance()->getObjectById($_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID])) : null;
     }
 
     /** check that the administrator session is set and that the administrator is still active */
@@ -45,14 +46,14 @@ class AuthenticationService
         unset($_SESSION[SlimPostgres::SESSION_KEY_NUM_FAILED_LOGINS]);
         $this->administrator = $administrator;
 		SlimPostgres::setAdminNotice("Logged in");
-        (LoginAttemptsMapper::getInstance())->insertSuccessfulLogin($administrator);
+        (LoginAttemptsTableMapper::getInstance())->insertSuccessfulLogin($administrator);
     }
 
     public function attemptLogin(string $username, string $password): bool
     {
-        $administratorsMapper = AdministratorsMapper::getInstance();
+        $administratorsEntityMapper = AdministratorsEntityMapper::getInstance();
         // check if administrator exists
-        if (null === $administrator = $administratorsMapper->getObjectByUsername($username, false)) {
+        if (null === $administrator = $administratorsEntityMapper->getObjectByUsername($username, false)) {
             $this->loginFailed($username, null);
             return false;
         }
@@ -87,7 +88,7 @@ class AuthenticationService
         $this->incrementNumFailedLogins();
 
         // insert login_attempts record
-        (LoginAttemptsMapper::getInstance())->insertFailedLogin($username, $administrator);
+        (LoginAttemptsTableMapper::getInstance())->insertFailedLogin($username, $administrator);
     }
 
     public function tooManyFailedLogins(): bool
@@ -124,11 +125,11 @@ class AuthenticationService
     /** no need to refresh passwordValue */
     public function getForm(string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $action, ?string $usernameValue = null)
     {
-        $administratorsMapper = AdministratorsMapper::getInstance();
+        $administratorsTableMapper = AdministratorsTableMapper::getInstance();
 
         $fields = [];
-        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($administratorsMapper->getColumnByName(self::USERNAME_FIELD), null, $usernameValue);
-        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($administratorsMapper->getColumnByName(self::PASSWORD_FIELD), null, null, 'Password', 'password');
+        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($administratorsTableMapper->getColumnByName(self::USERNAME_FIELD), null, $usernameValue);
+        $fields[] = DatabaseTableForm::getFieldFromDatabaseColumn($administratorsTableMapper->getColumnByName(self::PASSWORD_FIELD), null, null, 'Password', 'password');
         $fields[] = FormHelper::getCsrfNameField($csrfNameKey, $csrfNameValue);
         $fields[] = FormHelper::getCsrfValueField($csrfValueKey, $csrfValueValue);
         $fields[] = FormHelper::getSubmitField();

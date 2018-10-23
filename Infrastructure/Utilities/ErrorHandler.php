@@ -6,7 +6,7 @@ namespace Infrastructure\Utilities;
 use Infrastructure\SlimPostgres;
 use Infrastructure\Functions;
 use Infrastructure\Utilities;
-use Entities\SystemEvents\SystemEventsMapper;
+use Entities\SystemEvents\SystemEventsTableMapper;
 
 class ErrorHandler
 {
@@ -16,7 +16,7 @@ class ErrorHandler
     private $echoErrors;
     private $mailer;
     private $emailTo;
-    private $systemEventsMapper;
+    private $SystemEventsTableMapper;
     private $fatalMessage;
 
     public function __construct(
@@ -42,14 +42,14 @@ class ErrorHandler
         $this->fatalMessage = $fatalMessage;
     }
 
-    public function setSystemEventsMapper(SystemEventsMapper $systemEventsMapper)
+    public function setSystemEventsTableMapper(SystemEventsTableMapper $SystemEventsTableMapper)
     {
-        $this->systemEventsMapper = $systemEventsMapper;
+        $this->SystemEventsTableMapper = $SystemEventsTableMapper;
     }
 
     /*
      * 4 ways to handle:
-     * -database - always (as long as database and systemEventsMapper properties have been set)
+     * -database - always (as long as database and SystemEventsTableMapper properties have been set)
      * -log - always
      * -echo - depends on property
      * -email - depends on property. never email error deets.
@@ -65,7 +65,7 @@ class ErrorHandler
         $errorMessage = $this->generateMessage($messageBody);
 
         // log to database
-        if (isset($this->systemEventsMapper)) {
+        if (isset($this->SystemEventsTableMapper)) {
             switch ($this->getErrorType($errno)) {
                 case 'Core Error':
                 case 'Parse Error':
@@ -90,7 +90,7 @@ class ErrorHandler
 
             echo " INSERTING EVENT ";
             
-            @$this->systemEventsMapper->insertEvent('PHP Error', $systemEventType, $administratorId, $databaseErrorMessage);
+            @$this->SystemEventsTableMapper->insertEvent('PHP Error', $systemEventType, $administratorId, $databaseErrorMessage);
         }
 
         // log to file

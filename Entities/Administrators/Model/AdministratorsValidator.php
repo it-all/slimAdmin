@@ -20,7 +20,7 @@ class AdministratorsValidator extends ValitronValidatorExtension
         }
         parent::__construct($inputData, $fields);
 
-        $administratorsMapper = AdministratorsMapper::getInstance();
+        $administratorsTableMapper = AdministratorsTableMapper::getInstance();
 
         // bool - either inserting or !inserting (updating)
         $inserting = count($changedFieldValues) == 0;
@@ -40,7 +40,7 @@ class AdministratorsValidator extends ValitronValidatorExtension
 
         // unique column rule for username if it has changed
         if ($inserting || array_key_exists('username', $changedFieldValues)) {
-            $this->rule('unique', 'username', $administratorsMapper->getColumnByName('username'), $this);
+            $this->rule('unique', 'username', $administratorsTableMapper->getColumnByName('username'), $this);
         }
 
         // all roles must be in roles table

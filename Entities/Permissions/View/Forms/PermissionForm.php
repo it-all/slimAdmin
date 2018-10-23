@@ -6,7 +6,7 @@ namespace Entities\Permissions\View\Forms;
 use Slim\Http\Request;
 use Slim\Container;
 use Infrastructure\SlimPostgres;
-use Entities\Permissions\Model\PermissionsMapper;
+use Entities\Permissions\Model\PermissionsTableMapper;
 use Entities\Roles\Model\RolesMapper;
 use Entities\Roles\Model\Role;
 use Infrastructure\BaseMVC\View\Forms\Forms;
@@ -28,7 +28,7 @@ abstract class PermissionForm extends BaseForm implements Forms
      */
     private $formMethod;
     private $csrf;
-    private $mapper;
+    private $tableMapper;
     private $permissionValue;
     private $descriptionValue;
 
@@ -60,7 +60,7 @@ abstract class PermissionForm extends BaseForm implements Forms
     {
         parent::__construct($formAction, $container, $isPutMethod);
         $this->authorization = $container->authorization;
-        $this->mapper = PermissionsMapper::getInstance();
+        $this->tableMapper = PermissionsTableMapper::getInstance();
         $this->setFieldValues($fieldValues);
     }
 
@@ -82,12 +82,12 @@ abstract class PermissionForm extends BaseForm implements Forms
 
     private function getTitleField()
     {
-        return DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName(self::TITLE_FIELD_NAME), null, $this->permissionValue);
+        return DatabaseTableForm::getFieldFromDatabaseColumn($this->tableMapper->getColumnByName(self::TITLE_FIELD_NAME), null, $this->permissionValue);
     }
 
     private function getDescriptionField()
     {
-        return DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName(self::DESCRIPTION_FIELD_NAME), null, $this->descriptionValue);
+        return DatabaseTableForm::getFieldFromDatabaseColumn($this->tableMapper->getColumnByName(self::DESCRIPTION_FIELD_NAME), null, $this->descriptionValue);
     }
 
     private function getRolesFieldset() 
@@ -118,7 +118,7 @@ abstract class PermissionForm extends BaseForm implements Forms
 
     private function getActiveField()
     {
-        return DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName(self::ACTIVE_FIELD_NAME), null, Postgres::convertBoolToPostgresBool($this->activeValue));
+        return DatabaseTableForm::getFieldFromDatabaseColumn($this->tableMapper->getColumnByName(self::ACTIVE_FIELD_NAME), null, Postgres::convertBoolToPostgresBool($this->activeValue));
     }
 
     protected function getNodes(): array 

@@ -6,9 +6,10 @@ namespace Entities\Administrators;
 use Entities\Administrators\View\AdministratorsView;
 use Entities\Administrators\Model\AdministratorsValidator;
 use Entities\Administrators\Model\Administrator;
-use Entities\Administrators\Model\AdministratorsMapper;
+use Entities\Administrators\Model\AdministratorsEntityMapper;
+use Entities\Administrators\Model\AdministratorsTableMapper;
 use Entities\Roles\Model\RolesMapper;
-use Entities\LoginAttempts\LoginAttemptsMapper;
+use Entities\LoginAttempts\LoginAttemptsTableMapper;
 use Entities\Administrators\View\Forms\AdministratorForm;
 use Infrastructure\SlimPostgres;
 use Infrastructure\BaseMVC\View\ResponseUtilities;
@@ -24,14 +25,16 @@ class AdministratorsController extends BaseController
 {
     use ResponseUtilities;
 
-    private $administratorsMapper;
+    private $administratorsEntityMapper;
+    private $administratorsTableMapper;
     private $view;
     private $routePrefix;
     private $changedFieldsString;
 
     public function __construct(Container $container)
     {
-        $this->administratorsMapper = AdministratorsMapper::getInstance();
+        $this->administratorsEntityMapper = AdministratorsEntityMapper::getInstance();
+        $this->administratorsTableMapper = AdministratorsTableMapper::getInstance();
         $this->view = new AdministratorsView($container);
         $this->routePrefix = ROUTEPREFIX_ADMINISTRATORS;
         parent::__construct($container);
@@ -39,7 +42,7 @@ class AdministratorsController extends BaseController
 
     public function routePostIndexFilter(Request $request, Response $response, $args)
     {
-        $this->setIndexFilter($request, $response, $args, $this->administratorsMapper::SELECT_COLUMNS, $this->view);
+        $this->setIndexFilter($request, $response, $args, $this->administratorsEntityMapper::SELECT_COLUMNS, $this->view);
         return $this->view->indexViewObjects($response);
     }
 
@@ -60,7 +63,7 @@ class AdministratorsController extends BaseController
             return $this->view->insertView($request, $response, $args);
         }
 
-        $administratorId = $this->administratorsMapper->create($input['name'], $input['username'], $input['password'], $input['roles'], FormHelper::getBoolForCheckboxField($input['active']));
+        $administratorId = $this->administratorsEntityMapper->create($input['name'], $input['username'], $input['password'], $input['roles'], FormHelper::getBoolForCheckboxField($input['active']));
 
         $this->systemEvents->insertInfo("Inserted Administrator", (int) $this->authentication->getAdministratorId(), "id:$administratorId");
 
@@ -83,8 +86,8 @@ class AdministratorsController extends BaseController
         $redirectRoute = SlimPostgres::getRouteName(true, $this->routePrefix,'index');
 
         // make sure there is an administrator for the primary key
-        if (null === $administrator = $this->administratorsMapper->getObjectById((int) $primaryKey)) {
-            return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsMapper->getPrimaryTableMapper(), 'update');
+        if (null === $administrator = $this->administratorsEntityMapper->getObjectById((int) $primaryKey)) {
+            return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsTableMapper, 'update');
         }
 
         // check for changes made
@@ -105,7 +108,7 @@ class AdministratorsController extends BaseController
             return $this->view->updateView($request, $response, $args);
         }
         
-        $this->administratorsMapper->doUpdate((int) $primaryKey, $changedFields);
+        $this->administratorsEntityMapper->doUpdate((int) $primaryKey, $changedFields);
 
         $this->systemEvents->insertInfo("Updated Administrator", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$this->getChangedFieldsString($administrator, $changedFields));
         SlimPostgres::setAdminNotice("Updated administrator $primaryKey");
@@ -122,9 +125,9 @@ class AdministratorsController extends BaseController
         $primaryKey = (int) $args['primaryKey'];
 
         try {
-            $username = $this->administratorsMapper->delete($primaryKey, $this->authentication, $this->authorization);
+            $username = $this->administratorsEntityMapper->delete($primaryKey, $this->authentication, $this->authorization);
         } catch (Exceptions\QueryResultsNotFoundException $e) {
-            return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsMapper->getPrimaryTableMapper(), 'delete', 'Administrator');
+            return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsTableMapper, 'delete', 'Administrator');
         } catch (Exceptions\UnallowedActionException $e) {
             $this->systemEvents->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             SlimPostgres::setAdminNotice($e->getMessage(), 'failure');
@@ -135,7 +138,7 @@ class AdministratorsController extends BaseController
             return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix,'index')));
         }
 
-        $eventNote = $this->administratorsMapper->getPrimaryTableMapper()->getPrimaryKeyColumnName() . ":$primaryKey|username: $username";
+        $eventNote = $this->administratorsTableMapper->getPrimaryKeyColumnName() . ":$primaryKey|username: $username";
         $this->systemEvents->insertInfo("Deleted Administrator", (int) $this->authentication->getAdministratorId(), $eventNote);
         SlimPostgres::setAdminNotice("Deleted administrator $primaryKey(username: $username)");
 
@@ -197,7 +200,7 @@ class AdministratorsController extends BaseController
 
     private function getChangedFieldsString(Administrator $administrator, array $changedFields): string 
     {
-        $allowedChangedFieldsKeys = array_merge([AdministratorForm::ROLES_FIELDSET_NAME], (AdministratorsMapper::getInstance()::ADMINISTRATORS_UPDATE_FIELDS));
+        $allowedChangedFieldsKeys = array_merge([AdministratorForm::ROLES_FIELDSET_NAME], (AdministratorsTableMapper::getInstance()::ADMINISTRATORS_UPDATE_FIELDS));
 
         $changedString = "";
 

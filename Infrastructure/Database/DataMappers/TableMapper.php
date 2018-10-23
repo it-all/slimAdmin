@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Infrastructure\Database\DataMappers;
 
+use Infrastructure\Database\DataMappers\ListViewMappers;
 use Infrastructure\Database\Postgres;
 use Infrastructure\Database\Queries\InsertBuilder;
 use Infrastructure\Database\Queries\InsertUpdateBuilder;
@@ -11,7 +12,7 @@ use Infrastructure\Database\Queries\SelectBuilder;
 use Infrastructure\Database\Queries\UpdateBuilder;
 use Exceptions;
 
-class TableMapper implements TableMappers
+class TableMapper implements ListViewMappers
 {
     /** @var string  */
     protected $tableName;
@@ -38,7 +39,7 @@ class TableMapper implements TableMappers
 
     private $uniqueColumns;
 
-    private $defaultSelectColumnsString;
+    protected $defaultSelectColumnsString;
 
     public function __construct(string $tableName, $defaultSelectColumnsString = "*", ?string $orderByColumnName = null, bool $orderByAsc = true)
     {
@@ -104,6 +105,16 @@ class TableMapper implements TableMappers
         }
     }
 
+    public function getListViewTitle(): string 
+    {
+        return $this->getFormalTableName();
+    }
+
+    public function getInsertTitle(): string
+    {
+        return "Insert ".$this->getFormalTableName(false);
+    }
+
     // make protected since ORM does not sniff out every constraint, some must be added manually when table mapper is extended
     protected function addColumnConstraint(ColumnMapper $column, string $constraint, $context = true)
     {
@@ -124,16 +135,17 @@ class TableMapper implements TableMappers
         return $constraints;
     }
 
-    public function getSelectColumnsString(): string 
+    public function getDefaultSelectColumnsString(): string 
     {
         return $this->defaultSelectColumnsString;
     }
 
     /** returns either array of rows or null */
-    public function select(string $columns = "*", ?array $where = null, ?string $orderBy = null): ?array
+    public function select(?string $columns = "*", ?array $whereColumnsInfo = null, ?string $orderBy = null): ?array
     {
-        $orderBy = $orderBy ?? $this->getOrderBy($this->orderByColumnName, $this->orderByAsc);
-        $q = new SelectBuilder("SELECT $columns", "FROM $this->tableName", $where, $orderBy);
+        $columns = $columns ?? $this->defaultSelectColumnsString;
+        $orderBy = $orderBy ?? $this->getOrderBy();
+        $q = new SelectBuilder("SELECT $columns", "FROM $this->tableName", $whereColumnsInfo, $orderBy);
         $pgResult = $q->execute();
         if (!$results = pg_fetch_all($pgResult)) {
             $results = null;
@@ -142,17 +154,11 @@ class TableMapper implements TableMappers
         return $results;
     }
 
-    private function getOrderBy(string $orderByColumn = null, bool $orderByAsc = true): ?string
+    protected function getOrderBy(): ?string
     {
-        if ($orderByColumn != null) {
-            if ($orderByColumn == 'PRIMARYKEY') {
-                if ($this->primaryKeyColumnName === false) {
-                    throw new \Exception("Cannot order by Primary Key since it does not exist for table ".$this->tableName);
-                }
-                $orderByColumn = $this->primaryKeyColumnName;
-            }
-            $orderByString = "$orderByColumn";
-            if (!$orderByAsc) {
+        if ($this->orderByColumnName != null) {
+            $orderByString = "$this->orderByColumnName";
+            if (!$this->orderByAsc) {
                 $orderByString .= " DESC";
             }
             return $orderByString;
@@ -224,7 +230,6 @@ class TableMapper implements TableMappers
      * @param bool $getChangedValues :: default true. if true calls getChangedColumnsValues in order to send only changed to update builder, otherwise all $columnValues is sent to update builder. set false if input only includes changed values in order to not duplicate checking for changes.
      * @param array $record :: best to include if $getChangedValues is true in order to not duplicate select query
      * @param bool $addBooleanColumnValues if true calls method which adds in boolean columns that don't exist in the input columnValues
-     * @return \SlimPostgres\Database\Queries\recordset
      */
     public function updateByPrimaryKey(array $columnValues, $primaryKeyValue, bool $getChangedValues = true, array $record = [], bool $addBooleanColumnValues = false)
     {
@@ -340,6 +345,16 @@ class TableMapper implements TableMappers
         return $this->orderByColumnName;
     }
 
+    public function getListViewSortColumn(): ?string 
+    {
+        return $this->getOrderByColumnName();
+    }
+
+    public function getListViewSortAscending(): bool 
+    {
+        return $this->getOrderByAsc();
+    }
+    
     public function getOrderByAsc(): bool
     {
         return $this->orderByAsc;

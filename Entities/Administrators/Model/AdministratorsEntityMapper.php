@@ -3,27 +3,26 @@ declare(strict_types=1);
 
 namespace Entities\Administrators\Model;
 
-use Infrastructure\SlimPostgres;
+use Infrastructure\Database\DataMappers\EntityMapper;
 use Exceptions;
-use Infrastructure\Functions;
-use Infrastructure\Database\Postgres;
-use Infrastructure\Database\DataMappers\TableMapper;
 use Infrastructure\Database\Queries\QueryBuilder;
 use Infrastructure\Database\Queries\SelectBuilder;
-use Infrastructure\Database\DataMappers\MultiTableMapper;
-use Infrastructure\Security\Authentication\AuthenticationService;
+use Entities\LoginAttempts\LoginAttemptsTableMapper;
+use Entities\SystemEvents\SystemEventsTableMapper;
+use Infrastructure\Database\Postgres;
 use Infrastructure\Security\Authorization\AuthorizationService;
-use Entities\SystemEvents\SystemEventsMapper;
-use Entities\LoginAttempts\LoginAttemptsMapper;
+use Infrastructure\Security\Authorization\AuthenticationService;
 use Entities\Roles\Model\RolesMapper;
 
+
 // Singleton
-final class AdministratorsMapper extends MultiTableMapper
+final class AdministratorsEntityMapper extends EntityMapper
 {
+    private $administratorsTableMapper;
+
     const TABLE_NAME = 'administrators';
     const ROLES_TABLE_NAME = 'roles';
     const ADM_ROLES_TABLE_NAME = 'administrator_roles';
-    const ADMINISTRATORS_UPDATE_FIELDS = ['name', 'username', 'password', 'active'];
 
     const SELECT_COLUMNS = [
         'id' => self::TABLE_NAME . '.id',
@@ -42,14 +41,40 @@ final class AdministratorsMapper extends MultiTableMapper
     {
         static $instance = null;
         if ($instance === null) {
-            $instance = new AdministratorsMapper();
+            $instance = new AdministratorsEntityMapper();
         }
         return $instance;
     }
 
     protected function __construct()
     {
-        parent::__construct(new TableMapper(self::TABLE_NAME, '*', self::ORDER_BY_COLUMN_NAME), self::SELECT_COLUMNS, self::ORDER_BY_COLUMN_NAME);
+        $this->administratorsTableMapper = AdministratorsTableMapper::getInstance();
+        parent::setDefaultSelectColumnsString();
+    }
+
+    public function getListViewTitle(): string 
+    {
+        return $this->administratorsTableMapper->getFormalTableName();
+    }
+
+    public function getInsertTitle(): string
+    {
+        return "Insert Administrator";
+    }
+
+    public function getUpdateColumnName(): ?string
+    {
+        return $this->administratorsTableMapper->getUpdateColumnName();
+    }
+
+    public function getListViewSortColumn(): ?string 
+    {
+        return $this->administratorsTableMapper->getOrderByColumnName();
+    }
+
+    public function getListViewSortAscending(): bool 
+    {
+        return $this->administratorsTableMapper->getOrderByAsc();
     }
 
     /** any validation should be done prior */
@@ -59,7 +84,7 @@ final class AdministratorsMapper extends MultiTableMapper
         pg_query("BEGIN");
 
         try {
-            $administratorId = $this->doInsert($name, $username, $passwordClear, $active);
+            $administratorId = $this->administratorsTableMapper->callInsert($name, $username, $passwordClear, $active);
         } catch (\Exceptions $e) {
             pg_query("ROLLBACK");
             throw $e;
@@ -91,18 +116,6 @@ final class AdministratorsMapper extends MultiTableMapper
         return $q->executeWithReturnField('id');
     }
 
-    // returns hashed password for insert/update 
-    public function getHashedPassword(string $password): string 
-    {
-        return password_hash($password, PASSWORD_DEFAULT);
-    }
-
-    private function doInsert(string $name, string $username, string $passwordClear, bool $active): int
-    {
-        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (name, username, password_hash, active) VALUES($1, $2, $3, $4)", $name, $username, $this->getHashedPassword($passwordClear), Postgres::convertBoolToPostgresBool($active));
-        return (int) $q->executeWithReturnField('id');
-    }
-
     protected function getFromClause(): string 
     {
         return "FROM ".self::TABLE_NAME." JOIN ".self::ADM_ROLES_TABLE_NAME." ON ".self::TABLE_NAME.".id = ".self::ADM_ROLES_TABLE_NAME.".administrator_id JOIN ".self::ROLES_TABLE_NAME." ON ".self::ADM_ROLES_TABLE_NAME.".role_id = ".self::ROLES_TABLE_NAME.".id";
@@ -115,7 +128,7 @@ final class AdministratorsMapper extends MultiTableMapper
 
     private function getObject(array $whereColumnsInfo): ?Administrator
     {
-        $q = new SelectBuilder($this->getSelectClause(), $this->getFromClause(), $whereColumnsInfo, $this->getOrderBy());
+        $q = new SelectBuilder("SELECT ".$this->defaultSelectColumnsString, $this->getFromClause(), $whereColumnsInfo, $this->getOrderBy());
 
         $pgResults = $q->execute();
         if (pg_numrows($pgResults) > 0) {
@@ -166,16 +179,8 @@ final class AdministratorsMapper extends MultiTableMapper
         return $this->getObject($whereColumnsInfo);
     }
 
-    public function getAdministratorIdByUsername(string $username, bool $activeOnly = false): ?int 
-    {
-        if (null !== $administrator = $this->getObjectByUsername($username, $activeOnly)) {
-            return $administrator->getId();
-        }
-        return null;
-    }
-
     /** return array of records or null */
-    public function select(?string $columns = null, ?array $whereColumnsInfo = null, ?string $orderBy = null): ?array
+    public function select(?string $columns = "*", ?array $whereColumnsInfo = null, ?string $orderBy = null): ?array
     {
         if ($whereColumnsInfo != null) {
             $this->validateWhere($whereColumnsInfo);
@@ -186,11 +191,10 @@ final class AdministratorsMapper extends MultiTableMapper
             return $this->selectWithRoleSubquery($columns, $whereColumnsInfo, $orderBy);
         }
         
-        $selectColumnsString = ($columns === null) ? $this->getSelectColumnsString() : $columns;
-        $selectClause = "SELECT " . $selectColumnsString;
-        $orderBy = ($orderBy == null) ? $this->getOrderBy() : $orderBy;
-        
-        $q = new SelectBuilder($selectClause, $this->getFromClause(), $whereColumnsInfo, $orderBy);
+        $columns = $columns ?? $this->defaultSelectColumnsString;
+        $orderBy = $orderBy ?? $this->getOrderBy();
+
+        $q = new SelectBuilder("SELECT $columns", $this->getFromClause(), $whereColumnsInfo, $orderBy);
         $pgResult = $q->execute();
         if (!$results = pg_fetch_all($pgResult)) {
             $results = null;
@@ -202,10 +206,10 @@ final class AdministratorsMapper extends MultiTableMapper
     /** to filter the administrators with certain roles and return all the roles the administrators have */
     private function selectWithRoleSubquery(?string $columns = null, array $whereColumnsInfo = null, string $orderBy = null)
     {
-        $selectColumnsString = ($columns === null) ? $this->getSelectColumnsString() : $columns;
+        $columns = $columns ?? $this->defaultSelectColumnsString;
 
         /** start subquery */
-        $q = new QueryBuilder("SELECT $selectColumnsString ".$this->getFromClause()." WHERE administrators.id IN (SELECT administrators.id FROM administrators JOIN administrator_roles ON administrators.id=administrator_roles.administrator_id JOIN roles ON administrator_roles.role_id=roles.id WHERE");
+        $q = new QueryBuilder("SELECT $columns ".$this->getFromClause()." WHERE administrators.id IN (SELECT administrators.id FROM administrators JOIN administrator_roles ON administrators.id=administrator_roles.administrator_id JOIN roles ON administrator_roles.role_id=roles.id WHERE");
 
         /** build subquery */
         $opCount = 0;
@@ -239,13 +243,11 @@ final class AdministratorsMapper extends MultiTableMapper
     /** returns array of results instead of recordset */
     private function selectArray(?string $selectColumns = null, array $whereColumnsInfo = null, string $orderBy = null): array
     {
-        if ($selectColumns == null) {
-            $selectColumns = $this->getSelectColumnsString();
-        }
+        $columns = $selectColumns ?? $this->defaultSelectColumnsString;
 
         $administratorsArray = []; // populate with 1 entry per administrator with an array of roles
         
-        if(null !== $records = $this->select($selectColumns, $whereColumnsInfo, $orderBy)) {
+        if(null !== $records = $this->select($columns, $whereColumnsInfo, $orderBy)) {
             $rolesMapper = RolesMapper::getInstance();
             foreach ($records as $record) {
                 // either add new administrator or just new role based on whether administrator already exists
@@ -306,12 +308,12 @@ final class AdministratorsMapper extends MultiTableMapper
         }
 
         // make sure there are no system events for administrator being deleted
-        if ((SystemEventsMapper::getInstance())->existForAdministrator($id)) {
+        if ((SystemEventsTableMapper::getInstance())->existForAdministrator($id)) {
             throw new Exceptions\UnallowedActionException("System events exist for administrator: id $id");
         }
 
         // make sure there are no login attempts for administrator being deleted
-        $loginsMapper = LoginAttemptsMapper::getInstance();
+        $loginsMapper = LoginAttemptsTableMapper::getInstance();
         if ($loginsMapper->hasAdministrator($id)) {
             throw new Exceptions\UnallowedActionException("Login attempts exist for administrator: id $id");
         }
@@ -350,7 +352,7 @@ final class AdministratorsMapper extends MultiTableMapper
             throw $e;
         } 
         try {
-            $this->doDeleteAdministrator($administratorId);
+            $this->administratorsTableMapper->doDelete($administratorId);
         } catch (\Exceptions $e) {
             pg_query("ROLLBACK");
             throw $e;
@@ -377,45 +379,15 @@ final class AdministratorsMapper extends MultiTableMapper
         }
         return (int) $deletedId;
     }
-
-    /** deletes the administrators record */
-    private function doDeleteAdministrator(int $administratorId): ?string
-    {
-        $q = new QueryBuilder("DELETE FROM ".self::TABLE_NAME." WHERE id = $1", $administratorId);
-        if ($username = $q->executeWithReturnField('username')) {
-            return $username;
-        }
-
-        return null;
-    }
     
-    private function getChangedAdministratorFields(array $changedFields): array 
-    {
-        $changedAdministratorFields = [];
-
-        foreach (self::ADMINISTRATORS_UPDATE_FIELDS as $searchField) {
-            if (array_key_exists($searchField, $changedFields)) {
-                if ($searchField == 'password') {
-                    $changedAdministratorFields['password_hash'] = $this->getHashedPassword($changedFields['password']);
-                } elseif ($searchField == 'active') {
-                    $changedAdministratorFields['active'] = Postgres::convertBoolToPostgresBool($changedFields['active']);
-                } else {
-                    $changedAdministratorFields[$searchField] = $changedFields[$searchField];
-                }
-            }
-
-        }
-        return $changedAdministratorFields;
-    }
-
     public function doUpdate(int $administratorId, array $changedFields) 
     {
-        $changedAdministratorFields = $this->getChangedAdministratorFields($changedFields);
+        $changedAdministratorFields = $this->administratorsTableMapper->getChangedFields($changedFields);
 
         pg_query("BEGIN");
         if (count($changedAdministratorFields) > 0) {
             try {
-                $this->getPrimaryTableMapper()->updateByPrimaryKey($changedAdministratorFields, $administratorId, false);
+                $this->administratorsTableMapper->updateByPrimaryKey($changedAdministratorFields, $administratorId, false);
             } catch (\Exceptions $e) {
                 pg_query("ROLLBACK");
                 throw $e;

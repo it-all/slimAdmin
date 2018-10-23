@@ -6,7 +6,7 @@ namespace Entities\Administrators\View\Forms;
 use Slim\Http\Request;
 use Slim\Container;
 use Infrastructure\SlimPostgres;
-use Entities\Administrators\Model\AdministratorsMapper;
+use Entities\Administrators\Model\AdministratorsTableMapper;
 use Entities\Roles\Model\RolesMapper;
 use Infrastructure\BaseMVC\View\Forms\DatabaseTableForm;
 use Infrastructure\BaseMVC\View\Forms\Forms;
@@ -28,7 +28,7 @@ abstract class AdministratorForm extends BaseForm implements Forms
     protected $formMethod;
     protected $csrf;
     private $authorization;
-    private $mapper;
+    private $tableMapper;
     private $nameValue;
     private $usernameValue;
     private $passwordValue;
@@ -64,7 +64,7 @@ abstract class AdministratorForm extends BaseForm implements Forms
     {
         parent::__construct($formAction, $container, $isPutMethod);
         $this->authorization = $container->authorization;
-        $this->mapper = AdministratorsMapper::getInstance();
+        $this->tableMapper = AdministratorsTableMapper::getInstance();
         $this->setFieldValues($fieldValues);
     }
 
@@ -95,13 +95,13 @@ abstract class AdministratorForm extends BaseForm implements Forms
 
     private function getNameField()
     {
-        $nameField = DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName(self::NAME_FIELD_NAME), null, $this->nameValue);
+        $nameField = DatabaseTableForm::getFieldFromDatabaseColumn($this->tableMapper->getColumnByName(self::NAME_FIELD_NAME), null, $this->nameValue);
         return $nameField;
     }
 
     private function getUsernameField()
     {
-        return DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName(self::USERNAME_FIELD_NAME), null, $this->usernameValue);
+        return DatabaseTableForm::getFieldFromDatabaseColumn($this->tableMapper->getColumnByName(self::USERNAME_FIELD_NAME), null, $this->usernameValue);
     }
 
     private function setPasswordFields(array &$nodes)
@@ -148,7 +148,7 @@ abstract class AdministratorForm extends BaseForm implements Forms
 
     private function getActiveField()
     {
-        return DatabaseTableForm::getFieldFromDatabaseColumn($this->mapper->getColumnByName(self::ACTIVE_FIELD_NAME), null, Postgres::convertBoolToPostgresBool($this->activeValue));
+        return DatabaseTableForm::getFieldFromDatabaseColumn($this->tableMapper->getColumnByName(self::ACTIVE_FIELD_NAME), null, Postgres::convertBoolToPostgresBool($this->activeValue));
     }
 
     protected function getNodes(): array 

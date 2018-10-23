@@ -31,8 +31,23 @@ class Permission implements ListViewModels
     /** @var int[] an array of assigned role ids */
     private $roleIds;
 
-    /** @var string[] an array of basic system permissions which should not be delete */
-    private $nonDeletable;
+    /** @var string[] an array of basic system permissions which should not be deleted or changed */
+    const INVARIANT = [
+        SYSTEM_EVENTS_VIEW_RESOURCE,
+        LOGIN_ATTEMPTS_VIEW_RESOURCE,
+        ADMINISTRATORS_VIEW_RESOURCE,
+        ADMINISTRATORS_INSERT_RESOURCE,
+        ADMINISTRATORS_UPDATE_RESOURCE,
+        ADMINISTRATORS_DELETE_RESOURCE,
+        ROLES_VIEW_RESOURCE,
+        ROLES_INSERT_RESOURCE,
+        ROLES_UPDATE_RESOURCE,
+        ROLES_DELETE_RESOURCE,
+        PERMISSIONS_VIEW_RESOURCE,
+        PERMISSIONS_INSERT_RESOURCE,
+        PERMISSIONS_UPDATE_RESOURCE,
+        PERMISSIONS_DELETE_RESOURCE,
+    ];
 
     public function __construct(int $id, string $title, ?string $description, bool $active, \DateTimeImmutable $created, array $roles)
     {
@@ -52,27 +67,6 @@ class Permission implements ListViewModels
         $this->created = $created;
         $this->roles = $roles;
         $this->setRoleIds();
-        $this->setNonDeletable();
-    }
-
-    private function setNonDeletable() 
-    {
-        $this->nonDeletable = [
-            SYSTEM_EVENTS_VIEW_RESOURCE,
-            LOGIN_ATTEMPTS_VIEW_RESOURCE,
-            ADMINISTRATORS_VIEW_RESOURCE,
-            ADMINISTRATORS_INSERT_RESOURCE,
-            ADMINISTRATORS_UPDATE_RESOURCE,
-            ADMINISTRATORS_DELETE_RESOURCE,
-            ROLES_VIEW_RESOURCE,
-            ROLES_INSERT_RESOURCE,
-            ROLES_UPDATE_RESOURCE,
-            ROLES_DELETE_RESOURCE,
-            PERMISSIONS_VIEW_RESOURCE,
-            PERMISSIONS_INSERT_RESOURCE,
-            PERMISSIONS_UPDATE_RESOURCE,
-            PERMISSIONS_DELETE_RESOURCE,
-        ];
     }
 
     public function getId(): int 
@@ -150,16 +144,16 @@ class Permission implements ListViewModels
     /** whether model is allowed to be updated */
     public function isUpdatable(): bool
     {
-        return (PermissionsMapper::getInstance())->isUpdatable($this->id);
+        return (PermissionsTableMapper::getInstance())->isUpdatable();
     }
 
     /** whether this model is allowed to be deleted */
     public function isDeletable(): bool
     {
-        if (in_array($this->title, $this->nonDeletable)) {
+        if (in_array($this->title, self::INVARIANT)) {
             return false;
         }
-        return (PermissionsMapper::getInstance())->isDeletable();
+        return (PermissionsTableMapper::getInstance())->isDeletable();
     }
 
     public function getUniqueId(): ?string

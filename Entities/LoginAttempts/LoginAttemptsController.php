@@ -10,6 +10,6 @@ class LoginAttemptsController extends DatabaseTableController
 {
     public function __construct(Container $container)
     {
-        parent::__construct($container, LoginAttemptsMapper::getInstance(), new LoginAttemptsView($container), 'logins');
+        parent::__construct($container, LoginAttemptsTableMapper::getInstance(), new LoginAttemptsView($container), 'logins');
     }
 }

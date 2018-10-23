@@ -10,7 +10,7 @@ use Infrastructure\Database\Postgres;
 use Infrastructure\Security\Authentication\AuthenticationService;
 use Infrastructure\Security\Authorization\AuthorizationService;
 use Infrastructure\Security\CsrfMiddleware;
-use Entities\SystemEvents\SystemEventsMapper;
+use Entities\SystemEvents\SystemEventsTableMapper;
 use Infrastructure\Utilities;
 use Infrastructure\Functions;
 
@@ -23,7 +23,7 @@ class SlimPostgres
 
     private $environmentalVariables;
     private $database;
-    private $systemEventsMapper;
+    private $SystemEventsTableMapper;
     private $mailer;
 
     /** session variable keys */
@@ -166,10 +166,10 @@ class SlimPostgres
         $postgres = Postgres::getInstance($postgresConnectionString);
 
         /** used in error handler and container */
-        $this->systemEventsMapper = SystemEventsMapper::getInstance();
+        $this->SystemEventsTableMapper = SystemEventsTableMapper::getInstance();
 
         if ($this->config['errors']['logToDatabase']) {
-            $errorHandler->setSystemEventsMapper($this->systemEventsMapper);
+            $errorHandler->setSystemEventsTableMapper($this->SystemEventsTableMapper);
         }
 
         if (!Functions::isRunningFromCommandLine()) {
@@ -206,7 +206,7 @@ class SlimPostgres
         $slim = new \Slim\App($this->getSlimSettings());
         $slimContainer = $slim->getContainer();
 
-        $this->setSlimDependences($slimContainer, $this->systemEventsMapper, $this->mailer);
+        $this->setSlimDependences($slimContainer, $this->SystemEventsTableMapper, $this->mailer);
 
         $this->removeSlimErrorHandler($slimContainer);
 
@@ -233,7 +233,7 @@ class SlimPostgres
             return function ($request, $response) use ($container) {
 
                 /** log error */
-                $this->systemEventsMapper->insertEvent('404 Page Not Found', 'notice', $container->authentication->getAdministratorId());
+                $this->SystemEventsTableMapper->insertEvent('404 Page Not Found', 'notice', $container->authentication->getAdministratorId());
 
                 $_SESSION[SlimPostgres::SESSION_KEY_NOTICE] = [$this->config['pageNotFoundText'], SlimPostgres::STATUS_NOTICE_FAILURE];
                 return $container->view->render(
@@ -246,7 +246,7 @@ class SlimPostgres
         return $slimSettings;
     }
 
-    private function setSlimDependences($container, SystemEventsMapper $systemEventsMapper, Utilities\PhpMailerService $mailer)
+    private function setSlimDependences($container, SystemEventsTableMapper $SystemEventsTableMapper, Utilities\PhpMailerService $mailer)
     {
         /** Template */
         $container['view'] = function ($container) {
@@ -280,8 +280,8 @@ class SlimPostgres
         };
 
         /** System Events (Database Log) */
-        $container['systemEvents'] = function($container) use ($systemEventsMapper) {
-            return $systemEventsMapper;
+        $container['systemEvents'] = function($container) use ($SystemEventsTableMapper) {
+            return $SystemEventsTableMapper;
         };
 
         /** Mailer */

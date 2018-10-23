@@ -21,7 +21,7 @@ class PermissionsValidator extends ValitronValidatorExtension
         }
         parent::__construct($inputData, $fields);
 
-        $permissionsMapper = PermissionsMapper::getInstance();
+        $permissionsTableMapper = PermissionsTableMapper::getInstance();
 
         // bool - either inserting or !inserting (updating)
         $inserting = count($changedFieldValues) == 0;
@@ -33,7 +33,7 @@ class PermissionsValidator extends ValitronValidatorExtension
 
         // unique column rule for permission if it has changed
         if ($inserting || array_key_exists('title', $changedFieldValues)) {
-            $this->rule('unique', 'title', $permissionsMapper->getColumnByName('title'), $this);
+            $this->rule('unique', 'title', $permissionsTableMapper->getColumnByName('title'), $this);
         }
 
         // all selected roles must be in roles table

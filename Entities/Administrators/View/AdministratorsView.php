@@ -7,7 +7,7 @@ use It_All\FormFormer\Fields\InputFields\CheckboxRadioInputField;
 use It_All\FormFormer\Fieldset;
 use Exceptions\QueryFailureException;
 use Entities\Administrators\Model\Administrator;
-use Entities\Administrators\Model\AdministratorsMapper;
+use Entities\Administrators\Model\AdministratorsEntityMapper;
 use Entities\Administrators\View\Forms\AdministratorInsertForm;
 use Entities\Administrators\View\Forms\AdministratorUpdateForm;
 use It_All\FormFormer\Fields\InputField;
@@ -36,7 +36,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
     {
         $this->routePrefix = ROUTEPREFIX_ADMINISTRATORS;
 
-        parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS, AdministratorsMapper::getInstance(), ROUTE_ADMINISTRATORS_RESET, 'admin/lists/objectsList.php');
+        parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS, AdministratorsEntityMapper::getInstance(), ROUTE_ADMINISTRATORS_RESET, 'admin/lists/objectsList.php');
 
         $this->setInsert();
         $this->setUpdate();

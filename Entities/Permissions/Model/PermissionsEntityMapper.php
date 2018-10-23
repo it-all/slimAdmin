@@ -3,19 +3,20 @@ declare(strict_types=1);
 
 namespace Entities\Permissions\Model;
 
+use Infrastructure\Database\DataMappers\EntityMapper;
 use Entities\Permissions\Model\Permission;
 use Entities\Roles\Model\RolesMapper;
 use Entities\Roles\Model\Role;
-use Infrastructure\Database\DataMappers\MultiTableMapper;
-use Infrastructure\Database\DataMappers\TableMapper;
 use Infrastructure\Database\Queries\QueryBuilder;
 use Infrastructure\Database\Queries\SelectBuilder;
 use Infrastructure\Database\Postgres;
 use Exceptions;
 
 // Singleton
-final class PermissionsMapper extends MultiTableMapper
+final class PermissionsEntityMapper extends EntityMapper
 {
+    private $permissionsTableMapper;
+
     const TABLE_NAME = 'permissions';
     const ROLES_TABLE_NAME = 'roles';
     const ROLES_JOIN_TABLE_NAME = 'roles_permissions';
@@ -37,14 +38,40 @@ final class PermissionsMapper extends MultiTableMapper
     {
         static $instance = null;
         if ($instance === null) {
-            $instance = new PermissionsMapper();
+            $instance = new PermissionsEntityMapper();
         }
         return $instance;
     }
 
     protected function __construct()
     {
-        parent::__construct(new TableMapper(self::TABLE_NAME, '*', self::ORDER_BY_COLUMN_NAME), self::SELECT_COLUMNS, self::ORDER_BY_COLUMN_NAME);
+        $this->permissionsTableMapper = PermissionsTableMapper::getInstance();
+        parent::setDefaultSelectColumnsString();
+    }
+
+    public function getListViewTitle(): string 
+    {
+        return $this->permissionsTableMapper->getFormalTableName();
+    }
+
+    public function getInsertTitle(): string
+    {
+        return "Insert Permission";
+    }
+
+    public function getUpdateColumnName(): ?string
+    {
+        return $this->permissionsTableMapper->getUpdateColumnName();
+    }
+
+    public function getListViewSortColumn(): ?string 
+    {
+        return $this->permissionsTableMapper->getOrderByColumnName();
+    }
+
+    public function getListViewSortAscending(): bool 
+    {
+        return $this->permissionsTableMapper->getOrderByAsc();
     }
 
     /** any validation should be done prior */
@@ -59,7 +86,7 @@ final class PermissionsMapper extends MultiTableMapper
         pg_query("BEGIN");
 
         try {
-            $permissionId = $this->doInsert($title, $description, $active);
+            $permissionId = $this->permissionsTableMapper->callInsert($title, $description, $active);
         } catch (Exceptions\QueryFailureException $e) {
             pg_query("ROLLBACK");
             throw $e;
@@ -91,15 +118,6 @@ final class PermissionsMapper extends MultiTableMapper
         return $q->executeWithReturnField('id');
     }
 
-    private function doInsert(string $title, ?string $description = null, bool $active = true): int
-    {
-        if (strlen($description) == 0) {
-            $description = null;
-        }
-        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (title, description, active) VALUES($1, $2, $3)", $title, $description, Postgres::convertBoolToPostgresBool($active));
-        return (int) $q->executeWithReturnField('id');
-    }
-
     // returns key of results array for matching 'id' key, null if not found
     // note, careful when checking return value as 0 can be returned (evaluates to false)
     private function getPermissionsArrayKeyForId(array $permissionsArray, int $id): ?int 
@@ -114,7 +132,7 @@ final class PermissionsMapper extends MultiTableMapper
     }
 
     /** returns array of records or null */
-    public function select(?string $columns = null, ?array $whereColumnsInfo = null, ?string $orderBy = null): ?array
+    public function select(?string $columns = "*", ?array $whereColumnsInfo = null, ?string $orderBy = null): ?array
     {
         if ($whereColumnsInfo != null) {
             $this->validateWhere($whereColumnsInfo);
@@ -125,11 +143,10 @@ final class PermissionsMapper extends MultiTableMapper
             return $this->selectWithRoleSubquery($columns, $whereColumnsInfo, $orderBy);
         }
         
-        $selectColumnsString = ($columns === null) ? $this->getSelectColumnsString() : $columns;
-        $selectClause = "SELECT " . $selectColumnsString;
-        $orderBy = ($orderBy == null) ? $this->getOrderBy() : $orderBy;
+        $columns = $columns ?? $this->defaultSelectColumnsString;
+        $orderBy = $orderBy ?? $this->getOrderBy();
         
-        $q = new SelectBuilder($selectClause, $this->getFromClause(), $whereColumnsInfo, $orderBy);
+        $q = new SelectBuilder("SELECT $columns", $this->getFromClause(), $whereColumnsInfo, $orderBy);
         $pgResult = $q->execute();
         if (!$results = pg_fetch_all($pgResult)) {
             $results = null;
@@ -141,10 +158,10 @@ final class PermissionsMapper extends MultiTableMapper
     /** to filter the permissions with certain roles and return all the roles the permissions have */
     private function selectWithRoleSubquery(?string $columns = null, array $whereColumnsInfo = null, string $orderBy = null)
     {
-        $selectColumnsString = ($columns === null) ? $this->getSelectColumnsString() : $columns;
+        $columns = $columns ?? $this->defaultSelectColumnsString;
 
         /** start subquery */
-        $q = new QueryBuilder("SELECT $selectColumnsString ".$this->getFromClause()." WHERE permissions.id IN (SELECT permissions.id FROM permissions JOIN roles_permissions ON permissions.id=roles_permissions.permission_id JOIN roles ON roles_permissions.role_id=roles.id WHERE");
+        $q = new QueryBuilder("SELECT $columns ".$this->getFromClause()." WHERE permissions.id IN (SELECT permissions.id FROM permissions JOIN roles_permissions ON permissions.id=roles_permissions.permission_id JOIN roles ON roles_permissions.role_id=roles.id WHERE");
 
         /** build subquery */
         $opCount = 0;
@@ -164,13 +181,11 @@ final class PermissionsMapper extends MultiTableMapper
     /** returns array of results instead of recordset */
     private function selectArray(?string $selectColumns = null, array $whereColumnsInfo = null, string $orderBy = null): array
     {
-        if ($selectColumns == null) {
-            $selectColumns = $this->getSelectColumnsString();
-        }
+        $columns = $selectColumns ?? $this->defaultSelectColumnsString;
 
         $permissionsArray = []; // populate with 1 entry per permission with an array of role objects
 
-        if(null !== $records = $this->select($selectColumns, $whereColumnsInfo, $orderBy)) {
+        if(null !== $records = $this->select($columns, $whereColumnsInfo, $orderBy)) {
             $rolesMapper = RolesMapper::getInstance();
             foreach ($records as $record) {
                 // either add new permission or just new role based on whether permission already exists
@@ -205,7 +220,7 @@ final class PermissionsMapper extends MultiTableMapper
     
     private function getObject(array $whereColumnsInfo): ?Permission
     {
-        $q = new SelectBuilder($this->getSelectClause(), $this->getFromClause(), $whereColumnsInfo, $this->getOrderBy());
+        $q = new SelectBuilder("SELECT ".$this->defaultSelectColumnsString, $this->getFromClause(), $whereColumnsInfo, $this->getOrderBy());
         $pgResults = $q->execute();
         if (pg_numrows($pgResults) > 0) {
             // there will be 1 record for each role
@@ -255,16 +270,6 @@ final class PermissionsMapper extends MultiTableMapper
         return $this->getObject($whereColumnsInfo);
     }
 
-    public function isUpdatable(): bool
-    {
-        return true;
-    }
-
-    public function isDeletable(): bool 
-    {
-        return true;
-    }
-
     /** selects and converts recordset to array of objects and return */
     public function getObjects(array $whereColumnsInfo = null, string $orderBy = null): array 
     {
@@ -276,40 +281,15 @@ final class PermissionsMapper extends MultiTableMapper
         return $permissions;
     }
 
-    private function getChangedPermissionFields(array $changedFields): array 
-    {
-        $changedPermissionFields = [];
-
-        foreach (self::PERMISSIONS_UPDATE_FIELDS as $searchField) {
-            if (array_key_exists($searchField, $changedFields)) {
-                if ($searchField == 'active') {
-                    $changedPermissionFields['active'] = Postgres::convertBoolToPostgresBool($changedFields['active']);
-                } else {
-                    $changedPermissionFields[$searchField] = $changedFields[$searchField];
-                }
-            }
-
-        }
-        return $changedPermissionFields;
-    }
-
+    
     public function doUpdate(int $permissionId, array $changedFields) 
     {
-        /** validate changedFields to ensure keys match */
-        $updateFields = ['title', 'description', 'roles', 'active'];
-
-        foreach ($changedFields as $fieldName => $fieldInfo) {
-            if (!in_array($fieldName, $updateFields)) {
-                throw new \InvalidArgumentException("Invalid field $fieldName in changedFields");
-            }
-        }
-
-        $changedPermissionFields = $this->getChangedPermissionFields($changedFields);
+        $changedPermissionFields = $this->getChangedFields($changedFields);
 
         pg_query("BEGIN");
         if (count($changedPermissionFields) > 0) {
             try {
-                $this->getPrimaryTableMapper()->updateByPrimaryKey($changedPermissionFields, $permissionId, false);
+                $this->permissionsTableMapper->updateByPrimaryKey($changedPermissionFields, $permissionId, false);
             } catch (\Exceptions $e) {
                 pg_query("ROLLBACK");
                 throw $e;
@@ -367,15 +347,8 @@ final class PermissionsMapper extends MultiTableMapper
     {
         pg_query("BEGIN");
         $this->doDeletePermissionRoles($permissionId);
-        $this->doDeletePermission($permissionId);
+        $this->permissionsTableMapper->doDelete($permissionId);
         pg_query("COMMIT");
-    }
-
-    /** deletes the record(s) in the join table */
-    private function doDeletePermission(int $permissionId)
-    {
-        $q = new QueryBuilder("DELETE FROM ".self::TABLE_NAME." WHERE id = $1", $permissionId);
-        $q->execute();
     }
 
     /** deletes the record(s) in the join table */

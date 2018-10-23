@@ -6,7 +6,7 @@ namespace Infrastructure\BaseMVC\View;
 use Infrastructure\SlimPostgres;
 use Exceptions\QueryFailureException;
 use Infrastructure\Database\Queries\QueryBuilder;
-use Infrastructure\Database\DataMappers\TableMappers;
+use Infrastructure\Database\DataMappers\ListViewMappers;
 use Infrastructure\BaseMVC\View\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
@@ -38,7 +38,7 @@ abstract class AdminListView extends AdminView
     const SESSION_FILTER_COLUMNS_KEY = 'columns';
     const SESSION_FILTER_VALUE_KEY = 'value';
 
-    public function __construct(Container $container, string $filterFieldsPrefix, string $indexRoute, TableMappers $mapper, string $filterResetRoute, string $template = 'admin/lists/resultsList.php')
+    public function __construct(Container $container, string $filterFieldsPrefix, string $indexRoute, ListViewMappers $mapper, string $filterResetRoute, string $template = 'admin/lists/resultsList.php')
     {
         parent::__construct($container);
         $this->sessionFilterFieldKey = $filterFieldsPrefix . 'Filter';
@@ -67,13 +67,14 @@ abstract class AdminListView extends AdminView
     protected function setInsert()
     {
         $this->insertLinkInfo = ($this->authorization->isAuthorized($this->getResource('insert'))) ? [
-            'text' => 'Insert '.$this->mapper->getFormalTableName(false), 
+            'text' => $this->mapper->getInsertTitle(), 
             'route' => SlimPostgres::getRouteName(true, $this->routePrefix, 'insert')
         ] : null;
     }
 
     protected function setUpdate()
     {
+        /** can be null */
         $this->updateColumn = $this->mapper->getUpdateColumnName();
 
         $this->updatesPermitted = $this->authorization->isAuthorized($this->getResource('update')) && $this->updateColumn !== null;
@@ -99,18 +100,18 @@ abstract class AdminListView extends AdminView
     }
 
     /** get display items (array of recordset) from the mapper. special handling when filtering */
-    private function getDisplayItems(): array 
+    private function getDisplayItems(): ?array 
     {
         /** squelch the sql warning in case of ill-formed filter field and catch the exception instead in order to alert the administrator of mistake. note, ideally any value that causes a query failure will be invalidated in the controller, but this is an extra measure of avoiding an unhandled exception while still logging/displaying the alert */
         if (null !== $filterColumnsInfo = $this->getFilterColumnsInfo()) {
             try {
-                $displayItems = @$this->mapper->select($this->mapper->getSelectColumnsString(), $filterColumnsInfo);
+                $displayItems = @$this->mapper->select(null, $filterColumnsInfo);
             } catch (QueryFailureException $e) {
                 $this->systemEvents->insertAlert("List View Filter Query Failure", (int) $this->authentication->getAdministratorId(), $e->getMessage());
                 SlimPostgres::setAdminNotice('Query Failed', 'failure');
             }
         } else {
-            $displayItems = $this->mapper->select($this->mapper->getSelectColumnsString());
+            $displayItems = $this->mapper->select();
         }
 
         return $displayItems;
@@ -148,8 +149,8 @@ abstract class AdminListView extends AdminView
                 'deleteRoute' => $this->deleteRoute,
                 'displayItems' => $displayItems,
                 'columnCount' => $this->mapper->getCountSelectColumns(),
-                'sortColumn' => $this->mapper->getOrderByColumnName(),
-                'sortByAsc' => $this->mapper->getOrderByAsc(),
+                'sortColumn' => $this->mapper->getListViewSortColumn(),
+                'sortAscending' => $this->mapper->getListViewSortAscending(),
                 'navigationItems' => $this->navigationItems
             ]
         );

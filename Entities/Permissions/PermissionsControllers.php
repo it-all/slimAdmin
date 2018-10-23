@@ -7,7 +7,7 @@ use Infrastructure\SlimPostgres;
 use Infrastructure\BaseMVC\Controller\BaseController;
 use Entities\Roles\Model\RolesMapper;
 use Entities\Permissions\Model\Permission;
-use Entities\Permissions\Model\PermissionsMapper;
+use Entities\Permissions\Model\PermissionsTableMapper;
 use Entities\Permissions\Model\PermissionsValidator;
 use Entities\Permissions\View\PermissionsViews;
 use Entities\Permissions\View\Forms\PermissionForm;
@@ -21,14 +21,12 @@ class PermissionsControllers extends BaseController
 {
     use ResponseUtilities;
 
-    private $permissionsMapper;
     private $view;
     private $routePrefix;
     private $changedFieldsString;
 
     public function __construct(Container $container)
     {
-        $this->permissionsMapper = PermissionsMapper::getInstance();
         $this->view = new PermissionsViews($container);
         $this->routePrefix = ROUTEPREFIX_PERMISSIONS;
         parent::__construct($container);
@@ -192,7 +190,7 @@ class PermissionsControllers extends BaseController
 
     private function getChangedFieldsString(Permission $permission, array $changedFields): string 
     {
-        $allowedChangedFieldsKeys = array_merge([PermissionForm::ROLES_FIELDSET_NAME], (PermissionsMapper::getInstance()::PERMISSIONS_UPDATE_FIELDS));
+        $allowedChangedFieldsKeys = array_merge([PermissionForm::ROLES_FIELDSET_NAME], (PermissionsTableMapper::getInstance()::UPDATE_FIELDS));
 
         $changedString = "";
 

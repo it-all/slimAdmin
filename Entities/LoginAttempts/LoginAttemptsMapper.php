@@ -10,7 +10,7 @@ use Infrastructure\Database\DataMappers\TableMapper;
 use Infrastructure\Database\Queries\QueryBuilder;
 
 // Singleton
-final class LoginAttemptsMapper extends TableMapper
+final class LoginAttemptsTableMapper extends TableMapper
 {
     const TABLE_NAME = 'login_attempts';
 
@@ -18,7 +18,7 @@ final class LoginAttemptsMapper extends TableMapper
     {
         static $instance = null;
         if ($instance === null) {
-            $instance = new LoginAttemptsMapper();
+            $instance = new LoginAttemptsTableMapper();
         }
         return $instance;
     }
@@ -54,12 +54,6 @@ final class LoginAttemptsMapper extends TableMapper
             'created' => 'NOW()',
         ];
         return parent::insert($columnValues);
-    }
-
-    public function getView()
-    {
-        $q = new QueryBuilder("SELECT id, administrator_id, username, ip as ip_address, created as time_stamp, success FROM ".self::TABLE_NAME." ORDER BY created DESC");
-        return $q->execute();
     }
 
     public function hasAdministrator(int $administratorId): bool 

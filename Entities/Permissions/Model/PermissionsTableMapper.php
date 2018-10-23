@@ -34,7 +34,7 @@ final class PermissionsTableMapper extends TableMapper
         parent::__construct(self::TABLE_NAME, '*', self::ORDER_BY_COLUMN_NAME);
     }
 
-    private function callInsert(string $title, ?string $description = null, bool $active = true): int
+    public function callInsert(string $title, ?string $description = null, bool $active = true): int
     {
         $columnValues = [
             'title' => $title,
@@ -69,14 +69,14 @@ final class PermissionsTableMapper extends TableMapper
 
                 break;
                 default:
-                    $changedPermissionFields[$searchField] = $changedFields[$searchField];
+                    $changedPermissionFields[$fieldName] = $changedFields[$fieldName];
             }
         }
         return $changedPermissionFields;
     }
     
     /** deletes the permissions record */
-    private function doDelete(int $permissionId)
+    public function doDelete(int $permissionId)
     {
         $q = new QueryBuilder("DELETE FROM ".self::TABLE_NAME." WHERE id = $1", $permissionId);
         $q->execute();

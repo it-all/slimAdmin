@@ -200,7 +200,7 @@ class AdministratorsController extends BaseController
 
     private function getChangedFieldsString(Administrator $administrator, array $changedFields): string 
     {
-        $allowedChangedFieldsKeys = array_merge([AdministratorForm::ROLES_FIELDSET_NAME], (AdministratorsTableMapper::getInstance()::ADMINISTRATORS_UPDATE_FIELDS));
+        $allowedChangedFieldsKeys = array_merge([AdministratorForm::ROLES_FIELDSET_NAME], (AdministratorsTableMapper::getInstance()::UPDATE_FIELDS));
 
         $changedString = "";
 

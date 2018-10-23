@@ -28,15 +28,17 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
 {
     use ResponseUtilities;
 
+    private $administratorsEntityMapper;
     protected $routePrefix;
 
     const FILTER_FIELDS_PREFIX = 'administrators';
 
     public function __construct(Container $container)
     {
+        $this->administratorsEntityMapper = AdministratorsEntityMapper::getInstance();
         $this->routePrefix = ROUTEPREFIX_ADMINISTRATORS;
 
-        parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS, AdministratorsEntityMapper::getInstance(), ROUTE_ADMINISTRATORS_RESET, 'admin/lists/objectsList.php');
+        parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS, $this->administratorsEntityMapper, ROUTE_ADMINISTRATORS_RESET, 'admin/lists/objectsList.php');
 
         $this->setInsert();
         $this->setUpdate();
@@ -106,7 +108,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
             $response,
             'admin/form.php',
             [
-                'title' => 'Insert '. $this->mapper->getFormalTableName(false),
+                'title' => $this->administratorsEntityMapper->getInsertTitle(),
                 'form' => (new AdministratorInsertForm($formAction, $this->container, $fieldValues))->getForm(),
                 'navigationItems' => $this->navigationItems
             ]
@@ -123,7 +125,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
     {
         // make sure there is an administrator for the primary key
         if (null === $administrator = $this->mapper->getObjectById((int) $args['primaryKey'])) {
-            return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->mapper->getPrimaryTableMapper(), 'update');
+            return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->administratorsEntityMapper, 'update');
         }
 
         $formAction = $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]);
@@ -140,7 +142,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
             $response,
             'admin/form.php',
             [
-                'title' => 'Update ' . $this->mapper->getPrimaryTableMapper()->getFormalTableName(false),
+                'title' => $this->mapper->getUpdateTitle(),
                 'form' => $updateForm->getForm(),
                 // 'form' => $this->getForm($request, 'update', (int) $args['primaryKey'], $administrator),
                 'primaryKey' => $args['primaryKey'],

@@ -9,6 +9,7 @@ use Infrastructure\BaseMVC\View\AdminListView;
 use Infrastructure\BaseMVC\View\InsertUpdateViews;
 use Infrastructure\BaseMVC\View\ResponseUtilities;
 use Entities\Permissions\Model\PermissionsEntityMapper;
+use Entities\Permissions\Model\PermissionsTableMapper;
 use Entities\Permissions\View\Forms\PermissionInsertForm;
 use Entities\Permissions\View\Forms\PermissionUpdateForm;
 use Exceptions\QueryFailureException;
@@ -20,13 +21,15 @@ class PermissionsViews extends AdminListView implements ObjectsListViews, Insert
 {
     use ResponseUtilities;
 
+    private $permissionsEntityMapper;
     const FILTER_FIELDS_PREFIX = 'permissions';
 
     public function __construct(Container $container)
     {
         $this->routePrefix = ROUTEPREFIX_PERMISSIONS;
+        $this->permissionsEntityMapper = PermissionsEntityMapper::getInstance();
 
-        parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS_PERMISSIONS, PermissionsEntityMapper::getInstance(), ROUTE_ADMINISTRATORS_PERMISSIONS_RESET, 'admin/lists/objectsList.php');
+        parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS_PERMISSIONS, $this->permissionsEntityMapper, ROUTE_ADMINISTRATORS_PERMISSIONS_RESET, 'admin/lists/objectsList.php');
 
         $this->setInsert();
         $this->setUpdate();
@@ -78,7 +81,7 @@ class PermissionsViews extends AdminListView implements ObjectsListViews, Insert
             $response,
             'admin/form.php',
             [
-                'title' => 'Insert '. $this->mapper->getFormalTableName(false),
+                'title' => $this->permissionsEntityMapper->getInsertTitle(),
                 'form' => (new PermissionInsertForm($formAction, $this->container, $fieldValues))->getForm(),
                 'navigationItems' => $this->navigationItems
             ]
@@ -94,8 +97,8 @@ class PermissionsViews extends AdminListView implements ObjectsListViews, Insert
     public function updateView(Request $request, Response $response, $args)
     {
         // make sure there is a permission for the primary key
-        if (null === $permission = $this->mapper->getObjectById((int) $args['primaryKey'])) {
-            return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->mapper->getPrimaryTableMapper(), 'update');
+        if (null === $permission = $this->permissionsEntityMapper->getObjectById((int) $args['primaryKey'])) {
+            return $this->databaseRecordNotFound($response, $args['primaryKey'], PermissionsTableMapper::getInstance(), 'update');
         }
 
         $formAction = $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]);
@@ -112,7 +115,7 @@ class PermissionsViews extends AdminListView implements ObjectsListViews, Insert
             $response,
             'admin/form.php',
             [
-                'title' => 'Update ' . $this->mapper->getPrimaryTableMapper()->getFormalTableName(false),
+                'title' => $this->permissionsEntityMapper->getUpdateTitle(),
                 'form' => $updateForm->getForm(),
                 // 'form' => $this->getForm($request, 'update', (int) $args['primaryKey'], $administrator),
                 'primaryKey' => $args['primaryKey'],
@@ -130,7 +133,7 @@ class PermissionsViews extends AdminListView implements ObjectsListViews, Insert
         }
 
         try {
-            $permissions = $this->mapper->getObjects($this->getFilterColumnsInfo());
+            $permissions = $this->permissionsEntityMapper->getObjects($this->getFilterColumnsInfo());
         } catch (QueryFailureException $e) {
             $permissions = [];
             // warning system event is inserted when query fails

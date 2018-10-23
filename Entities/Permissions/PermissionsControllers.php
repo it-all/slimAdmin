@@ -8,6 +8,7 @@ use Infrastructure\BaseMVC\Controller\BaseController;
 use Entities\Roles\Model\RolesMapper;
 use Entities\Permissions\Model\Permission;
 use Entities\Permissions\Model\PermissionsTableMapper;
+use Entities\Permissions\Model\PermissionsEntityMapper;
 use Entities\Permissions\Model\PermissionsValidator;
 use Entities\Permissions\View\PermissionsViews;
 use Entities\Permissions\View\Forms\PermissionForm;
@@ -21,12 +22,16 @@ class PermissionsControllers extends BaseController
 {
     use ResponseUtilities;
 
+    private $permissionsEntityMapper;
+    private $permissionsTableMapper;
     private $view;
     private $routePrefix;
     private $changedFieldsString;
 
     public function __construct(Container $container)
     {
+        $this->permissionsEntityMapper = PermissionsEntityMapper::getInstance();
+        $this->permissionsTableMapper = PermissionsTableMapper::getInstance();
         $this->view = new PermissionsViews($container);
         $this->routePrefix = ROUTEPREFIX_PERMISSIONS;
         parent::__construct($container);
@@ -34,7 +39,7 @@ class PermissionsControllers extends BaseController
 
     public function routePostIndexFilter(Request $request, Response $response, $args)
     {
-        $this->setIndexFilter($request, $response, $args, $this->permissionsMapper::SELECT_COLUMNS, $this->view);
+        $this->setIndexFilter($request, $response, $args, $this->$this->permissionsEntityMapper::SELECT_COLUMNS, $this->view);
         return $this->view->indexViewObjects($response);
     }
 
@@ -56,7 +61,7 @@ class PermissionsControllers extends BaseController
         }
 
         try {
-            $permissionId = $this->permissionsMapper->create($input[PermissionForm::TITLE_FIELD_NAME], $input[PermissionForm::DESCRIPTION_FIELD_NAME], $input[PermissionForm::ROLES_FIELDSET_NAME], FormHelper::getBoolForCheckboxField($input[PermissionForm::ACTIVE_FIELD_NAME]));
+            $permissionId = $this->permissionsEntityMapper->create($input[PermissionForm::TITLE_FIELD_NAME], $input[PermissionForm::DESCRIPTION_FIELD_NAME], $input[PermissionForm::ROLES_FIELDSET_NAME], FormHelper::getBoolForCheckboxField($input[PermissionForm::ACTIVE_FIELD_NAME]));
         } catch (\Exception $e) {
             throw new \Exception("Permission create failure. ".$e->getMessage());
         }
@@ -82,8 +87,8 @@ class PermissionsControllers extends BaseController
         $redirectRoute = SlimPostgres::getRouteName(true, $this->routePrefix,'index');
 
         // make sure there is a permission for the primary key
-        if (null === $permission = $this->permissionsMapper->getObjectById((int) $primaryKey)) {
-            return $this->databaseRecordNotFound($response, $primaryKey, $this->permissionsMapper->getPrimaryTableMapper(), 'update');
+        if (null === $permission = $this->permissionsEntityMapper->getObjectById((int) $primaryKey)) {
+            return $this->databaseRecordNotFound($response, $primaryKey, $this->permissionsTableMapper, 'update');
         }
 
         // check for changes made
@@ -104,7 +109,7 @@ class PermissionsControllers extends BaseController
             return $this->view->updateView($request, $response, $args);
         }
         
-        $this->permissionsMapper->doUpdate((int) $primaryKey, $changedFields);
+        $this->permissionsEntityMapper->doUpdate((int) $primaryKey, $changedFields);
 
         $this->systemEvents->insertInfo("Updated Permission", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$this->getChangedFieldsString($permission, $changedFields));
         SlimPostgres::setAdminNotice("Updated permission $primaryKey");
@@ -121,9 +126,9 @@ class PermissionsControllers extends BaseController
         $primaryKey = (int) $args['primaryKey'];
 
         try {
-            $permission = $this->permissionsMapper->delete($primaryKey);
+            $title = $this->permissionsEntityMapper->delete($primaryKey);
         } catch (Exceptions\QueryResultsNotFoundException $e) {
-            return $this->databaseRecordNotFound($response, $primaryKey, $this->permissionsMapper->getPrimaryTableMapper(), 'delete', 'Permission');
+            return $this->databaseRecordNotFound($response, $primaryKey, PermissionsTableMapper::getInstance(), 'delete', 'Permission');
         } catch (Exceptions\UnallowedActionException $e) {
             $this->systemEvents->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             SlimPostgres::setAdminNotice($e->getMessage(), 'failure');
@@ -134,9 +139,9 @@ class PermissionsControllers extends BaseController
             return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix,'index')));
         }
 
-        $eventNote = $this->permissionsMapper->getPrimaryTableMapper()->getPrimaryKeyColumnName() . ":$primaryKey|username: $username";
+        $eventNote = $this->permissionsTableMapper->getPrimaryKeyColumnName() . ":$primaryKey|title: $title";
         $this->systemEvents->insertInfo("Deleted Permission", (int) $this->authentication->getAdministratorId(), $eventNote);
-        SlimPostgres::setAdminNotice("Deleted permission $primaryKey($permission)");
+        SlimPostgres::setAdminNotice("Deleted permission $primaryKey(title: $title)");
 
         return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'index')));
     }

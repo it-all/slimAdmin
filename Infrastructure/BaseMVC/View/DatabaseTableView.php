@@ -7,7 +7,7 @@ use Infrastructure\SlimPostgres;
 use Infrastructure\BaseMVC\View\InsertUpdateViews;
 use Infrastructure\BaseMVC\View\ResponseUtilities;
 use Infrastructure\BaseMVC\View\Forms\DatabaseTableForm;
-use Infrastructure\Database\DataMappers\TableMappers;
+use Infrastructure\Database\DataMappers\TableMapper;
 use Infrastructure\BaseMVC\View\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
@@ -21,7 +21,7 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
     protected $routePrefix;
     protected $mapper;
 
-    public function __construct(Container $container, TableMappers $mapper, string $routePrefix, bool $addDeleteColumnToListView = true, string $listViewTemplate = 'admin/lists/resultsList.php')
+    public function __construct(Container $container, TableMapper $mapper, string $routePrefix, bool $addDeleteColumnToListView = true, string $listViewTemplate = 'admin/lists/resultsList.php')
     {
         $this->mapper = $mapper;
         $this->routePrefix = $routePrefix;

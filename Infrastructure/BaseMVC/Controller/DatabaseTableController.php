@@ -24,7 +24,7 @@ class DatabaseTableController extends BaseController
     protected $view;
     protected $routePrefix;
 
-    public function __construct(Container $container, $mapper, $view, $routePrefix)
+    public function __construct(Container $container, TableMapper $mapper, $view, $routePrefix)
     {
         $this->mapper = $mapper;
         $this->view = $view;

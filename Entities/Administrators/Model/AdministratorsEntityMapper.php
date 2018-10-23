@@ -11,7 +11,7 @@ use Entities\LoginAttempts\LoginAttemptsTableMapper;
 use Entities\SystemEvents\SystemEventsTableMapper;
 use Infrastructure\Database\Postgres;
 use Infrastructure\Security\Authorization\AuthorizationService;
-use Infrastructure\Security\Authorization\AuthenticationService;
+use Infrastructure\Security\Authentication\AuthenticationService;
 use Entities\Roles\Model\RolesMapper;
 
 
@@ -60,6 +60,11 @@ final class AdministratorsEntityMapper extends EntityMapper
     public function getInsertTitle(): string
     {
         return "Insert Administrator";
+    }
+
+    public function getUpdateTitle(): string
+    {
+        return "Update Administrator";
     }
 
     public function getUpdateColumnName(): ?string

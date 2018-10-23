@@ -35,7 +35,7 @@ final class AdministratorsTableMapper extends TableMapper
         return password_hash($password, PASSWORD_DEFAULT);
     }
 
-    private function callInsert(string $name, string $username, string $passwordClear, bool $active): int
+    public function callInsert(string $name, string $username, string $passwordClear, bool $active): int
     {
         $columnValues = [
             'name' => $name,
@@ -75,7 +75,7 @@ final class AdministratorsTableMapper extends TableMapper
 
                 break;
                 default:
-                    $changedAdministratorFields[$searchField] = $changedFields[$searchField];
+                    $changedAdministratorFields[$fieldName] = $changedFields[$fieldName];
             }
         }
 

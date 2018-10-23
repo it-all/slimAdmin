@@ -133,7 +133,7 @@ abstract class AdminListView extends AdminView
             $response,
             $this->template,
             [
-                'title' => $this->mapper->getFormalTableName(),
+                'title' => $this->mapper->getListViewTitle(),
                 'insertLinkInfo' => $this->insertLinkInfo,
                 'filterOpsList' => QueryBuilder::getWhereOperatorsText(),
                 'filterValue' => $this->getFilterFieldValue(),

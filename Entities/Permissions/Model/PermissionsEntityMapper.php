@@ -20,7 +20,7 @@ final class PermissionsEntityMapper extends EntityMapper
     const TABLE_NAME = 'permissions';
     const ROLES_TABLE_NAME = 'roles';
     const ROLES_JOIN_TABLE_NAME = 'roles_permissions';
-    const PERMISSIONS_UPDATE_FIELDS = ['title', 'description', 'active'];
+    const UPDATE_FIELDS = ['title', 'description', 'active'];
 
     const SELECT_COLUMNS = [
         'id' => self::TABLE_NAME . '.id',
@@ -57,6 +57,11 @@ final class PermissionsEntityMapper extends EntityMapper
     public function getInsertTitle(): string
     {
         return "Insert Permission";
+    }
+
+    public function getUpdateTitle(): string
+    {
+        return "Update Permission";
     }
 
     public function getUpdateColumnName(): ?string
@@ -284,7 +289,7 @@ final class PermissionsEntityMapper extends EntityMapper
     
     public function doUpdate(int $permissionId, array $changedFields) 
     {
-        $changedPermissionFields = $this->getChangedFields($changedFields);
+        $changedPermissionFields = $this->permissionsTableMapper->getChangedFields($changedFields);
 
         pg_query("BEGIN");
         if (count($changedPermissionFields) > 0) {

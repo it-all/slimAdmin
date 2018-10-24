@@ -7,7 +7,7 @@ use Slim\Http\Request;
 use Slim\Container;
 use Infrastructure\SlimPostgres;
 use Entities\Administrators\Model\AdministratorsTableMapper;
-use Entities\Roles\Model\RolesMapper;
+use Entities\Roles\Model\RolesTableMapper;
 use Infrastructure\BaseMVC\View\Forms\DatabaseTableForm;
 use Infrastructure\BaseMVC\View\Forms\Forms;
 use Infrastructure\BaseMVC\View\Forms\Form as BaseForm;
@@ -122,9 +122,9 @@ abstract class AdministratorForm extends BaseForm implements Forms
     private function getRolesFieldset() 
     {
         // Roles Checkboxes
-        $rolesMapper = RolesMapper::getInstance();
+        $rolesTableMapper = RolesTableMapper::getInstance();
         $rolesCheckboxes = [];
-        foreach ($rolesMapper->getRoles() as $roleId => $roleName) {
+        foreach ($rolesTableMapper->getRoles() as $roleId => $roleName) {
             $rolesCheckboxAttributes = [
                 'type' => 'checkbox',
                 'name' => self::ROLES_FIELDSET_NAME . '[]',

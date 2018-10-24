@@ -5,7 +5,7 @@ namespace Entities\Permissions\Model;
 
 use Infrastructure\Database\DataMappers\EntityMapper;
 use Entities\Permissions\Model\Permission;
-use Entities\Roles\Model\RolesMapper;
+use Entities\Roles\Model\RolesTableMapper;
 use Entities\Roles\Model\Role;
 use Infrastructure\Database\Queries\QueryBuilder;
 use Infrastructure\Database\Queries\SelectBuilder;
@@ -84,7 +84,7 @@ final class PermissionsEntityMapper extends EntityMapper
     {
         // add top role if not already there, as it is assigned to all permissions
         if ($roleIds === null || !in_array(TOP_ROLE, $roleIds)) {
-            $roleIds[] = (RolesMapper::getInstance())->getTopRoleId();
+            $roleIds[] = (RolesTableMapper::getInstance())->getTopRoleId();
         }
 
         // insert administrator then administrator_roles in a transaction
@@ -191,7 +191,7 @@ final class PermissionsEntityMapper extends EntityMapper
         $permissionsArray = []; // populate with 1 entry per permission with an array of role objects
 
         if(null !== $records = $this->select($columns, $whereColumnsInfo, $orderBy)) {
-            $rolesMapper = RolesMapper::getInstance();
+            $rolesTableMapper = RolesTableMapper::getInstance();
             foreach ($records as $record) {
                 // either add new permission or just new role based on whether permission already exists
                 if (null === $key = $this->getPermissionsArrayKeyForId($permissionsArray, (int) $record['id'])) {
@@ -199,12 +199,12 @@ final class PermissionsEntityMapper extends EntityMapper
                         'id' => (int) $record['id'],
                         'title' => $record['title'],
                         'description' => $record['description'],
-                        'roles' => [$rolesMapper->getObjectById((int) $record['role_id'])],
+                        'roles' => [$rolesTableMapper->getObjectById((int) $record['role_id'])],
                         'active' => Postgres::convertPostgresBoolToBool($record['active']),
                         'created' => new \DateTimeImmutable($record['created']),
                     ];
                 } else {
-                    array_push($permissionsArray[$key]['roles'], $rolesMapper->getObjectById((int) $record['role_id']));
+                    array_push($permissionsArray[$key]['roles'], $rolesTableMapper->getObjectById((int) $record['role_id']));
                 }
             }
         }
@@ -230,9 +230,9 @@ final class PermissionsEntityMapper extends EntityMapper
         if (pg_numrows($pgResults) > 0) {
             // there will be 1 record for each role
             $roles = [];
-            $rolesMapper = RolesMapper::getInstance();
+            $rolesTableMapper = RolesTableMapper::getInstance();
             while ($row = pg_fetch_assoc($pgResults)) {
-                $roles[] = $rolesMapper->getObjectById((int) $row['role_id']);
+                $roles[] = $rolesTableMapper->getObjectById((int) $row['role_id']);
                 $lastRow = $row;
             }
             return $this->buildPermission((int) $lastRow['id'], $lastRow['title'], $lastRow['description'], Postgres::convertPostgresBoolToBool($lastRow['active']), new \DateTimeImmutable($lastRow['created']), $roles);
@@ -313,7 +313,7 @@ final class PermissionsEntityMapper extends EntityMapper
         if (isset($changedFields['roles']['remove'])) {
             foreach ($changedFields['roles']['remove'] as $deleteRoleId) {
                 /** never remove top role from a permission */
-                $deleteRole = (RolesMapper::getInstance())->getObjectById($deleteRoleId);
+                $deleteRole = (RolesTableMapper::getInstance())->getObjectById($deleteRoleId);
                 if (!$deleteRole->isTop()) {
                     try {
                         $roleDeleteResult = $this->doDeletePermissionRole($permissionId, (int) $deleteRoleId);
@@ -352,7 +352,7 @@ final class PermissionsEntityMapper extends EntityMapper
     {
         pg_query("BEGIN");
         $this->doDeletePermissionRoles($permissionId);
-        $this->permissionsTableMapper->doDelete($permissionId);
+        $this->permissionsTableMapper->delete($permissionId);
         pg_query("COMMIT");
     }
 

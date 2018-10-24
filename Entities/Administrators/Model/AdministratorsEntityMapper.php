@@ -12,7 +12,7 @@ use Entities\SystemEvents\SystemEventsTableMapper;
 use Infrastructure\Database\Postgres;
 use Infrastructure\Security\Authorization\AuthorizationService;
 use Infrastructure\Security\Authentication\AuthenticationService;
-use Entities\Roles\Model\RolesMapper;
+use Entities\Roles\Model\RolesTableMapper;
 
 
 // Singleton
@@ -139,9 +139,9 @@ final class AdministratorsEntityMapper extends EntityMapper
         if (pg_numrows($pgResults) > 0) {
             // there will be 1 record for each role
             $roles = [];
-            $rolesMapper = RolesMapper::getInstance();
+            $rolesTableMapper = RolesTableMapper::getInstance();
             while ($row = pg_fetch_assoc($pgResults)) {
-                $roles[] = $rolesMapper->getObjectById((int) $row['role_id']);
+                $roles[] = $rolesTableMapper->getObjectById((int) $row['role_id']);
                 $lastRow = $row;
             }
             
@@ -253,7 +253,7 @@ final class AdministratorsEntityMapper extends EntityMapper
         $administratorsArray = []; // populate with 1 entry per administrator with an array of roles
         
         if(null !== $records = $this->select($columns, $whereColumnsInfo, $orderBy)) {
-            $rolesMapper = RolesMapper::getInstance();
+            $rolesTableMapper = RolesTableMapper::getInstance();
             foreach ($records as $record) {
                 // either add new administrator or just new role based on whether administrator already exists
                 if (null === $key = $this->getAdministratorsArrayKeyForId($administratorsArray, (int) $record['id'])) {
@@ -262,12 +262,12 @@ final class AdministratorsEntityMapper extends EntityMapper
                         'name' => $record['name'],
                         'username' => $record['username'],
                         'passwordHash' => $record['password_hash'],
-                        'roles' => [$rolesMapper->getObjectById((int) $record['role_id'])],
+                        'roles' => [$rolesTableMapper->getObjectById((int) $record['role_id'])],
                         'active' => Postgres::convertPostgresBoolToBool($record['active']),
                         'created' => new \DateTimeImmutable($record['created']),
                     ];
                 } else {
-                    array_push($administratorsArray[$key]['roles'], $rolesMapper->getObjectById((int) $record['role_id']));
+                    array_push($administratorsArray[$key]['roles'], $rolesTableMapper->getObjectById((int) $record['role_id']));
                 }
             }
         }
@@ -357,7 +357,7 @@ final class AdministratorsEntityMapper extends EntityMapper
             throw $e;
         } 
         try {
-            $this->administratorsTableMapper->doDelete($administratorId);
+            $this->administratorsTableMapper->delete($administratorId);
         } catch (\Exceptions $e) {
             pg_query("ROLLBACK");
             throw $e;

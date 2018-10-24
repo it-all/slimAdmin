@@ -8,7 +8,7 @@ use Entities\SystemEvents\SystemEventsTableMapper;
 use Infrastructure\Security\Authentication\AuthenticationService;
 use Infrastructure\Security\Authorization\AuthorizationService;
 use Entities\Roles\Model\Role;
-use Entities\Roles\Model\RolesMapper;
+use Entities\Roles\Model\RolesTableMapper;
 use Infrastructure\BaseMVC\Model\ListViewModels;
 use Infrastructure\Database\Queries\QueryBuilder;
 use Infrastructure\Database\Postgres;
@@ -127,8 +127,8 @@ class Administrator implements ListViewModels
 
     public function hasRoleName(string $roleName): bool 
     {
-        $rolesMapper = RolesMapper::getInstance();
-        if (!in_array($roleName, $rolesMapper->getRoleNames())) {
+        $rolesTableMapper = RolesTableMapper::getInstance();
+        if (!in_array($roleName, $rolesTableMapper->getRoleNames())) {
             throw new \InvalidArgumentException("Invalid role $roleName");
         }
 

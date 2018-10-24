@@ -8,7 +8,7 @@ use Entities\Administrators\Model\AdministratorsValidator;
 use Entities\Administrators\Model\Administrator;
 use Entities\Administrators\Model\AdministratorsEntityMapper;
 use Entities\Administrators\Model\AdministratorsTableMapper;
-use Entities\Roles\Model\RolesMapper;
+use Entities\Roles\Model\RolesTableMapper;
 use Entities\LoginAttempts\LoginAttemptsTableMapper;
 use Entities\Administrators\View\Forms\AdministratorForm;
 use Infrastructure\SlimPostgres;
@@ -218,7 +218,7 @@ class AdministratorsController extends BaseController
             
             if ($fieldName == AdministratorForm::ROLES_FIELDSET_NAME) {
 
-                $rolesMapper = RolesMapper::getInstance();
+                $rolesTableMapper = RolesTableMapper::getInstance();
 
                 $addRoleIds = (isset($newValue['add'])) ? $newValue['add'] : [];
                 $removeRoleIds = (isset($newValue['remove'])) ? $newValue['remove'] : [];
@@ -234,7 +234,7 @@ class AdministratorsController extends BaseController
                     }
                 }
                 foreach ($addRoleIds as $roleId) {
-                    $updatedNewValue .= $rolesMapper->getRoleForRoleId((int) $roleId) . " ";
+                    $updatedNewValue .= $rolesTableMapper->getRoleForRoleId((int) $roleId) . " ";
                 }
                 $newValue = $updatedNewValue;
                 $oldValue = $updatedOldValue;

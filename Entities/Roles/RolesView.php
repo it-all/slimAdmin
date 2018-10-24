@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Entities\Roles;
 
-use Entities\Roles\Model\RolesMapper;
+use Entities\Roles\Model\RolesTableMapper;
 use Infrastructure\SlimPostgres;
 use Exceptions\QueryFailureException;
 use Infrastructure\BaseMVC\View\ObjectsListViews;
@@ -19,7 +19,7 @@ class RolesView extends DatabaseTableView implements ObjectsListViews, InsertUpd
 {
     public function __construct(Container $container)
     {
-        parent::__construct($container, RolesMapper::getInstance(), ROUTEPREFIX_ROLES, true, 'admin/lists/objectsList.php');
+        parent::__construct($container, RolesTableMapper::getInstance(), ROUTEPREFIX_ROLES, true, 'admin/lists/objectsList.php');
     }
 
     protected function getResource(string $which): string 

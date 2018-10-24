@@ -17,7 +17,7 @@ class RolesValidator extends DatabaseTableFormValidator
             throw new \InvalidArgumentException("insert action must not have record");
         }
 
-        parent::__construct($inputData, RolesMapper::getInstance());
+        parent::__construct($inputData, RolesTableMapper::getInstance());
 
         if ($databaseAction == 'update') {
             $skipUniqueForUnchanged = true;

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Entities\LoginAttempts;
 
-use Infrastructure\ListViewMappers;
 use Entities\Administrators\Model\Administrator;
 use Infrastructure\Database\Postgres;
 use Infrastructure\Database\DataMappers\TableMapper;

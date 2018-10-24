@@ -5,7 +5,7 @@ namespace Entities\Administrators\Model;
 
 use Infrastructure\Database\DatabaseTableValidation;
 use Infrastructure\Validation\ValitronValidatorExtension;
-use Entities\Roles\Model\RolesMapper;
+use Entities\Roles\Model\RolesTableMapper;
 use Infrastructure\Security\Authorization\AuthorizationService;
 
 class AdministratorsValidator extends ValitronValidatorExtension
@@ -45,14 +45,14 @@ class AdministratorsValidator extends ValitronValidatorExtension
 
         // all roles must be in roles table
         $this->rule('array', 'roles');
-        $rolesMapper = RolesMapper::getInstance();
-        $this->rule('in', 'roles.*', array_keys($rolesMapper->getRoles())); // role ids
+        $rolesTableMapper = RolesTableMapper::getInstance();
+        $this->rule('in', 'roles.*', array_keys($rolesTableMapper->getRoles())); // role ids
 
         // non-top-dogs cannot assign top-dog role to themselves or other non-top-dogs
         // and cannot unassign top role
         if (!$authorization->hasTopRole()) {
 
-            $topRoleId = $rolesMapper->getTopRoleId();
+            $topRoleId = $rolesTableMapper->getTopRoleId();
 
             $this->rule('notIn', 'roles.*', [$topRoleId])->message('No permission to set '.TOP_ROLE);
 

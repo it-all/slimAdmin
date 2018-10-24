@@ -266,15 +266,22 @@ class TableMapper implements ListViewMappers
      * if row is not deleted (ie primary key value not found), an exception is thrown
      * note that $primaryKeyValue argument is untyped as it can be string or int 
     */
-    public function deleteByPrimaryKey($primaryKeyValue)
+    public function deleteByPrimaryKey($primaryKeyValue, ?string $returnField = null): ?string
     {
         $query = "DELETE FROM $this->tableName WHERE ".$this->getPrimaryKeyColumnName()." = $1";
         $q = new QueryBuilder($query, $primaryKeyValue);
+
+        if ($returnField !== null) {
+            return $q->executeWithReturnField($returnField);
+        }
+
         $dbResult = $q->execute();
 
         if (pg_affected_rows($dbResult) == 0) {
             throw new Exceptions\QueryResultsNotFoundException();
         }
+
+        return null;
     }
 
     private function addColumnsToBuilder(InsertUpdateBuilder $builder, array $columnValues)

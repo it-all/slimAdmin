@@ -4,13 +4,12 @@ declare(strict_types=1);
 namespace Entities\Roles\Model;
 
 use Infrastructure\Database\DataMappers\TableMapper;
-use Infrastructure\Database\Queries\QueryBuilder;
 use It_All\FormFormer\Fields\SelectField;
 use It_All\FormFormer\Fields\SelectOption;
 use Exceptions;
 
 // Singleton
-final class RolesMapper extends TableMapper
+final class RolesTableMapper extends TableMapper
 {
     /** @var array role_id => role. instead of querying the database whenever a role is needed. all roles are loaded on construction and are then easily retrievable. note that if in the future any role records were to change via javascript this array would require updating through the setRoles method in order to stay in sync. */
     private $roles;
@@ -23,7 +22,7 @@ final class RolesMapper extends TableMapper
     {
         static $instance = null;
         if ($instance === null) {
-            $instance = new RolesMapper();
+            $instance = new RolesTableMapper();
         }
         return $instance;
     }
@@ -121,20 +120,8 @@ final class RolesMapper extends TableMapper
         return true;
     }
 
-    public function hasAdministrator(int $roleId): bool
-    {
-        $q = new QueryBuilder("SELECT COUNT(id) FROM ".self::ADMINISTRATORS_JOIN_TABLE_NAME." WHERE role_id = $1", $roleId);
-        return (bool) $q->getOne();
-    }
-
-    public function hasPermissionAssigned(int $roleId): bool
-    {
-        $q = new QueryBuilder("SELECT COUNT(id) FROM ".self::PERMISSIONS_JOIN_TABLE_NAME." WHERE role_id = $1", $roleId);
-        return (bool) $q->getOne();
-    }
-
     // override for validation
-    public function deleteByPrimaryKey($primaryKeyValue) 
+    public function deleteByPrimaryKey($primaryKeyValue, ?string $returnField = null): ?string
     {
         // make sure role exists and is deletable
         if (null === $role = $this->getObjectById((int) $primaryKeyValue)) {
@@ -145,7 +132,7 @@ final class RolesMapper extends TableMapper
             throw new Exceptions\UnallowedActionException("Role in use: id $primaryKeyValue");
         }
 
-        parent::deleteByPrimaryKey($primaryKeyValue);
+        return parent::deleteByPrimaryKey($primaryKeyValue, $returnField);
     }
 
     /** selects roles and converts recordset to array of objects and return */
@@ -160,12 +147,6 @@ final class RolesMapper extends TableMapper
         }
 
         return $roles;
-    }
-
-    public function deleteForAdministrator(int $administratorId) 
-    {
-        $q = new QueryBuilder("DELETE FROM ".self::ADMINISTRATORS_JOIN_TABLE_NAME." WHERE administrator_id = $1", $administratorId);
-        $q->execute();
     }
 
     /** all roles must exist or exception thrown */

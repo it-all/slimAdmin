@@ -5,9 +5,6 @@ namespace Entities\SystemEvents;
 
 use Infrastructure\Database\DataMappers\TableMapper;
 use Infrastructure\Database\Queries\QueryBuilder;
-use Infrastructure\Database\Queries\SelectBuilder;
-use Infrastructure\Database\Postgres;
-use Infrastructure\Functions;
 
 // Singleton
 final class SystemEventsTableMapper extends TableMapper

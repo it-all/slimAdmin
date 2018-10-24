@@ -17,7 +17,7 @@ use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class PermissionsViews extends AdminListView implements ObjectsListViews, InsertUpdateViews
+class PermissionsView extends AdminListView implements ObjectsListViews, InsertUpdateViews
 {
     use ResponseUtilities;
 

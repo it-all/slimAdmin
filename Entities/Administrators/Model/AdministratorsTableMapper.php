@@ -5,7 +5,6 @@ namespace Entities\Administrators\Model;
 
 use Infrastructure\Database\Postgres;
 use Infrastructure\Database\DataMappers\TableMapper;
-use Infrastructure\Database\Queries\QueryBuilder;
 
 // Singleton
 final class AdministratorsTableMapper extends TableMapper
@@ -48,14 +47,9 @@ final class AdministratorsTableMapper extends TableMapper
     }
 
     /** deletes the administrators record */
-    public function doDelete(int $administratorId): ?string
+    public function delete(int $administratorId): ?string
     {
-        $q = new QueryBuilder("DELETE FROM ".self::TABLE_NAME." WHERE id = $1", $administratorId);
-        if ($username = $q->executeWithReturnField('username')) {
-            return $username;
-        }
-
-        return null;
+        return parent::deleteByPrimaryKey($administratorId, 'username');
     }
     
     public function getChangedFields(array $changedFields): array 

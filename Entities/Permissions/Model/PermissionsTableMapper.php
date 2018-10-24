@@ -3,14 +3,8 @@ declare(strict_types=1);
 
 namespace Entities\Permissions\Model;
 
-use Entities\Roles\Model\RolesMapper;
-use Entities\Roles\Model\Role;
-use Infrastructure\Database\DataMappers\MultiTableMapper;
 use Infrastructure\Database\DataMappers\TableMapper;
-use Infrastructure\Database\Queries\QueryBuilder;
-use Infrastructure\Database\Queries\SelectBuilder;
 use Infrastructure\Database\Postgres;
-use Exceptions;
 
 // Singleton
 final class PermissionsTableMapper extends TableMapper
@@ -76,9 +70,8 @@ final class PermissionsTableMapper extends TableMapper
     }
     
     /** deletes the permissions record */
-    public function doDelete(int $permissionId)
+    public function delete(int $permissionId): ?string
     {
-        $q = new QueryBuilder("DELETE FROM ".self::TABLE_NAME." WHERE id = $1", $permissionId);
-        $q->execute();
+        return parent::deleteByPrimaryKey($administratorId, 'title');
     }
 }

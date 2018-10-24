@@ -7,7 +7,7 @@ use Slim\Http\Request;
 use Slim\Container;
 use Infrastructure\SlimPostgres;
 use Entities\Permissions\Model\PermissionsTableMapper;
-use Entities\Roles\Model\RolesMapper;
+use Entities\Roles\Model\RolesTableMapper;
 use Entities\Roles\Model\Role;
 use Infrastructure\BaseMVC\View\Forms\Forms;
 use Infrastructure\BaseMVC\View\Forms\Form as BaseForm;
@@ -93,9 +93,9 @@ abstract class PermissionForm extends BaseForm implements Forms
     private function getRolesFieldset() 
     {
         // Roles Checkboxes
-        $rolesMapper = RolesMapper::getInstance();
+        $rolesTableMapper = RolesTableMapper::getInstance();
         $rolesCheckboxes = [];
-        foreach ($rolesMapper->getRoles() as $roleId => $roleName) {
+        foreach ($rolesTableMapper->getRoles() as $roleId => $roleName) {
             $rolesCheckboxAttributes = [
                 'type' => 'checkbox',
                 'name' => self::ROLES_FIELDSET_NAME . '[]',

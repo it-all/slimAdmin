@@ -5,12 +5,12 @@ namespace Entities\Permissions;
 
 use Infrastructure\SlimPostgres;
 use Infrastructure\BaseMVC\Controller\BaseController;
-use Entities\Roles\Model\RolesMapper;
+use Entities\Roles\Model\RolesTableMapper;
 use Entities\Permissions\Model\Permission;
 use Entities\Permissions\Model\PermissionsTableMapper;
 use Entities\Permissions\Model\PermissionsEntityMapper;
 use Entities\Permissions\Model\PermissionsValidator;
-use Entities\Permissions\View\PermissionsViews;
+use Entities\Permissions\View\PermissionsView;
 use Entities\Permissions\View\Forms\PermissionForm;
 use Infrastructure\BaseMVC\View\ResponseUtilities;
 use Infrastructure\BaseMVC\View\Forms\FormHelper;
@@ -18,7 +18,7 @@ use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class PermissionsControllers extends BaseController
+class PermissionsController extends BaseController
 {
     use ResponseUtilities;
 
@@ -32,7 +32,7 @@ class PermissionsControllers extends BaseController
     {
         $this->permissionsEntityMapper = PermissionsEntityMapper::getInstance();
         $this->permissionsTableMapper = PermissionsTableMapper::getInstance();
-        $this->view = new PermissionsViews($container);
+        $this->view = new PermissionsView($container);
         $this->routePrefix = ROUTEPREFIX_PERMISSIONS;
         parent::__construct($container);
     }
@@ -177,7 +177,7 @@ class PermissionsControllers extends BaseController
         // search roles to remove (ignore top role)
         $removeRoles = [];
         foreach ($permission->getRoleIds() as $currentRoleId) {
-            if ($currentRoleId != (RolesMapper::getInstance())->getTopRoleId() && !in_array($currentRoleId, $roleIds)) {
+            if ($currentRoleId != (RolesTableMapper::getInstance())->getTopRoleId() && !in_array($currentRoleId, $roleIds)) {
                 $removeRoles[] = $currentRoleId;
             }
         }
@@ -210,7 +210,7 @@ class PermissionsControllers extends BaseController
             
             if ($fieldName == PermissionForm::ROLES_FIELDSET_NAME) {
 
-                $rolesMapper = RolesMapper::getInstance();
+                $rolesTableMapper = RolesTableMapper::getInstance();
 
                 $addRoleIds = (isset($newValue['add'])) ? $newValue['add'] : [];
                 $removeRoleIds = (isset($newValue['remove'])) ? $newValue['remove'] : [];
@@ -226,7 +226,7 @@ class PermissionsControllers extends BaseController
                     }
                 }
                 foreach ($addRoleIds as $roleId) {
-                    $updatedNewValue .= $rolesMapper->getRoleForRoleId((int) $roleId) . " ";
+                    $updatedNewValue .= $rolesTableMapper->getRoleForRoleId((int) $roleId) . " ";
                 }
                 $newValue = $updatedNewValue;
                 $oldValue = $updatedOldValue;

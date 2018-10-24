@@ -6,7 +6,7 @@ namespace Entities\Permissions\Model;
 use Entities\Permissions\View\Forms\PermissionForm;
 use Infrastructure\Database\DatabaseTableValidation;
 use Infrastructure\Validation\ValitronValidatorExtension;
-use Entities\Roles\Model\RolesMapper;
+use Entities\Roles\Model\RolesTableMapper;
 use Infrastructure\Security\Authorization\AuthorizationService;
 
 class PermissionsValidator extends ValitronValidatorExtension
@@ -38,7 +38,7 @@ class PermissionsValidator extends ValitronValidatorExtension
 
         // all selected roles must be in roles table
         $this->rule('array', 'roles');
-        $rolesMapper = RolesMapper::getInstance();
-        $this->rule('in', 'roles.*', array_keys($rolesMapper->getRoles())); // role ids
+        $rolesTableMapper = RolesTableMapper::getInstance();
+        $this->rule('in', 'roles.*', array_keys($rolesTableMapper->getRoles())); // role ids
     }
 }

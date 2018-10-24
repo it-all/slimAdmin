@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Entities\Roles;
 
-use Entities\Roles\Model\RolesMapper;
+use Entities\Roles\Model\RolesTableMapper;
 use Infrastructure\SlimPostgres;
 use Infrastructure\BaseMVC\Controller\DatabaseTableController;
 use Exceptions;
@@ -16,7 +16,7 @@ class RolesController extends DatabaseTableController
 {
     public function __construct(Container $container)
     {
-        parent::__construct($container, RolesMapper::getInstance(), new RolesView($container), ROUTEPREFIX_ROLES);
+        parent::__construct($container, RolesTableMapper::getInstance(), new RolesView($container), ROUTEPREFIX_ROLES);
     }
 
     /** override to call objects view */

@@ -5,6 +5,7 @@ namespace Entities\Administrators\Model;
 
 use Infrastructure\Database\Postgres;
 use Infrastructure\Database\DataMappers\TableMapper;
+use Infrastructure\Database\Queries\QueryBuilder;
 
 // fake Singleton with public constructor
 final class AdministratorsTableMapper extends TableMapper
@@ -28,6 +29,15 @@ final class AdministratorsTableMapper extends TableMapper
         parent::__construct(self::TABLE_NAME, '*', self::ORDER_BY_COLUMN_NAME);
     }
 
+    public function getIdByUsername(string $username): ?int 
+    {
+        $q = new QueryBuilder("SELECT id FROM ".self::TABLE_NAME." WHERE username = $1", $username);
+        if (null === $id = $q->getOne()) {
+            return null;
+        }
+        return (int) $id;
+    }
+    
     // returns hashed password for insert/update 
     public function getHashedPassword(string $password): string 
     {

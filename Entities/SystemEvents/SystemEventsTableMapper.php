@@ -6,7 +6,7 @@ namespace Entities\SystemEvents;
 use Infrastructure\Database\DataMappers\TableMapper;
 use Infrastructure\Database\Queries\QueryBuilder;
 
-// Singleton
+// fake Singleton with public constructor
 final class SystemEventsTableMapper extends TableMapper
 {
     /** @var array of system_event_types records: id => [eventy_type, description]. Populated at construction in order to reduce future queries */
@@ -24,7 +24,7 @@ final class SystemEventsTableMapper extends TableMapper
         return $instance;
     }
 
-    protected function __construct()
+    public function __construct()
     {
         parent::__construct(self::TABLE_NAME, '*', 'created', false);
         $this->setEventTypes();

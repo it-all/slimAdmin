@@ -8,7 +8,7 @@ use Infrastructure\Database\Postgres;
 use Infrastructure\Database\DataMappers\TableMapper;
 use Infrastructure\Database\Queries\QueryBuilder;
 
-// Singleton
+// fake Singleton with public constructor
 final class LoginAttemptsTableMapper extends TableMapper
 {
     const TABLE_NAME = 'login_attempts';
@@ -22,7 +22,7 @@ final class LoginAttemptsTableMapper extends TableMapper
         return $instance;
     }
 
-    protected function __construct()
+    public function __construct()
     {
         parent::__construct(self::TABLE_NAME, '*', 'created', false);
     }

@@ -8,7 +8,7 @@ use It_All\FormFormer\Fields\SelectField;
 use It_All\FormFormer\Fields\SelectOption;
 use Exceptions;
 
-// Singleton
+// fake Singleton with public constructor
 final class RolesTableMapper extends TableMapper
 {
     /** @var array role_id => role. instead of querying the database whenever a role is needed. all roles are loaded on construction and are then easily retrievable. note that if in the future any role records were to change via javascript this array would require updating through the setRoles method in order to stay in sync. */
@@ -27,7 +27,7 @@ final class RolesTableMapper extends TableMapper
         return $instance;
     }
 
-    protected function __construct()
+    public function __construct()
     {
         parent::__construct(self::TABLE_NAME, 'id, role, created', 'id');
         $this->setRoles();

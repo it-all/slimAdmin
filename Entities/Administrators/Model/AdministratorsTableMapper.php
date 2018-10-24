@@ -6,7 +6,7 @@ namespace Entities\Administrators\Model;
 use Infrastructure\Database\Postgres;
 use Infrastructure\Database\DataMappers\TableMapper;
 
-// Singleton
+// fake Singleton with public constructor
 final class AdministratorsTableMapper extends TableMapper
 {
     const TABLE_NAME = 'administrators';
@@ -23,7 +23,7 @@ final class AdministratorsTableMapper extends TableMapper
         return $instance;
     }
 
-    protected function __construct()
+    public function __construct()
     {
         parent::__construct(self::TABLE_NAME, '*', self::ORDER_BY_COLUMN_NAME);
     }

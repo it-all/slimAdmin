@@ -6,7 +6,7 @@ namespace Entities\Permissions\Model;
 use Infrastructure\Database\DataMappers\TableMapper;
 use Infrastructure\Database\Postgres;
 
-// Singleton
+// fake Singleton with public constructor
 final class PermissionsTableMapper extends TableMapper
 {
     const TABLE_NAME = 'permissions';
@@ -23,7 +23,7 @@ final class PermissionsTableMapper extends TableMapper
         return $instance;
     }
 
-    protected function __construct()
+    public function __construct()
     {
         parent::__construct(self::TABLE_NAME, '*', self::ORDER_BY_COLUMN_NAME);
     }

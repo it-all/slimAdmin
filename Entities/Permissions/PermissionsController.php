@@ -68,7 +68,7 @@ class PermissionsController extends BaseController
 
         $this->systemEvents->insertInfo("Inserted Permission", (int) $this->authentication->getAdministratorId(), "id:$permissionId");
 
-        SlimPostgres::setAdminNotice("Inserted Permission $administratorId");
+        SlimPostgres::setAdminNotice("Inserted Permission $permissionId");
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS_PERMISSIONS));
     }
 

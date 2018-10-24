@@ -105,6 +105,7 @@ class QueryBuilder
     /**
      * In order to receive a column value back for INSERT, UPDATE, and DELETE queries
      * Note that RETURNING can include multiple fields or expressions in SQL, but this only accepts one field. To receive multiple, simply call execute() instead and process the returned result similar to below
+     * Note also that if an invalid $returnField is received, the query still executes prior to throwing the InvalidArgumentException.
      */
     public function executeWithReturnField(string $returnField, bool $alterBooleanArgs = false)
     {
@@ -116,7 +117,7 @@ class QueryBuilder
         if (pg_num_rows($result) > 0) {
             $returned = pg_fetch_all($result);
             if (!isset($returned[0][$returnField])) {
-                throw new \InvalidArgumentException("$returnField column does not exist");
+                throw new \InvalidArgumentException("Query executed, but $returnField column does not exist");
             }
             return $returned[0][$returnField];
         } else {

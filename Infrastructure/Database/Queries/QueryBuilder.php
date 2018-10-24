@@ -129,7 +129,7 @@ class QueryBuilder
     /**
      * returns the value of the one column in one record or null if 0 records result
      */
-    public function getOne()
+    public function getOne(): ?string
     {
         $result = $this->execute();
         if (pg_num_rows($result) == 1) {

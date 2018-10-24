@@ -295,7 +295,7 @@ final class PermissionsEntityMapper extends EntityMapper
         if (count($changedPermissionFields) > 0) {
             try {
                 $this->permissionsTableMapper->updateByPrimaryKey($changedPermissionFields, $permissionId, false);
-            } catch (\Exceptions $e) {
+            } catch (\Exception $e) {
                 pg_query("ROLLBACK");
                 throw $e;
             }
@@ -304,7 +304,7 @@ final class PermissionsEntityMapper extends EntityMapper
             foreach ($changedFields['roles']['add'] as $addRoleId) {
                 try {
                     $this->doInsertPermissionRole($permissionId, (int) $addRoleId);
-                } catch (\Exceptions $e) {
+                } catch (\Exception $e) {
                     pg_query("ROLLBACK");
                     throw $e;
                 }
@@ -317,7 +317,7 @@ final class PermissionsEntityMapper extends EntityMapper
                 if (!$deleteRole->isTop()) {
                     try {
                         $roleDeleteResult = $this->doDeletePermissionRole($permissionId, (int) $deleteRoleId);
-                    } catch (\Exceptions $e) {
+                    } catch (\Exception $e) {
                         pg_query("ROLLBACK");
                         throw $e;
                     }
@@ -351,8 +351,22 @@ final class PermissionsEntityMapper extends EntityMapper
     private function doDeleteTransaction(int $permissionId)
     {
         pg_query("BEGIN");
-        $this->doDeletePermissionRoles($permissionId);
-        $this->permissionsTableMapper->delete($permissionId);
+        // $this->doDeletePermissionRoles($permissionId);
+
+        try {
+            $this->doDeletePermissionRoles($permissionId);
+        } catch (\Exception $e) {
+            pg_query("ROLLBACK");
+            throw $e;
+        }
+
+        try {
+            $this->permissionsTableMapper->delete($permissionId);
+        } catch (\Exception $e) {
+            pg_query("ROLLBACK");
+            throw $e;
+        }
+        // $this->permissionsTableMapper->delete($permissionId);
         pg_query("COMMIT");
     }
 

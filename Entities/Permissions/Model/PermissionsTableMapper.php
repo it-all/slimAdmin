@@ -72,6 +72,6 @@ final class PermissionsTableMapper extends TableMapper
     /** deletes the permissions record */
     public function delete(int $permissionId): ?string
     {
-        return parent::deleteByPrimaryKey($administratorId, 'title');
+        return parent::deleteByPrimaryKey($permissionId, 'title');
     }
 }

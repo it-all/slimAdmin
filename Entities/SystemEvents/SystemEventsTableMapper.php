@@ -102,19 +102,15 @@ final class SystemEventsTableMapper extends TableMapper
         if ($administratorId == 0) {
             $administratorId = null;
         }
-        $q = new QueryBuilder("INSERT INTO ".self::TABLE_NAME." (event_type, title, notes, administrator_id, ip_address, resource, request_method) VALUES($1, $2, $3, $4, $5, $6, $7)", $eventType, $title, $notes, $administratorId, $_SERVER['REMOTE_ADDR'], $_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
        
-        $ipAddress = $_SERVER['REMOTE_ADDR'];
-        $resource = $_SERVER['REQUEST_URI'];
-
         $columnValues = [
             'event_type' => $eventTypeId, 
             'title' => $title,
             'notes' => $notes,
             'created' => 'NOW()',
             'administrator_id' => $administratorId,
-            'ip_address' => $ipAddress,
-            'resource' => $resource,
+            'ip_address' => $_SERVER['REMOTE_ADDR'],
+            'resource' => $_SERVER['REQUEST_URI'],
             'request_method' => $_SERVER['REQUEST_METHOD']
         ];
 

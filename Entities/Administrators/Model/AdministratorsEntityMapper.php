@@ -90,14 +90,14 @@ final class AdministratorsEntityMapper extends EntityMapper
 
         try {
             $administratorId = $this->administratorsTableMapper->callInsert($name, $username, $passwordClear, $active);
-        } catch (\Exceptions $e) {
+        } catch (\Exception $e) {
             pg_query("ROLLBACK");
             throw $e;
         }
 
         try {
             $this->insertAdministratorRoles((int) $administratorId, $roleIds);
-        } catch (\Exceptions $e) {
+        } catch (\Exception $e) {
             pg_query("ROLLBACK");
             throw $e;
         }
@@ -352,13 +352,13 @@ final class AdministratorsEntityMapper extends EntityMapper
         pg_query("BEGIN");
         try {
             $this->doDeleteAdministratorRoles($administratorId);
-        } catch (\Exceptions $e) {
+        } catch (\Exception $e) {
             pg_query("ROLLBACK");
             throw $e;
         } 
         try {
             $this->administratorsTableMapper->delete($administratorId);
-        } catch (\Exceptions $e) {
+        } catch (\Exception $e) {
             pg_query("ROLLBACK");
             throw $e;
         } 
@@ -393,7 +393,7 @@ final class AdministratorsEntityMapper extends EntityMapper
         if (count($changedAdministratorFields) > 0) {
             try {
                 $this->administratorsTableMapper->updateByPrimaryKey($changedAdministratorFields, $administratorId, false);
-            } catch (\Exceptions $e) {
+            } catch (\Exception $e) {
                 pg_query("ROLLBACK");
                 throw $e;
             }
@@ -402,7 +402,7 @@ final class AdministratorsEntityMapper extends EntityMapper
             foreach ($changedFields['roles']['add'] as $addRoleId) {
                 try {
                     $this->doInsertAdministratorRole($administratorId, (int) $addRoleId);
-                } catch (\Exceptions $e) {
+                } catch (\Exception $e) {
                     pg_query("ROLLBACK");
                     throw $e;
                 }
@@ -412,7 +412,7 @@ final class AdministratorsEntityMapper extends EntityMapper
             foreach ($changedFields['roles']['remove'] as $deleteRoleId) {
                 try {
                     $roleDeleteResult = $this->doDeleteAdministratorRole($administratorId, (int) $deleteRoleId);
-                } catch (\Exceptions $e) {
+                } catch (\Exception $e) {
                     pg_query("ROLLBACK");
                     throw $e;
                 }

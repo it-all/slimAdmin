@@ -88,8 +88,6 @@ class ErrorHandler
 
             $administratorId = (isset($_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID])) ? (int) $_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID] : null;
 
-            echo " INSERTING EVENT ";
-            
             @$this->SystemEventsTableMapper->insertEvent('PHP Error', $systemEventType, $administratorId, $databaseErrorMessage);
         }
 

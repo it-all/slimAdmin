@@ -63,7 +63,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
     }
 
     /** overrides in order to get administrator objects and send to indexView */
-    public function routeIndex($request, Response $response, $args)
+    public function routeIndex(Request $request, Response $response, $args)
     {
         return $this->indexViewObjects($response);
     }

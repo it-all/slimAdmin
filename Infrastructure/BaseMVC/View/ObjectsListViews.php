@@ -10,7 +10,7 @@ use Slim\Http\Response;
 interface ObjectsListViews
 {
         /** overrides in order to get objects and send to indexView */
-        public function routeIndex($request, Response $response, $args);
+        public function routeIndex(Request $request, Response $response, $args);
     
         /** overrides in order to get objects and send to indexView */
         public function routeIndexResetFilter(Request $request, Response $response, $args);

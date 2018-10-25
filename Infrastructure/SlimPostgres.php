@@ -13,6 +13,8 @@ use Infrastructure\Security\CsrfMiddleware;
 use Entities\SystemEvents\SystemEventsTableMapper;
 use Infrastructure\Utilities;
 use Infrastructure\Functions;
+use Slim\Http\Request;
+use Slim\Http\Response;
 
 class SlimPostgres
 {
@@ -230,7 +232,7 @@ class SlimPostgres
 
         /** Override the default Not Found Handler */
         $slimSettings['notFoundHandler'] = function ($container) {
-            return function ($request, $response) use ($container) {
+            return function (Request $request, Response $response) use ($container) {
 
                 /** log error */
                 $this->SystemEventsTableMapper->insertEvent('404 Page Not Found', 'notice', $container->authentication->getAdministratorId());
@@ -299,7 +301,7 @@ class SlimPostgres
              * (http://blog.ircmaxell.com/2013/02/preventing-csrf-attacks.html)
              */
             $guard = new \Slim\Csrf\Guard('csrf', $storage, null, 200, 16, true);
-            $guard->setFailureCallable(function ($request, $response, $next) {
+            $guard->setFailureCallable(function (Request $request, Response $response, $next) {
                 $request = $request->withAttribute("csrf_status", false);
                 return $next($request, $response);
             });

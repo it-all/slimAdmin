@@ -8,6 +8,7 @@ use It_All\FormFormer\Fieldset;
 use Exceptions\QueryFailureException;
 use Entities\Administrators\Model\Administrator;
 use Entities\Administrators\Model\AdministratorsEntityMapper;
+use Entities\Administrators\Model\AdministratorsTableMapper;
 use Entities\Administrators\View\Forms\AdministratorInsertForm;
 use Entities\Administrators\View\Forms\AdministratorUpdateForm;
 use It_All\FormFormer\Fields\InputField;
@@ -29,6 +30,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
     use ResponseUtilities;
 
     private $administratorsEntityMapper;
+    private $administratorsTableMapper;
     protected $routePrefix;
 
     const FILTER_FIELDS_PREFIX = 'administrators';
@@ -36,6 +38,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
     public function __construct(Container $container)
     {
         $this->administratorsEntityMapper = AdministratorsEntityMapper::getInstance();
+        $this->administratorsTableMapper = AdministratorsTableMapper::getInstance();
         $this->routePrefix = ROUTEPREFIX_ADMINISTRATORS;
 
         parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS, $this->administratorsEntityMapper, ROUTE_ADMINISTRATORS_RESET, 'admin/lists/objectsList.php');
@@ -125,7 +128,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
     {
         // make sure there is an administrator for the primary key
         if (null === $administrator = $this->mapper->getObjectById((int) $args['primaryKey'])) {
-            return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->administratorsEntityMapper, 'update');
+            return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->administratorsTableMapper, 'update');
         }
 
         $formAction = $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]);

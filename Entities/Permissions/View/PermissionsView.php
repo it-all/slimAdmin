@@ -22,12 +22,14 @@ class PermissionsView extends AdminListView implements ObjectsListViews, InsertU
     use ResponseUtilities;
 
     private $permissionsEntityMapper;
+    private $permissionsTableMapper;
     const FILTER_FIELDS_PREFIX = 'permissions';
 
     public function __construct(Container $container)
     {
         $this->routePrefix = ROUTEPREFIX_PERMISSIONS;
         $this->permissionsEntityMapper = PermissionsEntityMapper::getInstance();
+        $this->permissionsTableMapper = PermissionsTableMapper::getInstance();
 
         parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS_PERMISSIONS, $this->permissionsEntityMapper, ROUTE_ADMINISTRATORS_PERMISSIONS_RESET, 'admin/lists/objectsList.php');
 

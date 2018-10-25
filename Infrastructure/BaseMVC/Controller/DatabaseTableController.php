@@ -20,13 +20,13 @@ class DatabaseTableController extends BaseController
 {
     use ResponseUtilities;
 
-    protected $mapper;
+    protected $tableMapper;
     protected $view;
     protected $routePrefix;
 
-    public function __construct(Container $container, TableMapper $mapper, $view, $routePrefix)
+    public function __construct(Container $container, TableMapper $tableMapper, $view, $routePrefix)
     {
-        $this->mapper = $mapper;
+        $this->tableMapper = $tableMapper;
         $this->view = $view;
         $this->routePrefix = $routePrefix;
         parent::__construct($container);
@@ -34,13 +34,13 @@ class DatabaseTableController extends BaseController
 
     public function getMapper(): TableMapper
     {
-        return $this->mapper;
+        return $this->tableMapper;
     }
 
     protected function getListViewColumns(): array
     {
         $listViewColumns = [];
-        foreach ($this->mapper->getColumns() as $column) {
+        foreach ($this->tableMapper->getColumns() as $column) {
             $listViewColumns[$column->getName()] = $column->getName();
         }
 
@@ -59,9 +59,9 @@ class DatabaseTableController extends BaseController
             throw new \Exception('No permission.');
         }
 
-        $this->setRequestInput($request, DatabaseTableForm::getFieldNames($this->mapper), $this->getBooleanFieldNames());
+        $this->setRequestInput($request, DatabaseTableForm::getFieldNames($this->tableMapper), $this->getBooleanFieldNames());
 
-        $validator = new DatabaseTableInsertFormValidator($this->requestInput, $this->mapper);
+        $validator = new DatabaseTableInsertFormValidator($this->requestInput, $this->tableMapper);
 
         if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
@@ -72,16 +72,16 @@ class DatabaseTableController extends BaseController
 
         try {
             /** the last true bool means that boolean columns that don't exist in $changedColumnsValues get inserted as false */
-            $insertResult = $this->mapper->insert($this->requestInput, true);
+            $insertResult = $this->tableMapper->insert($this->requestInput, true);
         } catch (\Exception $e) {
             throw new \Exception("Insert failure. ".$e->getMessage());
         }
 
-        $noteStart = "Inserted " . $this->mapper->getFormalTableName(false);
+        $noteStart = "Inserted " . $this->tableMapper->getFormalTableName(false);
         $adminNotification = $noteStart;
         $eventNote = "";
 
-        if (null !== $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName()) {
+        if (null !== $primaryKeyColumnName = $this->tableMapper->getPrimaryKeyColumnName()) {
             $adminNotification .= " $insertResult"; // if primary key is set the new id is returned by mapper insert method
             $eventNote = "$primaryKeyColumnName: $insertResult";
         }
@@ -95,7 +95,7 @@ class DatabaseTableController extends BaseController
     public function getBooleanFieldNames(): array
     {
         $booleanFieldNames = [];
-        foreach ($this->mapper->getColumns() as $column) {
+        foreach ($this->tableMapper->getColumns() as $column) {
             if ($column->isBoolean()) {
                 $booleanFieldNames[] = $column->getName();
             }
@@ -112,13 +112,13 @@ class DatabaseTableController extends BaseController
 
         $primaryKeyValue = $args['primaryKey'];
 
-        $this->setRequestInput($request, DatabaseTableForm::getFieldNames($this->mapper), $this->getBooleanFieldNames());
+        $this->setRequestInput($request, DatabaseTableForm::getFieldNames($this->tableMapper), $this->getBooleanFieldNames());
 
         $redirectRoute = SlimPostgres::getRouteName(true, $this->routePrefix, 'index');
 
         // make sure there is a record for the primary key
-        if (null === $record = $this->mapper->selectForPrimaryKey($primaryKeyValue)) {
-            return $this->databaseRecordNotFound($response, $primaryKeyValue, $this->mapper, 'update');
+        if (null === $record = $this->tableMapper->selectForPrimaryKey($primaryKeyValue)) {
+            return $this->databaseRecordNotFound($response, $primaryKeyValue, $this->tableMapper, 'update');
         }
 
         // if no changes made stay on page with error
@@ -128,7 +128,7 @@ class DatabaseTableController extends BaseController
             return $this->view->updateView($request, $response, $args);
         }
 
-        $validator = new DatabaseTableUpdateFormValidator($this->requestInput, $this->mapper, $record);
+        $validator = new DatabaseTableUpdateFormValidator($this->requestInput, $this->tableMapper, $record);
 
         if (!$validator->validate()) {
             // redisplay the form with input values and error(s)
@@ -138,11 +138,11 @@ class DatabaseTableController extends BaseController
         }
 
         /** the last true bool means that boolean columns that don't exist in $changedColumnsValues get inserted as false ('f') */
-        $this->mapper->updateByPrimaryKey($changedColumnsValues, $primaryKeyValue, true, [], true);
+        $this->tableMapper->updateByPrimaryKey($changedColumnsValues, $primaryKeyValue, true, [], true);
 
-        $noteStart = "Updated " . $this->mapper->getFormalTableName(false);
+        $noteStart = "Updated " . $this->tableMapper->getFormalTableName(false);
         $adminNotification = "$noteStart $primaryKeyValue";
-        $eventNote = $this->mapper->getPrimaryKeyColumnName() . ": " . $primaryKeyValue;
+        $eventNote = $this->tableMapper->getPrimaryKeyColumnName() . ": " . $primaryKeyValue;
 
         $this->systemEvents->insertInfo($noteStart, (int) $this->authentication->getAdministratorId(), $eventNote);
         SlimPostgres::setAdminNotice($adminNotification);
@@ -157,11 +157,11 @@ class DatabaseTableController extends BaseController
         }
 
         $primaryKey = $args['primaryKey'];
-        $tableName = $this->mapper->getFormalTableName(false);
-        $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
+        $tableName = $this->tableMapper->getFormalTableName(false);
+        $primaryKeyColumnName = $this->tableMapper->getPrimaryKeyColumnName();
 
         try {
-            $this->mapper->deleteByPrimaryKey($primaryKey);
+            $this->tableMapper->deleteByPrimaryKey($primaryKey);
             $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName: $primaryKey");
             SlimPostgres::setAdminNotice("Deleted $tableName $primaryKey");
         } catch (Exceptions\QueryResultsNotFoundException $e) {

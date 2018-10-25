@@ -19,14 +19,14 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
     use ResponseUtilities;
 
     protected $routePrefix;
-    protected $mapper;
+    protected $tableMapper;
 
-    public function __construct(Container $container, TableMapper $mapper, string $routePrefix, bool $addDeleteColumnToListView = true, string $listViewTemplate = 'admin/lists/resultsList.php')
+    public function __construct(Container $container, TableMapper $tableMapper, string $routePrefix, bool $addDeleteColumnToListView = true, string $listViewTemplate = 'admin/lists/resultsList.php')
     {
-        $this->mapper = $mapper;
+        $this->tableMapper = $tableMapper;
         $this->routePrefix = $routePrefix;
 
-        parent::__construct($container, $routePrefix, SlimPostgres::getRouteName(true, $routePrefix, 'index'), $this->mapper, SlimPostgres::getRouteName(true, $routePrefix, 'index.reset'), $listViewTemplate);
+        parent::__construct($container, $routePrefix, SlimPostgres::getRouteName(true, $routePrefix, 'index'), $this->tableMapper, SlimPostgres::getRouteName(true, $routePrefix, 'index.reset'), $listViewTemplate);
 
         $this->setInsert();
         $this->setUpdate();
@@ -43,7 +43,7 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
     {
         $formFieldData = ($request->isPost() && isset($args[SlimPostgres::USER_INPUT_KEY])) ? $args[SlimPostgres::USER_INPUT_KEY] : null;
 
-        $form = new DatabaseTableForm($this->mapper, $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'insert', 'post')), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'insert', $formFieldData);
+        $form = new DatabaseTableForm($this->tableMapper, $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'insert', 'post')), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'insert', $formFieldData);
         
         FormHelper::unsetSessionFormErrors();
 
@@ -51,7 +51,7 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
             $response,
             'admin/form.php',
             [
-                'title' => 'Insert '. $this->mapper->getFormalTableName(false),
+                'title' => 'Insert '. $this->tableMapper->getFormalTableName(false),
                 'form' => $form,
                 'navigationItems' => $this->navigationItems
             ]
@@ -69,13 +69,13 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
         $primaryKeyValue = $args['primaryKey'];
 
         // make sure there is a record for the mapper
-        if (null === $record = $this->mapper->selectForPrimaryKey($primaryKeyValue)) {
-            return $this->databaseRecordNotFound($response, $primaryKeyValue, $this->mapper, 'update');
+        if (null === $record = $this->tableMapper->selectForPrimaryKey($primaryKeyValue)) {
+            return $this->databaseRecordNotFound($response, $primaryKeyValue, $this->tableMapper, 'update');
         }
 
         $formFieldData = ($request->isPut() && isset($args[SlimPostgres::USER_INPUT_KEY])) ? $args[SlimPostgres::USER_INPUT_KEY] : $record;
 
-        $form = new DatabaseTableForm($this->mapper, $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $primaryKeyValue]), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'update', $formFieldData);
+        $form = new DatabaseTableForm($this->tableMapper, $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $primaryKeyValue]), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'update', $formFieldData);
         
         FormHelper::unsetSessionFormErrors();
 
@@ -83,7 +83,7 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
             $response,
             'admin/form.php',
             [
-                'title' => 'Update ' . $this->mapper->getFormalTableName(false),
+                'title' => 'Update ' . $this->tableMapper->getFormalTableName(false),
                 'form' => $form,
                 'primaryKey' => $primaryKeyValue,
                 'navigationItems' => $this->navigationItems,

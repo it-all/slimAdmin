@@ -37,9 +37,10 @@ final class RolesTableMapper extends TableMapper
     public function setRoles()
     {
         $this->roles = [];
-        $records = $this->select();
-        foreach ($records as $record) {
-            $this->roles[(int) $record['id']] = $record['role'];
+        if (null !== $records = $this->select()) {
+            foreach ($records as $record) {
+                $this->roles[(int) $record['id']] = $record['role'];
+            }
         }
     }
 
@@ -140,7 +141,7 @@ final class RolesTableMapper extends TableMapper
     {
         $roles = [];
 
-        if(null !== $records = $this->select("*", $whereColumnsInfo)) {
+        if (null !== $records = $this->select("*", $whereColumnsInfo)) {
             foreach ($records as $record) {
                 $roles[] = $this->buildRole((int) $record['id'], $record['role'], new \DateTimeImmutable($record['created']));
             }

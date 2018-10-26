@@ -104,7 +104,7 @@ final class SystemEventsTableMapper extends TableMapper
         }
        
         $columnValues = [
-            'event_type' => $eventTypeId, 
+            'event_type_id' => $eventTypeId, 
             'title' => $title,
             'notes' => $notes,
             'created' => 'NOW()',

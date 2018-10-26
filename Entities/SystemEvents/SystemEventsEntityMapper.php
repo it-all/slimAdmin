@@ -15,7 +15,7 @@ final class SystemEventsEntityMapper extends EntityMapper
     const SELECT_COLUMNS = [
         'id' => self::TABLE_NAME . '.id',
         'created' => self::TABLE_NAME . '.created',
-        'event_type' => self::TYPES_TABLE_NAME . '.event_type',
+        'event_type_id' => self::TYPES_TABLE_NAME . '.event_type_id',
         'event' => self::TABLE_NAME . '.title',
         'name' => self::ADMINISTRATORS_TABLE_NAME . '.name AS administrator',
         'notes' => self::TABLE_NAME . '.notes',
@@ -41,7 +41,7 @@ final class SystemEventsEntityMapper extends EntityMapper
 
     protected function getFromClause(): string 
     {
-        return "FROM ".self::TABLE_NAME." JOIN ".self::TYPES_TABLE_NAME." ON ".self::TABLE_NAME.".event_type = ".self::TYPES_TABLE_NAME.".id LEFT OUTER JOIN ".self::ADMINISTRATORS_TABLE_NAME." ON ".self::TABLE_NAME.".administrator_id = ".self::ADMINISTRATORS_TABLE_NAME.".id";
+        return "FROM ".self::TABLE_NAME." JOIN ".self::TYPES_TABLE_NAME." ON ".self::TABLE_NAME.".event_type_id = ".self::TYPES_TABLE_NAME.".id LEFT OUTER JOIN ".self::ADMINISTRATORS_TABLE_NAME." ON ".self::TABLE_NAME.".administrator_id = ".self::ADMINISTRATORS_TABLE_NAME.".id";
     }
 
     protected function getOrderBy(): string 

@@ -69,6 +69,11 @@ final class EventsTableMapper extends TableMapper
         return $this->insertEvent($title, 'error', $administratorId, $notes);
     }
 
+    public function insertSecurity(string $title, ?int $administratorId = null, ?string $notes = null): ?int
+    {
+        return $this->insertEvent($title, 'security', $administratorId, $notes);
+    }
+
     public function insertCritical(string $title, ?int $administratorId = null, ?string $notes = null): ?int
     {
         return $this->insertEvent($title, 'critical', $administratorId, $notes);

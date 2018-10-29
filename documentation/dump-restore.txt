@@ -1,0 +1,21 @@
+To generate database schema sql file from project root:  
+pg_dump -Uslimpg -s -Fc -f storage/dumps/pg_schema_initial.dump
+or 
+pg_dump -Uslimpg -s -O -f storage/dumps/pg_schema_initial.sql
+
+
+To generate event_types, permissions, roles, roles_permissions data,  only
+pg_dump -Uslimpg -a -Fc -t event_types -t permissions -t roles -t roles_permissions -f storage/dumps/pg_data_initial.dump
+or
+pg_dump -Uslimpg -a -O -t event_types -t permissions -t roles -t roles_permissions -f storage/dumps/pg_data_initial.sql
+
+Restore
+pg_restore -U btqcmrc -O -c --if-exists -n public -d btqcmrc storage/dumps/pg_schema_initial.dump
+or
+psql -Uuser -ddb < storage/dumps/pg_schema_initial.sql
+
+pg_restore -U btqcmrc -O -n public -d btqcmrc storage/dumps/pg_data_initial.dump
+or
+psql -Uuser -ddb < storage/dumps/pg_data_initial.sql
+
+Finally, to make the schema compatible w/ Postgres 9.x, rename pg_schema_initial.sql to pg_schema_initial_v9.sql and comment the AS integer lines.

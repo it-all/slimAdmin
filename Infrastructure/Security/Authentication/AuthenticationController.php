@@ -87,7 +87,7 @@ class AuthenticationController extends BaseController
                 break;  
 
             case 'inactive':
-                $eventMethod = 'insertWarning';
+                $eventMethod = 'insertSecurity';
                 $eventNotes = 'Inactive Administrator';    
                 break;
         }

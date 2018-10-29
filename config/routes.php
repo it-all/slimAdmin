@@ -10,8 +10,6 @@ use Infrastructure\Security\Authentication\AuthenticationMiddleware;
 use Domain\AdminHomeView;
 use Entities\Events\EventsView;
 use Entities\Events\EventsController;
-use Entities\LoginAttempts\LoginAttemptsView;
-use Entities\LoginAttempts\LoginAttemptsController;
 use Entities\Administrators\View\AdministratorsView;
 use Entities\Administrators\AdministratorsController;
 use Entities\Roles\RolesView;

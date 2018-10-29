@@ -9,7 +9,6 @@ use Entities\Administrators\Model\Administrator;
 use Entities\Administrators\Model\AdministratorsEntityMapper;
 use Entities\Administrators\Model\AdministratorsTableMapper;
 use Entities\Roles\Model\RolesTableMapper;
-use Entities\LoginAttempts\LoginAttemptsTableMapper;
 use Entities\Administrators\View\Forms\AdministratorForm;
 use Infrastructure\SlimPostgres;
 use Infrastructure\BaseMVC\View\ResponseUtilities;

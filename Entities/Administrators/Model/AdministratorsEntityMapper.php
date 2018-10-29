@@ -7,7 +7,6 @@ use Infrastructure\Database\DataMappers\EntityMapper;
 use Exceptions;
 use Infrastructure\Database\Queries\QueryBuilder;
 use Infrastructure\Database\Queries\SelectBuilder;
-use Entities\LoginAttempts\LoginAttemptsTableMapper;
 use Entities\Events\EventsTableMapper;
 use Infrastructure\Database\Postgres;
 use Infrastructure\Security\Authorization\AuthorizationService;
@@ -295,33 +294,6 @@ final class AdministratorsEntityMapper extends EntityMapper
             $administrators[$index]['roles'] = implode(", ", $administrators[$index]['roles']);
         }
         return $administrators;
-    }
-
-    /** ensure that $administrator can be deleted based on business rules */
-    public function validateDelete(Administrator $administrator) 
-    {
-        $id = $administrator->getId();
-
-        // make sure the current administrator is not deleting her/himself
-        if ($administrator->isLoggedIn()) {
-            throw new Exceptions\UnallowedActionException("Administrator cannot delete own account: id $id");
-        }
-
-        // non-top dogs cannot delete top dogs
-        if (!$administrator->getAuthorization()->hasTopRole() && $administrator->hasTopRole()) {
-            throw new Exceptions\UnallowedActionException("Not authorized to delete administrator: id $id");
-        }
-
-        // make sure there are no events for administrator being deleted
-        if ((EventsTableMapper::getInstance())->existForAdministrator($id)) {
-            throw new Exceptions\UnallowedActionException("Events exist for administrator: id $id");
-        }
-
-        // make sure there are no login attempts for administrator being deleted
-        $loginsMapper = LoginAttemptsTableMapper::getInstance();
-        if ($loginsMapper->hasAdministrator($id)) {
-            throw new Exceptions\UnallowedActionException("Login attempts exist for administrator: id $id");
-        }
     }
 
     /** does validation for delete then deletes and returns deleted username */

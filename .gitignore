@@ -1,15 +1,5 @@
 .vscode/
 vendor/
 storage/
-templates/
-public/
-prebuild/
 node_modules/
-Exceptions/
-domain/
-config/
-cliScripts/
-package-lock.json
-package.json
-.env.example
 .env

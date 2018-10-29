@@ -39,16 +39,16 @@ class RolesController extends DatabaseTableController
 
         try {
             $this->mapper->deleteByPrimaryKey($primaryKey);
-            $this->systemEvents->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName: $primaryKey");
+            $this->events->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName: $primaryKey");
             SlimPostgres::setAdminNotice("Deleted $tableName $primaryKey");
         } catch (Exceptions\UnallowedActionException $e) {
-            $this->systemEvents->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
+            $this->events->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             SlimPostgres::setAdminNotice($e->getMessage(), 'failure');
         } catch (Exceptions\QueryResultsNotFoundException $e) {
-            $this->systemEvents->insertWarning('Query Results Not Found', (int) $this->authentication->getAdministratorId(), $e->getMessage());
+            $this->events->insertWarning('Query Results Not Found', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             SlimPostgres::setAdminNotice($e->getMessage(), 'failure');
         } catch (Exceptions\QueryFailureException $e) {
-            $this->systemEvents->insertError('Query Failure', (int) $this->authentication->getAdministratorId(), $e->getMessage());
+            $this->events->insertError('Query Failure', (int) $this->authentication->getAdministratorId(), $e->getMessage());
             SlimPostgres::setAdminNotice('Delete Failed', 'failure');
         }
 

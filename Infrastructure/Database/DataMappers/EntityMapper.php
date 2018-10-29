@@ -10,13 +10,13 @@ abstract class EntityMapper implements ListViewMappers
 {
     protected $defaultSelectColumnsString;
 
-    abstract public function getListViewTitle(): string;
-    abstract public function getInsertTitle(): string;
-    abstract public function getUpdateColumnName(): ?string;
-    abstract public function getListViewSortColumn(): ?string;
-    abstract public function getListViewSortAscending(): bool;
-    abstract protected function getFromClause();
-    abstract protected function getOrderBy();
+    // abstract public function getListViewTitle(): string;
+    // abstract public function getInsertTitle(): string;
+    // abstract public function getUpdateColumnName(): ?string;
+    // abstract public function getListViewSortColumn(): ?string;
+    // abstract public function getListViewSortAscending(): bool;
+    // abstract protected function getFromClause();
+    // abstract protected function getOrderBy();
 
     public function setDefaultSelectColumnsString() 
     {
@@ -27,7 +27,7 @@ abstract class EntityMapper implements ListViewMappers
         $this->defaultSelectColumnsString = Functions::removeLastCharsFromString($selectColumnsString, 2);
     }
 
-    // /** returns array of records or null */
+    /** returns array of records or null */
     public function select(?string $columns = "*", ?array $whereColumnsInfo = null, ?string $orderBy = null): ?array
     {
         if ($whereColumnsInfo != null) {

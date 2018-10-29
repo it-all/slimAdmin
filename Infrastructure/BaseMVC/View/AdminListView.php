@@ -107,7 +107,7 @@ abstract class AdminListView extends AdminView
             try {
                 $displayItems = @$this->mapper->select(null, $filterColumnsInfo);
             } catch (QueryFailureException $e) {
-                $this->systemEvents->insertAlert("List View Filter Query Failure", (int) $this->authentication->getAdministratorId(), $e->getMessage());
+                $this->events->insertAlert("List View Filter Query Failure", (int) $this->authentication->getAdministratorId(), $e->getMessage());
                 SlimPostgres::setAdminNotice('Query Failed', 'failure');
             }
         } else {

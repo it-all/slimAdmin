@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Entities\Administrators\Model;
 
 use Entities\LoginAttempts\LoginAttemptsTableMapper;
-use Entities\SystemEvents\SystemEventsTableMapper;
+use Entities\Events\EventsTableMapper;
 use Infrastructure\Security\Authentication\AuthenticationService;
 use Infrastructure\Security\Authorization\AuthorizationService;
 use Entities\Roles\Model\Role;
@@ -261,9 +261,9 @@ class Administrator implements ListViewModels
             return false;
         }
 
-        // make sure there are no system events for administrator being deleted
-        if ((SystemEventsTableMapper::getInstance())->existForAdministrator($id)) {
-            $this->notDeletableReason = "System events exist for administrator: id $id";
+        // make sure there are no events for administrator being deleted
+        if ((EventsTableMapper::getInstance())->existForAdministrator($id)) {
+            $this->notDeletableReason = "Events exist for administrator: id $id";
             return false;
         }
 

@@ -33,8 +33,7 @@ class Permission implements ListViewModels
 
     /** @var string[] an array of basic system permissions which should not be deleted or changed */
     const UNDELETABLE = [
-        SYSTEM_EVENTS_VIEW_RESOURCE,
-        LOGIN_ATTEMPTS_VIEW_RESOURCE,
+        EVENTS_VIEW_RESOURCE,
         ADMINISTRATORS_VIEW_RESOURCE,
         ADMINISTRATORS_INSERT_RESOURCE,
         ADMINISTRATORS_UPDATE_RESOURCE,

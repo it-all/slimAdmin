@@ -1,23 +1,23 @@
 <?php
 declare(strict_types=1);
 
-namespace Entities\SystemEvents;
+namespace Entities\Events;
 
 use Infrastructure\BaseMVC\Controller\BaseController;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class SystemEventsController extends BaseController
+class EventsController extends BaseController
 {
     private $view;
     private $mapper;
 
     public function __construct(Container $container)
     {
-        $this->view = new SystemEventsView($container);
+        $this->view = new EventsView($container);
         parent::__construct($container);
-        $this->mapper = $this->systemEvents; // already in container as a service
+        $this->mapper = $this->events; // already in container as a service
     }
 
     public function routePostIndexFilter(Request $request, Response $response, $args)

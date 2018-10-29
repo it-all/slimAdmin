@@ -6,7 +6,7 @@ namespace Infrastructure\Utilities;
 use Infrastructure\SlimPostgres;
 use Infrastructure\Functions;
 use Infrastructure\Utilities;
-use Entities\SystemEvents\SystemEventsTableMapper;
+use Entities\Events\EventsTableMapper;
 
 class ErrorHandler
 {
@@ -16,7 +16,7 @@ class ErrorHandler
     private $echoErrors;
     private $mailer;
     private $emailTo;
-    private $SystemEventsTableMapper;
+    private $EventsTableMapper;
     private $fatalMessage;
 
     public function __construct(
@@ -42,14 +42,14 @@ class ErrorHandler
         $this->fatalMessage = $fatalMessage;
     }
 
-    public function setSystemEventsTableMapper(SystemEventsTableMapper $SystemEventsTableMapper)
+    public function setEventsTableMapper(EventsTableMapper $EventsTableMapper)
     {
-        $this->SystemEventsTableMapper = $SystemEventsTableMapper;
+        $this->EventsTableMapper = $EventsTableMapper;
     }
 
     /*
      * 4 ways to handle:
-     * -database - always (as long as database and SystemEventsTableMapper properties have been set)
+     * -database - always (as long as database and EventsTableMapper properties have been set)
      * -log - always
      * -echo - depends on property
      * -email - depends on property. never email error deets.
@@ -65,30 +65,30 @@ class ErrorHandler
         $errorMessage = $this->generateMessage($messageBody);
 
         // log to database
-        if (isset($this->SystemEventsTableMapper)) {
+        if (isset($this->EventsTableMapper)) {
             switch ($this->getErrorType($errno)) {
                 case 'Core Error':
                 case 'Parse Error':
                 case 'Fatal Error':
-                    $systemEventType = 'critical';
+                    $eventType = 'critical';
                     break;
                 case 'Core Warning':
                 case 'Warning':
-                    $systemEventType = 'warning';
+                    $eventType = 'warning';
                     break;
                 case 'Deprecated':
                 case 'Notice':
-                    $systemEventType = 'notice';
+                    $eventType = 'notice';
                     break;
                 default:
-                    $systemEventType = 'error';
+                    $eventType = 'error';
             }
 
             $databaseErrorMessage = explode('Stack Trace:', $errorMessage)[0].'...See PHP error log for further details.';
 
             $administratorId = (isset($_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID])) ? (int) $_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID] : null;
 
-            @$this->SystemEventsTableMapper->insertEvent('PHP Error', $systemEventType, $administratorId, $databaseErrorMessage);
+            @$this->EventsTableMapper->insertEvent('PHP Error', $eventType, $administratorId, $databaseErrorMessage);
         }
 
         // log to file

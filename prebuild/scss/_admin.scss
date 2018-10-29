@@ -1,0 +1,39 @@
+$link-color: #2ba6cb;
+
+body {
+  background-color: #5e5e5e;
+  color: #dcd4c2;
+  font-family: Courier, Serif;
+  font-size: 1em;
+  line-height: 1.4em;
+}
+
+#debug {
+  height: 10em;
+  overflow: auto;
+}
+main {
+  background-color: #222;
+}
+
+a {
+  color: $link-color;
+  text-decoration: none;
+  padding: .1em;
+}
+
+a:hover {
+  background-color: #9a9b9a;
+  color: #0A246A;
+}
+
+@media print {
+  body {
+    background-color: white;
+    color: black;
+  }
+}
+
+.nowrap {
+  white-space: nowrap;
+}

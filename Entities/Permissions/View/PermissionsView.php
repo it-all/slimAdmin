@@ -138,7 +138,7 @@ class PermissionsView extends AdminListView implements ObjectsListViews, InsertU
             $permissions = $this->permissionsEntityMapper->getObjects($this->getFilterColumnsInfo());
         } catch (QueryFailureException $e) {
             $permissions = [];
-            // warning system event is inserted when query fails
+            // warning event is inserted when query fails
             SlimPostgres::setAdminNotice('Query Failed', 'failure');
         }
         

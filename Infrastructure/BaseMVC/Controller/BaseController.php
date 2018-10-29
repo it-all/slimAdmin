@@ -144,7 +144,7 @@ abstract class BaseController
     }
 
     /** 
-     * @param string $emailTo must be in $settings['emails'] array or error will be inserted to system events
+     * @param string $emailTo must be in $settings['emails'] array or error will be inserted to events
      * @param string $mainBody
      * @param bool $addEventLogStatement defaults true, if true adds 'See event log for details' after $mainBody
      * @param bool $throwExceptionOnError defaults false, if true exception is thrown if no match for $emailTo
@@ -164,7 +164,7 @@ abstract class BaseController
                     [$settings['emails'][$emailTo]]
                 );
             } else {
-                $this->systemEvents->insertError("Email Not Found", (int) $this->authentication->getAdministratorId(), $emailTo);
+                $this->events->insertError("Email Not Found", (int) $this->authentication->getAdministratorId(), $emailTo);
                 if ($throwExceptionOnError) {
                     throw new \InvalidArgumentException("Email Not Found: $emailTo");
                 }

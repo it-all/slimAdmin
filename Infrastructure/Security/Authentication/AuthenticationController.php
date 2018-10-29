@@ -28,12 +28,12 @@ class AuthenticationController extends BaseController
         }
 
         if (!$this->authentication->attemptLogin($username, $password)) {
-            $this->systemEvents->insertWarning('Unsuccessful Login', null, 'Username: '.$username);
+            $this->insertFailureEvent();
 
             if ($this->authentication->tooManyFailedLogins()) {
                 $eventTitle = 'Maximum unsuccessful login attempts exceeded';
                 $eventNotes = 'Failed:'.$this->authentication->getNumFailedLogins();
-                $this->systemEvents->insertAlert($eventTitle, null, $eventNotes);
+                $this->events->insertAlert($eventTitle, null, $eventNotes);
 
                 // redirect to home page with error message
                 $_SESSION[SlimPostgres::SESSION_KEY_NOTICE] = ['Login disabled. Too many failed logins.', 'error'];
@@ -50,8 +50,12 @@ class AuthenticationController extends BaseController
             return (new AuthenticationView($this->container))->routeGetLogin($request, $response, $args);
         }
 
-        // successful login
-        $this->systemEvents->insertInfo('Login', (int) $this->authentication->getAdministratorId());
+        /** successful login */
+        $administratorId = $this->authentication->getAdministratorId();
+        $administratorUsername = $this->authentication->getAdministratorUsername();
+        /** enter null in administrator_id event arg since not logged in at time of request */
+        $this->events->insertInfo('Login', null, "administrator id: $administratorId|username: $administratorUsername");
+        SlimPostgres::setAdminNotice("Logged in");
 
         // redirect to proper resource
         if (isset($_SESSION[SlimPostgres::SESSION_KEY_GOTO_ADMIN_PATH])) {
@@ -64,12 +68,39 @@ class AuthenticationController extends BaseController
         return $response->withRedirect($redirect);
     }
 
+    private function insertFailureEvent() 
+    {
+        if (null === $reason = $this->authentication->getFailReason()) {
+            throw new \Exception("Failure Reason Required");
+        }
+
+        /** insert event */
+        switch ($reason) {
+            case 'password':
+                $eventMethod = 'insertInfo';
+                $eventNotes = 'Incorrect Password';   
+                break;
+
+            case 'nonexistent':
+                $eventMethod = 'insertWarning';
+                $eventNotes = 'Non-existent Administrator';  
+                break;  
+
+            case 'inactive':
+                $eventMethod = 'insertWarning';
+                $eventNotes = 'Inactive Administrator';    
+                break;
+        }
+
+        $this->events->{$eventMethod}('Login Failure', $this->authentication->getFailAdministratorId(), $eventNotes);
+    }
+
     public function routeGetLogout(Request $request, Response $response)
     {
         if (null === $username = $this->authentication->getAdministratorUsername()) {
-            $this->systemEvents->insertWarning('Attempted logout for non-logged-in visitor');
+            $this->events->insertWarning('Attempted logout for non-logged-in visitor');
         } else {
-            $this->systemEvents->insertInfo('Logout', (int) $this->authentication->getAdministratorId());
+            $this->events->insertInfo('Logout', (int) $this->authentication->getAdministratorId());
             $this->authentication->logout();
         }
 

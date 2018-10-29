@@ -8,7 +8,7 @@ use Exceptions;
 use Infrastructure\Database\Queries\QueryBuilder;
 use Infrastructure\Database\Queries\SelectBuilder;
 use Entities\LoginAttempts\LoginAttemptsTableMapper;
-use Entities\SystemEvents\SystemEventsTableMapper;
+use Entities\Events\EventsTableMapper;
 use Infrastructure\Database\Postgres;
 use Infrastructure\Security\Authorization\AuthorizationService;
 use Infrastructure\Security\Authentication\AuthenticationService;
@@ -312,9 +312,9 @@ final class AdministratorsEntityMapper extends EntityMapper
             throw new Exceptions\UnallowedActionException("Not authorized to delete administrator: id $id");
         }
 
-        // make sure there are no system events for administrator being deleted
-        if ((SystemEventsTableMapper::getInstance())->existForAdministrator($id)) {
-            throw new Exceptions\UnallowedActionException("System events exist for administrator: id $id");
+        // make sure there are no events for administrator being deleted
+        if ((EventsTableMapper::getInstance())->existForAdministrator($id)) {
+            throw new Exceptions\UnallowedActionException("Events exist for administrator: id $id");
         }
 
         // make sure there are no login attempts for administrator being deleted

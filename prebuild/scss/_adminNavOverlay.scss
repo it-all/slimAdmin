@@ -1,0 +1,104 @@
+/* https://codepen.io/hubpork/pen/HsBnd */
+
+#navOverlay {
+  position: fixed;
+  overflow: auto;
+  z-index: -1;
+  opacity: 0;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  left: 0px;
+  top: 0px;
+  background: rgba(0,0,0,0.8);
+  -webkit-transition: all 0.3s ease-in-out;
+  -moz-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+
+#navOverlay ul {
+  position: relative;
+  top: 10%;
+  //-webkit-transform: scale(2);
+  //-moz-transform: scale(2);
+  //-ms-transform: scale(2);
+  //transform: scale(2);
+  -webkit-transition: all 0.3s ease-in-out;
+  -moz-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+
+#navOverlay li {
+  margin: .5em;
+  //font-size: 1.2em;
+  color: #787878;
+}
+
+#navOverlay li a {
+  border-radius: 3px;
+  padding: .2em;
+  border: 1px solid transparent;
+  text-decoration: none;
+  color: #fff;
+  -webkit-transition: all 0.2s ease-in-out;
+  -moz-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+}
+
+#navOverlay li a:hover { border-color: #fff; }
+
+#navOverlay > ul > li {
+  font-size: 1.2em;
+}
+
+#navOverlay > ul > li > ul > li {
+  font-size: .9em;
+  margin-left: 2em;
+}
+
+#navOverlay > ul > li > ul > li > ul > li {
+  font-size: .6em;
+  margin-left: 4em;
+}
+
+#toggle-nav-label {
+  color: rgba(0,0,0,0.8);
+  background: #999;
+  text-align: center;
+  line-height: 24px;
+  font-size: 16px;
+  display: block;
+  cursor: pointer;
+  position: relative;
+  z-index: 500;
+  width: 30px;
+  height: 20px;
+  border-radius: 3px;
+  margin-right: 3px;
+}
+
+#toggle-nav { display: none; }
+
+#toggle-nav:checked ~ #navOverlay {
+  opacity: 1;
+  z-index: 400;
+}
+
+#toggle-nav:checked ~ #navOverlay ul {
+  -webkit-transform: scale(1);
+  -moz-transform: scale(1);
+  -ms-transform: scale(1);
+  transform: scale(1);
+}
+
+#toggle-nav:checked ~ #toggle-nav-label {
+  background: #fff;
+  color: rgba(0,0,0,0.8);
+}
+
+.adminNavSubSection {
+  display: none;
+}

@@ -60,14 +60,10 @@ class AdminNavigation
                     ],
 
                     'Events' => [
-                        'route' => ROUTE_SYSTEM_EVENTS,
-                        'authorization' => SYSTEM_EVENTS_VIEW_RESOURCE,
+                        'route' => ROUTE_EVENTS,
+                        'authorization' => EVENTS_VIEW_RESOURCE,
                     ],
 
-                    'Login Attempts' => [
-                        'route' => ROUTE_LOGIN_ATTEMPTS,
-                        'authorization' => LOGIN_ATTEMPTS_VIEW_RESOURCE,
-                    ],
                 ]
             ],
             'Logout' => [

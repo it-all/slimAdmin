@@ -7,7 +7,7 @@ use It_All\FormFormer\Form;
 use Entities\Administrators\Model\Administrator;
 use Entities\Administrators\Model\AdministratorsEntityMapper;
 use Entities\Administrators\Model\AdministratorsTableMapper;
-use Entities\LoginAttempts\LoginAttemptsTableMapper;
+use Entities\LoginAttempts\LoginAttemptsEntityMapper;
 use Infrastructure\SlimPostgres;
 use Infrastructure\BaseMVC\View\Forms\DatabaseTableForm;
 use Infrastructure\BaseMVC\View\Forms\FormHelper;
@@ -17,11 +17,20 @@ class AuthenticationService
     private $maxFailedLogins;
     private $administratorHomeRoutes;
 
+    /** @var string must be one of FAIL_REASONS */
+    private $failReason;
+
+    /** @var Administrator if username maps to existing administrator but authentication fails due to incorrect password or inactive administrator, this will be populated */
+    private $failAdministrator;
+
     /** @var \SlimPostgres\Administrators\Administrator|null the logged in administrator model or null */
     private $administrator;
 
     const USERNAME_FIELD = 'username';
     const PASSWORD_FIELD = 'password_hash';
+
+    /** incorrect password, inactive administrator, non-existent administrator */
+    const FAIL_REASONS = ['password', 'inactive', 'nonexistent'];
 
     public function __construct(int $maxFailedLogins, array $administratorHomeRoutes)
     {
@@ -29,6 +38,38 @@ class AuthenticationService
         $this->administratorHomeRoutes = $administratorHomeRoutes;
         /** set administrator property to administrator id found in session or null */
         $this->administrator = (isset($_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID])) ? (AdministratorsEntityMapper::getInstance()->getObjectById($_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID])) : null;
+    }
+
+    public function getFailReason(): ?string 
+    {
+        return $this->failReason;
+    }
+
+    private function setFailReason(string $reason) 
+    {
+        if (!\in_array($reason, self::FAIL_REASONS)) {
+            throw new \InvalidArgumentException("Invalid fail reason $reason");
+        }
+
+        $this->failReason = $reason;
+    }
+
+    public function getFailAdministrator(): ?Administrator 
+    {
+        return $this->failAdministrator;
+    }
+
+    private function setFailAdministrator(Administrator $administrator) 
+    {
+        $this->failAdministrator = $administrator;
+    }
+
+    public function getFailAdministratorId(): ?int 
+    {
+        if (!$this->failAdministrator === null) {
+            return $this->failAdministrator->getId();
+        }
+        return null;
     }
 
     /** check that the administrator session is set and that the administrator is still active */
@@ -39,28 +80,19 @@ class AuthenticationService
         }
         return false;
     }
-    
-    private function loginSucceeded(string $username, Administrator $administrator)
-    {
-        $_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID] = $administrator->getId();
-        unset($_SESSION[SlimPostgres::SESSION_KEY_NUM_FAILED_LOGINS]);
-        $this->administrator = $administrator;
-		SlimPostgres::setAdminNotice("Logged in");
-        (LoginAttemptsTableMapper::getInstance())->insertSuccessfulLogin($administrator);
-    }
 
     public function attemptLogin(string $username, string $password): bool
     {
         $administratorsEntityMapper = AdministratorsEntityMapper::getInstance();
         // check if administrator exists
         if (null === $administrator = $administratorsEntityMapper->getObjectByUsername($username, false)) {
-            $this->loginFailed($username, null);
+            $this->loginFailed($username, 'nonexistent', $administrator);
             return false;
         }
 
         // verify administrator is active
         if (!$administrator->isActive()) {
-            $this->loginFailed($username, $administrator);
+            $this->loginFailed($username, 'inactive', $administrator);
             return false;
         }
 
@@ -69,7 +101,7 @@ class AuthenticationService
             $this->loginSucceeded($username, $administrator);
             return true;
         } else {
-            $this->loginFailed($username, $administrator);
+            $this->loginFailed($username, 'password', $administrator);
             return false;
         }
     }
@@ -83,12 +115,20 @@ class AuthenticationService
         }
     }
 
-    private function loginFailed(string $username, ?Administrator $administrator)
+    private function loginSucceeded(string $username, Administrator $administrator)
     {
-        $this->incrementNumFailedLogins();
+        $_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID] = $administrator->getId();
+        unset($_SESSION[SlimPostgres::SESSION_KEY_NUM_FAILED_LOGINS]);
+        $this->administrator = $administrator;        
+    }
 
-        // insert login_attempts record
-        (LoginAttemptsTableMapper::getInstance())->insertFailedLogin($username, $administrator);
+    private function loginFailed(string $username, string $reason, ?Administrator $administrator = null)
+    {
+        $this->setFailReason($reason);
+        if (null !== $administrator) {
+            $this->setFailAdministrator($administrator);
+        }
+        $this->incrementNumFailedLogins();
     }
 
     public function tooManyFailedLogins(): bool

@@ -1,0 +1,41 @@
+$formLabelColor: #A7D45B;
+
+form {
+  margin-left: 1em;
+}
+.inlineFormField {
+  //display: inline-block;
+  float: left;
+  clear: none;
+}
+
+label {
+  color: $formLabelColor;
+  font-size: 1em;
+  margin: 0 .3em 0 .2em;
+}
+
+.fieldRequired {
+  display: inline;
+  font-size: .8em;
+  color: #cccccc;
+}
+
+.generalFormError {
+  color: red;
+  font-size: 1.2em;
+  margin-bottom: 1em;
+}
+
+.ffErrorMsg {
+  color: red;
+}
+
+.formFieldError {
+  border: .1em solid red;
+}
+
+.afterLabel {
+  display: block;
+  margin: 0 0 1em 1.5em;
+}

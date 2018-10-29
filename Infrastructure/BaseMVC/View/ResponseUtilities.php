@@ -18,8 +18,8 @@ trait ResponseUtilities
             throw new \Exception("routeAction $routeAction must be update or delete");
         }
 
-        // enter system event
-        $this->systemEvents->insertWarning("Query Results Not Found", (int) $this->authentication->getAdministratorId(), $tableMapper->getPrimaryKeyColumnName().":$primaryKey|Table: ".$tableMapper->getTableName());
+        // enter event
+        $this->events->insertWarning("Query Results Not Found", (int) $this->authentication->getAdministratorId(), $tableMapper->getPrimaryKeyColumnName().":$primaryKey|Table: ".$tableMapper->getTableName());
 
         $noticeTitle = ($title != null) ? $title: 'Record';
         SlimPostgres::setAdminNotice("$noticeTitle $primaryKey Not Found", 'failure');

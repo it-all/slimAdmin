@@ -1,21 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace Entities\SystemEvents;
+namespace Entities\Events;
 
 use Infrastructure\Database\DataMappers\EntityMapper;
 
 // Singleton
-final class SystemEventsEntityMapper extends EntityMapper
+final class EventsEntityMapper extends EntityMapper
 {
-    const TABLE_NAME = 'system_events';
-    const TYPES_TABLE_NAME = 'system_event_types';
+    const TABLE_NAME = 'events';
+    const TYPES_TABLE_NAME = 'event_types';
     const ADMINISTRATORS_TABLE_NAME = 'administrators';
 
     const SELECT_COLUMNS = [
         'id' => self::TABLE_NAME . '.id',
         'created' => self::TABLE_NAME . '.created',
-        'event_type_id' => self::TYPES_TABLE_NAME . '.event_type_id',
+        'event_type' => self::TYPES_TABLE_NAME . '.event_type',
         'event' => self::TABLE_NAME . '.title',
         'name' => self::ADMINISTRATORS_TABLE_NAME . '.name AS administrator',
         'notes' => self::TABLE_NAME . '.notes',
@@ -28,7 +28,7 @@ final class SystemEventsEntityMapper extends EntityMapper
     {
         static $instance = null;
         if ($instance === null) {
-            $instance = new SystemEventsEntityMapper();
+            $instance = new EventsEntityMapper();
         }
         return $instance;
     }

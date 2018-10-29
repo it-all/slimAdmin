@@ -6,7 +6,7 @@ See <a href="https://github.com/it-all/slim-postgres-skeleton">Slim-Postgres-Ske
 
 CODE DOCUMENTATION  
 Entities  
-Entities are like business objects at the core of the system. The current entities are Administrators, Roles, Permissions, System Events, and Login Attempts. Domain business object, i.e. Orders in an ecommerce system, will go in the domain directory of <a href="https://github.com/it-all/slim-postgres-skeleton">Slim-Postgres-Skeleton</a>.  
+Entities are like business objects at the core of the system. The current entities are Administrators, Roles, Permissions, and Events. Domain business object, i.e. Orders in an ecommerce system, will go in the domain directory of <a href="https://github.com/it-all/slim-postgres-skeleton">Slim-Postgres-Skeleton</a>.  
   
 Database Mappers  
 Mappers are where all PostgreSQL database queries should occur. In fact, where all database function calls (pg_*) should occur.  There are two types of mappers: table mappers and entity mappers. 

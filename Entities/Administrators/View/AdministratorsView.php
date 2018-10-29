@@ -89,7 +89,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
             $administrators = $this->mapper->getObjects($this->getFilterColumnsInfo(), null, $this->authentication, $this->authorization);
         } catch (QueryFailureException $e) {
             $administrators = [];
-            // warning system event is inserted when query fails
+            // warning event is inserted when query fails
             SlimPostgres::setAdminNotice('Query Failed', 'failure');
         }
         

@@ -10,7 +10,7 @@ use Infrastructure\Database\Postgres;
 use Infrastructure\Security\Authentication\AuthenticationService;
 use Infrastructure\Security\Authorization\AuthorizationService;
 use Infrastructure\Security\CsrfMiddleware;
-use Entities\SystemEvents\SystemEventsTableMapper;
+use Entities\Events\EventsTableMapper;
 use Infrastructure\Utilities;
 use Infrastructure\Functions;
 use Slim\Http\Request;
@@ -25,7 +25,7 @@ class SlimPostgres
 
     private $environmentalVariables;
     private $database;
-    private $SystemEventsTableMapper;
+    private $EventsTableMapper;
     private $mailer;
 
     /** session variable keys */
@@ -168,10 +168,10 @@ class SlimPostgres
         $postgres = Postgres::getInstance($postgresConnectionString);
 
         /** used in error handler and container */
-        $this->SystemEventsTableMapper = SystemEventsTableMapper::getInstance();
+        $this->EventsTableMapper = EventsTableMapper::getInstance();
 
         if ($this->config['errors']['logToDatabase']) {
-            $errorHandler->setSystemEventsTableMapper($this->SystemEventsTableMapper);
+            $errorHandler->setEventsTableMapper($this->EventsTableMapper);
         }
 
         if (!Functions::isRunningFromCommandLine()) {
@@ -189,9 +189,6 @@ class SlimPostgres
             $sessionTTLseconds = $this->config['session']['ttlHours'] * 60 * 60;
             ini_set('session.gc_maxlifetime', (string) $sessionTTLseconds);
             ini_set('session.cookie_lifetime', (string) $sessionTTLseconds);
-            if (!$this->isSessionIdValid(session_id())) {
-                session_regenerate_id(true);
-            }
             if (isset($this->config['session']['savePath']) && mb_strlen($this->config['session']['savePath']) > 0) {
                 session_save_path($this->config['session']['savePath']);
             }
@@ -208,7 +205,7 @@ class SlimPostgres
         $slim = new \Slim\App($this->getSlimSettings());
         $slimContainer = $slim->getContainer();
 
-        $this->setSlimDependences($slimContainer, $this->SystemEventsTableMapper, $this->mailer);
+        $this->setSlimDependences($slimContainer, $this->EventsTableMapper, $this->mailer);
 
         $this->removeSlimErrorHandler($slimContainer);
 
@@ -235,7 +232,7 @@ class SlimPostgres
             return function (Request $request, Response $response) use ($container) {
 
                 /** log error */
-                $this->SystemEventsTableMapper->insertEvent('404 Page Not Found', 'notice', $container->authentication->getAdministratorId());
+                $this->EventsTableMapper->insertEvent('404 Page Not Found', 'notice', $container->authentication->getAdministratorId());
 
                 $_SESSION[SlimPostgres::SESSION_KEY_NOTICE] = [$this->config['pageNotFoundText'], SlimPostgres::STATUS_NOTICE_FAILURE];
                 return $container->view->render(
@@ -248,7 +245,7 @@ class SlimPostgres
         return $slimSettings;
     }
 
-    private function setSlimDependences($container, SystemEventsTableMapper $SystemEventsTableMapper, Utilities\PhpMailerService $mailer)
+    private function setSlimDependences($container, EventsTableMapper $EventsTableMapper, Utilities\PhpMailerService $mailer)
     {
         /** Template */
         $container['view'] = function ($container) {
@@ -281,9 +278,9 @@ class SlimPostgres
             return new AuthorizationService();
         };
 
-        /** System Events (Database Log) */
-        $container['systemEvents'] = function($container) use ($SystemEventsTableMapper) {
-            return $SystemEventsTableMapper;
+        /** Events (Database Log) */
+        $container['events'] = function($container) use ($EventsTableMapper) {
+            return $EventsTableMapper;
         };
 
         /** Mailer */
@@ -415,11 +412,11 @@ class SlimPostgres
      * @param bool optional $isEmptyIdValid
      * @return bool
      */
-    private function isSessionIdValid(string $sessionId, $isEmptyIdValid = true): bool
+    private function isSessionIdValid(string $sessionId): bool
     {
-        if ($isEmptyIdValid && mb_strlen($sessionId) == 0) { // if blank, there is no session id
-            return true;
-        }
+        // if (mb_strlen($sessionId) == 0) { // if blank, there is no session id
+        //     return true;
+        // }
         return preg_match('/^[-,a-zA-Z0-9]{1,128}$/', $sessionId) > 0;
     }
 

@@ -1,25 +1,25 @@
 <?php
 declare(strict_types=1);
 
-namespace Entities\SystemEvents;
+namespace Entities\Events;
 
 use Infrastructure\Database\DataMappers\TableMapper;
 use Infrastructure\Database\Queries\QueryBuilder;
 
 // fake Singleton with public constructor
-final class SystemEventsTableMapper extends TableMapper
+final class EventsTableMapper extends TableMapper
 {
-    /** @var array of system_event_types records: id => [eventy_type, description]. Populated at construction in order to reduce future queries */
+    /** @var array of event_types records: id => [eventy_type, description]. Populated at construction in order to reduce future queries */
     private $eventTypes;
 
-    const TABLE_NAME = 'system_events';
-    const TYPES_TABLE_NAME = 'system_event_types';
+    const TABLE_NAME = 'events';
+    const TYPES_TABLE_NAME = 'event_types';
 
     public static function getInstance()
     {
         static $instance = null;
         if ($instance === null) {
-            $instance = new SystemEventsTableMapper();
+            $instance = new EventsTableMapper();
         }
         return $instance;
     }
@@ -44,47 +44,47 @@ final class SystemEventsTableMapper extends TableMapper
         }
     }
 
-    public function insertDebug(string $title, int $administratorId = null, string $notes = null)
+    public function insertDebug(string $title, ?int $administratorId = null, ?string $notes = null): ?int
     {
-        $this->insertEvent($title, 'debug', $administratorId, $notes);
+        return $this->insertEvent($title, 'debug', $administratorId, $notes);
     }
 
-    public function insertInfo(string $title, ?int $administratorId = null, string $notes = null)
+    public function insertInfo(string $title, ?int $administratorId = null, ?string $notes = null): ?int
     {
-        $this->insertEvent($title, 'info', $administratorId, $notes);
+        return $this->insertEvent($title, 'info', $administratorId, $notes);
     }
 
-    public function insertNotice(string $title, int $administratorId = null, string $notes = null)
+    public function insertNotice(string $title, ?int $administratorId = null, ?string $notes = null): ?int
     {
-        $this->insertEvent($title, 'notice', $administratorId, $notes);
+        return $this->insertEvent($title, 'notice', $administratorId, $notes);
     }
 
-    public function insertWarning(string $title, int $administratorId = null, string $notes = null)
+    public function insertWarning(string $title, ?int $administratorId = null, ?string $notes = null): ?int
     {
-        $this->insertEvent($title, 'warning', $administratorId, $notes);
+        return $this->insertEvent($title, 'warning', $administratorId, $notes);
     }
 
-    public function insertError(string $title, int $administratorId = null, string $notes = null)
+    public function insertError(string $title, ?int $administratorId = null, ?string $notes = null): ?int
     {
-        $this->insertEvent($title, 'error', $administratorId, $notes);
+        return $this->insertEvent($title, 'error', $administratorId, $notes);
     }
 
-    public function insertCritical(string $title, int $administratorId = null, string $notes = null)
+    public function insertCritical(string $title, ?int $administratorId = null, ?string $notes = null): ?int
     {
-        $this->insertEvent($title, 'critical', $administratorId, $notes);
+        return $this->insertEvent($title, 'critical', $administratorId, $notes);
     }
 
-    public function insertAlert(string $title, int $administratorId = null, string $notes = null)
+    public function insertAlert(string $title, ?int $administratorId = null, ?string $notes = null): ?int
     {
-        $this->insertEvent($title, 'alert', $administratorId, $notes);
+        return $this->insertEvent($title, 'alert', $administratorId, $notes);
     }
 
-    public function insertEmergency(string $title, int $administratorId = null, string $notes = null)
+    public function insertEmergency(string $title, ?int $administratorId = null, ?string $notes = null): ?int
     {
-        $this->insertEvent($title, 'emergency', $administratorId, $notes);
+        return $this->insertEvent($title, 'emergency', $administratorId, $notes);
     }
 
-    public function insertEvent(string $title, string $eventType = 'info', ?int $administratorId = null, string $notes = null)
+    public function insertEvent(string $title, string $eventType = 'info', ?int $administratorId = null, ?string $notes = null): ?int
     {
         if (null === $eventTypeId = $this->getEventTypeId($eventType)) {
             throw new \Exception("Invalid eventType: $eventType");
@@ -116,10 +116,10 @@ final class SystemEventsTableMapper extends TableMapper
 
         /** suppress exception as it will result in infinite loop in error handler, which also calls this fn */
         try {
-            parent::insert($columnValues);
+            return (int) parent::insert($columnValues);
         } catch (\Exception $e) {
             /** may want to log error here since it's being squelched, but it's not easy to get the error log path here or even the ErrorHandler object */
-            return;
+            return null;
         }
     }
 

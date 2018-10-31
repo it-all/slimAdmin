@@ -68,3 +68,37 @@ define('ROUTE_ADMINISTRATORS_PERMISSIONS_UPDATE_PUT', ROUTEPREFIX_ADMIN . '.'.RO
 define('ROUTE_ADMINISTRATORS_PERMISSIONS_DELETE', ROUTEPREFIX_ADMIN . '.'.ROUTEPREFIX_PERMISSIONS.'.delete');
 // nav / permission options without routes
 define('NAV_ADMIN_SYSTEM', 'systemNav');
+
+// EVENT TITLES
+define('EVENT_PAGE_NOT_FOUND', '404 Page Not Found');
+define('EVENT_MAX_LOGIN_FAULT', 'Maximum unsuccessful login attempts exceeded');
+define('EVENT_LOGIN', 'Login');
+define('EVENT_LOGIN_FAIL', 'Login Failure');
+define('EVENT_LOGIN_REQUIRED', 'Login Required');
+define('EVENT_LOGOUT', 'Logout');
+define('EVENT_LOGOUT_FAULT', 'Attempted logout for non-logged-in visitor');
+
+define('EVENT_UNAUTHORIZED_ACCESS_ATTEMPT', 'No authorization for resource');
+define('CSRF_FAULT', 'CSRF Check Failure');
+define('EVENT_QUERY_FAIL', 'Query Failure');
+define('EVENT_QUERY_NO_RESULTS', 'Query Results Not Found');
+define('EVENT_EMAIL_NOT_FOUND', 'Email Not Found');
+define('EVENT_UNALLOWED_ACTION', 'Unallowed Action');
+
+
+define('EVENT_LIST_VIEW_FILTER_QUERY_FAIL', 'List View Filter Query Failure');
+
+define('EVENT_ADMINISTRATOR_INSERT', 'Inserted Administrator');
+define('EVENT_ADMINISTRATOR_UPDATE', 'Updated Administrator');
+define('EVENT_ADMINISTRATOR_DELETE', 'Deleted Administrator');
+define('EVENT_ADMINISTRATOR_DELETE_FAIL', 'Administrator Deletion Failure');
+
+define('EVENT_PERMISSION_INSERT', 'Inserted Permission');
+define('EVENT_PERMISSION_UPDATE', 'Updated Permission');
+define('EVENT_PERMISSION_DELETE', 'Deleted Permission');
+define('EVENT_PERMISSION_DELETE_FAIL', 'Permission Deletion Failure');
+
+define('EVENT_ROLE_INSERT', 'Inserted Role');
+define('EVENT_ROLE_UPDATE', 'Updated Role');
+define('EVENT_ROLE_DELETE', 'Deleted Role');
+define('EVENT_ROLE_DELETE_FAIL', 'Role Deletion Failure');

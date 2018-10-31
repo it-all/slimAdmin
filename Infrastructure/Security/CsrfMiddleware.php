@@ -12,9 +12,8 @@ class CsrfMiddleware extends Middleware
 	public function __invoke(Request $request, Response $response, $next)
 	{
         if (false === $request->getAttribute('csrf_status')) {
-            $eventTitle = 'CSRF Check Failure';
             $this->container->events->setAdministratorId($this->container->authentication->getAdministratorId());
-            $this->container->events->insertError($eventTitle);
+            $this->container->events->insertSecurity(CSRF_FAULT);
             session_unset();
             $_SESSION[SESSION_NOTICE] = ['Error. Your session has been reset.', 'error'];
             return $response->withRedirect($this->container->router->pathFor(ROUTE_HOME));

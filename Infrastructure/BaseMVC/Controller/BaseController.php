@@ -164,7 +164,7 @@ abstract class BaseController
                     [$settings['emails'][$emailTo]]
                 );
             } else {
-                $this->events->insertError("Email Not Found", $emailTo);
+                $this->events->insertError(EVENT_EMAIL_NOT_FOUND, $emailTo);
                 if ($throwExceptionOnError) {
                     throw new \InvalidArgumentException("Email Not Found: $emailTo");
                 }

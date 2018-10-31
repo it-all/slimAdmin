@@ -77,7 +77,11 @@ class DatabaseTableController extends AdminController
             throw new \Exception("Insert failure. ".$e->getMessage());
         }
 
-        $noteStart = "Inserted " . $this->tableMapper->getFormalTableName(false);
+        $tableNameSingular = $this->tableMapper->getFormalTableName(false);
+        $noteStart = "Inserted $tableNameSingular";
+
+        /** use constant if defined, squelch warning */
+        $eventTitle = @constant("EVENT_".strtoupper($tableNameSingular)."_INSERT") ?? $noteStart;
         $adminNotification = $noteStart;
         $eventNote = "";
 
@@ -86,7 +90,7 @@ class DatabaseTableController extends AdminController
             $eventNote = "$primaryKeyColumnName: $insertResult";
         }
         
-        $this->events->insertInfo($noteStart, $eventNote);
+        $this->events->insertInfo($eventTitle, $eventNote);
         SlimPostgres::setAdminNotice($adminNotification);
 
         return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'index')));
@@ -140,11 +144,15 @@ class DatabaseTableController extends AdminController
         /** the last true bool means that boolean columns that don't exist in $changedColumnsValues get inserted as false ('f') */
         $this->tableMapper->updateByPrimaryKey($changedColumnsValues, $primaryKeyValue, true, [], true);
 
-        $noteStart = "Updated " . $this->tableMapper->getFormalTableName(false);
+        $tableNameSingular = $this->tableMapper->getFormalTableName(false);
+
+        $noteStart = "Updated $tableNameSingular";
+        /** use constant if defined, squelch warning */
+        $eventTitle = @constant("EVENT_".strtoupper($tableNameSingular)."_UPDATE") ?? $noteStart;
         $adminNotification = "$noteStart $primaryKeyValue";
         $eventNote = $this->tableMapper->getPrimaryKeyColumnName() . ": " . $primaryKeyValue;
 
-        $this->events->insertInfo($noteStart, $eventNote);
+        $this->events->insertInfo($eventTitle, $eventNote);
         SlimPostgres::setAdminNotice($adminNotification);
 
         return $response->withRedirect($this->router->pathFor($redirectRoute));
@@ -162,10 +170,14 @@ class DatabaseTableController extends AdminController
 
         try {
             $this->tableMapper->deleteByPrimaryKey($primaryKey);
-            $this->events->insertInfo("Deleted $tableName", "$primaryKeyColumnName: $primaryKey");
+
+            /** use constant if defined, squelch warning */
+            $eventTitle = @constant("EVENT_".strtoupper($tableName)."_DELETE") ?? "Deleted $tableName";
+
+            $this->events->insertInfo($eventTitle, "$primaryKeyColumnName: $primaryKey");
             SlimPostgres::setAdminNotice("Deleted $tableName $primaryKey");
         } catch (Exceptions\QueryResultsNotFoundException $e) {
-            $this->events->insertWarning('Delete Attempt on Non-existing Record', "Table: $tableName|$primaryKeyColumnName: $primaryKey");
+            $this->events->insertWarning(EVENT_QUERY_NO_RESULTS, "Table: $tableName|$primaryKeyColumnName: $primaryKey");
             SlimPostgres::setAdminNotice("$tableName $primaryKey Not Found", 'failure');
         } catch (Exceptions\QueryFailureException $e) {
             SlimPostgres::setAdminNotice('Deletion Query Failure', 'failure');

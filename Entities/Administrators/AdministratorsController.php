@@ -64,7 +64,7 @@ class AdministratorsController extends AdminController
 
         $administratorId = $this->administratorsEntityMapper->create($input['name'], $input['username'], $input['password'], $input['roles'], FormHelper::getBoolForCheckboxField($input['active']));
 
-        $this->events->insertInfo("Inserted Administrator", "id:$administratorId");
+        $this->events->insertInfo(EVENT_ADMINISTRATOR_INSERT, "id:$administratorId");
 
         SlimPostgres::setAdminNotice("Inserted administrator $administratorId");
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS));
@@ -109,7 +109,7 @@ class AdministratorsController extends AdminController
         
         $this->administratorsEntityMapper->doUpdate((int) $primaryKey, $changedFields);
 
-        $this->events->insertInfo("Updated Administrator", "id:$primaryKey|".$this->getChangedFieldsString($administrator, $changedFields));
+        $this->events->insertInfo(EVENT_ADMINISTRATOR_UPDATE, "id:$primaryKey|".$this->getChangedFieldsString($administrator, $changedFields));
         SlimPostgres::setAdminNotice("Updated administrator $primaryKey");
         
         return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix,'index')));
@@ -128,17 +128,17 @@ class AdministratorsController extends AdminController
         } catch (Exceptions\QueryResultsNotFoundException $e) {
             return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsTableMapper, 'delete', 'Administrator');
         } catch (Exceptions\UnallowedActionException $e) {
-            $this->events->insertWarning('Unallowed Action', $e->getMessage());
+            $this->events->insertWarning(EVENT_UNALLOWED_ACTION, $e->getMessage());
             SlimPostgres::setAdminNotice($e->getMessage(), 'failure');
             return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix,'index')));
         } catch (Exceptions\QueryFailureException $e) {
-            $this->events->insertError('Administrator Deletion Failure', $e->getMessage());
+            $this->events->insertError(EVENT_ADMINISTRATOR_DELETE_FAIL, $e->getMessage());
             SlimPostgres::setAdminNotice('Delete Failed', 'failure');
             return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix,'index')));
         }
 
         $eventNote = $this->administratorsTableMapper->getPrimaryKeyColumnName() . ":$primaryKey|username: $username";
-        $this->events->insertInfo("Deleted Administrator", $eventNote);
+        $this->events->insertInfo(EVENT_ADMINISTRATOR_DELETE, $eventNote);
         SlimPostgres::setAdminNotice("Deleted administrator $primaryKey(username: $username)");
 
         return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'index')));

@@ -232,7 +232,7 @@ class SlimPostgres
             return function (Request $request, Response $response) use ($container) {
 
                 /** log error */
-                $this->eventsTableMapper->insertNotice('404 Page Not Found');
+                $this->eventsTableMapper->insertNotice(EVENT_PAGE_NOT_FOUND);
 
                 $_SESSION[SlimPostgres::SESSION_KEY_NOTICE] = [$this->config['pageNotFoundText'], SlimPostgres::STATUS_NOTICE_FAILURE];
                 return $container->view->render(

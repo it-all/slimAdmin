@@ -34,11 +34,11 @@ class RolesController extends DatabaseTableController
         }
 
         $primaryKey = $args['primaryKey'];
-        $tableName = $this->mapper->getFormalTableName(false);
-        $primaryKeyColumnName = $this->mapper->getPrimaryKeyColumnName();
+        $tableName = $this->tableMapper->getFormalTableName(false);
+        $primaryKeyColumnName = $this->tableMapper->getPrimaryKeyColumnName();
 
         try {
-            $this->mapper->deleteByPrimaryKey($primaryKey);
+            $this->tableMapper->deleteByPrimaryKey($primaryKey);
             $this->events->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName: $primaryKey");
             SlimPostgres::setAdminNotice("Deleted $tableName $primaryKey");
         } catch (Exceptions\UnallowedActionException $e) {

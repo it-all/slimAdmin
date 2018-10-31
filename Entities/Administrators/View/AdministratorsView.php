@@ -86,7 +86,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
         }
 
         try {
-            $administrators = $this->mapper->getObjects($this->getFilterColumnsInfo(), null, $this->authentication, $this->authorization);
+            $administrators = $this->administratorsEntityMapper->getObjects($this->getFilterColumnsInfo(), null, $this->authentication, $this->authorization);
         } catch (QueryFailureException $e) {
             $administrators = [];
             // warning event is inserted when query fails
@@ -127,7 +127,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
     public function updateView(Request $request, Response $response, $args)
     {
         // make sure there is an administrator for the primary key
-        if (null === $administrator = $this->mapper->getObjectById((int) $args['primaryKey'])) {
+        if (null === $administrator = $this->administratorsEntityMapper->getObjectById((int) $args['primaryKey'])) {
             return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->administratorsTableMapper, 'update');
         }
 
@@ -145,7 +145,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
             $response,
             'admin/form.php',
             [
-                'title' => $this->mapper->getUpdateTitle(),
+                'title' => $this->administratorsEntityMapper->getUpdateTitle(),
                 'form' => $updateForm->getForm(),
                 // 'form' => $this->getForm($request, 'update', (int) $args['primaryKey'], $administrator),
                 'primaryKey' => $args['primaryKey'],

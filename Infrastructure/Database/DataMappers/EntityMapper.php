@@ -4,19 +4,15 @@ declare(strict_types=1);
 namespace Infrastructure\Database\DataMappers;
 
 use Infrastructure\Database\DataMappers\ListViewMappers;
+use Infrastructure\Database\Queries\SelectBuilder;
 use Infrastructure\Functions;
 
 abstract class EntityMapper implements ListViewMappers
 {
     protected $defaultSelectColumnsString;
 
-    // abstract public function getListViewTitle(): string;
-    // abstract public function getInsertTitle(): string;
-    // abstract public function getUpdateColumnName(): ?string;
-    // abstract public function getListViewSortColumn(): ?string;
-    // abstract public function getListViewSortAscending(): bool;
-    // abstract protected function getFromClause();
-    // abstract protected function getOrderBy();
+    abstract protected function getFromClause();
+    abstract protected function getOrderBy();
 
     public function setDefaultSelectColumnsString() 
     {
@@ -28,7 +24,7 @@ abstract class EntityMapper implements ListViewMappers
     }
 
     /** returns array of records or null */
-    public function select(?string $columns = "*", ?array $whereColumnsInfo = null, ?string $orderBy = null): ?array
+    public function select(?string $columns = null, ?array $whereColumnsInfo = null, ?string $orderBy = null): ?array
     {
         if ($whereColumnsInfo != null) {
             $this->validateWhere($whereColumnsInfo, self::SELECT_COLUMNS);

@@ -141,7 +141,7 @@ class TableMapper implements ListViewMappers
     }
 
     /** returns either array of rows or null */
-    public function select(?string $columns = "*", ?array $whereColumnsInfo = null, ?string $orderBy = null): ?array
+    public function select(?string $columns = null, ?array $whereColumnsInfo = null, ?string $orderBy = null): ?array
     {
         $columns = $columns ?? $this->defaultSelectColumnsString;
         $orderBy = $orderBy ?? $this->getOrderBy();

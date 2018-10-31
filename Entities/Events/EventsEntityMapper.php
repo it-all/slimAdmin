@@ -8,6 +8,8 @@ use Infrastructure\Database\DataMappers\EntityMapper;
 // Singleton
 final class EventsEntityMapper extends EntityMapper
 {
+    private $eventsTableMapper;
+
     const TABLE_NAME = 'events';
     const TYPES_TABLE_NAME = 'event_types';
     const ADMINISTRATORS_TABLE_NAME = 'administrators';
@@ -36,7 +38,7 @@ final class EventsEntityMapper extends EntityMapper
     protected function __construct()
     {
         $this->setDefaultSelectColumnsString(self::SELECT_COLUMNS);
-        $this->setEventTypes();
+        $this->eventsTableMapper = EventsTableMapper::getInstance();
     }
 
     protected function getFromClause(): string 
@@ -47,5 +49,35 @@ final class EventsEntityMapper extends EntityMapper
     protected function getOrderBy(): string 
     {
         return self::TABLE_NAME.".created DESC";
+    }
+
+    public function getListViewTitle(): string
+    {
+        return $this->eventsTableMapper->getListViewTitle();
+    }
+
+    public function getInsertTitle(): string
+    {
+        return $this->eventsTableMapper->getInsertTitle();
+    }
+
+    public function getUpdateColumnName(): ?string
+    {
+        return null;
+    }
+
+    public function getCountSelectColumns(): int
+    {
+        return count(self::SELECT_COLUMNS);
+    }
+
+    public function getListViewSortColumn(): ?string
+    {
+        return $this->eventsTableMapper->getListViewSortColumn();
+    }
+
+    public function getListViewSortAscending(): ?bool
+    {
+        return $this->eventsTableMapper->getListViewSortAscending();
     }
 }

@@ -16,6 +16,7 @@ class AdminView extends BaseView
         parent::__construct($container);
         if ($this->authentication->isAuthenticated()) {
             $this->navigationItems = (new AdminNavigation($container))->getNavForAdministrator();
+            $this->events->setAdministratorId($this->authentication->getAdministratorId());
         }
     }
 }

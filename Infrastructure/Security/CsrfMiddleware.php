@@ -13,18 +13,12 @@ class CsrfMiddleware extends Middleware
 	{
         if (false === $request->getAttribute('csrf_status')) {
             $eventTitle = 'CSRF Check Failure';
-            $this->container->events->insertError($eventTitle, (int) $this->container->authentication->getAdministratorId());
+            $this->container->events->setAdministratorId($this->container->authentication->getAdministratorId());
+            $this->container->events->insertError($eventTitle);
             session_unset();
             $_SESSION[SESSION_NOTICE] = ['Error. Your session has been reset.', 'error'];
             return $response->withRedirect($this->container->router->pathFor(ROUTE_HOME));
         }
-
-//        $this->container->view->getEnvironment()->addGlobal('csrf', [
-//            'tokenNameKey' => $this->container->csrf->getTokenNameKey(),
-//            'tokenName' => $this->container->csrf->getTokenName(),
-//            'tokenValueKey' => $this->container->csrf->getTokenValueKey(),
-//            'tokenValue' => $this->container->csrf->getTokenValue()
-//        ]);
 
 		$response = $next($request, $response);
 		return $response;

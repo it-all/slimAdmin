@@ -24,7 +24,7 @@ class AuthorizationMiddleware extends Middleware
     public function __invoke(Request $request, Response $response, $next)
 	{
         if (!$this->container->authorization->isAuthorized($this->resource)) {
-            $this->container->events->insertAlert('No authorization for resource', $this->container->authentication->getAdministratorId());
+            $this->container->events->insertSecurity('No authorization for resource', $this->container->authentication->getAdministratorId());
 		    SlimPostgres::setAdminNotice('No permission', 'failure');
             return (new AdminHomeView($this->container))->routeIndex($request, $response, ['status' => 403]);
         }

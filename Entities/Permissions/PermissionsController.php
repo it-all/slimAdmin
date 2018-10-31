@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Entities\Permissions;
 
 use Infrastructure\SlimPostgres;
-use Infrastructure\BaseMVC\Controller\BaseController;
+use Infrastructure\BaseMVC\Controller\AdminController;
 use Entities\Roles\Model\RolesTableMapper;
 use Entities\Permissions\Model\Permission;
 use Entities\Permissions\Model\PermissionsTableMapper;
@@ -18,7 +18,7 @@ use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class PermissionsController extends BaseController
+class PermissionsController extends AdminController
 {
     use ResponseUtilities;
 
@@ -66,7 +66,7 @@ class PermissionsController extends BaseController
             throw new \Exception("Permission create failure. ".$e->getMessage());
         }
 
-        $this->events->insertInfo("Inserted Permission", (int) $this->authentication->getAdministratorId(), "id:$permissionId");
+        $this->events->insertInfo("Inserted Permission", "id:$permissionId");
 
         SlimPostgres::setAdminNotice("Inserted Permission $permissionId");
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS_PERMISSIONS));
@@ -111,7 +111,7 @@ class PermissionsController extends BaseController
         
         $this->permissionsEntityMapper->doUpdate((int) $primaryKey, $changedFields);
 
-        $this->events->insertInfo("Updated Permission", (int) $this->authentication->getAdministratorId(), "id:$primaryKey|".$this->getChangedFieldsString($permission, $changedFields));
+        $this->events->insertInfo("Updated Permission", "id:$primaryKey|".$this->getChangedFieldsString($permission, $changedFields));
         SlimPostgres::setAdminNotice("Updated permission $primaryKey");
         
         return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix,'index')));
@@ -130,17 +130,17 @@ class PermissionsController extends BaseController
         } catch (Exceptions\QueryResultsNotFoundException $e) {
             return $this->databaseRecordNotFound($response, $primaryKey, PermissionsTableMapper::getInstance(), 'delete', 'Permission');
         } catch (Exceptions\UnallowedActionException $e) {
-            $this->events->insertWarning('Unallowed Action', (int) $this->authentication->getAdministratorId(), $e->getMessage());
+            $this->events->insertWarning('Unallowed Action', $e->getMessage());
             SlimPostgres::setAdminNotice($e->getMessage(), 'failure');
             return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix,'index')));
         } catch (Exceptions\QueryFailureException $e) {
-            $this->events->insertError('Permission Deletion Failure', (int) $this->authentication->getAdministratorId(), $e->getMessage());
+            $this->events->insertError('Permission Deletion Failure', $e->getMessage());
             SlimPostgres::setAdminNotice('Delete Failed', 'failure');
             return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix,'index')));
         }
 
         $eventNote = $this->permissionsTableMapper->getPrimaryKeyColumnName() . ":$primaryKey|title: $title";
-        $this->events->insertInfo("Deleted Permission", (int) $this->authentication->getAdministratorId(), $eventNote);
+        $this->events->insertInfo("Deleted Permission", $eventNote);
         SlimPostgres::setAdminNotice("Deleted permission $primaryKey(title: $title)");
 
         return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'index')));

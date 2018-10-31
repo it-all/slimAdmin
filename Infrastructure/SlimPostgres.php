@@ -25,7 +25,7 @@ class SlimPostgres
 
     private $environmentalVariables;
     private $database;
-    private $EventsTableMapper;
+    private $eventsTableMapper;
     private $mailer;
 
     /** session variable keys */
@@ -168,10 +168,10 @@ class SlimPostgres
         $postgres = Postgres::getInstance($postgresConnectionString);
 
         /** used in error handler and container */
-        $this->EventsTableMapper = EventsTableMapper::getInstance();
+        $this->eventsTableMapper = EventsTableMapper::getInstance();
 
         if ($this->config['errors']['logToDatabase']) {
-            $errorHandler->setEventsTableMapper($this->EventsTableMapper);
+            $errorHandler->setEventsTableMapper($this->eventsTableMapper);
         }
 
         if (!Functions::isRunningFromCommandLine()) {
@@ -205,7 +205,7 @@ class SlimPostgres
         $slim = new \Slim\App($this->getSlimSettings());
         $slimContainer = $slim->getContainer();
 
-        $this->setSlimDependences($slimContainer, $this->EventsTableMapper, $this->mailer);
+        $this->setSlimDependences($slimContainer, $this->eventsTableMapper, $this->mailer);
 
         $this->removeSlimErrorHandler($slimContainer);
 
@@ -232,7 +232,7 @@ class SlimPostgres
             return function (Request $request, Response $response) use ($container) {
 
                 /** log error */
-                $this->EventsTableMapper->insertEvent('404 Page Not Found', 'notice', $container->authentication->getAdministratorId());
+                $this->eventsTableMapper->insertNotice('404 Page Not Found');
 
                 $_SESSION[SlimPostgres::SESSION_KEY_NOTICE] = [$this->config['pageNotFoundText'], SlimPostgres::STATUS_NOTICE_FAILURE];
                 return $container->view->render(
@@ -245,7 +245,7 @@ class SlimPostgres
         return $slimSettings;
     }
 
-    private function setSlimDependences($container, EventsTableMapper $EventsTableMapper, Utilities\PhpMailerService $mailer)
+    private function setSlimDependences($container, EventsTableMapper $eventsTableMapper, Utilities\PhpMailerService $mailer)
     {
         /** Template */
         $container['view'] = function ($container) {
@@ -279,8 +279,8 @@ class SlimPostgres
         };
 
         /** Events (Database Log) */
-        $container['events'] = function($container) use ($EventsTableMapper) {
-            return $EventsTableMapper;
+        $container['events'] = function($container) use ($eventsTableMapper) {
+            return $eventsTableMapper;
         };
 
         /** Mailer */

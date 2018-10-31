@@ -6,7 +6,7 @@ namespace Infrastructure\BaseMVC\Controller;
 use Infrastructure\SlimPostgres;
 use Exceptions;
 use Infrastructure\BaseMVC\View\ResponseUtilities;
-use Infrastructure\BaseMVC\Controller\BaseController;
+use Infrastructure\BaseMVC\Controller\AdminController;
 use Infrastructure\Database\DataMappers\TableMapper;
 use Infrastructure\BaseMVC\View\Forms\FormHelper;
 use Infrastructure\BaseMVC\View\Forms\DatabaseTableForm;
@@ -16,7 +16,7 @@ use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class DatabaseTableController extends BaseController
+class DatabaseTableController extends AdminController
 {
     use ResponseUtilities;
 
@@ -86,7 +86,7 @@ class DatabaseTableController extends BaseController
             $eventNote = "$primaryKeyColumnName: $insertResult";
         }
         
-        $this->events->insertInfo($noteStart, (int) $this->authentication->getAdministratorId(), $eventNote);
+        $this->events->insertInfo($noteStart, $eventNote);
         SlimPostgres::setAdminNotice($adminNotification);
 
         return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'index')));
@@ -144,7 +144,7 @@ class DatabaseTableController extends BaseController
         $adminNotification = "$noteStart $primaryKeyValue";
         $eventNote = $this->tableMapper->getPrimaryKeyColumnName() . ": " . $primaryKeyValue;
 
-        $this->events->insertInfo($noteStart, (int) $this->authentication->getAdministratorId(), $eventNote);
+        $this->events->insertInfo($noteStart, $eventNote);
         SlimPostgres::setAdminNotice($adminNotification);
 
         return $response->withRedirect($this->router->pathFor($redirectRoute));
@@ -162,10 +162,10 @@ class DatabaseTableController extends BaseController
 
         try {
             $this->tableMapper->deleteByPrimaryKey($primaryKey);
-            $this->events->insertInfo("Deleted $tableName", (int) $this->authentication->getAdministratorId(), "$primaryKeyColumnName: $primaryKey");
+            $this->events->insertInfo("Deleted $tableName", "$primaryKeyColumnName: $primaryKey");
             SlimPostgres::setAdminNotice("Deleted $tableName $primaryKey");
         } catch (Exceptions\QueryResultsNotFoundException $e) {
-            $this->events->insertWarning('Delete Attempt on Non-existing Record', (int) $this->authentication->getAdministratorId(), "Table: $tableName|$primaryKeyColumnName: $primaryKey");
+            $this->events->insertWarning('Delete Attempt on Non-existing Record', "Table: $tableName|$primaryKeyColumnName: $primaryKey");
             SlimPostgres::setAdminNotice("$tableName $primaryKey Not Found", 'failure');
         } catch (Exceptions\QueryFailureException $e) {
             SlimPostgres::setAdminNotice('Deletion Query Failure', 'failure');

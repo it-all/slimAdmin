@@ -12,6 +12,8 @@ final class EventsTableMapper extends TableMapper
     /** @var array of event_types records: id => [eventy_type, description]. Populated at construction in order to reduce future queries */
     private $eventTypes;
 
+    private $administratorId;
+
     const TABLE_NAME = 'events';
     const TYPES_TABLE_NAME = 'event_types';
 
@@ -30,6 +32,12 @@ final class EventsTableMapper extends TableMapper
         $this->setEventTypes();
     }
 
+    /** this must be called in order to set the currently logged in administrator */
+    public function setAdministratorId(int $administratorId) 
+    {
+        $this->administratorId = $administratorId;
+    }
+
     private function setEventTypes()
     {
         $this->eventTypes = [];
@@ -44,52 +52,52 @@ final class EventsTableMapper extends TableMapper
         }
     }
 
-    public function insertDebug(string $title, ?int $administratorId = null, ?string $notes = null): ?int
+    public function insertDebug(string $title, ?string $notes = null): ?int
     {
-        return $this->insertEvent($title, 'debug', $administratorId, $notes);
+        return $this->insertEvent($title, 'debug', $notes);
     }
 
-    public function insertInfo(string $title, ?int $administratorId = null, ?string $notes = null): ?int
+    public function insertInfo(string $title, ?string $notes = null): ?int
     {
-        return $this->insertEvent($title, 'info', $administratorId, $notes);
+        return $this->insertEvent($title, 'info', $notes);
     }
 
-    public function insertNotice(string $title, ?int $administratorId = null, ?string $notes = null): ?int
+    public function insertNotice(string $title, ?string $notes = null): ?int
     {
-        return $this->insertEvent($title, 'notice', $administratorId, $notes);
+        return $this->insertEvent($title, 'notice', $notes);
     }
 
-    public function insertWarning(string $title, ?int $administratorId = null, ?string $notes = null): ?int
+    public function insertWarning(string $title, ?string $notes = null): ?int
     {
-        return $this->insertEvent($title, 'warning', $administratorId, $notes);
+        return $this->insertEvent($title, 'warning', $notes);
     }
 
-    public function insertError(string $title, ?int $administratorId = null, ?string $notes = null): ?int
+    public function insertError(string $title, ?string $notes = null): ?int
     {
-        return $this->insertEvent($title, 'error', $administratorId, $notes);
+        return $this->insertEvent($title, 'error', $notes);
     }
 
-    public function insertSecurity(string $title, ?int $administratorId = null, ?string $notes = null): ?int
+    public function insertSecurity(string $title, ?string $notes = null): ?int
     {
-        return $this->insertEvent($title, 'security', $administratorId, $notes);
+        return $this->insertEvent($title, 'security', $notes);
     }
 
-    public function insertCritical(string $title, ?int $administratorId = null, ?string $notes = null): ?int
+    public function insertCritical(string $title, ?string $notes = null): ?int
     {
-        return $this->insertEvent($title, 'critical', $administratorId, $notes);
+        return $this->insertEvent($title, 'critical', $notes);
     }
 
-    public function insertAlert(string $title, ?int $administratorId = null, ?string $notes = null): ?int
+    public function insertAlert(string $title, ?string $notes = null): ?int
     {
-        return $this->insertEvent($title, 'alert', $administratorId, $notes);
+        return $this->insertEvent($title, 'alert', $notes);
     }
 
-    public function insertEmergency(string $title, ?int $administratorId = null, ?string $notes = null): ?int
+    public function insertEmergency(string $title, ?string $notes = null): ?int
     {
-        return $this->insertEvent($title, 'emergency', $administratorId, $notes);
+        return $this->insertEvent($title, 'emergency', $notes);
     }
 
-    public function insertEvent(string $title, string $eventType = 'info', ?int $administratorId = null, ?string $notes = null): ?int
+    public function insertEvent(string $title, string $eventType = 'info', ?string $notes = null): ?int
     {
         if (null === $eventTypeId = $this->getEventTypeId($eventType)) {
             throw new \Exception("Invalid eventType: $eventType");
@@ -103,17 +111,12 @@ final class EventsTableMapper extends TableMapper
             $notes = null;
         }
 
-        // allow 0 to be passed in instead of null, convert to null so query won't fail
-        if ($administratorId == 0) {
-            $administratorId = null;
-        }
-       
         $columnValues = [
             'event_type_id' => $eventTypeId, 
             'title' => $title,
             'notes' => $notes,
             'created' => 'NOW()',
-            'administrator_id' => $administratorId,
+            'administrator_id' => $this->administratorId,
             'ip_address' => $_SERVER['REMOTE_ADDR'],
             'resource' => $_SERVER['REQUEST_URI'],
             'request_method' => $_SERVER['REQUEST_METHOD']

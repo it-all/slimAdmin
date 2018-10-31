@@ -16,7 +16,7 @@ class ErrorHandler
     private $echoErrors;
     private $mailer;
     private $emailTo;
-    private $EventsTableMapper;
+    private $eventsTableMapper;
     private $fatalMessage;
 
     public function __construct(
@@ -42,14 +42,14 @@ class ErrorHandler
         $this->fatalMessage = $fatalMessage;
     }
 
-    public function setEventsTableMapper(EventsTableMapper $EventsTableMapper)
+    public function setEventsTableMapper(EventsTableMapper $eventsTableMapper)
     {
-        $this->EventsTableMapper = $EventsTableMapper;
+        $this->eventsTableMapper = $eventsTableMapper;
     }
 
     /*
      * 4 ways to handle:
-     * -database - always (as long as database and EventsTableMapper properties have been set)
+     * -database - always (as long as database and eventsTableMapper properties have been set)
      * -log - always
      * -echo - depends on property
      * -email - depends on property. never email error deets.
@@ -65,7 +65,7 @@ class ErrorHandler
         $errorMessage = $this->generateMessage($messageBody);
 
         // log to database
-        if (isset($this->EventsTableMapper)) {
+        if (isset($this->eventsTableMapper)) {
             switch ($this->getErrorType($errno)) {
                 case 'Core Error':
                 case 'Parse Error':
@@ -86,9 +86,12 @@ class ErrorHandler
 
             $databaseErrorMessage = explode('Stack Trace:', $errorMessage)[0].'...See PHP error log for further details.';
 
-            $administratorId = (isset($_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID])) ? (int) $_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID] : null;
+            /** set events administrator id if logged in */
+            if ((isset($_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID]))) {
+                $this->eventsTableMapper->setAdministratorId((int) $_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID]);
+            }
 
-            @$this->EventsTableMapper->insertEvent('PHP Error', $eventType, $administratorId, $databaseErrorMessage);
+            @$this->eventsTableMapper->insertEvent('PHP Error', $eventType, $databaseErrorMessage);
         }
 
         // log to file

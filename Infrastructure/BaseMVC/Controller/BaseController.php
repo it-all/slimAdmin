@@ -164,7 +164,7 @@ abstract class BaseController
                     [$settings['emails'][$emailTo]]
                 );
             } else {
-                $this->events->insertError("Email Not Found", (int) $this->authentication->getAdministratorId(), $emailTo);
+                $this->events->insertError("Email Not Found", $emailTo);
                 if ($throwExceptionOnError) {
                     throw new \InvalidArgumentException("Email Not Found: $emailTo");
                 }

@@ -111,6 +111,9 @@ final class EventsTableMapper extends TableMapper
             $notes = null;
         }
 
+        $sessionId = (session_id() == '') ? null : session_id();
+        $referer = ($_SERVER['HTTP_REFERER'] == '') ? null : $_SERVER['HTTP_REFERER'];
+        
         $columnValues = [
             'event_type_id' => $eventTypeId, 
             'title' => $title,
@@ -119,7 +122,9 @@ final class EventsTableMapper extends TableMapper
             'administrator_id' => $this->administratorId,
             'ip_address' => $_SERVER['REMOTE_ADDR'],
             'resource' => $_SERVER['REQUEST_URI'],
-            'request_method' => $_SERVER['REQUEST_METHOD']
+            'request_method' => $_SERVER['REQUEST_METHOD'],
+            'referer' => $referer,
+            'session_id' => $sessionId,
         ];
 
         /** suppress exception as it will result in infinite loop in error handler, which also calls this fn */

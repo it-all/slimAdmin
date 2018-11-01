@@ -23,7 +23,9 @@ final class EventsEntityMapper extends EntityMapper
         'notes' => self::TABLE_NAME . '.notes',
         'ip_address' => self::TABLE_NAME . '.ip_address',
         'request_method' => self::TABLE_NAME . '.request_method',
-        'resource' => self::TABLE_NAME . '.resource'
+        'resource' => self::TABLE_NAME . '.resource',
+        'referer' => self::TABLE_NAME . '.referer',
+        'session' => self::TABLE_NAME . '.session_id',
     ];
 
     public static function getInstance()

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-Infrastructure\SlimPostgres
+use Infrastructure\SlimPostgres;
 
 $title = $businessName;
 $htmlHeadCss = '<link href="/css/frontend.css" rel="stylesheet" type="text/css">';

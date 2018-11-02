@@ -49,21 +49,21 @@ final class PermissionsTableMapper extends TableMapper
         return true;
     }
     
+    /** note this allows any fields to be passed in changedFields and returns only changes from the UPDATE_FIELDS array */
     public function getChangedFields(array $changedFields): array 
     {
         $changedPermissionFields = [];
 
         foreach ($changedFields as $fieldName => $fieldInfo) {
-            if (!in_array($fieldName, self::UPDATE_FIELDS)) {
-                throw new \InvalidArgumentException("Invalid field $fieldName in changedFields");
-            }
-            switch($fieldName) {
-                case 'active':
-                    $changedPermissionFields['active'] = Postgres::convertBoolToPostgresBool($changedFields['active']);
+            if (in_array($fieldName, self::UPDATE_FIELDS)) {
+                switch($fieldName) {
+                    case 'active':
+                        $changedPermissionFields['active'] = Postgres::convertBoolToPostgresBool($changedFields['active']);
+                        break;
 
-                break;
-                default:
-                    $changedPermissionFields[$fieldName] = $changedFields[$fieldName];
+                    default:
+                        $changedPermissionFields[$fieldName] = $changedFields[$fieldName];
+                }
             }
         }
         return $changedPermissionFields;

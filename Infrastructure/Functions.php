@@ -7,6 +7,11 @@ namespace Infrastructure;
 // A place to store php helper functions, not App-related functions
 class Functions
 {
+    public static function validateJson(string $json): bool 
+    {
+        return json_decode($json) !== null;
+    }
+    
     public static function destroySession() 
     {
         /** Unset all of the session variables */

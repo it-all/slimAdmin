@@ -187,11 +187,23 @@ class TableMapper implements ListViewMappers
         return null;
     }
 
-    protected function addBooleanColumnValues(array $columnValues): array
+    public function getBooleanColumnNames(): array
     {
+        $booleanFieldNames = [];
         foreach ($this->columns as $column) {
-            if ($column->isBoolean() && !isset($columnValues[$column->getName()])) {
-                $columnValues[$column->getName()] = Postgres::BOOLEAN_FALSE;
+            if ($column->isBoolean()) {
+                $booleanFieldNames[] = $column->getName();
+            }
+        }
+        return $booleanFieldNames;
+    }
+
+    /** inserts columnName => 'f' into columnValues array for any boolean column in the table that does not exist in columnValues */
+    private function addBooleanColumnFalse(array $columnValues): array
+    {
+        foreach ($this->getBooleanColumnNames() as $booleanColumnName) {
+            if (!isset($columnValues[$booleanColumnName])) {
+                $columnValues[$booleanColumnName] = Postgres::BOOLEAN_FALSE;
             }
         }
 
@@ -199,10 +211,10 @@ class TableMapper implements ListViewMappers
     }
 
     /** returns primary key if set, otherwise returns pg result */
-    public function insert(array $columnValues, bool $addBooleanColumnValues = false)
+    public function insert(array $columnValues, bool $addBooleanColumnFalse = false)
     {
-        if ($addBooleanColumnValues) {
-            $columnValues = $this->addBooleanColumnValues($columnValues);
+        if ($addBooleanColumnFalse) {
+            $columnValues = $this->addBooleanColumnFalse($columnValues);
         }
         $ib = new InsertBuilder($this->tableName);
         if ($this->getPrimaryKeyColumnName() !== null) {
@@ -229,13 +241,13 @@ class TableMapper implements ListViewMappers
      * @param $primaryKeyValue
      * @param bool $getChangedValues :: default true. if true calls getChangedColumnsValues in order to send only changed to update builder, otherwise all $columnValues is sent to update builder. set false if input only includes changed values in order to not duplicate checking for changes.
      * @param array $record :: best to include if $getChangedValues is true in order to not duplicate select query
-     * @param bool $addBooleanColumnValues if true calls method which adds in boolean columns that don't exist in the input columnValues
+     * @param bool $addBooleanColumnFalse if true calls method which adds in boolean columns that don't exist in the input columnValues
      */
-    public function updateByPrimaryKey(array $columnValues, $primaryKeyValue, bool $getChangedValues = true, array $record = [], bool $addBooleanColumnValues = false)
+    public function updateByPrimaryKey(array $columnValues, $primaryKeyValue, bool $getChangedValues = true, array $record = [], bool $addBooleanColumnFalse = false)
     {
         // what if columnValues is empty array, or updatecolumnValues is empty array
-        if ($addBooleanColumnValues) {
-            $columnValues = $this->addBooleanColumnValues($columnValues);
+        if ($addBooleanColumnFalse) {
+            $columnValues = $this->addBooleanColumnFalse($columnValues);
         }
 
         if ($getChangedValues) {
@@ -287,12 +299,14 @@ class TableMapper implements ListViewMappers
     private function addColumnsToBuilder(InsertUpdateBuilder $builder, array $columnValues)
     {
         foreach ($columnValues as $name => $value) {
-            // make sure this is truly a column
+            /** make sure this is truly a column */
             if (null !== $column = $this->getColumnByName($name)) {
                 if (is_string($value) && mb_strlen($value) == 0) {
                     $value = $this->handleBlankValue($column);
                 }
                 $builder->addColumn($name, $value);
+            } else {
+                throw new \InvalidArgumentException("Database table ".$this->tableName." does not contain a $name column");
             }
         }
     }

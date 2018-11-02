@@ -22,6 +22,9 @@ class AuthenticationService
     /** @var Administrator if username maps to existing administrator but authentication fails due to incorrect password or inactive administrator, this will be populated */
     private $failAdministrator;
 
+    /** @var string stores username entered when login fails because username is nonexistent */
+    private $nonexistentUsername;
+
     /** @var \SlimPostgres\Administrators\Administrator|null the logged in administrator model or null */
     private $administrator;
 
@@ -65,10 +68,21 @@ class AuthenticationService
 
     public function getFailAdministratorId(): ?int 
     {
-        if (!$this->failAdministrator === null) {
+        if ($this->failAdministrator !== null) {
             return $this->failAdministrator->getId();
         }
         return null;
+    }
+
+    /** stores username entered when login fails because username is nonexistent */
+    private function setNonexistentUsername(string $username) 
+    {
+        $this->nonexistentUsername = $username;
+    }
+
+    public function getNonexistentUsername(): ?string 
+    {
+        return $this->nonexistentUsername;
     }
 
     /** check that the administrator session is set and that the administrator is still active */
@@ -126,6 +140,8 @@ class AuthenticationService
         $this->setFailReason($reason);
         if (null !== $administrator) {
             $this->setFailAdministrator($administrator);
+        } elseif ($reason == 'nonexistent') {
+            $this->setNonexistentUsername($username);
         }
         $this->incrementNumFailedLogins();
     }

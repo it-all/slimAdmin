@@ -59,7 +59,8 @@ class DatabaseTableController extends AdminController
             throw new \Exception('No permission.');
         }
 
-        $this->setRequestInput($request, DatabaseTableForm::getFieldNames($this->tableMapper), $this->getBooleanFieldNames());
+        /** note that boolean columns that don't exist in request input are added as false */
+        $this->setRequestInput($request, DatabaseTableForm::getFieldNames($this->tableMapper), $this->tableMapper->getBooleanColumnNames());
 
         $validator = new DatabaseTableInsertFormValidator($this->requestInput, $this->tableMapper);
 
@@ -70,41 +71,40 @@ class DatabaseTableController extends AdminController
             return $this->view->insertView($request, $response, $args);
         }
 
-        try {
-            /** the last true bool means that boolean columns that don't exist in $changedColumnsValues get inserted as false */
-            $insertResult = $this->tableMapper->insert($this->requestInput, true);
-        } catch (\Exception $e) {
-            throw new \Exception("Insert failure. ".$e->getMessage());
-        }
+        /** if primary key is set the new id is returned by mapper insert method */
+        $insertResult = $this->tableMapper->insert($this->requestInput);
 
-        $tableNameSingular = $this->tableMapper->getFormalTableName(false);
-        $noteStart = "Inserted $tableNameSingular";
-
-        /** use constant if defined, squelch warning */
-        $eventTitle = @constant("EVENT_".strtoupper($tableNameSingular)."_INSERT") ?? $noteStart;
-        $adminNotification = $noteStart;
-        $eventNote = "";
-
-        if (null !== $primaryKeyColumnName = $this->tableMapper->getPrimaryKeyColumnName()) {
-            $adminNotification .= " $insertResult"; // if primary key is set the new id is returned by mapper insert method
-            $eventNote = "$primaryKeyColumnName: $insertResult";
-        }
-        
-        $this->events->insertInfo($eventTitle, $eventNote);
-        SlimPostgres::setAdminNotice($adminNotification);
+        $this->enterEventAndNotice('insert', $insertResult);
 
         return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'index')));
     }
 
-    public function getBooleanFieldNames(): array
+    /** called by insert and update */
+    private function enterEventAndNotice(string $action, $primaryKeyValue = null) 
     {
-        $booleanFieldNames = [];
-        foreach ($this->tableMapper->getColumns() as $column) {
-            if ($column->isBoolean()) {
-                $booleanFieldNames[] = $column->getName();
-            }
+        if ($action != 'insert' && $action != 'update') {
+            throw new \InvalidArgumentException("Action must be either insert or update");
         }
-        return $booleanFieldNames;
+
+        $actionPastTense = ($action == 'insert') ? 'inserted' : 'updated';
+
+        $tableNameSingular = $this->tableMapper->getFormalTableName(false);
+        $noteStart = "$actionPastTense $tableNameSingular";
+
+        /** use event constant if defined, squelch warning */
+        $eventTitle = @constant("EVENT_".strtoupper($tableNameSingular)."_".strtoupper($action)) ?? $noteStart;
+        $adminNotification = $noteStart;
+        $eventPayload = [];
+
+        if (null !== $primaryKeyColumnName = $this->tableMapper->getPrimaryKeyColumnName()) {
+            $adminNotification .= " $primaryKeyValue"; // if primary key is set the new id is returned by mapper insert method
+            $eventPayload = [$primaryKeyColumnName => $primaryKeyValue];
+        }
+        
+        $eventPayload = array_merge($eventPayload, $this->requestInput);
+
+        $this->events->insertInfo($eventTitle, $eventPayload);
+        SlimPostgres::setAdminNotice($adminNotification);
     }
 
     /** the table must have a primary key column defined */
@@ -116,7 +116,8 @@ class DatabaseTableController extends AdminController
 
         $primaryKeyValue = $args['primaryKey'];
 
-        $this->setRequestInput($request, DatabaseTableForm::getFieldNames($this->tableMapper), $this->getBooleanFieldNames());
+        /** note that boolean columns that don't exist in request input are added as false */
+        $this->setRequestInput($request, DatabaseTableForm::getFieldNames($this->tableMapper), $this->tableMapper->getBooleanColumnNames());
 
         $redirectRoute = SlimPostgres::getRouteName(true, $this->routePrefix, 'index');
 
@@ -141,19 +142,9 @@ class DatabaseTableController extends AdminController
             return $this->view->updateView($request, $response, $args);
         }
 
-        /** the last true bool means that boolean columns that don't exist in $changedColumnsValues get inserted as false ('f') */
-        $this->tableMapper->updateByPrimaryKey($changedColumnsValues, $primaryKeyValue, true, [], true);
+        $this->tableMapper->updateByPrimaryKey($changedColumnsValues, $primaryKeyValue);
 
-        $tableNameSingular = $this->tableMapper->getFormalTableName(false);
-
-        $noteStart = "Updated $tableNameSingular";
-        /** use constant if defined, squelch warning */
-        $eventTitle = @constant("EVENT_".strtoupper($tableNameSingular)."_UPDATE") ?? $noteStart;
-        $adminNotification = "$noteStart $primaryKeyValue";
-        $eventNote = $this->tableMapper->getPrimaryKeyColumnName() . ": " . $primaryKeyValue;
-
-        $this->events->insertInfo($eventTitle, $eventNote);
-        SlimPostgres::setAdminNotice($adminNotification);
+        $this->enterEventAndNotice('update', $primaryKeyValue);
 
         return $response->withRedirect($this->router->pathFor($redirectRoute));
     }
@@ -174,25 +165,15 @@ class DatabaseTableController extends AdminController
             /** use constant if defined, squelch warning */
             $eventTitle = @constant("EVENT_".strtoupper($tableName)."_DELETE") ?? "Deleted $tableName";
 
-            $this->events->insertInfo($eventTitle, "$primaryKeyColumnName: $primaryKey");
+            $this->events->insertInfo($eventTitle, [$primaryKeyColumnName => $primaryKey]);
             SlimPostgres::setAdminNotice("Deleted $tableName $primaryKey");
         } catch (Exceptions\QueryResultsNotFoundException $e) {
-            $this->events->insertWarning(EVENT_QUERY_NO_RESULTS, "Table: $tableName|$primaryKeyColumnName: $primaryKey");
+            $this->events->insertWarning(EVENT_QUERY_NO_RESULTS, ['table' => $tableName, $primaryKeyColumnName => $primaryKey]);
             SlimPostgres::setAdminNotice("$tableName $primaryKey Not Found", 'failure');
         } catch (Exceptions\QueryFailureException $e) {
             SlimPostgres::setAdminNotice('Deletion Query Failure', 'failure');
         }
 
         return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'index')));
-    }
-
-    private function getChangedFieldsString(array $changedFields, array $record): string 
-    {
-        $changedString = "";
-        foreach ($changedFields as $fieldName => $newValue) {
-            $changedString .= " $fieldName: ".$record[$fieldName]." => $newValue, ";
-        }
-
-        return substr($changedString, 0, strlen($changedString)-2);
     }
 }

@@ -39,17 +39,17 @@ class RolesController extends DatabaseTableController
 
         try {
             $this->tableMapper->deleteByPrimaryKey($primaryKey);
-            $this->events->insertInfo(EVENT_ROLE_DELETE, "$primaryKeyColumnName: $primaryKey");
+            $this->events->insertInfo(EVENT_ROLE_DELETE, [$primaryKeyColumnName => $primaryKey]);
             SlimPostgres::setAdminNotice("Deleted $tableName $primaryKey");
         } catch (Exceptions\UnallowedActionException $e) {
-            $this->events->insertWarning(EVENT_UNALLOWED_ACTION, $e->getMessage());
+            $this->events->insertWarning(EVENT_UNALLOWED_ACTION, ['error' => $e->getMessage()]);
             SlimPostgres::setAdminNotice($e->getMessage(), 'failure');
         } catch (Exceptions\QueryResultsNotFoundException $e) {
 define('EVENT_QUERY_NO_RESULTS', 'Query Results Not Found');
             $this->events->insertWarning(EVENT_QUERY_NO_RESULTS, $e->getMessage());
             SlimPostgres::setAdminNotice($e->getMessage(), 'failure');
         } catch (Exceptions\QueryFailureException $e) {
-            $this->events->insertError(EVENT_QUERY_FAIL, $e->getMessage());
+            $this->events->insertError(EVENT_QUERY_FAIL, ['error' => $e->getMessage()]);
             SlimPostgres::setAdminNotice('Delete Failed', 'failure');
         }
 

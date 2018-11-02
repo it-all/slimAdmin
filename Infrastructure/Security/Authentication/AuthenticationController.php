@@ -31,7 +31,7 @@ class AuthenticationController extends BaseController
             $this->insertFailureEvent();
 
             if ($this->authentication->tooManyFailedLogins()) {
-                $this->events->insertSecurity(EVENT_MAX_LOGIN_FAULT, 'Failed:'.$this->authentication->getNumFailedLogins());
+                $this->events->insertSecurity(EVENT_MAX_LOGIN_FAULT, ['number' => $this->authentication->getNumFailedLogins()]);
 
                 // redirect to home page with error message
                 $_SESSION[SlimPostgres::SESSION_KEY_NOTICE] = ['Login disabled. Too many failed logins.', 'error'];
@@ -52,7 +52,7 @@ class AuthenticationController extends BaseController
         $administratorId = $this->authentication->getAdministratorId();
         $administratorUsername = $this->authentication->getAdministratorUsername();
         /** enter null in administrator_id event arg since not logged in at time of request */
-        $this->events->insertInfo(EVENT_LOGIN, "administrator id: $administratorId|username: $administratorUsername");
+        $this->events->insertInfo(EVENT_LOGIN, ['administratorId' => $administratorId, 'username' => $administratorUsername]);
         SlimPostgres::setAdminNotice("Logged in");
 
         // redirect to proper resource
@@ -76,21 +76,33 @@ class AuthenticationController extends BaseController
         switch ($reason) {
             case 'password':
                 $eventMethod = 'insertInfo';
-                $eventNotes = 'Incorrect Password Administrator '.$this->authentication->getFailAdministratorId();   
+                $eventPayload = [
+                    'reason' => 'Incorrect Password',
+                    'administratorId' => $this->authentication->getFailAdministratorId()
+                ];
                 break;
 
             case 'nonexistent':
                 $eventMethod = 'insertWarning';
-                $eventNotes = 'Non-existent Administrator';  
+                $eventPayload = [
+                    'reason' => 'Non-existent Administrator',
+                    'username' => $this->authentication->getNonexistentUsername()
+                ];
                 break;  
 
             case 'inactive':
                 $eventMethod = 'insertSecurity';
-                $eventNotes = 'Inactive Administrator '.$this->authentication->getFailAdministratorId();    
+                $eventPayload = [
+                    'reason' => 'Inactive Administrator',
+                    'administratorId' => $this->authentication->getFailAdministratorId()
+                ];
                 break;
+
+            default:
+                throw new \Exception("Invalid Failure Reason: $reason");
         }
 
-        $this->events->{$eventMethod}(EVENT_LOGIN_FAIL, $eventNotes);
+        $this->events->{$eventMethod}(EVENT_LOGIN_FAIL, $eventPayload);
     }
 
     /** since this extends AdminController and not AdminController, the administratorId property of Events service must be set for the logout function in order to have it know the current logged in administrator */

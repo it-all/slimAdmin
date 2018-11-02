@@ -62,24 +62,25 @@ final class AdministratorsTableMapper extends TableMapper
         return parent::deleteByPrimaryKey($administratorId, 'username');
     }
     
+    /** note this allows any fields to be passed in changedFields and returns only changes from the UPDATE_FIELDS array */
     public function getChangedFields(array $changedFields): array 
     {
         $changedAdministratorFields = [];
 
         foreach ($changedFields as $fieldName => $fieldInfo) {
-            if (!in_array($fieldName, self::UPDATE_FIELDS)) {
-                throw new \InvalidArgumentException("Invalid field $fieldName in changedFields");
-            }
-            switch($fieldName) {
-                case 'password':
-                    $changedAdministratorFields['password_hash'] = $this->getHashedPassword($changedFields['password']);
-                break;
-                case 'active':
-                    $changedAdministratorFields['active'] = Postgres::convertBoolToPostgresBool($changedFields['active']);
+            if (in_array($fieldName, self::UPDATE_FIELDS)) {
+                switch($fieldName) {
+                    case 'password':
+                        $changedAdministratorFields['password_hash'] = $this->getHashedPassword($changedFields['password']);
+                        break;
 
-                break;
-                default:
-                    $changedAdministratorFields[$fieldName] = $changedFields[$fieldName];
+                    case 'active':
+                        $changedAdministratorFields['active'] = Postgres::convertBoolToPostgresBool($changedFields['active']);
+                        break;
+                        
+                    default:
+                        $changedAdministratorFields[$fieldName] = $changedFields[$fieldName];
+                }
             }
         }
 

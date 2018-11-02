@@ -19,7 +19,7 @@ trait ResponseUtilities
         }
 
         // enter event
-        $this->events->insertWarning(EVENT_QUERY_NO_RESULTS, $tableMapper->getPrimaryKeyColumnName().":$primaryKey|Table: ".$tableMapper->getTableName());
+        $this->events->insertWarning(EVENT_QUERY_NO_RESULTS, [$tableMapper->getPrimaryKeyColumnName() => $primaryKey, 'table' => $tableMapper->getTableName()]);
 
         $noticeTitle = ($title != null) ? $title: 'Record';
         SlimPostgres::setAdminNotice("$noticeTitle $primaryKey Not Found", 'failure');

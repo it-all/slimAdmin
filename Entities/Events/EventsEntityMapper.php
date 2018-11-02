@@ -20,6 +20,7 @@ final class EventsEntityMapper extends EntityMapper
         'event_type' => self::TYPES_TABLE_NAME . '.event_type',
         'event' => self::TABLE_NAME . '.title',
         'name' => self::ADMINISTRATORS_TABLE_NAME . '.name AS administrator',
+        'payload' => self::TABLE_NAME . '.payload',
         'notes' => self::TABLE_NAME . '.notes',
         'ip_address' => self::TABLE_NAME . '.ip_address',
         'request_method' => self::TABLE_NAME . '.request_method',

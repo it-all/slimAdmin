@@ -64,6 +64,14 @@ class ErrorHandler
         }
         $errorMessage = $this->generateMessage($messageBody);
 
+        // log to file
+        @error_log($errorMessage, 3, $this->logPath);
+
+        // echo
+        if ($this->echoErrors) {
+            echo (Functions::isRunningFromCommandLine()) ? $errorMessage : nl2br($errorMessage, false);
+        }
+
         // log to database
         if (isset($this->eventsTableMapper)) {
             switch ($this->getErrorType($errno)) {
@@ -94,24 +102,11 @@ class ErrorHandler
             @$this->eventsTableMapper->insertEvent('PHP Error', $eventType, $databaseErrorMessage);
         }
 
-        // log to file
-        @error_log($errorMessage, 3, $this->logPath);
-
-        // echo
-        if ($this->echoErrors) {
-            echo (Functions::isRunningFromCommandLine()) ? $errorMessage : nl2br($errorMessage, false);
-
-            if ($die) {
-                die();
-            }
-        }
-
         // email
         if ($this->emailErrors) {
             @$this->mailer->send($_SERVER['SERVER_NAME'] . " Error", "Check log file for details.", $this->emailTo);
         }
 
-        // will only get here if errors have not been echoed above
         if ($die) {
             if ($this->redirectPage != null) {
                 $_SESSION[SESSION_NOTICE] = [$this->fatalMessage, 'error'];

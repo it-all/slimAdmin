@@ -64,7 +64,14 @@ class AdministratorsController extends AdminController
 
         $administratorId = $this->administratorsEntityMapper->create($input['name'], $input['username'], $input['password'], $input['roles'], FormHelper::getBoolForCheckboxField($input['active']));
 
-        $this->events->insertInfo(EVENT_ADMINISTRATOR_INSERT, "id:$administratorId");
+        $eventPayload = [
+            $this->administratorsTableMapper->getPrimaryKeyColumnName() => $administratorId,
+            'name' => $input['name'],
+            'username' => $input['username'],
+            'active' => $input['active'],
+            'roles' => $input['roles'],
+        ];
+        $this->events->insertInfo(EVENT_ADMINISTRATOR_INSERT, $eventPayload);
 
         SlimPostgres::setAdminNotice("Inserted administrator $administratorId");
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS));
@@ -109,7 +116,8 @@ class AdministratorsController extends AdminController
         
         $this->administratorsEntityMapper->doUpdate((int) $primaryKey, $changedFields);
 
-        $this->events->insertInfo(EVENT_ADMINISTRATOR_UPDATE, "id:$primaryKey|".$this->getChangedFieldsString($administrator, $changedFields));
+        $eventsPayload = array_merge([$this->administratorsTableMapper->getPrimaryKeyColumnName() => $primaryKey], $changedFields);
+        $this->events->insertInfo(EVENT_ADMINISTRATOR_UPDATE, $eventsPayload);
         SlimPostgres::setAdminNotice("Updated administrator $primaryKey");
         
         return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix,'index')));
@@ -128,17 +136,17 @@ class AdministratorsController extends AdminController
         } catch (Exceptions\QueryResultsNotFoundException $e) {
             return $this->databaseRecordNotFound($response, $primaryKey, $this->administratorsTableMapper, 'delete', 'Administrator');
         } catch (Exceptions\UnallowedActionException $e) {
-            $this->events->insertWarning(EVENT_UNALLOWED_ACTION, $e->getMessage());
+            $this->events->insertWarning(EVENT_UNALLOWED_ACTION, ['error' => $e->getMessage()]);
             SlimPostgres::setAdminNotice($e->getMessage(), 'failure');
             return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix,'index')));
         } catch (Exceptions\QueryFailureException $e) {
-            $this->events->insertError(EVENT_ADMINISTRATOR_DELETE_FAIL, $e->getMessage());
+            $this->events->insertError(EVENT_ADMINISTRATOR_DELETE_FAIL, ['error' => $e->getMessage()]);
             SlimPostgres::setAdminNotice('Delete Failed', 'failure');
             return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix,'index')));
         }
 
-        $eventNote = $this->administratorsTableMapper->getPrimaryKeyColumnName() . ":$primaryKey|username: $username";
-        $this->events->insertInfo(EVENT_ADMINISTRATOR_DELETE, $eventNote);
+        $eventPayload = [$this->administratorsTableMapper->getPrimaryKeyColumnName() => $primaryKey, 'username' => $username];
+        $this->events->insertInfo(EVENT_ADMINISTRATOR_DELETE, $eventPayload);
         SlimPostgres::setAdminNotice("Deleted administrator $primaryKey(username: $username)");
 
         return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'index')));
@@ -195,56 +203,5 @@ class AdministratorsController extends AdminController
         }
 
         return $changedFieldValues;
-    }
-
-    private function getChangedFieldsString(Administrator $administrator, array $changedFields): string 
-    {
-        $allowedChangedFieldsKeys = array_merge([AdministratorForm::ROLES_FIELDSET_NAME], (AdministratorsTableMapper::getInstance()::UPDATE_FIELDS));
-
-        $changedString = "";
-
-        foreach ($changedFields as $fieldName => $newValue) {
-
-            // make sure only correct fields have been input
-            if (!in_array($fieldName, $allowedChangedFieldsKeys)) {
-                throw new \InvalidArgumentException("$fieldName not allowed in changedFields");
-            }
-
-            /** special case for password, do not show values */            
-            if ($fieldName != 'password') {
-                $oldValue =  $administrator->{"get".ucfirst($fieldName)}();
-            }
-            
-            if ($fieldName == AdministratorForm::ROLES_FIELDSET_NAME) {
-
-                $rolesTableMapper = RolesTableMapper::getInstance();
-
-                $addRoleIds = (isset($newValue['add'])) ? $newValue['add'] : [];
-                $removeRoleIds = (isset($newValue['remove'])) ? $newValue['remove'] : [];
-
-                // update values based on add/remove and old roles
-                $updatedNewValue = "";
-                $updatedOldValue = "";
-                foreach ($oldValue as $role) {
-                    $updatedOldValue .= $role->getRoleName()." ";
-                    // don't put the roles being removed into the new value
-                    if (!in_array($role->getId(), $removeRoleIds)) {
-                        $updatedNewValue .= $role->getRoleName()." ";
-                    }
-                }
-                foreach ($addRoleIds as $roleId) {
-                    $updatedNewValue .= $rolesTableMapper->getRoleForRoleId((int) $roleId) . " ";
-                }
-                $newValue = $updatedNewValue;
-                $oldValue = $updatedOldValue;
-            }
-
-            $changedString .= " $fieldName: ";
-            /** special case for password, do not show values */
-            $changedString .= ($fieldName == 'password') ? "updated" : "$oldValue => $newValue";
-            $changedString .= ", ";
-        }
-
-        return Functions::removeLastCharsFromString($changedString, 2);
     }
 }

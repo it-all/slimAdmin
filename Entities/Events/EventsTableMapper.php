@@ -52,52 +52,52 @@ final class EventsTableMapper extends TableMapper
         }
     }
 
-    public function insertDebug(string $title, ?string $notes = null): ?int
+    public function insertDebug(string $title, ?array $payload = null): ?int
     {
-        return $this->insertEvent($title, 'debug', $notes);
+        return $this->insertEvent($title, 'debug', $payload);
     }
 
-    public function insertInfo(string $title, ?string $notes = null): ?int
+    public function insertInfo(string $title, ?array $payload = null): ?int
     {
-        return $this->insertEvent($title, 'info', $notes);
+        return $this->insertEvent($title, 'info', $payload);
     }
 
-    public function insertNotice(string $title, ?string $notes = null): ?int
+    public function insertNotice(string $title, ?array $payload = null): ?int
     {
-        return $this->insertEvent($title, 'notice', $notes);
+        return $this->insertEvent($title, 'notice', $payload);
     }
 
-    public function insertWarning(string $title, ?string $notes = null): ?int
+    public function insertWarning(string $title, ?array $payload = null): ?int
     {
-        return $this->insertEvent($title, 'warning', $notes);
+        return $this->insertEvent($title, 'warning', $payload);
     }
 
-    public function insertError(string $title, ?string $notes = null): ?int
+    public function insertError(string $title, ?array $payload = null): ?int
     {
-        return $this->insertEvent($title, 'error', $notes);
+        return $this->insertEvent($title, 'error', $payload);
     }
 
-    public function insertSecurity(string $title, ?string $notes = null): ?int
+    public function insertSecurity(string $title, ?array $payload = null): ?int
     {
-        return $this->insertEvent($title, 'security', $notes);
+        return $this->insertEvent($title, 'security', $payload);
     }
 
-    public function insertCritical(string $title, ?string $notes = null): ?int
+    public function insertCritical(string $title, ?array $payload = null): ?int
     {
-        return $this->insertEvent($title, 'critical', $notes);
+        return $this->insertEvent($title, 'critical', $payload);
     }
 
-    public function insertAlert(string $title, ?string $notes = null): ?int
+    public function insertAlert(string $title, ?array $payload = null): ?int
     {
-        return $this->insertEvent($title, 'alert', $notes);
+        return $this->insertEvent($title, 'alert', $payload);
     }
 
-    public function insertEmergency(string $title, ?string $notes = null): ?int
+    public function insertEmergency(string $title, ?array $payload = null): ?int
     {
-        return $this->insertEvent($title, 'emergency', $notes);
+        return $this->insertEvent($title, 'emergency', $payload);
     }
 
-    public function insertEvent(string $title, string $eventType = 'info', ?string $notes = null): ?int
+    public function insertEvent(string $title, string $eventType = 'info', ?array $payload = null): ?int
     {
         if (null === $eventTypeId = $this->getEventTypeId($eventType)) {
             throw new \Exception("Invalid eventType: $eventType");
@@ -107,17 +107,23 @@ final class EventsTableMapper extends TableMapper
             throw new \Exception("Title cannot be blank");
         }
 
-        if ($notes !== null && mb_strlen(trim($notes)) == 0) {
-            $notes = null;
+        if ($payload !== null) {
+            if (count($payload) == 0) {
+                $payload = null;
+            } else {
+                if (!$payload = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK)) {
+                    throw new \InvalidArgumentException("Payload is invalid JSON");
+                }
+            }
         }
 
         $sessionId = (session_id() == '') ? null : session_id();
         $referer = ($_SERVER['HTTP_REFERER'] == '') ? null : $_SERVER['HTTP_REFERER'];
-        
+
         $columnValues = [
             'event_type_id' => $eventTypeId, 
             'title' => $title,
-            'notes' => $notes,
+            'payload' => $payload,
             'created' => 'NOW()',
             'administrator_id' => $this->administratorId,
             'ip_address' => $_SERVER['REMOTE_ADDR'],

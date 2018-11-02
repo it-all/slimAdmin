@@ -66,7 +66,14 @@ class PermissionsController extends AdminController
             throw new \Exception("Permission create failure. ".$e->getMessage());
         }
 
-        $this->events->insertInfo(EVENT_PERMISSION_INSERT, "id:$permissionId");
+        $eventPayload = [
+            $this->permissionsTableMapper->getPrimaryKeyColumnName() => $permissionId,
+            PermissionForm::TITLE_FIELD_NAME => $input[PermissionForm::TITLE_FIELD_NAME],
+            PermissionForm::DESCRIPTION_FIELD_NAME => $input[PermissionForm::DESCRIPTION_FIELD_NAME],
+            PermissionForm::ACTIVE_FIELD_NAME => $input[PermissionForm::ACTIVE_FIELD_NAME],
+            PermissionForm::ROLES_FIELDSET_NAME => $input[PermissionForm::ROLES_FIELDSET_NAME],
+        ];
+        $this->events->insertInfo(EVENT_PERMISSION_INSERT, $eventPayload);
 
         SlimPostgres::setAdminNotice("Inserted Permission $permissionId");
         return $response->withRedirect($this->router->pathFor(ROUTE_ADMINISTRATORS_PERMISSIONS));
@@ -111,7 +118,8 @@ class PermissionsController extends AdminController
         
         $this->permissionsEntityMapper->doUpdate((int) $primaryKey, $changedFields);
 
-        $this->events->insertInfo(EVENT_PERMISSION_UPDATE, "id:$primaryKey|".$this->getChangedFieldsString($permission, $changedFields));
+        $eventsPayload = array_merge([$this->permissionsTableMapper->getPrimaryKeyColumnName() => $primaryKey], $changedFields);
+        $this->events->insertInfo(EVENT_PERMISSION_UPDATE, $eventsPayload);
         SlimPostgres::setAdminNotice("Updated permission $primaryKey");
         
         return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix,'index')));
@@ -130,17 +138,17 @@ class PermissionsController extends AdminController
         } catch (Exceptions\QueryResultsNotFoundException $e) {
             return $this->databaseRecordNotFound($response, $primaryKey, PermissionsTableMapper::getInstance(), 'delete', 'Permission');
         } catch (Exceptions\UnallowedActionException $e) {
-            $this->events->insertWarning(EVENT_UNALLOWED_ACTION, $e->getMessage());
+            $this->events->insertWarning(EVENT_UNALLOWED_ACTION, ['error' => $e->getMessage()]);
             SlimPostgres::setAdminNotice($e->getMessage(), 'failure');
             return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix,'index')));
         } catch (Exceptions\QueryFailureException $e) {
-            $this->events->insertError(EVENT_PERMISSION_DELETE_FAIL, $e->getMessage());
+            $this->events->insertError(EVENT_PERMISSION_DELETE_FAIL, ['error' => $e->getMessage()]);
             SlimPostgres::setAdminNotice('Delete Failed', 'failure');
             return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix,'index')));
         }
 
-        $eventNote = $this->permissionsTableMapper->getPrimaryKeyColumnName() . ":$primaryKey|title: $title";
-        $this->events->insertInfo(EVENT_PERMISSION_DELETE, $eventNote);
+        $eventPayload = [$this->permissionsTableMapper->getPrimaryKeyColumnName() => $primaryKey, 'title' => $title];
+        $this->events->insertInfo(EVENT_PERMISSION_DELETE, $eventPayload);
         SlimPostgres::setAdminNotice("Deleted permission $primaryKey(title: $title)");
 
         return $response->withRedirect($this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'index')));
@@ -191,50 +199,5 @@ class PermissionsController extends AdminController
         }
 
         return $changedFieldValues;
-    }
-
-    private function getChangedFieldsString(Permission $permission, array $changedFields): string 
-    {
-        $allowedChangedFieldsKeys = array_merge([PermissionForm::ROLES_FIELDSET_NAME], (PermissionsTableMapper::getInstance()::UPDATE_FIELDS));
-
-        $changedString = "";
-
-        foreach ($changedFields as $fieldName => $newValue) {
-
-            // make sure only correct fields have been input
-            if (!in_array($fieldName, $allowedChangedFieldsKeys)) {
-                throw new \InvalidArgumentException("$fieldName not allowed in changedFields");
-            }
-
-            $oldValue = $permission->{"get".ucfirst($fieldName)}();
-            
-            if ($fieldName == PermissionForm::ROLES_FIELDSET_NAME) {
-
-                $rolesTableMapper = RolesTableMapper::getInstance();
-
-                $addRoleIds = (isset($newValue['add'])) ? $newValue['add'] : [];
-                $removeRoleIds = (isset($newValue['remove'])) ? $newValue['remove'] : [];
-
-                // update values based on add/remove and old roles
-                $updatedNewValue = "";
-                $updatedOldValue = "";
-                foreach ($oldValue as $role) {
-                    $updatedOldValue .= $role->getRoleName()." ";
-                    // don't put the roles being removed into the new value
-                    if (!in_array($role->getId(), $removeRoleIds)) {
-                        $updatedNewValue .= $role->getRoleName()." ";
-                    }
-                }
-                foreach ($addRoleIds as $roleId) {
-                    $updatedNewValue .= $rolesTableMapper->getRoleForRoleId((int) $roleId) . " ";
-                }
-                $newValue = $updatedNewValue;
-                $oldValue = $updatedOldValue;
-            }
-
-            $changedString .= " $fieldName: $oldValue => $newValue, ";
-        }
-
-        return substr($changedString, 0, strlen($changedString)-2);
     }
 }

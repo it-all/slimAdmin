@@ -76,8 +76,10 @@ class SlimPostgres
         $this->environmentalVariables = getenv();
 
         /** validate .env (note, not thorough validation) */
-        $dotenv->required('PHPMAILER_PROTOCOL')->allowedValues(['smtp', 'sendmail', 'mail', 'qmail']);
-        $phpMailerProtocol = $this->environmentalVariables['PHPMAILER_PROTOCOL'];
+        $dotenv->required('PHPMAILER_PROTOCOL')->allowedValues(['', 'smtp', 'sendmail', 'mail', 'qmail']);
+        /** explicitly set to null if blank */
+        $phpMailerProtocol = trim($this->environmentalVariables['PHPMAILER_PROTOCOL']) == '' ?null : $this->environmentalVariables['PHPMAILER_PROTOCOL'];
+
         if ($phpMailerProtocol == 'smtp') {
             $dotenv->required('PHPMAILER_SMTP_HOST');
             $dotenv->required('PHPMAILER_SMTP_PORT')->isInteger();
@@ -105,26 +107,28 @@ class SlimPostgres
         // do not email error notifications on dev sites unless env var ERRORS_EMAIL_DEV set true
         $this->config['errors']['emailDev'] = array_key_exists('ERRORS_EMAIL_DEV', $this->environmentalVariables) && $this->environmentalVariables['ERRORS_EMAIL_DEV'] === "1";
 
-        /** set up emailer, which is used in error handler and container */
-        $phpMailerSmtpHost = (array_key_exists('PHPMAILER_SMTP_HOST', $this->environmentalVariables)) ? $this->environmentalVariables['PHPMAILER_SMTP_HOST'] : null;
-        $phpMailerSmtpPort = (array_key_exists('PHPMAILER_SMTP_PORT', $this->environmentalVariables)) ? (int) $this->environmentalVariables['PHPMAILER_SMTP_PORT'] : null;
-        $disableMailerSend = !$this->config['isLive'] && !$this->config['errors']['emailDev'];
-        $this->mailer = new Utilities\PhpMailerService(
-            $this->config['errors']['phpErrorLogPath'],
-            $this->config['emails']['service'],
-            $this->config['businessName'],
-            $phpMailerProtocol,
-            $phpMailerSmtpHost,
-            $phpMailerSmtpPort,
-            $disableMailerSend
-        );
+        /** if protocol is set, set up emailer, which is used in error handler and container */
+        if ($phpMailerProtocol !== null) {
+            $phpMailerSmtpHost = (array_key_exists('PHPMAILER_SMTP_HOST', $this->environmentalVariables)) ? $this->environmentalVariables['PHPMAILER_SMTP_HOST'] : null;
+            $phpMailerSmtpPort = (array_key_exists('PHPMAILER_SMTP_PORT', $this->environmentalVariables)) ? (int) $this->environmentalVariables['PHPMAILER_SMTP_PORT'] : null;
+            $disableMailerSend = !$this->config['isLive'] && !$this->config['errors']['emailDev'];
+            $this->mailer = new Utilities\PhpMailerService(
+                $this->config['errors']['phpErrorLogPath'],
+                $this->config['emails']['service'],
+                $this->config['businessName'],
+                $phpMailerProtocol,
+                $phpMailerSmtpHost,
+                $phpMailerSmtpPort,
+                $disableMailerSend
+            );    
+        }
 
         /** error handling */
 
         /** only echo on dev sites */
         $echoErrors = !$this->config['isLive'] && $this->config['errors']['echoDev'];
 
-        $emailErrors = $this->config['isLive'] || $this->config['errors']['emailDev'];
+        $emailErrors = $this->mailer !== null && ($this->config['isLive'] || $this->config['errors']['emailDev']);
         $emailErrorsTo = [];
         if (array_key_exists('emailTo', $this->config['errors'])) {
             foreach ($this->config['errors']['emailTo'] as $roleEmail) {
@@ -245,7 +249,7 @@ class SlimPostgres
         return $slimSettings;
     }
 
-    private function setSlimDependences($container, EventsTableMapper $eventsTableMapper, Utilities\PhpMailerService $mailer)
+    private function setSlimDependences($container, EventsTableMapper $eventsTableMapper, ?Utilities\PhpMailerService $mailer)
     {
         /** Template */
         $container['view'] = function ($container) {

@@ -149,9 +149,9 @@ abstract class BaseController
      * @param bool $addEventLogStatement defaults true, if true adds 'See event log for details' after $mainBody
      * @param bool $throwExceptionOnError defaults false, if true exception is thrown if no match for $emailTo
      */
-    protected function sendEventNotificationEmail(string $emailTo, string $mainBody, bool $addEventLogStatement = true, bool $throwExceptionOnError = false)
+    protected function sendEventNotificationEmail(string $emailTo, string $mainBody, ?string $subjectEnd = '', ?bool $addEventLogStatement = true, ?bool $throwExceptionOnError = false)
     {
-        if ($emailTo !== null) {
+        if ($this->mailer !== null && $emailTo !== null) {
             $settings = $this->container->get('settings');
             if (isset($settings['emails'][$emailTo])) {
                 $emailBody = $mainBody;
@@ -159,7 +159,7 @@ abstract class BaseController
                     $emailBody .= PHP_EOL . "See event log for details.";
                 }
                 $this->mailer->send(
-                    $_SERVER['SERVER_NAME'] . " Event",
+                    $_SERVER['SERVER_NAME'] . " Event $subjectEnd",
                     $emailBody,
                     [$settings['emails'][$emailTo]]
                 );

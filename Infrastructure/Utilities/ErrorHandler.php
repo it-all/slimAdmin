@@ -25,19 +25,24 @@ class ErrorHandler
         bool $echoErrors = false,
         bool $emailErrors = true,
         array $emailTo = [],
-        PhpMailerService $m = null,
+        ?PhpMailerService $mailer = null,
         $fatalMessage = 'Apologies, there has been an error on our site. We have been alerted and will correct it as soon as possible.'
     )
     {
-        if ($emailErrors && count($emailTo) == 0) {
-            throw new \InvalidArgumentException("emailTo not set");
+        if ($emailErrors) {
+            if ($mailer === null) {
+                throw new \InvalidArgumentException("mailer not set");
+            }
+            if (count($emailTo) == 0) {
+                throw new \InvalidArgumentException("emailTo not set");
+            }
         }
         
         $this->logPath = $logPath;
         $this->redirectPage = $redirectPage;
         $this->emailErrors = $emailErrors;
         $this->echoErrors = $echoErrors;
-        $this->mailer = $m;
+        $this->mailer = $mailer;
         $this->emailTo = $emailTo;
         $this->fatalMessage = $fatalMessage;
     }

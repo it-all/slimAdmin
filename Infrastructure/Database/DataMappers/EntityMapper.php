@@ -27,7 +27,7 @@ abstract class EntityMapper implements ListViewMappers
     public function select(?string $columns = null, ?array $whereColumnsInfo = null, ?string $orderBy = null): ?array
     {
         if ($whereColumnsInfo != null) {
-            $this->validateWhere($whereColumnsInfo, self::SELECT_COLUMNS);
+            $this->validateWhere($whereColumnsInfo, static::SELECT_COLUMNS);
         }
              
         $columns = $columns ?? $this->defaultSelectColumnsString;

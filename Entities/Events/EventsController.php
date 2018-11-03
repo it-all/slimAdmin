@@ -17,7 +17,7 @@ class EventsController extends AdminController
     {
         $this->view = new EventsView($container);
         parent::__construct($container);
-        $this->mapper = $this->events; // already in container as a service
+        $this->mapper = \Entities\Events\EventsEntityMapper::getInstance();
     }
 
     public function routePostIndexFilter(Request $request, Response $response, $args)

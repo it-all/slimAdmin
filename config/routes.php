@@ -4,6 +4,7 @@ declare(strict_types=1);
 use Domain\HomeView;
 use Infrastructure\Security\Authentication\AuthenticationView;
 use Infrastructure\Security\Authentication\AuthenticationController;
+use Infrastructure\Utilities\AdministratorHomeRouteMiddleware;
 use Infrastructure\Security\Authentication\GuestMiddleware;
 use Infrastructure\Security\Authorization\AuthorizationMiddleware;
 use Infrastructure\Security\Authentication\AuthenticationMiddleware;
@@ -44,6 +45,7 @@ $slim->post('/' . $config['adminPath'], AuthenticationController::class . ':rout
 // admin home
 $slim->get('/' . $config['adminPath'] . '/home',
     AdminHomeView::class . ':routeIndex')
+    ->add(new AdministratorHomeRouteMiddleware($slimContainer))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMIN_HOME_DEFAULT);
 

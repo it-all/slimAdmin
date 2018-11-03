@@ -87,21 +87,21 @@ COPY public.roles_permissions (id, role_id, permission_id, created) FROM stdin;
 -- Name: permsissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.permsissions_id_seq', 59, true);
+SELECT pg_catalog.setval('public.permsissions_id_seq', 63, true);
 
 
 --
 -- Name: roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.roles_id_seq', 125, true);
+SELECT pg_catalog.setval('public.roles_id_seq', 138, true);
 
 
 --
 -- Name: roles_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.roles_permissions_id_seq', 102, true);
+SELECT pg_catalog.setval('public.roles_permissions_id_seq', 109, true);
 
 
 --

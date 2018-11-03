@@ -119,13 +119,14 @@ CREATE TABLE public.events (
     id bigint NOT NULL,
     event_type_id smallint NOT NULL,
     title character varying(255) NOT NULL,
-    notes text,
     created timestamp without time zone DEFAULT now() NOT NULL,
     administrator_id integer,
     ip_address character varying(50),
     resource character varying(100),
     request_method character varying(20),
-    payload json
+    payload jsonb,
+    referer character varying(100),
+    session_id character varying(100)
 );
 
 

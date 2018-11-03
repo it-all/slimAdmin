@@ -19,6 +19,9 @@ class DatabaseTableForm extends Form
 {
     private static $tableMapper;
 
+    /** by default do not include in forms */
+    private const DEFAULT_SKIP_COLUMNS = ['created'];
+
     /** @var array of form field columns */
     private static $fieldColumns;
 
@@ -28,7 +31,7 @@ class DatabaseTableForm extends Form
     const TEXTAREA_COLS = 50;
     const TEXTAREA_ROWS = 5;
 
-    public function __construct(TableMapper $databaseTableMapper, string $formAction, string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, string $databaseAction = 'insert', array $fieldData = null, bool $jsValidate = true)
+    public function __construct(TableMapper $databaseTableMapper, string $formAction, string $csrfNameKey, string $csrfNameValue, string $csrfValueKey, string $csrfValueValue, ?string $databaseAction = 'insert', ?array $fieldData = null, ?array $skipColumnNames = null, ?bool $jsValidate = true)
     {
         self::$tableMapper = $databaseTableMapper;
 
@@ -38,19 +41,19 @@ class DatabaseTableForm extends Form
         }
 
         /** also sets field names */
-        self::setFieldColumns();
+        self::setFieldColumns($skipColumnNames);
 
         $fields = $this->getFields($csrfNameKey, $csrfNameValue, $csrfValueKey, $csrfValueValue, $databaseAction, $fieldData);
 
         parent::__construct($fields, $formTagAttributes, FormHelper::getGeneralError());
     }
 
-    private static function setFieldColumns() 
+    private static function setFieldColumns(?array $skipColumnNames = null) 
     {
         self::$fieldColumns = [];
         self::$fieldNames = [];
         foreach (self::$tableMapper->getColumns() as $column) {
-            if (self::includeFieldForColumn($column)) {
+            if (self::includeFieldForColumn($column, $skipColumnNames)) {
                 self::$fieldColumns[] = $column;
                 self::$fieldNames[] = $column->getName();
             }
@@ -61,13 +64,35 @@ class DatabaseTableForm extends Form
      * conditions for returning false:
      * - primary column
      */
-    protected static function includeFieldForColumn(ColumnMapper $column): bool
+    protected static function includeFieldForColumn(ColumnMapper $column, ?array $skipColumnNames = null): bool
     {
         if ($column->isPrimaryKey()) {
             return false;
         }
+        
+        $notIncluded = ($skipColumnNames !== null) ? array_merge(self::DEFAULT_SKIP_COLUMNS, $skipColumnNames) : self::DEFAULT_SKIP_COLUMNS;
+
+        if (in_array($column->getName(), $notIncluded)) {
+            return false;
+        }
 
         return true;
+    }
+
+    /** allow access without constructing */
+    public static function getFieldColumns(TableMapper $databaseTableMapper): array 
+    {
+        if (!isset(self::$tableMapper)) {
+            self::$tableMapper = $databaseTableMapper;
+        } elseif (self::$tableMapper !== $databaseTableMapper) {
+            throw new \InvalidArgumentException("Table mapper mismatch");
+        }
+
+        if (!isset(self::$fieldColumns)) {
+            self::setFieldColumns();
+        }
+
+        return self::$fieldColumns;
     }
 
     /** allow access without constructing */

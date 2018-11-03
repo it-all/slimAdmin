@@ -39,7 +39,7 @@ class PermissionsController extends AdminController
 
     public function routePostIndexFilter(Request $request, Response $response, $args)
     {
-        $this->setIndexFilter($request, $response, $args, $this->$this->permissionsEntityMapper::SELECT_COLUMNS, $this->view);
+        $this->setIndexFilter($request, $response, $args, $this->permissionsEntityMapper::SELECT_COLUMNS, $this->view);
         return $this->view->indexViewObjects($response);
     }
 

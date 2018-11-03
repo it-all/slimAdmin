@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Infrastructure\Validation;
 
+use Infrastructure\BaseMVC\View\Forms\DatabaseTableForm;
 use Infrastructure\Database\Postgres;
 use Infrastructure\Database\DataMappers\TableMapper;
 use Infrastructure\Database\DataMappers\ColumnMapper;
@@ -21,11 +22,10 @@ class DatabaseTableValidation
     private function setValidationRules(): array
     {
         $validation = [];
-        foreach ($this->tableMapper->getColumns() as $column) {
-            // primary key does not appear in forms therefore does not have validation
+        /** primary key and 'created' columns are skipped in getFieldColumns() */
+        foreach (DatabaseTableForm::getFieldColumns($this->tableMapper) as $column) {
             // do not impose required validation on boolean (checkbox) fields, even though the column may be not null, allowing 'f' (unchecked) is fine but doing required validation will cause an error for unchecked condition
-
-            if (!$column->isPrimaryKey() && !$column->isBoolean()) {
+            if (!$column->isBoolean()) {
                 $this->validationRules[$column->getName()] = self::getDatabaseColumnValidation($column);
             } 
         }

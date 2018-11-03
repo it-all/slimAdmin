@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Entities\Administrators\Model;
 
-use Infrastructure\Database\DatabaseTableValidation;
 use Infrastructure\Validation\ValitronValidatorExtension;
 use Entities\Roles\Model\RolesTableMapper;
 use Infrastructure\Security\Authorization\AuthorizationService;

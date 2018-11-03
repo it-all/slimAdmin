@@ -67,6 +67,7 @@ class ErrorHandler
         if (error_reporting() == 0) {
             return;
         }
+
         $errorMessage = $this->generateMessage($messageBody);
 
         // log to file
@@ -79,6 +80,7 @@ class ErrorHandler
 
         // log to database
         if (isset($this->eventsTableMapper)) {
+            /** determine event type */
             switch ($this->getErrorType($errno)) {
                 case 'Core Error':
                 case 'Parse Error':
@@ -104,7 +106,7 @@ class ErrorHandler
                 $this->eventsTableMapper->setAdministratorId((int) $_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID]);
             }
 
-            @$this->eventsTableMapper->insertEvent('PHP Error', $eventType, $databaseErrorMessage);
+            @$this->eventsTableMapper->insertEvent('PHP Error', $eventType, ['error' => $databaseErrorMessage]);
         }
 
         // email

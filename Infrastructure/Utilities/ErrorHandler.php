@@ -70,7 +70,7 @@ class ErrorHandler
 
         $errorMessage = $this->generateMessage($messageBody);
 
-        // log to file
+        // log to file. suppress errors to prevent infinite loop.
         @error_log($errorMessage, 3, $this->logPath);
 
         // echo
@@ -106,6 +106,7 @@ class ErrorHandler
                 $this->eventsTableMapper->setAdministratorId((int) $_SESSION[SlimPostgres::SESSION_KEY_ADMINISTRATOR_ID]);
             }
 
+            // suppress errors to prevent infinite loop.
             @$this->eventsTableMapper->insertEvent('PHP Error', $eventType, ['error' => $databaseErrorMessage]);
         }
 

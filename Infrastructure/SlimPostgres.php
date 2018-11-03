@@ -10,6 +10,7 @@ use Infrastructure\Database\Postgres;
 use Infrastructure\Security\Authentication\AuthenticationService;
 use Infrastructure\Security\Authorization\AuthorizationService;
 use Infrastructure\Security\CsrfMiddleware;
+use Infrastructure\Utilities\TrackerMiddleware;
 use Entities\Events\EventsTableMapper;
 use Infrastructure\Utilities;
 use Infrastructure\Functions;
@@ -95,7 +96,8 @@ class SlimPostgres
             }
         }
 
-        mb_internal_encoding($this->config['mbInternalEncoding']); // so no need to set encoding for mb_strlen()
+        /** so no need to set encoding for each mb_strlen() call */
+        mb_internal_encoding($this->config['mbInternalEncoding']); 
 
         /** add some .env to config */
         // assume this is a live server unless IS_LIVE env var set false
@@ -321,6 +323,11 @@ class SlimPostgres
     {
         /** handle CSRF check failures and allow template to access and insert CSRF fields to forms */
         $slim->add(new CsrfMiddleware($slimContainer));
+
+        /** Insert System Event for every resource request */
+        if (isset($this->config['trackAll']) && $this->config['trackAll']) {
+            $slim->add(new TrackerMiddleware($slimContainer));
+        }
 
         /** slim CSRF check middleware */
         $slim->add($slimContainer->csrf);

@@ -36,8 +36,6 @@ return [
 
     'pageNotFoundText' => 'Page not found. Please check the URL. If correct, please email service@'.DOMAIN_NAME.' for assistance.',
 
-    'mbInternalEncoding' => 'UTF-8',
-
     'authentication' => [
         'maxFailedLogins' => 5, // If met or exceeded in a session, will insert a event and disallow further login attempts by redirecting to the homepage
         'administratorHomeRoutes' => [
@@ -47,6 +45,12 @@ return [
 
     // if true removes leading and trailing blank space on all inputs
     'trimAllUserInput' => true,
+
+    /** whether to enter all resource requests into events database table */
+    'trackAll' => false,
+
+    /** so no need to set encoding for each mb_strlen() call */
+    'mbInternalEncoding' => 'UTF-8',
 
     // how to add admin nav menu options
 //        'adminNav' => [

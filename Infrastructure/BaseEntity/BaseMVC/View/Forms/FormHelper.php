@@ -1,13 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\BaseMVC\View\Forms;
+namespace Infrastructure\BaseEntity\BaseMVC\View\Forms;
 
 use It_All\FormFormer\Fields\InputField;
 use Infrastructure\SlimPostgres;
 use Infrastructure\Database\DataMappers\ColumnMapper;
 use Infrastructure\Database\DataMappers\TableMapper;
-use Infrastructure\Database\Postgres;
 
 class FormHelper
 {

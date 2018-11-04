@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Entities\Events;
 
 use Entities\Events\EventsEntityMapper;
-use Infrastructure\BaseMVC\View\AdminListView;
+use Infrastructure\BaseEntity\BaseMVC\View\AdminListView;
 use Slim\Container;
 
 class EventsView extends AdminListView

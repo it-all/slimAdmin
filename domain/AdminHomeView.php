@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Domain;
 
-use Infrastructure\BaseMVC\View\AdminView;
+use Infrastructure\BaseEntity\BaseMVC\View\AdminView;
 
 class AdminHomeView extends AdminView
 {

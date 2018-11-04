@@ -6,6 +6,7 @@ namespace Infrastructure\Security;
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Infrastructure\Middleware;
+use Infrastructure\SlimPostgres;
 
 class CsrfMiddleware extends Middleware
 {
@@ -15,7 +16,7 @@ class CsrfMiddleware extends Middleware
             $this->container->events->setAdministratorId($this->container->authentication->getAdministratorId());
             $this->container->events->insertSecurity(CSRF_FAULT);
             session_unset();
-            $_SESSION[SESSION_NOTICE] = ['Error. Your session has been reset.', 'error'];
+            $_SESSION[SlimPostgres::SESSION_KEY_NOTICE] = ['Error. Your session has been reset.', 'error'];
             return $response->withRedirect($this->container->router->pathFor(ROUTE_HOME));
         }
 

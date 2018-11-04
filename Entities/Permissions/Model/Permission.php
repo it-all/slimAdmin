@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Entities\Permissions\Model;
 
-use Infrastructure\BaseMVC\Model\ListViewModels;
+use Infrastructure\BaseEntity\BaseMVC\Model\ListViewModels;
 use Infrastructure\Database\Postgres;
 use Infrastructure\Functions;
 

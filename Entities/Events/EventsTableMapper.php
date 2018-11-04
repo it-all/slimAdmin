@@ -118,7 +118,7 @@ final class EventsTableMapper extends TableMapper
         }
 
         $sessionId = (session_id() == '') ? null : session_id();
-        $referer = ($_SERVER['HTTP_REFERER'] == '') ? null : $_SERVER['HTTP_REFERER'];
+        $referer = $_SERVER['HTTP_REFERER'] ?? null;
 
         $columnValues = [
             'event_type_id' => $eventTypeId, 

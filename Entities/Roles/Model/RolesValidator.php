@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Entities\Roles\Model;
 
-use Infrastructure\DatabaseTableFormValidator;
+use Infrastructure\BaseEntity\DatabaseTable\Model\DatabaseTableFormValidator;
 
 // can add custom validation rules to roles 
 class RolesValidator extends DatabaseTableFormValidator

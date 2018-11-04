@@ -8,7 +8,7 @@ use Infrastructure\Security\Authentication\AuthenticationService;
 use Infrastructure\Security\Authorization\AuthorizationService;
 use Entities\Roles\Model\Role;
 use Entities\Roles\Model\RolesTableMapper;
-use Infrastructure\BaseMVC\Model\ListViewModels;
+use Infrastructure\BaseEntity\BaseMVC\Model\ListViewModels;
 use Infrastructure\Database\Queries\QueryBuilder;
 use Infrastructure\Database\Postgres;
 use Exceptions\UnallowedActionException;

@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace Entities\Permissions\View;
 
 use Infrastructure\SlimPostgres;
-use Infrastructure\BaseMVC\View\ObjectsListViews;
-use Infrastructure\BaseMVC\View\AdminListView;
-use Infrastructure\BaseMVC\View\InsertUpdateViews;
-use Infrastructure\BaseMVC\View\ResponseUtilities;
+use Infrastructure\BaseEntity\BaseMVC\View\ObjectsListViews;
+use Infrastructure\BaseEntity\BaseMVC\View\AdminListView;
+use Infrastructure\BaseEntity\BaseMVC\View\InsertUpdateViews;
+use Infrastructure\BaseEntity\BaseMVC\View\ResponseUtilities;
 use Entities\Permissions\Model\PermissionsEntityMapper;
 use Entities\Permissions\Model\PermissionsTableMapper;
 use Entities\Permissions\View\Forms\PermissionInsertForm;
@@ -99,11 +99,11 @@ class PermissionsView extends AdminListView implements ObjectsListViews, InsertU
     public function updateView(Request $request, Response $response, $args)
     {
         // make sure there is a permission for the primary key
-        if (null === $permission = $this->permissionsEntityMapper->getObjectById((int) $args['primaryKey'])) {
-            return $this->databaseRecordNotFound($response, $args['primaryKey'], PermissionsTableMapper::getInstance(), 'update');
+        if (null === $permission = $this->permissionsEntityMapper->getObjectById((int) $args[ROUTEARG_PRIMARY_KEY])) {
+            return $this->databaseRecordNotFound($response, $args[ROUTEARG_PRIMARY_KEY], PermissionsTableMapper::getInstance(), 'update');
         }
 
-        $formAction = $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]);
+        $formAction = $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'update', 'put'), [ROUTEARG_PRIMARY_KEY => $args[ROUTEARG_PRIMARY_KEY]]);
 
         /** if input set we are redisplaying after invalid form submission */
         if ($request->isPut() && isset($args[SlimPostgres::USER_INPUT_KEY])) {
@@ -119,8 +119,7 @@ class PermissionsView extends AdminListView implements ObjectsListViews, InsertU
             [
                 'title' => $this->permissionsEntityMapper->getUpdateTitle(),
                 'form' => $updateForm->getForm(),
-                // 'form' => $this->getForm($request, 'update', (int) $args['primaryKey'], $administrator),
-                'primaryKey' => $args['primaryKey'],
+                'primaryKey' => $args[ROUTEARG_PRIMARY_KEY],
                 'navigationItems' => $this->navigationItems,
                 'hideFocus' => true
             ]

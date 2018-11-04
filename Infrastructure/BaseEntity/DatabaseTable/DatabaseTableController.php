@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\BaseMVC\Controller;
+namespace Infrastructure\BaseEntity\DatabaseTable;
 
 use Infrastructure\SlimPostgres;
 use Exceptions;
-use Infrastructure\BaseMVC\View\ResponseUtilities;
-use Infrastructure\BaseMVC\Controller\AdminController;
+use Infrastructure\BaseEntity\BaseMVC\View\ResponseUtilities;
+use Infrastructure\BaseEntity\BaseMVC\Controller\AdminController;
 use Infrastructure\Database\DataMappers\TableMapper;
-use Infrastructure\BaseMVC\View\Forms\FormHelper;
-use Infrastructure\BaseMVC\View\Forms\DatabaseTableForm;
-use Infrastructure\Validation\DatabaseTableInsertFormValidator;
-use Infrastructure\Validation\DatabaseTableUpdateFormValidator;
+use Infrastructure\BaseEntity\BaseMVC\View\Forms\FormHelper;
+use Infrastructure\BaseEntity\DatabaseTable\View\DatabaseTableForm;
+use Infrastructure\BaseEntity\DatabaseTable\Model\DatabaseTableInsertFormValidator;
+use Infrastructure\BaseEntity\DatabaseTable\Model\DatabaseTableUpdateFormValidator;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -114,7 +114,7 @@ class DatabaseTableController extends AdminController
             throw new \Exception('No permission.');
         }
 
-        $primaryKeyValue = $args['primaryKey'];
+        $primaryKeyValue = $args[ROUTEARG_PRIMARY_KEY];
 
         /** note that boolean columns that don't exist in request input are added as false */
         $this->setRequestInput($request, DatabaseTableForm::getFieldNames($this->tableMapper), $this->tableMapper->getBooleanColumnNames());
@@ -155,7 +155,7 @@ class DatabaseTableController extends AdminController
             throw new \Exception('No permission.');
         }
 
-        $primaryKey = $args['primaryKey'];
+        $primaryKey = $args[ROUTEARG_PRIMARY_KEY];
         $tableName = $this->tableMapper->getFormalTableName(false);
         $primaryKeyColumnName = $this->tableMapper->getPrimaryKeyColumnName();
 

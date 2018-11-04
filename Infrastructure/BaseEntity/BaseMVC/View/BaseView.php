@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\BaseMVC\View;
+namespace Infrastructure\BaseEntity\BaseMVC\View;
 
 use Slim\Container;
 

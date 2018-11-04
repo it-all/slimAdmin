@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Infrastructure\Security\Authentication;
 
 use Infrastructure\SlimPostgres;
-use Infrastructure\BaseMVC\Controller\BaseController;
-use Infrastructure\BaseMVC\View\Forms\FormHelper;
+use Infrastructure\BaseEntity\BaseMVC\Controller\BaseController;
+use Infrastructure\BaseEntity\BaseMVC\View\Forms\FormHelper;
 use Slim\Http\Request;
 use Slim\Http\Response;
 

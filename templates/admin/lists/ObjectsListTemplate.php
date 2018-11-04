@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Templates\Admin\Lists;
 
-use Infrastructure\BaseMVC\Model\ListViewModels;
+use Infrastructure\BaseEntity\BaseMVC\Model\ListViewModels;
 use Slim\Router;
 
 class ObjectsListTemplate extends ListTemplate

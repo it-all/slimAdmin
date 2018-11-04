@@ -11,9 +11,9 @@ use Entities\Administrators\Model\AdministratorsTableMapper;
 use Entities\Roles\Model\RolesTableMapper;
 use Entities\Administrators\View\Forms\AdministratorForm;
 use Infrastructure\SlimPostgres;
-use Infrastructure\BaseMVC\View\ResponseUtilities;
-use Infrastructure\BaseMVC\Controller\AdminController;
-use Infrastructure\BaseMVC\View\Forms\FormHelper;
+use Infrastructure\BaseEntity\BaseMVC\View\ResponseUtilities;
+use Infrastructure\BaseEntity\BaseMVC\Controller\AdminController;
+use Infrastructure\BaseEntity\BaseMVC\View\Forms\FormHelper;
 use Exceptions;
 use Infrastructure\Functions;
 use Slim\Container;
@@ -83,7 +83,7 @@ class AdministratorsController extends AdminController
             throw new \Exception('No permission.');
         }
 
-        $primaryKey = $args['primaryKey'];
+        $primaryKey = $args[ROUTEARG_PRIMARY_KEY];
 
         // if all roles have been unchecked it won't be included in the post will be set null
         $this->setRequestInput($request, AdministratorForm::getFieldNames());
@@ -129,7 +129,7 @@ class AdministratorsController extends AdminController
             throw new \Exception('No permission.');
         }
 
-        $primaryKey = (int) $args['primaryKey'];
+        $primaryKey = (int) $args[ROUTEARG_PRIMARY_KEY];
 
         try {
             $username = $this->administratorsEntityMapper->delete($primaryKey, $this->authentication, $this->authorization);

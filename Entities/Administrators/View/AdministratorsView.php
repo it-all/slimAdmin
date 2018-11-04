@@ -14,13 +14,13 @@ use Entities\Administrators\View\Forms\AdministratorUpdateForm;
 use It_All\FormFormer\Fields\InputField;
 use It_All\FormFormer\Form;
 use Infrastructure\SlimPostgres;
-use Infrastructure\BaseMVC\View\ObjectsListViews;
-use Infrastructure\BaseMVC\View\InsertUpdateViews;
-use Infrastructure\BaseMVC\View\ResponseUtilities;
+use Infrastructure\BaseEntity\BaseMVC\View\ObjectsListViews;
+use Infrastructure\BaseEntity\BaseMVC\View\InsertUpdateViews;
+use Infrastructure\BaseEntity\BaseMVC\View\ResponseUtilities;
 use Infrastructure\Database\Queries\QueryBuilder;
-use Infrastructure\BaseMVC\View\AdminListView;
-use Infrastructure\BaseMVC\View\Forms\DatabaseTableForm;
-use Infrastructure\BaseMVC\View\Forms\FormHelper;
+use Infrastructure\BaseEntity\BaseMVC\View\AdminListView;
+use Infrastructure\BaseEntity\DatabaseTable\View\DatabaseTableForm;
+use Infrastructure\BaseEntity\BaseMVC\View\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -127,11 +127,11 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
     public function updateView(Request $request, Response $response, $args)
     {
         // make sure there is an administrator for the primary key
-        if (null === $administrator = $this->administratorsEntityMapper->getObjectById((int) $args['primaryKey'])) {
-            return $this->databaseRecordNotFound($response, $args['primaryKey'], $this->administratorsTableMapper, 'update');
+        if (null === $administrator = $this->administratorsEntityMapper->getObjectById((int) $args[ROUTEARG_PRIMARY_KEY])) {
+            return $this->databaseRecordNotFound($response, $args[ROUTEARG_PRIMARY_KEY], $this->administratorsTableMapper, 'update');
         }
 
-        $formAction = $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $args['primaryKey']]);
+        $formAction = $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'update', 'put'), [ROUTEARG_PRIMARY_KEY => $args[ROUTEARG_PRIMARY_KEY]]);
 
         /** if input set we are redisplaying after invalid form submission */
         if ($request->isPut() && isset($args[SlimPostgres::USER_INPUT_KEY])) {
@@ -147,8 +147,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
             [
                 'title' => $this->administratorsEntityMapper->getUpdateTitle(),
                 'form' => $updateForm->getForm(),
-                // 'form' => $this->getForm($request, 'update', (int) $args['primaryKey'], $administrator),
-                'primaryKey' => $args['primaryKey'],
+                'primaryKey' => $args[ROUTEARG_PRIMARY_KEY],
                 'navigationItems' => $this->navigationItems,
                 'hideFocus' => true
             ]

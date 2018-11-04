@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Domain;
 
-use Infrastructure\BaseMVC\View\BaseView;
+use Infrastructure\BaseEntity\BaseMVC\View\BaseView;
 use Slim\Http\Request;
 use Slim\Http\Response;
 

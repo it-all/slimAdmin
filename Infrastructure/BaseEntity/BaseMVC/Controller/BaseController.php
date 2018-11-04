@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\BaseMVC\Controller;
+namespace Infrastructure\BaseEntity\BaseMVC\Controller;
 
 use Infrastructure\SlimPostgres;
 use Infrastructure\Database\Postgres;
 use Infrastructure\Database\Queries\QueryBuilder;
-use Infrastructure\BaseMVC\View\Forms\FormHelper;
+use Infrastructure\BaseEntity\BaseMVC\View\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
-use Infrastructure\BaseMVC\View\AdminListView;
+use Infrastructure\BaseEntity\BaseMVC\View\AdminListView;
 
 abstract class BaseController
 {

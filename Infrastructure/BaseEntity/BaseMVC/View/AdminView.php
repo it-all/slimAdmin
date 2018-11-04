@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\BaseMVC\View;
+namespace Infrastructure\BaseEntity\BaseMVC\View;
 
 use Infrastructure\SlimPostgres;
-use Infrastructure\BaseMVC\View\AdminNavigation;
+use Infrastructure\BaseEntity\BaseMVC\View\AdminNavigation;
 use Slim\Container;
 
 class AdminView extends BaseView

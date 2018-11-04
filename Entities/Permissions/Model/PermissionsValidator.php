@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Entities\Permissions\Model;
 
 use Entities\Permissions\View\Forms\PermissionForm;
-use Infrastructure\Validation\ValitronValidatorExtension;
+use Infrastructure\Utilities\ValitronValidatorExtension;
 use Entities\Roles\Model\RolesTableMapper;
 use Infrastructure\Security\Authorization\AuthorizationService;
 

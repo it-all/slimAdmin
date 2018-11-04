@@ -17,6 +17,8 @@ use Entities\Roles\RolesView;
 use Entities\Roles\RolesController;
 use Entities\Permissions\View\PermissionsView;
 use Entities\Permissions\PermissionsController;
+use Infrastructure\BaseEntity\DatabaseTable\View\DatabaseTableView;
+use Infrastructure\BaseEntity\DatabaseTable\View\DatabaseTableViewChild;
 
 /////////////////////////////////////////
 // Routes that anyone can access
@@ -98,17 +100,17 @@ $slim->post('/' . $config['adminPath'] . '/administrators/insert', Administrator
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_INSERT_POST);
 
-$slim->get('/' . $config['adminPath'] . '/administrators/{primaryKey}', AdministratorsView::class . ':routeGetUpdate')
+$slim->get('/' . $config['adminPath'] . '/administrators/{'.ROUTEARG_PRIMARY_KEY.'}', AdministratorsView::class . ':routeGetUpdate')
     ->add(new AuthorizationMiddleware($slimContainer, ADMINISTRATORS_UPDATE_RESOURCE))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_UPDATE);
 
-$slim->put('/' . $config['adminPath'] . '/administrators/{primaryKey}', AdministratorsController::class . ':routePutUpdate')
+$slim->put('/' . $config['adminPath'] . '/administrators/{'.ROUTEARG_PRIMARY_KEY.'}', AdministratorsController::class . ':routePutUpdate')
     ->add(new AuthorizationMiddleware($slimContainer, ADMINISTRATORS_UPDATE_RESOURCE))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_UPDATE_PUT);
 
-$slim->get('/' . $config['adminPath'] . '/administrators/delete/{primaryKey}', AdministratorsController::class . ':routeGetDelete')
+$slim->get('/' . $config['adminPath'] . '/administrators/delete/{'.ROUTEARG_PRIMARY_KEY.'}', AdministratorsController::class . ':routeGetDelete')
     ->add(new AuthorizationMiddleware($slimContainer, ADMINISTRATORS_DELETE_RESOURCE))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_DELETE);
@@ -140,17 +142,17 @@ $slim->post('/' . $config['adminPath'] . '/roles/insert', RolesController::class
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_ROLES_INSERT_POST);
 
-$slim->get('/' . $config['adminPath'] . '/roles/{primaryKey}', RolesView::class . ':routeGetUpdate')
+$slim->get('/' . $config['adminPath'] . '/roles/{'.ROUTEARG_PRIMARY_KEY.'}', RolesView::class . ':routeGetUpdate')
     ->add(new AuthorizationMiddleware($slimContainer, ROLES_UPDATE_RESOURCE))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_ROLES_UPDATE);
 
-$slim->put('/' . $config['adminPath'] . '/roles/{primaryKey}', RolesController::class . ':routePutUpdate')
+$slim->put('/' . $config['adminPath'] . '/roles/{'.ROUTEARG_PRIMARY_KEY.'}', RolesController::class . ':routePutUpdate')
     ->add(new AuthorizationMiddleware($slimContainer, ROLES_UPDATE_RESOURCE))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_ROLES_UPDATE_PUT);
 
-$slim->get('/' . $config['adminPath'] . '/roles/delete/{primaryKey}', RolesController::class . ':routeGetDelete')
+$slim->get('/' . $config['adminPath'] . '/roles/delete/{'.ROUTEARG_PRIMARY_KEY.'}', RolesController::class . ':routeGetDelete')
     ->add(new AuthorizationMiddleware($slimContainer, ROLES_DELETE_RESOURCE))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_ROLES_DELETE);
@@ -182,18 +184,28 @@ $slim->post('/' . $config['adminPath'] . '/permissions/insert', PermissionsContr
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_PERMISSIONS_INSERT_POST);
 
-$slim->get('/' . $config['adminPath'] . '/permissions/{primaryKey}', PermissionsView::class . ':routeGetUpdate')
+$slim->get('/' . $config['adminPath'] . '/permissions/{'.ROUTEARG_PRIMARY_KEY.'}', PermissionsView::class . ':routeGetUpdate')
     ->add(new AuthorizationMiddleware($slimContainer, PERMISSIONS_UPDATE_RESOURCE))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_PERMISSIONS_UPDATE);
 
-$slim->put('/' . $config['adminPath'] . '/permissions/{primaryKey}', PermissionsController::class . ':routePutUpdate')
+$slim->put('/' . $config['adminPath'] . '/permissions/{'.ROUTEARG_PRIMARY_KEY.'}', PermissionsController::class . ':routePutUpdate')
     ->add(new AuthorizationMiddleware($slimContainer, PERMISSIONS_UPDATE_RESOURCE))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_PERMISSIONS_UPDATE_PUT);
 
-$slim->get('/' . $config['adminPath'] . '/permissions/delete/{primaryKey}', PermissionsController::class . ':routeGetDelete')
+$slim->get('/' . $config['adminPath'] . '/permissions/delete/{'.ROUTEARG_PRIMARY_KEY.'}', PermissionsController::class . ':routeGetDelete')
     ->add(new AuthorizationMiddleware($slimContainer, PERMISSIONS_DELETE_RESOURCE))
     ->add(new AuthenticationMiddleware($slimContainer))
     ->setName(ROUTE_ADMINISTRATORS_PERMISSIONS_DELETE);
+
 // end permissions
+
+/** Database Tables */
+
+$slim->get('/' . $config['adminPath'] . '/'.ROUTEPREFIX_DATABASE_TABLES.'/{'.ROUTEARG_DATABASE_TABLE_NAME.'}', DatabaseTableViewChild::class . ':routeIndex')
+    ->add(new AuthorizationMiddleware($slimContainer, DATABASE_TABLES_VIEW_RESOURCE))
+    ->add(new AuthenticationMiddleware($slimContainer))
+    ->setName(ROUTE_DATABASE_TABLES);
+
+/** end Database Tables */

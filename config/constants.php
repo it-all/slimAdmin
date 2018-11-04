@@ -11,6 +11,7 @@ define('ROUTEPREFIX_EVENTS', 'events');
 define('ROUTEPREFIX_ADMINISTRATORS', 'administrators');
 define('ROUTEPREFIX_ROLES', 'roles');
 define('ROUTEPREFIX_PERMISSIONS', 'permissions');
+define('ROUTEPREFIX_DATABASE_TABLES', 'dbtables');
 
 // authorization resources/permissions, must match permission db records
 define('EVENTS_VIEW_RESOURCE', 'Events View');
@@ -29,6 +30,8 @@ define('PERMISSIONS_VIEW_RESOURCE', 'Permissions View');
 define('PERMISSIONS_INSERT_RESOURCE', 'Permissions Insert');
 define('PERMISSIONS_UPDATE_RESOURCE', 'Permissions Update');
 define('PERMISSIONS_DELETE_RESOURCE', 'Permissions Delete');
+
+define('DATABASE_TABLES_VIEW_RESOURCE', 'Database Tables View');
 
 // GLOBAL ROUTE NAME CONSTANTS
 define('ROUTE_HOME', 'home');
@@ -66,8 +69,15 @@ define('ROUTE_ADMINISTRATORS_PERMISSIONS_INSERT_POST', ROUTEPREFIX_ADMIN . '.'.R
 define('ROUTE_ADMINISTRATORS_PERMISSIONS_UPDATE', ROUTEPREFIX_ADMIN . '.'.ROUTEPREFIX_PERMISSIONS.'.update');
 define('ROUTE_ADMINISTRATORS_PERMISSIONS_UPDATE_PUT', ROUTEPREFIX_ADMIN . '.'.ROUTEPREFIX_PERMISSIONS.'.put.update');
 define('ROUTE_ADMINISTRATORS_PERMISSIONS_DELETE', ROUTEPREFIX_ADMIN . '.'.ROUTEPREFIX_PERMISSIONS.'.delete');
+/** database tables */
+define('ROUTE_DATABASE_TABLES', ROUTEPREFIX_DATABASE_TABLES);
+
 // nav / permission options without routes
 define('NAV_ADMIN_SYSTEM', 'systemNav');
+
+/** route arg names */
+define('ROUTEARG_PRIMARY_KEY', 'primaryKey');
+define('ROUTEARG_DATABASE_TABLE_NAME', 'tableName');
 
 // EVENT TITLES
 define('EVENT_PAGE_NOT_FOUND', '404 Page Not Found');

@@ -8,8 +8,8 @@ use Entities\Administrators\Model\Administrator;
 use Entities\Administrators\Model\AdministratorsEntityMapper;
 use Entities\Administrators\Model\AdministratorsTableMapper;
 use Infrastructure\SlimPostgres;
-use Infrastructure\BaseMVC\View\Forms\DatabaseTableForm;
-use Infrastructure\BaseMVC\View\Forms\FormHelper;
+use Infrastructure\BaseEntity\DatabaseTable\View\DatabaseTableForm;
+use Infrastructure\BaseEntity\BaseMVC\View\Forms\FormHelper;
 
 class AuthenticationService
 {

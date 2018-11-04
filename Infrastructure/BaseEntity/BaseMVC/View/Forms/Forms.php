@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\BaseMVC\View\Forms;
+namespace Infrastructure\BaseEntity\BaseMVC\View\Forms;
 
 use It_All\FormFormer\Form;
 

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\Validation;
+namespace Infrastructure\Utilities;
 
 use Valitron\Validator;
 

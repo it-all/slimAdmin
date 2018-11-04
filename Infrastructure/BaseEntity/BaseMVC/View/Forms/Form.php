@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\BaseMVC\View\Forms;
+namespace Infrastructure\BaseEntity\BaseMVC\View\Forms;
 
 use Slim\Container;
 use It_All\FormFormer\Form as ItAllForm;
-use Infrastructure\BaseMVC\View\Forms\FormHelper;
+use Infrastructure\BaseEntity\BaseMVC\View\Forms\FormHelper;
 
 abstract class Form
 {

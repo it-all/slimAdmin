@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\Validation;
+namespace Infrastructure\BaseEntity\DatabaseTable\Model;
 
-use Infrastructure\BaseMVC\View\Forms\DatabaseTableForm;
+use Infrastructure\BaseEntity\DatabaseTable\View\DatabaseTableForm;
 use Infrastructure\Database\Postgres;
 use Infrastructure\Database\DataMappers\TableMapper;
 use Infrastructure\Database\DataMappers\ColumnMapper;

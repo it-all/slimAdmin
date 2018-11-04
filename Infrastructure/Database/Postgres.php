@@ -63,19 +63,26 @@ Class Postgres
     /**
      * select all tables in a schema
      * @param string $schema
-     * @return recordset
+     * @return array of table names
      */
-    public function getSchemaTables(string $schema = 'public', array $skipTables = [])
+    public static function getSchemaTables(string $schema = 'public', array $skipTables = []): array
     {
         $query = "SELECT table_name FROM information_schema.tables WHERE table_schema = $1";
-        foreach ($skipTables as $sk) {
+        foreach ($skipTables as $skip) {
             $query .= " AND table_name";
-            $query .= (substr($sk, mb_strlen($sk) - 1) === '%') ? " NOT LIKE '$sk'" : " != '$sk'";
+            $query .= (substr($skip, mb_strlen($skip) - 1) === '%') ? " NOT LIKE '$skip'" : " != '$skip'";
         }
         $query .= " ORDER BY table_name";
         $q = new QueryBuilder($query, $schema);
 
-        return $q->execute();
+        $pgResult = $q->execute();
+        $records = pg_fetch_all($pgResult);
+        pg_free_result($pgResult);
+        $tables = [];
+        foreach ($records as $index => $record) {
+            $tables[] = $record['table_name'];
+        }
+        return array_values($tables);
     }
 
     /**

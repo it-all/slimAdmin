@@ -2,11 +2,21 @@
 
 use Slim\Router;
 
-function navSection($key, $navItem, Router $router)
+/** either a link or plain text */
+function getNavItem(string $navText, array $navItem, Router $router): string 
 {
-    $navSection = '<li>';
+    if (isset($navItem['route'])) {
+        $href = isset($navItem['args']) ? $router->pathFor($navItem['route'], $navItem['args']) : $router->pathFor($navItem['route']);
+        return '<a href="' . $href . '">' . $navText . '</a>';
+    } else {
+        return $navText;
+    }
+}
 
-    $navSection .= (isset($navItem['route'])) ? '<a href="'.$router->pathFor($navItem['route']).'">'.$key.'</a>' : $key;
+function navSection(string $key, array $navItem, Router $router): string
+{
+    $navSection = '<li>' . getNavItem($key, $navItem, $router);
+
     if (isset($navItem['subSections']))     {
         $navSection .= '<a href="#" onclick="toggleDisplay(getElementById(\''.$key.'\'));togglePlusMinus(this);">+</a>';
         $navSection .= '<ul class="adminNavSubSection" id="'.$key.'">';

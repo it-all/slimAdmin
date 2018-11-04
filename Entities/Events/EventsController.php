@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Entities\Events;
 
-use Infrastructure\BaseMVC\Controller\AdminController;
+use Infrastructure\BaseEntity\BaseMVC\Controller\AdminController;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;

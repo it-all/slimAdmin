@@ -1,9 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\BaseMVC\View;
+namespace Infrastructure\BaseEntity\BaseMVC\View;
 
 use Slim\Container;
+use Infrastructure\Database\Postgres;
 
 /**
  * navigation for admin pages
@@ -64,6 +65,11 @@ class AdminNavigation
                         'authorization' => EVENTS_VIEW_RESOURCE,
                     ],
 
+                    'Database' => [
+                        'authorization' => DATABASE_TABLES_VIEW_RESOURCE,
+                        'subSections' => $this->getDatabaseTablesSection()
+                    ],
+
                 ]
             ],
             'Logout' => [
@@ -78,6 +84,20 @@ class AdminNavigation
 
             $this->nav = array_merge($this->container['settings']['adminNav'], $this->nav);
         }
+    }
+
+    private function getDatabaseTablesSection(): array 
+    {
+        $section = [];
+        $tables = Postgres::getSchemaTables();
+
+        foreach ($tables as $table) {
+            $section[$table] = [
+                'route' => ROUTE_DATABASE_TABLES,
+                'args' => [ROUTEARG_DATABASE_TABLE_NAME => $table]
+            ];
+        }
+        return $section;
     }
 
     /** add nav components as necessary based on logged in administrator role */

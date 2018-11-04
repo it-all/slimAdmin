@@ -11,7 +11,7 @@ class TrackerMiddleware extends Middleware
 {
 	public function __invoke(Request $request, Response $response, $next)
 	{
-        $this->container->events->insertInfo('Resource Request');
+        $this->container->events->insertInfo('Resource Requested');
 
 		$response = $next($request, $response);
 		return $response;

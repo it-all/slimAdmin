@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\BaseMVC\View;
+namespace Infrastructure\BaseEntity\BaseMVC\View;
 
 use Infrastructure\SlimPostgres;
 use Exceptions\QueryFailureException;
 use Infrastructure\Database\Queries\QueryBuilder;
 use Infrastructure\Database\DataMappers\ListViewMappers;
-use Infrastructure\BaseMVC\View\Forms\FormHelper;
+use Infrastructure\BaseEntity\BaseMVC\View\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;

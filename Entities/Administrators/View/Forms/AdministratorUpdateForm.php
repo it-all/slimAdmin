@@ -5,7 +5,7 @@ namespace Entities\Administrators\View\Forms;
 
 use Slim\Container;
 use Entities\Administrators\Model\Administrator;
-use Infrastructure\BaseMVC\View\Forms\FormHelper;
+use Infrastructure\BaseEntity\BaseMVC\View\Forms\FormHelper;
 
 class AdministratorUpdateForm extends AdministratorForm
 {

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Entities\Roles\Model;
 
-use Infrastructure\BaseMVC\Model\ListViewModels;
+use Infrastructure\BaseEntity\BaseMVC\Model\ListViewModels;
 
 // model 
 class Role implements ListViewModels

@@ -5,12 +5,12 @@ namespace Entities\Roles;
 
 use Entities\Roles\Model\RolesTableMapper;
 use Infrastructure\SlimPostgres;
-use Infrastructure\BaseMVC\Controller\DatabaseTableController;
+use Infrastructure\BaseEntity\DatabaseTable\DatabaseTableController;
 use Exceptions;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
-use Infrastructure\BaseMVC\View\Forms\FormHelper;
+use Infrastructure\BaseEntity\BaseMVC\View\Forms\FormHelper;
 
 class RolesController extends DatabaseTableController
 {
@@ -33,7 +33,7 @@ class RolesController extends DatabaseTableController
             throw new \Exception('No permission.');
         }
 
-        $primaryKey = $args['primaryKey'];
+        $primaryKey = $args[ROUTEARG_PRIMARY_KEY];
         $tableName = $this->tableMapper->getFormalTableName(false);
         $primaryKeyColumnName = $this->tableMapper->getPrimaryKeyColumnName();
 

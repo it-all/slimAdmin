@@ -1,14 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\BaseMVC\View;
+namespace Infrastructure\BaseEntity\DatabaseTable\View;
 
 use Infrastructure\SlimPostgres;
-use Infrastructure\BaseMVC\View\InsertUpdateViews;
-use Infrastructure\BaseMVC\View\ResponseUtilities;
-use Infrastructure\BaseMVC\View\Forms\DatabaseTableForm;
+use Infrastructure\BaseEntity\BaseMVC\View\AdminListView;
+use Infrastructure\BaseEntity\BaseMVC\View\InsertUpdateViews;
+use Infrastructure\BaseEntity\BaseMVC\View\ResponseUtilities;
+use Infrastructure\BaseEntity\DatabaseTable\View\DatabaseTableForm;
 use Infrastructure\Database\DataMappers\TableMapper;
-use Infrastructure\BaseMVC\View\Forms\FormHelper;
+use Infrastructure\BaseEntity\BaseMVC\View\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -31,6 +32,12 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
         $this->setInsert();
         $this->setUpdate();
         $this->setDelete();
+    }
+
+    /** overrides in order to get objects and send to indexView */
+    public function routeIndex(Request $request, Response $response, $args)
+    {
+        return $this->indexView($response);
     }
 
     public function routeGetInsert(Request $request, Response $response, $args)
@@ -66,7 +73,7 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
     /** this can be called for both the initial get and the posted form if errors exist (from controller) */
     public function updateView(Request $request, Response $response, $args)
     {
-        $primaryKeyValue = $args['primaryKey'];
+        $primaryKeyValue = $args[ROUTEARG_PRIMARY_KEY];
 
         // make sure there is a record for the mapper
         if (null === $record = $this->tableMapper->selectForPrimaryKey($primaryKeyValue)) {
@@ -75,7 +82,7 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
 
         $formFieldData = ($request->isPut() && isset($args[SlimPostgres::USER_INPUT_KEY])) ? $args[SlimPostgres::USER_INPUT_KEY] : $record;
 
-        $form = new DatabaseTableForm($this->tableMapper, $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'update', 'put'), ['primaryKey' => $primaryKeyValue]), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'update', $formFieldData);
+        $form = new DatabaseTableForm($this->tableMapper, $this->router->pathFor(SlimPostgres::getRouteName(true, $this->routePrefix, 'update', 'put'), [ROUTEARG_PRIMARY_KEY => $primaryKeyValue]), $this->csrf->getTokenNameKey(), $this->csrf->getTokenName(), $this->csrf->getTokenValueKey(), $this->csrf->getTokenValue(), 'update', $formFieldData);
         
         FormHelper::unsetSessionFormErrors();
 

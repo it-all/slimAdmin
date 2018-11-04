@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Entities\Permissions;
 
 use Infrastructure\SlimPostgres;
-use Infrastructure\BaseMVC\Controller\AdminController;
+use Infrastructure\BaseEntity\BaseMVC\Controller\AdminController;
 use Entities\Roles\Model\RolesTableMapper;
 use Entities\Permissions\Model\Permission;
 use Entities\Permissions\Model\PermissionsTableMapper;
@@ -12,8 +12,8 @@ use Entities\Permissions\Model\PermissionsEntityMapper;
 use Entities\Permissions\Model\PermissionsValidator;
 use Entities\Permissions\View\PermissionsView;
 use Entities\Permissions\View\Forms\PermissionForm;
-use Infrastructure\BaseMVC\View\ResponseUtilities;
-use Infrastructure\BaseMVC\View\Forms\FormHelper;
+use Infrastructure\BaseEntity\BaseMVC\View\ResponseUtilities;
+use Infrastructure\BaseEntity\BaseMVC\View\Forms\FormHelper;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -85,7 +85,7 @@ class PermissionsController extends AdminController
             throw new \Exception('No permission.');
         }
 
-        $primaryKey = $args['primaryKey'];
+        $primaryKey = $args[ROUTEARG_PRIMARY_KEY];
 
         // if all roles have been unchecked it won't be included in the post will be set null
         $this->setRequestInput($request, PermissionForm::getFieldNames());
@@ -131,7 +131,7 @@ class PermissionsController extends AdminController
             throw new \Exception('No permission.');
         }
 
-        $primaryKey = (int) $args['primaryKey'];
+        $primaryKey = (int) $args[ROUTEARG_PRIMARY_KEY];
 
         try {
             $title = $this->permissionsEntityMapper->delete($primaryKey);

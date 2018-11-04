@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\BaseMVC\Model;
+namespace Infrastructure\BaseEntity\BaseMVC\Model;
 
 use Infrastructure\Security\Authorization\AuthorizationService;
 use Infrastructure\Security\Authentication\AuthenticationService;

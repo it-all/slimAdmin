@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Infrastructure\Security\Authentication;
 
-use Infrastructure\Validation\ValitronValidatorExtension;
+use Infrastructure\Utilities\ValitronValidatorExtension;
 
 // sets validation rules for login form
 class AuthenticationValidator extends ValitronValidatorExtension

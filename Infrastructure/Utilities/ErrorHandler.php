@@ -117,7 +117,7 @@ class ErrorHandler
 
         if ($die) {
             if ($this->redirectPage != null) {
-                $_SESSION[SESSION_NOTICE] = [$this->fatalMessage, 'error'];
+                $_SESSION[SlimPostgres::SESSION_KEY_NOTICE] = [$this->fatalMessage, 'error'];
                 header("Location: $this->redirectPage");
             }
             exit();

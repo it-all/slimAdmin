@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\BaseMVC\View\Forms;
+namespace Infrastructure\BaseEntity\DatabaseTable\View;
 
+use Infrastructure\BaseEntity\BaseMVC\View\Forms\FormHelper;
 use It_All\FormFormer\Fields\Field;
 use It_All\FormFormer\Fields\InputField;
 use It_All\FormFormer\Fields\InputFields\CheckboxRadioInputField;
@@ -12,7 +13,7 @@ use It_All\FormFormer\Fields\TextareaField;
 use It_All\FormFormer\Form;
 use Infrastructure\Database\DataMappers\ColumnMapper;
 use Infrastructure\Database\DataMappers\TableMapper;
-use Infrastructure\Validation\DatabaseTableValidation;
+use Infrastructure\BaseEntity\DatabaseTable\Model\DatabaseTableValidation;
 use Infrastructure\Database\Postgres;
 
 class DatabaseTableForm extends Form

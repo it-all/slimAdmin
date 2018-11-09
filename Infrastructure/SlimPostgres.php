@@ -70,7 +70,7 @@ class SlimPostgres
 
     public function __construct()
     {
-        $this->commonConfigSettingsKeys = ['isLive', 'businessName', 'businessDba', 'emails', 'authentication', 'authorization', 'trimAllUserInput'];
+        $this->commonConfigSettingsKeys = ['isLive', 'businessName', 'businessDba', 'emails', 'authentication', 'authorization', 'trimAllUserInput', 'databaseTables'];
         $dotenv = new Dotenv(APPLICATION_ROOT_DIRECTORY);
         $dotenv->load();
 

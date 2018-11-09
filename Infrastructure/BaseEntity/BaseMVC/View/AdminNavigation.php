@@ -86,16 +86,25 @@ class AdminNavigation
         }
     }
 
+    /** table view is allowed unless settings[table] is set false */
+    private function isDatabaseTableViewAllowed(string $table) : bool 
+    {
+        return !(isset($this->container->settings['databaseTables'][$table]) && $this->container->settings['databaseTables'][$table] === false);
+        return isset($this->container->settings['databaseTables'][$table]) && is_array($this->container->settings['databaseTables'][$table]) && in_array('view',$this->container->settings['databaseTables'][$table]);
+    }
+
     private function getDatabaseTablesSection(): array 
     {
         $section = [];
         $tables = Postgres::getSchemaTables();
 
         foreach ($tables as $table) {
-            $section[$table] = [
-                'route' => ROUTE_DATABASE_TABLES,
-                'args' => [ROUTEARG_DATABASE_TABLE_NAME => $table]
-            ];
+            if ($this->isDatabaseTableViewAllowed($table)) {
+                $section[$table] = [
+                    'route' => ROUTE_DATABASE_TABLES,
+                    'args' => [ROUTEARG_DATABASE_TABLE_NAME => $table]
+                ];    
+            }
         }
         return $section;
     }

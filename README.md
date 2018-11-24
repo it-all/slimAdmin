@@ -117,9 +117,9 @@ PHP Errors with stack trace are logged to the file set in config['storage']['err
 * postgres=# alter role myrolename with encrypted password 'mypassword';  
 * postgres=# create database mydbname with owner myrolename;  
   
-<a id="restoreDb">Import pg_schema.sql and pg_data.sql</a>
-* pg_restore -U myrolename -O -c --if-exists -n public -d mydbname /storage/dumps/pg_schema.dump
-* pg_restore -U myrolename -O -n public -d mydbname /storage/dumps/pg_data.dump
+<a id="restoreDb">Import pg_schema.sql and pg_data.sql (from project root dir)</a>
+* pg_restore -U myrolename -O -c --if-exists -n public -d mydbname storage/dumps/pg_schema_initial.dump
+* pg_restore -U myrolename -O -n public -d mydbname storage/dumps/pg_data_initial.dump
   
 CODE DOCUMENTATION  
 Entities  

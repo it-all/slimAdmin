@@ -230,11 +230,23 @@ class AuthenticationService
         return false;
     }
 
+    private function getAdminHomeRouteForAdministratorByRole(): ?string 
+    {
+        foreach ($this->administrator->getRoleNames() as $roleName) {
+            if (array_key_exists($roleName, $this->administratorHomeRoutes)) {
+                return $this->administratorHomeRoutes[$roleName];
+            }
+        }
+        return null;
+    }
+
     // determine home route: either by username, by role, or default
     public function getAdminHomeRouteForAdministrator(): string
     {
         if (array_key_exists($this->getAdministratorUsername(), $this->administratorHomeRoutes)) {
             return $this->administratorHomeRoutes[$this->getAdministratorUsername()];
+        } elseif (null !== $roleRoute = $this->getAdminHomeRouteForAdministratorByRole()) {
+            return $roleRoute;
         }
         
         // default

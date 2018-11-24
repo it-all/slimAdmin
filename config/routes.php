@@ -44,7 +44,7 @@ $slim->post('/' . $config['adminPath'], AuthenticationController::class . ':rout
 // Admin Routes - Routes that only authenticated users access (to end of file)
 // Note, if route needs authorization as well, the authorization is added prior to authentication, so that authentication is performed first
 
-// admin home
+// generic admin home, AdministratorHomeRouteMiddleware redirects to user specific home route if configured
 $slim->get('/' . $config['adminPath'] . '/home',
     AdminHomeView::class . ':routeIndex')
     ->add(new AdministratorHomeRouteMiddleware($slimContainer))

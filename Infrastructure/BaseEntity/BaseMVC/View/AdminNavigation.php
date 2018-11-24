@@ -63,6 +63,13 @@ class AdminNavigation
                     'Events' => [
                         'route' => ROUTE_EVENTS,
                         'authorization' => EVENTS_VIEW_RESOURCE,
+                        'subSections' => [
+                            'Types' => [
+                                'route' => ROUTE_DATABASE_TABLES,
+                                'args' => [ROUTEARG_DATABASE_TABLE_NAME => 'event_types'],
+                                'authorization' => EVENTS_VIEW_RESOURCE,
+                            ],
+                        ]
                     ],
 
                     'Database' => [

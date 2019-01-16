@@ -49,20 +49,6 @@ return [
     /** whether to enter all resource requests into events database table */
     'trackAll' => false,
 
-    /** automated database table crud allowances
-     * 
-     *  if view is allowed on all tables by default, tables that are not to be enabled must be explicitly set false in the tableCrudSettings key, ie 'tableName' => false. insert/update/delete permissions can then be defined explicitly as necessary, ie 'tableName' => ['insert', 'update', 'delete']
-     * 
-     * if view is not allowed by default, tables that are to be enabled must be explicitly given crud permissions in the tableCrudSettings key, ie 'tableName' => ['view'], or 'tableName' => ['insert', 'update', 'delete']
-     */
-    'databaseTables' => [
-        'allowViewByDefault' => true,
-        'tableCrudSettings' => [
-            'roles' => false,
-            'event_types' => ['insert', 'update', 'delete'],    
-        ],
-    ],
-
     /** so no need to set encoding for each mb_strlen() call */
     'mbInternalEncoding' => 'UTF-8',
 

@@ -96,8 +96,7 @@ class AdminNavigation
     /** table view is allowed unless settings[table] is set false */
     private function isDatabaseTableViewAllowed(string $table) : bool 
     {
-        return !(isset($this->container->settings['databaseTables'][$table]) && $this->container->settings['databaseTables'][$table] === false);
-        return isset($this->container->settings['databaseTables'][$table]) && is_array($this->container->settings['databaseTables'][$table]) && in_array('view',$this->container->settings['databaseTables'][$table]);
+        return true;
     }
 
     private function getDatabaseTablesSection(): array 

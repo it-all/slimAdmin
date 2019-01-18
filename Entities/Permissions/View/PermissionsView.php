@@ -31,7 +31,7 @@ class PermissionsView extends AdminListView implements ObjectsListViews, InsertU
         $this->permissionsEntityMapper = PermissionsEntityMapper::getInstance();
         $this->permissionsTableMapper = PermissionsTableMapper::getInstance();
 
-        parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS_PERMISSIONS, $this->permissionsEntityMapper, ROUTE_ADMINISTRATORS_PERMISSIONS_RESET, 'admin/lists/objectsList.php');
+        parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS_PERMISSIONS, $this->permissionsEntityMapper, ROUTE_ADMINISTRATORS_PERMISSIONS_RESET, 'Admin/Lists/objectsList.php');
 
         $this->setInsert();
         $this->setUpdate();
@@ -81,7 +81,7 @@ class PermissionsView extends AdminListView implements ObjectsListViews, InsertU
 
         return $this->view->render(
             $response,
-            'admin/form.php',
+            'Admin/form.php',
             [
                 'title' => $this->permissionsEntityMapper->getInsertTitle(),
                 'form' => (new PermissionInsertForm($formAction, $this->container, $fieldValues))->getForm(),
@@ -115,7 +115,7 @@ class PermissionsView extends AdminListView implements ObjectsListViews, InsertU
 
         return $this->view->render(
             $response,
-            'admin/form.php',
+            'Admin/form.php',
             [
                 'title' => $this->permissionsEntityMapper->getUpdateTitle(),
                 'form' => $updateForm->getForm(),

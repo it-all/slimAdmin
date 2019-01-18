@@ -2,8 +2,8 @@
 declare(strict_types=1);
 
 $htmlHeadCss = '<link href="/css/adminFlexSimpleNotLoggedIn.css" rel="stylesheet" type="text/css">';
-require 'partials/header.php';
-require 'partials/footer.php';
+require 'Partials/header.php';
+require 'Partials/footer.php';
 $htmlBodyContent = $header;
 $formHtml = $form->generate();
 $htmlBodyContent .= <<< EOT
@@ -26,4 +26,4 @@ if (mb_strlen($focusFieldId) > 0) {
 </script>    
 EOT;
 }
-require APPLICATION_ROOT_DIRECTORY . '/templates/base.php';
+require TEMPLATES_PATH . 'base.php';

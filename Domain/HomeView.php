@@ -13,7 +13,7 @@ class HomeView extends BaseView
     {
         return $this->view->render(
             $response,
-            'frontend/home.php',
+            'Frontend/home.php',
             ['pageType' => 'public']
         );
     }

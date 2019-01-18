@@ -144,7 +144,8 @@ class SlimPostgres
             $echoErrors,
             $emailErrors,
             $emailErrorsTo,
-            $this->mailer
+            $this->mailer, 
+            $this->config['errors']['fatalMessage']
         );
 
         /** workaround for catching some fatal errors like parse errors. note that parse errors in this file and index.php are not handled, but cause a fatal error with display (not displayed if display_errors is off in php.ini, but the ini_set call will not affect it). */

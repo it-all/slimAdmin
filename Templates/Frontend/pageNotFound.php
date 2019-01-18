@@ -15,8 +15,8 @@ if ((isset($_SESSION[SlimPostgres::SESSION_KEY_NOTICE]))) {
 
 $htmlBodyContent = <<< EOL
     <main>
-        $noticeDiv
         <h1>Homepage of $businessName</h1>
+        $noticeDiv
     </main>
 EOL;
-require APPLICATION_ROOT_DIRECTORY . '/templates/base.php';
+require TEMPLATES_PATH . 'base.php';

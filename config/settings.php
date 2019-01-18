@@ -71,7 +71,7 @@ return [
 
         'outputBuffering' => 'append',
 
-        'templatesPath' => APPLICATION_ROOT_DIRECTORY . '/templates/', // note slim requires trailing slash
+        'templatesPath' => TEMPLATES_PATH, // note slim requires trailing slash
 
         'addContentLengthHeader' => false, // if this is not disabled, slim/App.php threw an exception related to error handling, when the php set_error_handler() function was triggered
 

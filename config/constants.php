@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 define('DOMAIN_NAME', 'example.com');
+define('TEMPLATES_DIR_NAME', 'Templates');
+define('TEMPLATES_PATH', APPLICATION_ROOT_DIRECTORY . '/' . TEMPLATES_DIR_NAME . '/'); // includes trailing /
 
 define('TOP_ROLE', 'owner'); // must match db role
 

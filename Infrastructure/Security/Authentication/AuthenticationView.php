@@ -29,7 +29,7 @@ class AuthenticationView extends AdminView
         // render page
         return $this->view->render(
             $response,
-            'admin/login.php',
+            'Admin/login.php',
             [
                 'title' => '::Login',
                 'form' => $form,

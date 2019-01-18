@@ -41,7 +41,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
         $this->administratorsTableMapper = AdministratorsTableMapper::getInstance();
         $this->routePrefix = ROUTEPREFIX_ADMINISTRATORS;
 
-        parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS, $this->administratorsEntityMapper, ROUTE_ADMINISTRATORS_RESET, 'admin/lists/objectsList.php');
+        parent::__construct($container, self::FILTER_FIELDS_PREFIX, ROUTE_ADMINISTRATORS, $this->administratorsEntityMapper, ROUTE_ADMINISTRATORS_RESET, 'Admin/Lists/objectsList.php');
 
         $this->setInsert();
         $this->setUpdate();
@@ -109,7 +109,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
 
         return $this->view->render(
             $response,
-            'admin/form.php',
+            'Admin/form.php',
             [
                 'title' => $this->administratorsEntityMapper->getInsertTitle(),
                 'form' => (new AdministratorInsertForm($formAction, $this->container, $fieldValues))->getForm(),
@@ -143,7 +143,7 @@ class AdministratorsView extends AdminListView implements ObjectsListViews, Inse
 
         return $this->view->render(
             $response,
-            'admin/form.php',
+            'Admin/form.php',
             [
                 'title' => $this->administratorsEntityMapper->getUpdateTitle(),
                 'form' => $updateForm->getForm(),

@@ -12,7 +12,7 @@ class AdminHomeView extends AdminView
         $responseStatus = (array_key_exists('status', $args)) ? $args['status'] : 200;
         return $this->view->render(
             $response,
-            'admin/home.php',
+            'Admin/home.php',
             [
                 'title' => 'Admin',
                 'navigationItems' => $this->navigationItems,

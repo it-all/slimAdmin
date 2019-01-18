@@ -22,7 +22,7 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
     protected $routePrefix;
     protected $tableMapper;
 
-    public function __construct(Container $container, TableMapper $tableMapper, string $routePrefix, bool $addDeleteColumnToListView = true, string $listViewTemplate = 'admin/lists/resultsList.php')
+    public function __construct(Container $container, TableMapper $tableMapper, string $routePrefix, bool $addDeleteColumnToListView = true, string $listViewTemplate = 'Admin/Lists/resultsList.php')
     {
         $this->tableMapper = $tableMapper;
         $this->routePrefix = $routePrefix;
@@ -56,7 +56,7 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
 
         return $this->view->render(
             $response,
-            'admin/form.php',
+            'Admin/form.php',
             [
                 'title' => 'Insert '. $this->tableMapper->getFormalTableName(false),
                 'form' => $form,
@@ -88,7 +88,7 @@ abstract class DatabaseTableView extends AdminListView implements InsertUpdateVi
 
         return $this->view->render(
             $response,
-            'admin/form.php',
+            'Admin/form.php',
             [
                 'title' => 'Update ' . $this->tableMapper->getFormalTableName(false),
                 'form' => $form,

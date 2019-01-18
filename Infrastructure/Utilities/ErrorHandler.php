@@ -26,7 +26,7 @@ class ErrorHandler
         bool $emailErrors = true,
         array $emailTo = [],
         ?PhpMailerService $mailer = null,
-        $fatalMessage = 'Apologies, there has been an error on our site. We have been alerted and will correct it as soon as possible.'
+        ?string $fatalMessage = null
     )
     {
         if ($emailErrors) {
@@ -117,7 +117,9 @@ class ErrorHandler
 
         if ($die) {
             if ($this->redirectPage != null) {
-                $_SESSION[SlimPostgres::SESSION_KEY_NOTICE] = [$this->fatalMessage, 'error'];
+                if (!is_null($this->fatalMessage)) {
+                    $_SESSION[SlimPostgres::SESSION_KEY_NOTICE] = [$this->fatalMessage, 'error'];
+                }
                 header("Location: $this->redirectPage");
             }
             exit();

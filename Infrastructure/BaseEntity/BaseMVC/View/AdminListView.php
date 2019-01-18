@@ -38,7 +38,7 @@ abstract class AdminListView extends AdminView
     const SESSION_FILTER_COLUMNS_KEY = 'columns';
     const SESSION_FILTER_VALUE_KEY = 'value';
 
-    public function __construct(Container $container, string $filterFieldsPrefix, string $indexRoute, ListViewMappers $mapper, string $filterResetRoute, string $template = 'admin/lists/resultsList.php')
+    public function __construct(Container $container, string $filterFieldsPrefix, string $indexRoute, ListViewMappers $mapper, string $filterResetRoute, string $template = 'Admin/Lists/resultsList.php')
     {
         parent::__construct($container);
         $this->sessionFilterFieldKey = $filterFieldsPrefix . 'Filter';

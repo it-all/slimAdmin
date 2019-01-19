@@ -353,11 +353,11 @@ ALTER TABLE ONLY public.permissions
 
 
 --
--- Name: permissions permsissions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: permissions permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.permissions
-    ADD CONSTRAINT permsissions_pkey PRIMARY KEY (id);
+    ADD CONSTRAINT permissions_pkey PRIMARY KEY (id);
 
 
 --

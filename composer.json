@@ -24,6 +24,7 @@
         "psr-4": {
             "Domain\\": "Domain",
             "Entities\\": "Entities",
+            "Exceptions\\": "Exceptions",
             "Infrastructure\\": "Infrastructure",
             "Templates\\": "Templates"
         }

@@ -175,6 +175,9 @@ class TableMapper implements ListViewMappers
     /** unlike select(), this returns only the array for a single record, or null */
     public function selectForPrimaryKey($primaryKeyValue, string $columns = "*"): ?array
     {
+        if (is_null($this->getPrimaryKeyColumnName())) {
+            throw new \Exception("$this->tableName primary key not defined");
+        }
         $where = [
             $this->getPrimaryKeyColumnName() => [
                 'operators' => ['='],

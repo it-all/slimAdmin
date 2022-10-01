@@ -1,0 +1,71 @@
+<?php
+declare(strict_types=1);
+
+// DO NOT CHECK IN WITH CREDENTIALS SET
+// This should be copied to deleteAdministrator.php, which is .gitignored
+
+/** CAUTION, this deletes the administrator, associated administrator_roles, and events. Deleting events is like deleting log entries. It is not allowed from the AdministratorsMapper. This script should only be used for test administrators or when all traces of an administrator's activity is to be removed. */
+
+/** begin config */
+$username = ''; // must exist or exception will occur
+/** end config */
+
+use Entities\Administrators\Model\AdministratorsTableMapper;
+use Infrastructure\Database\Queries\QueryBuilder;
+use Infrastructure\SlimAdmin;
+
+define('APPLICATION_ROOT_DIRECTORY', realpath(__DIR__.'/..'));
+require APPLICATION_ROOT_DIRECTORY . '/vendor/autoload.php';
+require APPLICATION_ROOT_DIRECTORY . '/config/constants.php';
+
+SlimAdmin::getInstance();
+
+$administratorsTableMapper =  AdministratorsTableMapper::getInstance();
+if (null === $administratorId = $administratorsTableMapper->getIdByUsername($username)) {
+    throw new \Exception("Administrator not found for username $username");
+}
+
+pg_query("BEGIN");
+deleteAdministratorRoles($administratorId);
+deleteEvents($administratorId);
+deleteAdministrator($administratorId);
+pg_query("COMMIT");
+
+function deleteAdministratorRoles(int $administratorId)
+{
+    $q = new QueryBuilder("DELETE FROM administrator_roles WHERE administrator_id = $administratorId");
+
+    try {
+        $q->execute();
+        echo "administrator roles deleted.\n";  
+    } catch (\Exception $e) {
+        pg_query("ROLLBACK");
+        echo $e->getMessage() . "\n\n";
+    }
+}
+
+function deleteEvents(int $administratorId)
+{
+    $q = new QueryBuilder("DELETE FROM events WHERE administrator_id = $administratorId");
+
+    try {
+        $q->execute();
+        echo "administrator events deleted.\n";  
+    } catch (\Exception $e) {
+        pg_query("ROLLBACK");
+        echo $e->getMessage() . "\n\n";
+    }
+}
+
+function deleteAdministrator(int $administratorId)
+{
+    $q = new QueryBuilder("DELETE FROM administrators WHERE id = $administratorId");
+
+    try {
+        $q->execute();
+        echo "administrator $administratorId deleted.\n";  
+    } catch (\Exception $e) {
+        pg_query("ROLLBACK");
+        echo $e->getMessage() . "\n\n";
+    }
+}

@@ -1,0 +1,26 @@
+Front Controller (uses Slim Framework)
+Mappers and Models
+Mappers are interfaces between the database and the rest of the application. They are the only application files that perform SQL queries. A TableMapper maps directly to a single database table. An EntityMapper maps to multiple database tables, which are usually related by foreign key(s). Mappers can return single column values, an array which represents a record or an array of record arrays (ie recordset), a single Model object or an array of Model objects. Models are objects which represent domain or application entities. There is usually a Model for each TableMapper or EntityMapper. Models are usually immutable in that they are hydrated with database data which is not allowed to be altered after construction. Mappers that return Models are responsible for massaging raw database data as necessary in order to properly construct the Model(s).
+
+Apache
+I added DirectorySlash Off to both the :80 and :443 servers in sites-enabled/XX.conf - in order to not have endless redirects for front end pages because of the Slim middleware which removes the trailing slash and redirects.
+
+SASS - CSS Compilation
+handled by package.json scripts
+use npm run watch:css to compile prebuild/scss/*.scss to public/css/*.css
+when pushing to production use npm run postbuild:css to autoprefix and minify css
+
+JS minification
+manually upon every js update, run
+    node prebuild/js/node/uglify.js 
+
+References
+SCSS via package.json
+    https://deliciousbrains.com/npm-build-script/
+    https://builtin.com/software-engineering-perspectives/npm-only-build-step
+    https://www.studio4130.com/wordpress-development-using-npm-scripts/
+    https://www.youtube.com/watch?v=o4cECvhrBo8
+    https://thinkdobecreate.com/articles/minimum-static-site-sass-setup/
+Uglify JS
+    https://blog.kevinchisholm.com/javascript/node-js/getting-started-with-the-uglify-js-node-js-module/
+    https://github.com/mishoo/UglifyJS

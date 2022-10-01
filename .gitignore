@@ -1,0 +1,14 @@
+*.dump
+/trash
+/archive
+.htpasswd
+code.iml
+.gitignore~
+__pycache__
+/node_modules
+.DS_Store
+.env
+/.vscode
+/storage
+/vendor
+/assets/images

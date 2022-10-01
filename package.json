@@ -1,0 +1,15 @@
+{
+  "devDependencies": {
+    "onchange": "^7.1.0",
+    "postcss-cli": "^8.0.0",
+    "autoprefixer": "^10.4.8",
+    "cssnano": "^5.1.12",
+    "uglify-js": "^3.16.3",
+    "sass": "^1.54.0"
+  },
+  "scripts": {
+    "scss": "sass prebuild/scss:public/css",
+    "watch:css": "onchange 'prebuild/scss/*.scss' -- npm run scss",
+    "postbuild:css": "postcss css/*.css -u autoprefixer cssnano -r"
+  }
+}

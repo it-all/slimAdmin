@@ -1,0 +1,19 @@
+input[type="submit"] {
+  background-color: #c97737;
+  padding: .5em;
+  border: none;
+  border-radius: 0.3125rem; 
+  box-shadow: 0 12px 24px 0 rgba(0,0,0,0.2);
+}
+.formError {
+  margin-left: 1em;
+  color: red;
+  font-size: .875rem;
+}
+.formFieldError {
+  // background-color: rgb(248, 125, 125);
+  border: 2px solid red;
+}
+label[class="required"] {
+  font-weight: bold;
+}

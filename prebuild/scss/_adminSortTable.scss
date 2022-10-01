@@ -1,0 +1,13 @@
+/* Sortable tables */
+.sortable-header-row {
+  font-weight: bold;
+  cursor: default;
+}
+
+.sorttable_sorted {
+  text-decoration: underline;
+}
+
+.sorttable_sorted_reverse {
+  text-decoration: overline;
+}

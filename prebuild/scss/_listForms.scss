@@ -1,0 +1,10 @@
+.listForm input, .listForm select, .listForm textarea {
+    display: block;
+    margin-bottom: .2em;
+}
+.listForm input[type=submit] {
+    border-width: 4px;
+    font-size: 1.3rem;
+    margin-top: .5em;
+    font-weight: bold;
+}

@@ -1,0 +1,28 @@
+table {
+  border-collapse: separate;
+}
+
+tr:hover {
+  background-color: #0f192a;
+}
+
+th, td {
+  padding: .2em .8em;
+  text-align: left;
+}
+
+th.cellRight, td.cellRight {
+  text-align: right;
+}
+
+th.cellCenter, td.cellCenter {
+  text-align: center;
+}
+
+td.cellBold {
+  font-weight: bold;
+}
+
+th.nowrap, td.nowrap {
+  white-space: nowrap;
+}

@@ -1,0 +1,17 @@
+body {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+main {
+  padding: $main-padding;
+  width: 100%;
+  flex: 1 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: .1em auto;
+  display: flex;
+  flex-direction: column;
+}

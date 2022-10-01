@@ -1,0 +1,24 @@
+{
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^8.1",
+        "slim/slim": "4.10",
+        "slim/psr7": "^1.5",
+        "php-di/php-di": "^6.4",
+        "slim/php-view": "^3.2",
+        "phpmailer/phpmailer": "~6.1",
+        "slim/csrf": "^1.2",
+        "it-all/form-former": "^v2.2.2",
+        "vlucas/valitron": "^1.4.10",
+        "vlucas/phpdotenv": "^5.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Domain\\": "Domain",
+            "Entities\\": "Entities",
+            "Exceptions\\": "Exceptions",
+            "Infrastructure\\": "Infrastructure",
+            "Templates\\": "Templates"
+        }
+    }
+}

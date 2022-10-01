@@ -88,7 +88,7 @@ class AdministratorsListView extends AdminFilterableListView
     {
         return [
             'id' => $this->getUpdateCellValue($administrator->getId()),
-            'name' => htmlentities($administrator->getName(), ENT_QUOTES | ENT_HTML5),
+            'name' => $administrator->getName(),
             'username' => $administrator->getUsername(),
             'roles' => $administrator->getRolesString(),
             'active' => Postgres::convertBoolToPostgresBool($administrator->isActive()),

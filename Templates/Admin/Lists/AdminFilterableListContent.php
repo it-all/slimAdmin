@@ -76,7 +76,7 @@ EOT;
                         $content = $cellInfo;
                         $classString = '';
                     }
-                    $body .= '<td' . $classString . ' valign="top">'.$content.'</td>';
+                    $body .= '<td' . $classString . ' valign="top">'.htmlentities($content, ENT_QUOTES | ENT_HTML5).'</td>';
                 }
             }
             $body .= '</tr>';

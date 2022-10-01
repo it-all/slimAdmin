@@ -88,7 +88,7 @@ class PermissionsListView extends AdminFilterableListView
     {
         return [
             'id' => $this->getUpdateCellValue($permission->getId()),
-            'title' => htmlentities($permission->getTitle(), ENT_QUOTES | ENT_HTML5),
+            'title' => $permission->getTitle(),
             'description' => $permission->getdescription(),
             'roles' => $permission->getRolesString(),
             'active' => Postgres::convertBoolToPostgresBool($permission->isActive()),

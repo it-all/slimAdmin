@@ -103,14 +103,14 @@ EOT;
             $body .= '<tr>';
             foreach ($row as $cellInfo) {
                 if (is_array($cellInfo)) {
-                    $content = $cellInfo['content'];
+                    $content = (string) $cellInfo['content'];
                     $classString = ' class="' . implode(" ", $cellInfo['classes']) . '"';
                 } else {
-                    $content = $cellInfo;
+                    $content = (string) $cellInfo;
                     $classString = '';
                 }
 
-                $body .= '<td' . $classString . ' valign="top">'.htmlentities($content, ENT_QUOTES | ENT_HTML5).'</td>';
+                $body .= '<td' . $classString . ' valign="top">'.$content.'</td>';
             }
             $body .= '</tr>';
         }

@@ -162,6 +162,11 @@ class Administrator
         return $this->name;
     }
 
+    public function getNameEscaped(): string
+    {
+        return htmlentities($this->name, ENT_QUOTES | ENT_HTML5);
+    }
+
     public function getLastInitial(): string 
     {
         return substr($this->getLastName(), 0, 1);

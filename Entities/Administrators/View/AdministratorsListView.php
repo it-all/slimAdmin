@@ -80,7 +80,7 @@ class AdministratorsListView extends AdminFilterableListView
         $primaryKeyValue = $administrator->getId();
         $deletePath = $this->container->get('routeParser')->urlFor(SlimAdmin::getRouteName(true, $this->routePrefix, 'delete'), [ROUTEARG_PRIMARY_KEY => $primaryKeyValue]);
 
-        return $this->deletesAuthorized && $administrator->isDeletable() ? '<a href="'.$deletePath.'" title="delete" onclick="return confirm(\'Are you sure you want to delete Administrator '.$primaryKeyValue.' '.htmlentities($administrator->getName(), ENT_QUOTES | ENT_HTML5).'?\');">X</a>' : '';
+        return $this->deletesAuthorized && $administrator->isDeletable() ? '<a href="'.$deletePath.'" title="delete" onclick="return confirm(\'Are you sure you want to delete Administrator '.$primaryKeyValue.' '.$administrator->getNameEscaped().'?\');">X</a>' : '';
     }
 
     // adds the delete column, with a value if administrator is deletable
@@ -88,7 +88,7 @@ class AdministratorsListView extends AdminFilterableListView
     {
         return [
             'id' => $this->getUpdateCellValue($administrator->getId()),
-            'name' => $administrator->getName(),
+            'name' => $administrator->getNameEscaped(),
             'username' => $administrator->getUsername(),
             'roles' => $administrator->getRolesString(),
             'active' => Postgres::convertBoolToPostgresBool($administrator->isActive()),

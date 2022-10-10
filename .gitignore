@@ -9,6 +9,5 @@ __pycache__
 .DS_Store
 .env
 /.vscode
-/storage
 /vendor
 /assets/images

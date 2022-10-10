@@ -2,15 +2,16 @@
 slimAdmin is a <a target="_blank" href="https://www.php.net">PHP</a> framework based on <a target="_blank" href="https://www.slimframework.com/">Slim Micro-Framework</a> and <a target="_blank" href="https://www.postgresql.org/">PostgreSQL</a>. It has a built-in administrative interface and other tools to allow rapid web app development.  
     
 INSTALLATION  
-composer create-project it-all/slim-postgres your-app-name 1.*  
+clone this repo
+run composer install  
 Set write permissions on /storage ie chmod -R 777 storage/  
-<a href="#createdb">Create your PostgreSQL database</a> and <a href="#restoredb">restore</a> /storage/dumps/pg_schema.dump and /storage/dumps/pg_data.dump to it  
+<a href="#createdb">Create your PostgreSQL database</a> and <a href="#restoredb">restore</a> /docs/slimAdminInit.sql to it (ie psql dbName < docs/slimAdminInit.sql)  
 Create a website with /public as the home directory  
 Copy/rename .env.example to .env then edit .env  
 Navigate to your site to see the default homepage. If there are no errors then you've succesfully connected to the database.  
 Edit then run cliScripts/insertTopAdministrator.php  
 Preempt 'object not found error' with composer dump-autoload -o  
-Navigate to your site /private (the admin directory defined in settings['adminPath']) and login!  
+Navigate to your site /ADMIN_DIR (defaults to /private) and login!  
   
 FEATURES  
 <a target="_blank" href="https://www.php.net">PHP</a> 7.1+  

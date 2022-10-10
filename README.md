@@ -1,21 +1,20 @@
 # slimAdmin  
-slimAdmin is a <a target="_blank" href="https://www.php.net">PHP</a> framework based on <a target="_blank" href="https://www.slimframework.com/">Slim Micro-Framework</a> and <a target="_blank" href="https://www.postgresql.org/">PostgreSQL</a>. It has a built-in administrative interface and other tools to allow rapid web app development.  
+slimAdmin is a <a target="_blank" href="https://www.php.net">PHP</a> web programming framework based on <a target="_blank" href="https://www.slimframework.com/">Slim Micro-Framework</a> and the <a target="_blank" href="https://www.postgresql.org/">PostgreSQL</a> database. It has a built-in administrative interface and other tools to allow rapid web app development.  
     
 INSTALLATION  
 clone this repo
 run composer install  
-Set write permissions on /storage ie chmod -R 777 storage/  
+Set write permissions on /storage and its subdirectories (ie chmod -R 777 storage/)  
 <a href="#createdb">Create your PostgreSQL database</a> and <a href="#restoredb">restore</a> /docs/slimAdminInit.sql to it (ie psql dbName < docs/slimAdminInit.sql)  
-Create a website with /public as the home directory  
+Create a web server site with /public as the home directory  
 Copy/rename .env.example to .env then edit .env  
 Navigate to your site to see the default homepage. If there are no errors then you've succesfully connected to the database.  
-Edit then run cliScripts/insertTopAdministrator.php  
-Preempt 'object not found error' with composer dump-autoload -o  
-Navigate to your site /ADMIN_DIR (defaults to /private) and login!  
+Edit with credentials, then run cliScripts/insertTopAdministrator.php  
+Navigate to your site /private (can be changed in /config/constants.php - ADMIN_DIR) and login!  
   
 FEATURES  
-<a target="_blank" href="https://www.php.net">PHP</a> 7.1+  
-Built on <a target="_blank" href="https://slimframework.com">Slim framework</a>, a front-controller micro-framework for PHP  
+<a target="_blank" href="https://www.php.net">PHP</a> 8.1+  
+Built on <a target="_blank" href="https://slimframework.com">Slim framework (v 4.10)</a>, a front-controller micro-framework for PHP  
 <a target="_blank" href="https://postgresql.org">PostgreSQL Database</a> Integration  
 <a target="_blank" href="#admin">Administrative User Interface and Navigation</a>  
 <a href="#authe">Authentication</a> (Log In/Out)  
@@ -30,6 +29,7 @@ Data Validation with <a target="_blank" href="https://github.com/vlucas/valitron
 <a href="#xss">XSS Prevention</a>  
 <a href="https://github.com/vlucas/phpdotenv">PHP dotenv</a> for configuring server environments  
 <a href="#errlog">PHP Error Logging with Stack Trace</a> for debugging  
+CRUD ORM  
   
 CODING NEW FUNCTIONALITY  
 *work in progress*  
@@ -50,6 +50,7 @@ The following administrative functionalities are already coded:
 - View, Create, Edit, Delete Administrators (with role assignment)  
 - View, Create, Edit, Delete Roles  
 - View, Create, Edit, Delete Permissions (with role assignment)  
+- View, Create, Edit, Delete Database Table Records (with role assignment)  
 - Logout  
 These options are found in the navigation menu at top left. Once other options are coded, they can be added to the menu by uncommenting/adding to $config['slim']['adminNav'].  
 
@@ -108,6 +109,7 @@ The <a href="https://github.com/slimphp/Slim-Csrf" target="_blank">Slim Framewor
   
 <a id="xss">XSS Prevention</a>  
 <a href="http://us2.php.net/htmlentities" target="_blank">htmlentities()</a> is used to escape output.  
+* this is a work in progress  
   
 <a id="errLog">PHP Error Log</a>  
 PHP Errors with stack trace are logged to the file set in config['storage']['errors']['phpErrorLogPath']  
@@ -117,14 +119,10 @@ PHP Errors with stack trace are logged to the file set in config['storage']['err
 * postgres=# create role myrolename with login; (creating the role with the same name as the database name allows easy psql access)  
 * postgres=# alter role myrolename with encrypted password 'mypassword';  
 * postgres=# create database mydbname with owner myrolename;  
-  
-<a id="restoreDb">Import pg_schema.sql and pg_data.sql (from project root dir)</a>
-* pg_restore -U myrolename -O -c --if-exists -n public -d mydbname storage/dumps/pg_schema_initial.dump
-* pg_restore -U myrolename -O -n public -d mydbname storage/dumps/pg_data_initial.dump
-  
+    
 CODE DOCUMENTATION  
 Entities  
-Entities are like business objects at the core of the system. The current entities are Administrators, Roles, Permissions, and Events. Domain business object, i.e. Orders in an ecommerce system, will go in the domain directory of <a href="https://github.com/it-all/slim-postgres-skeleton">Slim-Postgres-Skeleton</a>.  
+Entities are like business objects at the core of the system. The current entities are Administrators, Roles, Permissions, and Events. Domain business object, i.e. Orders in an ecommerce system, will go in the domain directory.  
   
 Database Mappers  
 Mappers are where all PostgreSQL database queries should occur. In fact, where all database function calls (pg_*) should occur.  There are two types of mappers: table mappers and entity mappers. 

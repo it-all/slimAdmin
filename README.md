@@ -2,7 +2,7 @@
 slimAdmin is a <a target="_blank" href="https://www.php.net">PHP</a> web programming framework based on <a target="_blank" href="https://www.slimframework.com/">Slim Micro-Framework</a> and the <a target="_blank" href="https://www.postgresql.org/">PostgreSQL</a> database. It has a built-in administrative interface and other tools to allow rapid web app development.  
     
 INSTALLATION  
-clone this repo
+clone this repo  
 run composer install  
 Set write permissions on /storage and its subdirectories (ie chmod -R 777 storage/)  
 <a href="#createdb">Create your PostgreSQL database</a> and <a href="#restoredb">restore</a> /docs/slimAdminInit.sql to it (ie psql dbName < docs/slimAdminInit.sql)  

@@ -10,6 +10,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 class DatabaseTableView
 {
     private $tableName;
+    protected $container;
 
     public function __construct(Container $container)
     {

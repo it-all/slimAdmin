@@ -11,7 +11,9 @@ Add your site to your hosts file
 Restart web server  
 Copy/rename .env.example to .env then edit .env  
 Navigate to your site to see the default homepage. If there are no errors then you've succesfully connected to the database.  
-Edit with credentials, then run cliScripts/insertTopAdministrator.php  
+Copy cliScripts/insertTopAdministrator.php.example to cliScripts/insertTopAdministrator.php
+Edit cliScripts/insertTopAdministrator.php with credentials  
+run php cliScripts/insertTopAdministrator.php  
 Navigate to your site /private (can be changed in /config/constants.php - ADMIN_DIR) and login!  
   
 FEATURES  

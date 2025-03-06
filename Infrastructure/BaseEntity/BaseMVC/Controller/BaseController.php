@@ -44,7 +44,7 @@ abstract class BaseController
      */
     protected function sendEventNotificationEmail(string $emailTo, string $mainBody, ?string $subjectEnd = '', ?bool $addEventLogStatement = true, ?bool $throwExceptionOnError = false)
     {
-        if ($this->mailer !== null && $emailTo !== null) {
+        if (isset($this->mailer) && $this->mailer !== null && $emailTo !== null) {
             $settings = $this->container->get('settings');
             if (isset($settings['emails'][$emailTo])) {
                 $toArray = is_array($settings['emails'][$emailTo]) ? $settings['emails'][$emailTo] : [$settings['emails'][$emailTo]];

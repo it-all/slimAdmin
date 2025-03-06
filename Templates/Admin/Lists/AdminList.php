@@ -5,7 +5,7 @@ namespace Templates\Admin\Lists;
 
 class AdminList
 {
-    protected $mainHtml, $headCss, $bodyJs, $listArray, $headers, $footer, $columnCount, $numResults, $hasResults, $title, $numResultsTotal, $showAllLink;
+    protected $mainHtml, $headCss, $bodyJs, $listArray, $headers, $footers, $columnCount, $numResults, $hasResults, $title, $numResultsTotal, $showAllLink;
 
     /**
      *  $numResultsTotal can be used to show that the results set is limited

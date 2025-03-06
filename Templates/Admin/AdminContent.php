@@ -13,7 +13,9 @@ class AdminContent extends TemplateContent
     protected $isLive;
     protected $domainName;
     protected $businessName;
+    protected $businessDba;
     protected $router;
+    protected $routeParser;
     protected $debugString;
 
     public function __construct(string $mainHtml, ?string $headCss, ?string $bodyJs, ?array $notices, bool $isLive, string $title, string $domainName, string $businessName, string $businessDba, $authentication, ?array $navigationItems, RouteParserInterface $routeParser, ?string $debugString = null)

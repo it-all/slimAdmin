@@ -18,7 +18,7 @@ Navigate to your site /private (can be changed in /config/constants.php - ADMIN_
   
 FEATURES  
 <a target="_blank" href="https://www.php.net">PHP</a> 8.1+  
-Built on <a target="_blank" href="https://slimframework.com">Slim framework (v 4.10)</a>, a front-controller micro-framework for PHP  
+Built on <a target="_blank" href="https://slimframework.com">Slim framework (v 4.14)</a>, a front-controller micro-framework for PHP  
 <a target="_blank" href="https://postgresql.org">PostgreSQL Database</a> Integration  
 <a target="_blank" href="#admin">Administrative User Interface and Navigation</a>  
 <a href="#authe">Authentication</a> (Log In/Out)  

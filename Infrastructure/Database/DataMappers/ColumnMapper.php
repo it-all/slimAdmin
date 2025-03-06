@@ -54,10 +54,6 @@ class ColumnMapper
         $this->name = $columnInfo['column_name'];
         $this->type = $columnInfo['data_type'];
         $this->isNullable = $columnInfo['is_nullable'] == 'YES';
-        if ($this->type == 'boolean' && $this->isNullable) {
-            // alert of database design problem
-            throw new \Exception("Column {$this->name} of table {$this->tableMapper->getTableName()} is boolean and nullable, that's a no-no");
-        }
         $this->udtName = $columnInfo['udt_name'];
         $this->isUnique = $columnInfo['is_unique'];
         if ($this->isUnique) {

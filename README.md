@@ -5,7 +5,7 @@ INSTALLATION
 clone this repo  
 run composer install  
 Set write permissions on /storage and its subdirectories (ie chmod -R 777 storage/)  
-<a href="#createdb">Create your PostgreSQL database</a> and <a href="#restoredb">restore</a> /docs/slimAdminInit.sql to it (ie psql dbName < docs/slimAdminInit.sql)  
+<a href="#createdb">Create your PostgreSQL database</a>  restore /docs/slimAdminInit.sql to it (ie psql dbName < docs/slimAdminInit.sql)  
 Create a web server site with /public as the home directory  
 Copy/rename .env.example to .env then edit .env  
 Navigate to your site to see the default homepage. If there are no errors then you've succesfully connected to the database.  

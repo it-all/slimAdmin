@@ -43,6 +43,9 @@ class ColumnMapper
     /** @var  array only applies to enum (USER-DEFINED) types */
     private $enumOptions;
 
+    /** @var bool */
+    private $isNextVal;
+
     function __construct(TableMapper $tableMapper,  array $columnInfo)
     {
         $this->constraints = []; // initialize

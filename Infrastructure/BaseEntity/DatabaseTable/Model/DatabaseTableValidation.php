@@ -11,7 +11,7 @@ use Infrastructure\Database\DataMappers\ColumnMapper;
 class DatabaseTableValidation
 {
     private $tableMapper;
-    private $validationColumns;
+    private $validationRules;
 
     public function __construct(TableMapper $tableMapper)
     {

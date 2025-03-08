@@ -421,7 +421,7 @@ class SlimAdmin
     }
 
     /** if called with no args, redirects to current URI with proper protocol, www or not based on config, and query string */
-    private function redirect(string $toURI = null)
+    private function redirect(?string $toURI = null)
     {
         if (Functions::isRunningFromCommandLine()) {
             exit();
@@ -430,7 +430,7 @@ class SlimAdmin
         exit();
     }
 
-    private function getRedirect(string $toURI = null): ?string
+    private function getRedirect(?string $toURI = null): ?string
     {
         if (is_null($toURI)) {
             if (Functions::isRunningFromCommandLine()) {
@@ -471,7 +471,7 @@ class SlimAdmin
     }
 
     /** because of route naming conventions, only send resourceType of post, put, or patch */
-    public static function getRouteName(bool $isAdmin = true, string $routePrefix = null, string $routeType = null, string $requestMethod = null): string
+    public static function getRouteName(bool $isAdmin = true, ?string $routePrefix = null, ?string $routeType = null, ?string $requestMethod = null): string
     {
         $routeName = '';
 

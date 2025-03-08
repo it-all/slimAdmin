@@ -22,8 +22,9 @@ require APPLICATION_ROOT_DIRECTORY . '/vendor/autoload.php';
 require APPLICATION_ROOT_DIRECTORY . '/config/constants.php';
 
 SlimAdmin::getInstance();
+define('PG_CONN', (Postgres::getInstance())->getConnection());
 
-pg_query("BEGIN");
+pg_query(PG_CONN, "BEGIN");
 
 $rolesTableMapper = RolesTableMapper::getInstance();
 
@@ -43,6 +44,6 @@ foreach ($permissionsEntityMapper->getObjects() as $permission) {
     }
 }
 
-pg_query("COMMIT");
+pg_query(PG_CONN, "COMMIT");
 
 echo "administrator $administratorId inserted.\n";  

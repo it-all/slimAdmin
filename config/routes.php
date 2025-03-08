@@ -9,16 +9,12 @@ use Infrastructure\Security\Authentication\GuestMiddleware;
 use Infrastructure\Security\Authorization\AuthorizationMiddleware;
 use Infrastructure\Security\Authentication\AuthenticationMiddleware;
 use Domain\AdminHomeView;
-use Entities\AdCodes\AdCodesController;
-use Entities\AdCodes\AdCodesListView;
 use Entities\Events\EventsListView;
 use Entities\Events\EventsController;
 use Entities\Administrators\View\AdministratorsListView;
 use Entities\Administrators\View\AdministratorsInsertView;
 use Entities\Administrators\View\AdministratorsUpdateView;
 use Entities\Administrators\AdministratorsController;
-use Entities\Emails\BouncedView;
-use Entities\GiftCertificates\GiftCertificatesFrontendView;
 use Entities\Roles\View\RolesListView;
 use Entities\Roles\View\RolesUpdateView;
 use Entities\Roles\View\RolesInsertView;
@@ -29,31 +25,11 @@ use Entities\Permissions\View\PermissionsUpdateView;
 use Entities\Permissions\PermissionsController;
 use Infrastructure\BaseEntity\DatabaseTable\View\DatabaseTableView;
 use Infrastructure\BaseEntity\DatabaseTable\DatabaseTableController;
-use Entities\PurchaseOrders\View\PurchaseOrdersListView;
-use Entities\PurchaseOrders\View\PurchaseOrderPdfView;
-use Entities\PurchaseOrders\Controller\PurchaseOrdersController;
-use Entities\PurchaseOrders\Controller\PurchaseOrdersInsertController;
-use Entities\PurchaseOrders\Controller\PurchaseOrdersUpdateController;
-use Entities\PurchaseOrders\View\PurchaseOrderInsertView;
-use Entities\PurchaseOrders\View\PurchaseOrderUpdateView;
-use Entities\Items\ItemShipments\View\ItemShipmentsInsertView;
-use Entities\Items\ItemShipments\Controller\ItemShipmentsInsertController;
-use Entities\PurchaseOrders\Controller\ItemPurchaseOrdersController;
-use Entities\PurchaseOrders\Controller\PurchaseOrdersDesignerSpcController;
-use Entities\PurchaseOrders\Controller\SkuPurchaseOrdersController;
-use Entities\PurchaseOrders\View\PurchaseOrdersItemView;
-use Entities\PurchaseOrders\View\PurchaseOrdersLateView;
-use Entities\PurchaseOrders\View\PurchaseOrdersSkuView;
-use Entities\PurchaseOrdersPlacers\DesignerOrderPlacersController;
-use Entities\PurchaseOrdersPlacers\View\DesignerOrderPlacersInsertView;
-use Entities\PurchaseOrdersPlacers\View\DesignerOrderPlacersListView;
-use Entities\PurchaseOrdersPlacers\View\DesignerOrderPlacersUpdateView;
 
 /////////////////////////////////////////
 // Routes that anyone can access
 
 $slim->get('/', HomeView::class . ':routeIndex')->setName(ROUTE_HOME);
-$slim->get('/gift_certificate', GiftCertificatesFrontendView::class . ':routeIndex');
 
 // remainder of front end pages to go here
 

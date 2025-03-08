@@ -28,7 +28,6 @@ use Slim\Psr7\Response;
 /** singleton */
 class SlimAdmin
 {
-    const SCHEME = 'https';
     private $postgres;
     private $config;
 
@@ -186,12 +185,11 @@ class SlimAdmin
 
         if (!Functions::isRunningFromCommandLine()) {
             /**
-             * force all pages to be https. and verify/force www or not www based on Config::useWww
-             * if not, REDIRECT TO PROPER SECURE PAGE
+             * force all pages to be https if scheme is set https in environmental variable
              * note this practice is ok:
              * http://security.stackexchange.com/questions/49645/actually-isnt-it-bad-to-redirect-http-to-https
              */
-            if (!$this->isHttpsRequest()) {
+            if ($this->environmentalVariables['SCHEME'] === 'https' && !$this->isHttpsRequest()) {
                 $this->redirect();
             }
 
@@ -412,7 +410,7 @@ class SlimAdmin
 
     public function getUrl(?bool $forceHttp = false, ?bool $forceDomainRemote = false): string 
     {
-        $scheme = $forceHttp ? 'http' : self::SCHEME;
+        $scheme = $forceHttp ? 'http' : $this->environmentalVariables['SCHEME'];
         $domain = $forceDomainRemote ? $this->config['domainName'] : $this->config['hostname'];
         $url = $scheme . "://";
         if (mb_strlen($this->config['subDomainName']) > 0) {
